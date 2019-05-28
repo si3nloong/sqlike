@@ -3,8 +3,8 @@ package sqlike
 import (
 	"log"
 	"reflect"
-	"bitbucket.org/SianLoong/sqlike/core"
-	"bitbucket.org/SianLoong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/core"
+	"github.com/si3nloong/sqlike/reflext"
 	"golang.org/x/xerrors"
 )
 

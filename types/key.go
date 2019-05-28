@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/component"
-	"bitbucket.org/SianLoong/sqlike/util"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	"github.com/si3nloong/sqlike/util"
 )
 
 // Writer :

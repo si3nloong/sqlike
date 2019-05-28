@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/primitive"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 )
 
 // DeleteStatement :

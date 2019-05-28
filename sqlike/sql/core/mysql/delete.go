@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/actions"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Delete :

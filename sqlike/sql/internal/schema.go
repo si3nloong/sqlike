@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/component"
-	sqltype "bitbucket.org/SianLoong/sqlike/sqlike/sql/types"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	sqltype "github.com/si3nloong/sqlike/sqlike/sql/types"
 	"golang.org/x/xerrors"
 )
 

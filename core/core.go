@@ -2,10 +2,10 @@ package core
 
 import (
 	// "encoding/base64"
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/types"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/types"
 
-	// "bitbucket.org/SianLoong/sqlike/core/codec"
+	// "github.com/si3nloong/sqlike/core/codec"
 	"reflect"
 	// "strconv"
 )

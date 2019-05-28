@@ -1,6 +1,6 @@
 package sqlike
 
-import "bitbucket.org/SianLoong/sqlike/core/codec"
+import "github.com/si3nloong/sqlike/core/codec"
 
 // DefaultMapper :
 var (

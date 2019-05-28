@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"strings"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/component"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/sql/util"
 )
 
 // DropTable :

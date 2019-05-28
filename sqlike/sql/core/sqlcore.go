@@ -3,12 +3,12 @@ package sqlcore
 import (
 	"sync"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/actions"
-	"bitbucket.org/SianLoong/sqlike/sqlike/indexes"
-	"bitbucket.org/SianLoong/sqlike/sqlike/options"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/core/mysql"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/sqlike/sql/core/mysql"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Dialect :

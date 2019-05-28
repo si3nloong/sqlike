@@ -1,9 +1,9 @@
 package sqlike
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/actions"
-	"bitbucket.org/SianLoong/sqlike/sqlike/options"
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/options"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )
 
 // FindOne :

@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/actions"
-	"bitbucket.org/SianLoong/sqlike/sqlike/primitive"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/codec"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
-	sqlutil "bitbucket.org/SianLoong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
 	"golang.org/x/xerrors"
 )
 

@@ -1,7 +1,7 @@
 package jsonb
 
 import (
-	"bitbucket.org/SianLoong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/core/codec"
 )
 
 var registry = buildRegistry()

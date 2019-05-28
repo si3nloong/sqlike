@@ -1,8 +1,8 @@
 package sqlike
 
 import (
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
-	"bitbucket.org/SianLoong/sqlike/types"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/types"
 )
 
 // Column :

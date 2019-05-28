@@ -3,7 +3,7 @@ package jsonb
 import (
 	"bytes"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/reflext"
 )
 
 var jsonNull = []byte(`null`)

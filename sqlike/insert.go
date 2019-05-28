@@ -3,11 +3,11 @@ package sqlike
 import (
 	"database/sql"
 	"reflect"
-	"bitbucket.org/SianLoong/sqlike/core"
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/options"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/codec"
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/core"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"golang.org/x/xerrors"
 )
 

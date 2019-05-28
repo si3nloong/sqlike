@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	"bitbucket.org/SianLoong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/jsonb"
 )
 
 // DefaultEncoders :

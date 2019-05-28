@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/reflext"
 )
 
 // DefaultMapper :

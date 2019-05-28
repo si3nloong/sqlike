@@ -3,8 +3,8 @@ package sqlike
 import (
 	"database/sql"
 
-	sqlcore "bitbucket.org/SianLoong/sqlike/sqlike/sql/core"
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
+	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/blang/semver"
 )
 

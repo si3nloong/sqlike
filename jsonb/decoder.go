@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"strconv"
 
-	"bitbucket.org/SianLoong/sqlike/core/codec"
-	"bitbucket.org/SianLoong/sqlike/core"
-	"bitbucket.org/SianLoong/sqlike/util"
+	"github.com/si3nloong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/core"
+	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
 

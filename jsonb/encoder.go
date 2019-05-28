@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/SianLoong/sqlike/core"
+	"github.com/si3nloong/sqlike/core"
 
-	"bitbucket.org/SianLoong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/core/codec"
 )
 
 const timeFormat = `"2006-01-02 15:04:05.999999"`

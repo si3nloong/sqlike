@@ -3,7 +3,7 @@ package sqlstmt
 import (
 	"sync"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/reflext"
 	"golang.org/x/xerrors"
 )
 

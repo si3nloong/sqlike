@@ -3,9 +3,9 @@ package sqlike
 import (
 	"strings"
 
-	"bitbucket.org/SianLoong/sqlike/sqlike/indexes"
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
-	"bitbucket.org/SianLoong/sqlike/types"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/xerrors"
 )
 

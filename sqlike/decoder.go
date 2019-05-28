@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/SianLoong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/core/codec"
 	"golang.org/x/xerrors"
 )
 

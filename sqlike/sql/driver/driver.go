@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Driver :

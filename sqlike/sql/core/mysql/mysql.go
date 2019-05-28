@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/internal"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
-	sqlutil "bitbucket.org/SianLoong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sqlike/sql/internal"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
 )
 
 // MySQL :

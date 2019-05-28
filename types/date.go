@@ -5,7 +5,7 @@ import (
 	"database/sql/driver"
 	"strconv"
 
-	"bitbucket.org/SianLoong/sqlike/util"
+	"github.com/si3nloong/sqlike/util"
 )
 
 // Date :

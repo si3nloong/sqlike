@@ -1,7 +1,7 @@
 package expr
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // Equal :

@@ -8,8 +8,8 @@ package core
 // 	"strconv"
 // 	"time"
 
-// 	"bitbucket.org/SianLoong/sqlike/core/codec"
-// 	"bitbucket.org/SianLoong/sqlike/jsonb"
+// 	"github.com/si3nloong/sqlike/core/codec"
+// 	"github.com/si3nloong/sqlike/jsonb"
 // )
 
 // var (

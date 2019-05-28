@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"bitbucket.org/SianLoong/sqlike/sqlike/indexes"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // GetIndexes :

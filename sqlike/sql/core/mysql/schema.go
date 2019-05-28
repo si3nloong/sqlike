@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"strings"
 
-	"bitbucket.org/SianLoong/sqlike/reflext"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/component"
-	"bitbucket.org/SianLoong/sqlike/sqlike/sql/internal"
-	sqltype "bitbucket.org/SianLoong/sqlike/sqlike/sql/types"
-	sqlutil "bitbucket.org/SianLoong/sqlike/sqlike/sql/util"
-	"bitbucket.org/SianLoong/sqlike/util"
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	"github.com/si3nloong/sqlike/sqlike/sql/internal"
+	sqltype "github.com/si3nloong/sqlike/sqlike/sql/types"
+	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
 

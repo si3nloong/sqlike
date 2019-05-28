@@ -3,8 +3,8 @@ package mysql
 import (
 	"strings"
 
-	"bitbucket.org/SianLoong/sqlike/sqlike/options"
-	sqlstmt "bitbucket.org/SianLoong/sqlike/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/options"
+	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // InsertInto :

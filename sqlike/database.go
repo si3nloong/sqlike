@@ -1,9 +1,9 @@
 package sqlike
 
 import (
-	"bitbucket.org/SianLoong/sqlike/core/codec"
-	sqlcore "bitbucket.org/SianLoong/sqlike/sqlike/sql/core"
-	sqldriver "bitbucket.org/SianLoong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/core/codec"
+	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
+	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )
 
 // Database :
