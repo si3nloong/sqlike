@@ -41,7 +41,7 @@ func (s mySQLSchema) SetBuilders(sb *internal.SchemaBuilder) {
 	sb.SetTypeBuilder(sqltype.Float32, s.FloatDataType)
 	sb.SetTypeBuilder(sqltype.Float64, s.FloatDataType)
 	sb.SetTypeBuilder(sqltype.Struct, s.JSONDataType)
-	sb.SetTypeBuilder(sqltype.Array, s.JSONDataType)
+	sb.SetTypeBuilder(sqltype.Array, s.ArrayDataType)
 	sb.SetTypeBuilder(sqltype.Slice, s.JSONDataType)
 	sb.SetTypeBuilder(sqltype.Map, s.JSONDataType)
 }
@@ -187,6 +187,24 @@ func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col component.Colum
 	}
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
+	return
+}
+
+func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col component.Column) {
+	col.Name = sf.Path
+	col.Nullable = sf.IsNullable
+	// length := sf.Zero.Len()
+	t := sf.Zero.Type().Elem()
+	if t.Kind() == reflect.Uint8 {
+		charset, collation := `ascii`, `ascii_general_ci`
+		col.DataType = `VARCHAR`
+		col.Type = `VARCHAR(36)`
+		col.CharSet = &charset
+		col.Collation = &collation
+		return
+	}
+	col.DataType = `JSON`
+	col.Type = `JSON`
 	return
 }
 
