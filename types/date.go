@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"strconv"
+	"time"
 
+	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/component"
 	"github.com/si3nloong/sqlike/util"
 )
 
@@ -25,9 +28,36 @@ func (d *Date) init() {
 	}
 }
 
+// DataType :
+func (d *Date) DataType(driver string, sf *reflext.StructField) component.Column {
+	dflt := `CURDATE()`
+	return component.Column{
+		Name:         sf.Path,
+		DataType:     `DATE`,
+		Type:         `DATE`,
+		DefaultValue: &dflt,
+		Nullable:     sf.IsNullable,
+	}
+}
+
 // Value :
 func (d *Date) Value() (driver.Value, error) {
 	return d.String(), nil
+}
+
+// Scan :
+func (d *Date) Scan(it interface{}) error {
+	// TODO:
+	switch vi := it.(type) {
+	case []byte:
+
+	case string:
+	case time.Time:
+		d.Year = vi.Year()
+		d.Month = int(vi.Month())
+		d.Day = vi.Day()
+	}
+	return nil
 }
 
 // String :

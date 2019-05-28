@@ -35,7 +35,7 @@ TODO:
 [x] - Set omit or setter fields on `Upsert`
 [ok] - Insert single record into `Table`
 [ok] - Insert multiple record into `Table`
-[wip] - Retrieve single record from `Table`
+[ok] - Retrieve single record from `Table`
 [ok] - Retrieve multiple record from `Table`
 [ok] - Update single record
 [ok] - Modify single record by `$Key`
@@ -44,7 +44,7 @@ TODO:
 [ok] - Delete multiple record
 [ok] - Delete single record
 [x] - Replace into
-[x|5%] - Write `test`
+[x|5%] - Write testcases
 
 [xxx] - Support `Postgres`
 

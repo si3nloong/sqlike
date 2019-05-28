@@ -18,11 +18,16 @@ import (
 )
 
 // Writer :
-type Writer interface {
+type writer interface {
 	io.Writer
 	WriteString(string) (int, error)
 	WriteByte(byte) error
 }
+
+var (
+	latin1    = `latin1`
+	latin1Bin = `latin1_bin`
+)
 
 // Key :
 type Key struct {
@@ -32,11 +37,6 @@ type Key struct {
 	Name      string
 	Parent    *Key
 }
-
-var (
-	latin1    = `latin1`
-	latin1Bin = `latin1_bin`
-)
 
 // DataType :
 func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column {
@@ -56,6 +56,17 @@ func (k *Key) Value() (driver.Value, error) {
 	defer util.ReleaseString(blr)
 	k.marshal(blr, true)
 	return blr.String(), nil
+}
+
+// Scan :
+func (k *Key) Scan(it interface{}) error {
+	// TODO:
+	switch it.(type) {
+	case []byte:
+
+	case string:
+	}
+	return nil
 }
 
 // Incomplete :
@@ -106,7 +117,7 @@ func (k *Key) Equal(o *Key) bool {
 }
 
 // marshal marshals the key's string representation to the buffer.
-func (k *Key) marshal(w Writer, escape bool) {
+func (k *Key) marshal(w writer, escape bool) {
 	if k.Parent != nil {
 		k.Parent.marshal(w, escape)
 	}
