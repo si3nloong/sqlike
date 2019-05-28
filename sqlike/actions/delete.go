@@ -9,7 +9,7 @@ import (
 type DeleteStatement interface {
 	Where(fields ...interface{}) DeleteStatement
 	OrderBy(fields ...primitive.Sort) DeleteStatement
-	Limit(num int) DeleteStatement
+	Limit(num uint) DeleteStatement
 }
 
 // DeleteActions :
@@ -17,7 +17,7 @@ type DeleteActions struct {
 	Table      string
 	Conditions []interface{}
 	Sorts      []primitive.Sort
-	Record     int
+	Record     uint
 }
 
 // Where :
@@ -33,7 +33,7 @@ func (f *DeleteActions) OrderBy(fields ...primitive.Sort) DeleteStatement {
 }
 
 // Limit :
-func (f *DeleteActions) Limit(num int) DeleteStatement {
+func (f *DeleteActions) Limit(num uint) DeleteStatement {
 	if num > 0 {
 		f.Record = num
 	}

@@ -3,9 +3,9 @@ package sqlike
 import (
 	"database/sql"
 
+	"github.com/blang/semver"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
-	"github.com/blang/semver"
 )
 
 // Client :
@@ -13,15 +13,15 @@ type Client struct {
 	driverName string
 	version    semver.Version
 	*sql.DB
-	logger   Logger
-	dialect  sqlcore.Dialect
+	logger  Logger
+	dialect sqlcore.Dialect
 }
 
-func newClient(driver string, db *sql.DB) (*Client, error) {
+func newClient(driver string, db *sql.DB, dialect sqlcore.Dialect) (*Client, error) {
 	client := &Client{
 		driverName: driver,
 		DB:         db,
-		dialect:    sqlcore.GetDialectByDriver(driver),
+		dialect:    dialect,
 	}
 	client.version = client.getVersion()
 	return client, nil
@@ -58,11 +58,11 @@ func (c Client) ListDatabases() ([]string, error) {
 // Database :
 func (c *Client) Database(name string) *Database {
 	return &Database{
-		name:     name,
-		client:   c,
-		dialect:  c.dialect,
-		driver:   c.DB,
-		logger:   c.logger,
+		name:    name,
+		client:  c,
+		dialect: c.dialect,
+		driver:  c.DB,
+		logger:  c.logger,
 	}
 }
 

@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"reflect"
+
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -63,38 +64,24 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 }
 
 // UpdateOne :
-func (tb *Table) UpdateOne(update interface{}, opts ...*options.UpdateOneOptions) (int64, error) {
-	v := reflect.ValueOf(update)
-	t := v.Type()
-	if !reflext.IsKind(t, reflect.Ptr) {
-		return 0, ErrUnaddressableEntity
+func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
+	x := new(actions.UpdateOneActions)
+	if act != nil {
+		*x = *(act.(*actions.UpdateOneActions))
+	}
+	if x.Table == "" {
+		x.Table = tb.name
 	}
 
-	if v.IsNil() {
-		return 0, xerrors.New("entity is nil")
-	}
-
-	x := new(actions.UpdateActions)
-	x.Table = tb.name
-	mapper := core.DefaultMapper
-	cdc := mapper.CodecByType(t)
-	_, fields := skipGeneratedColumns(cdc.NameFields)
-
-	for _, sf := range fields {
-		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-		if sf.Path == "$Key" {
-			x.Where(expr.Equal("$Key", fv.Interface()))
-			continue
-		}
-		x.Set(sf.Path, fv.Interface())
+	if len(x.Values) < 1 {
+		return 0, xerrors.New("sqlike: no value to update")
 	}
 
 	x.Limit(1)
-	stmt, err := tb.dialect.Update(x)
+	stmt, err := tb.dialect.Update(&x.UpdateActions)
 	if err != nil {
 		return 0, err
 	}
-
 	result, err := sqldriver.Execute(
 		tb.driver,
 		stmt,

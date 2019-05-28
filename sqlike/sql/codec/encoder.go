@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/jsonb"
+	"golang.org/x/xerrors"
 )
 
 // DefaultEncoders :
@@ -74,9 +75,10 @@ func (enc DefaultEncoders) EncodeJSONRaw(v reflect.Value) (interface{}, error) {
 func (enc DefaultEncoders) EncodeTime(v reflect.Value) (interface{}, error) {
 	x, isOk := v.Interface().(time.Time)
 	if !isOk {
-
+		return nil, xerrors.New("invalid data type")
 	}
-	return x, nil
+	// convert to UTC before storing into DB
+	return x.UTC(), nil
 }
 
 // EncodeString :

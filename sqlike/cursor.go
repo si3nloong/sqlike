@@ -1,22 +1,21 @@
 package sqlike
 
 import (
-	"bytes"
 	"database/sql"
-	"log"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
-	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	"golang.org/x/xerrors"
 )
 
 // Cursor :
 type Cursor struct {
-	rows    *sql.Rows
-	columns []string
-	err     error
+	rows     *sql.Rows
+	registry *codec.Registry
+	columns  []string
+	err      error
 }
 
 // Columns :
@@ -35,10 +34,16 @@ func (c *Cursor) Decode(dst interface{}) error {
 		return c.err
 	}
 
-	v := reflect.ValueOf(dst)
+	v := reflext.ValueOf(dst)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return ErrUnaddressableEntity
+	}
+
+	v = reflext.Indirect(v)
+	t = reflext.Deref(t)
+	if !reflext.IsKind(t, reflect.Struct) {
+		return xerrors.New("it must be struct to decode")
 	}
 
 	length := len(c.columns)
@@ -47,7 +52,7 @@ func (c *Cursor) Decode(dst interface{}) error {
 	values := make([]interface{}, length, length)
 
 	for j := 0; j < length; j++ {
-		values[j] = new(sql.RawBytes)
+		values[j] = &values[j]
 	}
 	if err := c.rows.Scan(values...); err != nil {
 		return err
@@ -56,23 +61,25 @@ func (c *Cursor) Decode(dst interface{}) error {
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
 		fv := mapper.FieldByIndexes(vv, idx)
-		log.Println(j, fv)
-		// 	decoder, err := c.registry.LookupDecoder(fv.Type())
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	r := bytes.NewBuffer(*values[j].(*sql.RawBytes))
-		// 	if err := decoder(r, fv); err != nil {
-		// 		return err
-		// 	}
+		// log.Println(j, fv.Type())
+		decoder, err := c.registry.LookupDecoder(fv.Type())
+		if err != nil {
+			return err
+		}
+		if err := decoder(values[j], fv); err != nil {
+			return err
+		}
 	}
 	reflext.Indirect(v).Set(reflext.Indirect(vv))
+	if !c.Next() {
+		defer c.Close()
+	}
 	return nil
 }
 
 // All :
 func (c *Cursor) All(results interface{}) error {
-	defer c.rows.Close()
+	defer c.Close()
 	if c.err != nil {
 		return c.err
 	}
@@ -98,7 +105,7 @@ func (c *Cursor) All(results interface{}) error {
 	for i := 0; c.rows.Next(); i++ {
 		values := make([]interface{}, length, length)
 		for j := 0; j < length; j++ {
-			values[j] = new(sql.RawBytes)
+			values[j] = &values[j]
 		}
 		if err := c.rows.Scan(values...); err != nil {
 			return err
@@ -108,15 +115,13 @@ func (c *Cursor) All(results interface{}) error {
 		for j, idx := range idxs {
 			fv := mapper.FieldByIndexes(vv, idx)
 			if i < 1 {
-				decoder, err := DefaultRegistry.LookupDecoder(fv.Type())
+				decoder, err := c.registry.LookupDecoder(fv.Type())
 				if err != nil {
 					return err
 				}
 				decoders[j] = decoder
 			}
-
-			r := bytes.NewBuffer(*values[j].(*sql.RawBytes))
-			if err := decoders[j](r, fv); err != nil {
+			if err := decoders[j](values[j], fv); err != nil {
 				return err
 			}
 		}
@@ -128,6 +133,9 @@ func (c *Cursor) All(results interface{}) error {
 
 // Error :
 func (c *Cursor) Error() error {
+	if c.rows != nil {
+		defer c.rows.Close()
+	}
 	return c.err
 }
 
@@ -138,5 +146,9 @@ func (c *Cursor) Next() bool {
 
 // Close :
 func (c *Cursor) Close() error {
-	return c.rows.Close()
+	if c.rows != nil {
+		defer c.rows.Close()
+		return nil
+	}
+	return nil
 }

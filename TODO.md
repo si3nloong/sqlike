@@ -8,6 +8,8 @@ TODO:
 2. JSON encoder & decoder
 
 [ok] - Connect to `MySQL` server
+[ok] - Connect to `MySQL` server with `options.Connect`
+[x] - Support extra options like charset and collation in connection
 [ok] - Get `MySQL` server version
 [ok] - Drop selected `Database`
 [ok] - List all `Database`

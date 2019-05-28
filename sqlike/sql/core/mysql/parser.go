@@ -318,14 +318,14 @@ func (p *mySQLParser) appendOrderBy(stmt *sqlstmt.Statement, sorts []primitive.S
 	return nil
 }
 
-func (p *mySQLParser) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset int) {
+func (p *mySQLParser) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset uint) {
 	// No limit is very harmful, default limit is 100
 	if limit < 1 {
 		limit = 100
 	}
-	stmt.WriteString(` LIMIT ` + strconv.Itoa(limit))
+	stmt.WriteString(` LIMIT ` + strconv.FormatUint(uint64(limit), 10))
 	if offset > 0 {
-		stmt.WriteString(` OFFSET ` + strconv.Itoa(offset))
+		stmt.WriteString(` OFFSET ` + strconv.FormatUint(uint64(offset), 10))
 	}
 }
 

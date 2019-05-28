@@ -15,8 +15,8 @@ type SelectStatement interface {
 	Having(fields ...interface{}) SelectStatement
 	GroupBy(fields ...interface{}) SelectStatement
 	OrderBy(fields ...primitive.Sort) SelectStatement
-	Limit(num int) SelectStatement
-	Offset(num int) SelectStatement
+	Limit(num uint) SelectStatement
+	Offset(num uint) SelectStatement
 }
 
 // FindActions :
@@ -27,8 +27,8 @@ type FindActions struct {
 	Havings     []interface{}
 	GroupBys    []interface{}
 	Sorts       []primitive.Sort
-	Record      int
-	Offs        int
+	Record      uint
+	Offs        uint
 }
 
 // Select :
@@ -38,7 +38,7 @@ func (f *FindActions) Select(fields ...interface{}) SelectStatement {
 }
 
 // Distinct :
-// func (f *FindActions) Distinct() *FindActions {
+// func (f *FindActions) Distinct() *SelectStatement {
 // 	return f
 // }
 
@@ -76,7 +76,7 @@ func (f *FindActions) GroupBy(fields ...interface{}) SelectStatement {
 }
 
 // Limit :
-func (f *FindActions) Limit(num int) SelectStatement {
+func (f *FindActions) Limit(num uint) SelectStatement {
 	if num > 0 {
 		f.Record = num
 	}
@@ -84,7 +84,7 @@ func (f *FindActions) Limit(num int) SelectStatement {
 }
 
 // Offset :
-func (f *FindActions) Offset(num int) SelectStatement {
+func (f *FindActions) Offset(num uint) SelectStatement {
 	if num > 0 {
 		f.Offs = num
 	}

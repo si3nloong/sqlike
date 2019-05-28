@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"reflect"
 	"sync"
@@ -15,7 +16,7 @@ var (
 
 func buildDefaultRegistry() *Registry {
 	rg := NewRegistry()
-	// DefaultDecoders{}.SetDecoders(rg)
+	DefaultDecoders{}.SetDecoders(rg)
 	DefaultEncoders{}.SetEncoders(rg)
 	return rg
 }
@@ -67,10 +68,6 @@ func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
 	r.kindDecoders[k] = dec
 }
 
-// func (r *Registry) Encode(t reflect.Type) (interface{}, error) {
-
-// }
-
 // LookupEncoder :
 func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 	var (
@@ -102,6 +99,14 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		dec  ValueDecoder
 		isOk bool
 	)
+
+	v := reflext.Zero(t)
+	if _, isOk := v.Addr().Interface().(sql.Scanner); isOk {
+		return func(it interface{}, v reflect.Value) error {
+			return v.Addr().Interface().(sql.Scanner).Scan(it)
+		}, nil
+	}
+
 	dec, isOk = r.typeDecoders[t]
 	if isOk {
 		return dec, nil

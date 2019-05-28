@@ -13,6 +13,7 @@ import (
 
 // Dialect :
 type Dialect interface {
+	Connect(opt *options.ConnectOptions) (connStr string)
 	GetVersion() (stmt *sqlstmt.Statement)
 	GetDatabases() (stmt *sqlstmt.Statement)
 	Format(v interface{}) (val string)

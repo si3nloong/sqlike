@@ -64,11 +64,11 @@ func (dec DefaultDecoders) DecodeJSONRaw(r codec.ValueReader, v reflect.Value) e
 
 // DecodeTime :
 func (dec DefaultDecoders) DecodeTime(r codec.ValueReader, v reflect.Value) error {
-	x, err := time.Parse(timeFormat, r.String())
-	if err != nil {
-		return err
-	}
-	v.Set(reflect.ValueOf(x))
+	// x, err := time.Parse(timeFormat, r.String())
+	// if err != nil {
+	// 	return err
+	// }
+	// v.Set(reflect.ValueOf(x))
 	return nil
 }
 
