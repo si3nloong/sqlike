@@ -9,7 +9,7 @@ TODO:
 
 [ok] - Connect to `MySQL` server
 [ok] - Connect to `MySQL` server with `options.Connect`
-[x] - Support extra options like charset and collation in connection
+[x|gth] - Support extra options like charset and collation in connection
 [ok] - Get `MySQL` server version
 [ok] - Drop selected `Database`
 [ok] - List all `Database`
@@ -26,7 +26,7 @@ TODO:
 [x] - Transaction support
 [x] - [Bugs] Virtual column sequence in `ALTER TABLE`
 [x] - Support custom type (`Key`[ok],`Date`[ok],`Point`)
-[x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds
+[x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds (Pending for API design)
 [ok] - Custom `JSON` encoder (w/o cover `Map` datatype)
 [wip] - Custom `JSON` decoder
 [ok] - Single database `Migration`
@@ -44,8 +44,8 @@ TODO:
 [ok] - Delete single record by `$Key`
 [ok] - Delete multiple record
 [ok] - Delete single record
-[x] - Replace into
-[x|5%] - Write testcases
+[x] - Replace into (Pending for API design)
+[20%] - Write testcases
 
 [xxx] - Support `Postgres`
 

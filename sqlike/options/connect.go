@@ -43,6 +43,6 @@ func (opt *ConnectOptions) SetHost(host string) *ConnectOptions {
 
 // SetPort :
 func (opt *ConnectOptions) SetPort(port string) *ConnectOptions {
-	opt.Host = strings.TrimSpace(port)
+	opt.Port = strings.TrimSpace(port)
 	return opt
 }

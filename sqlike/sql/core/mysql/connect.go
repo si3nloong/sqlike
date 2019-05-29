@@ -14,7 +14,7 @@ func (ms MySQL) Connect(opt *options.ConnectOptions) (connStr string) {
 	blr.WriteString(opt.Password)
 	blr.WriteByte('@')
 	if opt.Host != "" {
-		blr.WriteByte('(')
+		blr.WriteString(`tcp(`)
 		blr.WriteString(opt.Host)
 		blr.WriteByte(':')
 		blr.WriteString(opt.Port)
