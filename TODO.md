@@ -23,6 +23,7 @@ TODO:
 [ok] - Create multiple `Index`
 [ok] - List all `Index`
 [ok] - Drop selected `Index`
+[x] - Transaction support
 [x] - [Bugs] Virtual column sequence in `ALTER TABLE`
 [x] - Support custom type (`Key`[ok],`Date`[ok],`Point`)
 [x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds

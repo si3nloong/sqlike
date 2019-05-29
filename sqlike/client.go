@@ -27,6 +27,15 @@ func newClient(driver string, db *sql.DB, dialect sqlcore.Dialect) (*Client, err
 	return client, nil
 }
 
+// SetLogger : this is to set the logger for debugging, it will panic
+// if the logger input is nil
+func (c *Client) SetLogger(logger Logger) {
+	if logger == nil {
+		panic("logger cannot be nil")
+	}
+	c.logger = logger
+}
+
 // Version :
 func (c *Client) Version() (version semver.Version) {
 	version = c.version
