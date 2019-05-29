@@ -142,6 +142,8 @@ func (dec DefaultDecoders) DecodeBool(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case bool:
+		x = vi
 	case nil:
 	}
 	v.SetBool(x)
@@ -165,6 +167,8 @@ func (dec DefaultDecoders) DecodeInt(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case int64:
+		x = vi
 	case nil:
 	}
 	if v.OverflowInt(x) {
@@ -191,6 +195,8 @@ func (dec DefaultDecoders) DecodeUint(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case uint64:
+		x = vi
 	case nil:
 	}
 	if v.OverflowUint(x) {
@@ -217,6 +223,8 @@ func (dec DefaultDecoders) DecodeFloat(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case float64:
+		x = vi
 	case nil:
 
 	}
