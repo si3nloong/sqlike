@@ -51,7 +51,7 @@ func (enc ValueEncoder) SetEncoders(rg *codec.Registry) {
 // EncodeByte :
 func (enc ValueEncoder) EncodeByte(w codec.ValueWriter, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write(jsonNull)
+		w.Write([]byte(`null`))
 		return nil
 	}
 	w.WriteRune('"')
@@ -63,7 +63,7 @@ func (enc ValueEncoder) EncodeByte(w codec.ValueWriter, v reflect.Value) error {
 // EncodeJSONRaw :
 func (enc ValueEncoder) EncodeJSONRaw(w codec.ValueWriter, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write(jsonNull)
+		w.Write([]byte(`null`))
 		return nil
 	}
 	buf := new(bytes.Buffer)
@@ -129,7 +129,7 @@ func (enc ValueEncoder) EncodeFloat(w codec.ValueWriter, v reflect.Value) error 
 // EncodePtr :
 func (enc *ValueEncoder) EncodePtr(w codec.ValueWriter, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write(jsonNull)
+		w.Write([]byte(`null`))
 		return nil
 	}
 	v = v.Elem()
@@ -167,7 +167,7 @@ func (enc *ValueEncoder) EncodeStruct(w codec.ValueWriter, v reflect.Value) erro
 // EncodeArray :
 func (enc *ValueEncoder) EncodeArray(w codec.ValueWriter, v reflect.Value) error {
 	if v.Kind() == reflect.Slice && v.IsNil() {
-		w.Write(jsonNull)
+		w.Write([]byte(`null`))
 		return nil
 	}
 	w.WriteRune('[')

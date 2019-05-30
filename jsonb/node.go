@@ -1,18 +1,14 @@
 package jsonb
 
-import "bytes"
-
 type jsonType int
 
 const (
-	object jsonType = iota
-	array
+	jsonUnknown jsonType = iota
+	jsonObject
+	jsonArray
+	jsonString
+	jsonNull
 )
-
-// Reader :
-type Reader struct {
-	bytes.Buffer
-}
 
 // Node :
 type Node struct {

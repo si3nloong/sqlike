@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,9 +37,10 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("NormalStruct")
+	ns := newNormalStruct()
 
+	// Single insert
 	{
-		ns := newNormalStruct()
 		result, err = table.InsertOne(&ns)
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
@@ -46,6 +48,19 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, int64(1), affected)
 	}
 
+	// Single upsert
+	{
+		ns.Emoji = `🤕`
+		result, err = table.InsertOne(&ns,
+			options.InsertOne().
+				SetMode(options.InsertOnDuplicate))
+		require.NoError(t, err)
+		affected, err = result.RowsAffected()
+		require.NoError(t, err)
+		require.Equal(t, int64(2), affected)
+	}
+
+	// Multiple insert
 	{
 		nss := [...]normalStruct{
 			newNormalStruct(),
@@ -59,6 +74,7 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, int64(3), affected)
 	}
 
+	// Error insertion
 	{
 		_, err = table.InsertOne(&struct {
 			Interface interface{}

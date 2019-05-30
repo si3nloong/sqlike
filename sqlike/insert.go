@@ -3,6 +3,7 @@ package sqlike
 import (
 	"database/sql"
 	"reflect"
+
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -12,7 +13,7 @@ import (
 )
 
 // InsertOne :
-func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
+func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
@@ -43,6 +44,9 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOptions) (sql
 	values[0] = rows
 
 	opt := new(options.InsertOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 
 	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)
 	return sqldriver.Execute(
@@ -96,10 +100,6 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 	opt := new(options.InsertManyOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
-		// 	if opt != nil {
-		// 		// logger = tb.logger
-		// 	}
-		// 	log.Println(opt)
 	}
 
 	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)

@@ -17,6 +17,7 @@ TODO:
 [ok] - Truncate selected `Table`
 [ok] - List all column for selected `Table`
 [ok] - Drop selected `Table`
+[ok] - Rename `Table`
 [ok] - Check `Table` exists
 [ok] - Create single `Index` (support `unique`, `fulltext` and `spatial`)
 [ok] - Support primary key on `Migration`

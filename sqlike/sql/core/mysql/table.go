@@ -11,6 +11,17 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/sql/util"
 )
 
+// RenameTable :
+func (ms MySQL) RenameTable(oldName, newName string) (stmt *sqlstmt.Statement) {
+	stmt = sqlstmt.NewStatement(ms)
+	stmt.WriteString(`RENAME TABLE `)
+	stmt.WriteString(ms.Quote(oldName))
+	stmt.WriteString(` TO `)
+	stmt.WriteString(ms.Quote(newName))
+	stmt.WriteByte(';')
+	return
+}
+
 // DropTable :
 func (ms MySQL) DropTable(table string, exists bool) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)

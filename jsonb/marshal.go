@@ -6,7 +6,7 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 )
 
-var jsonNull = []byte(`null`)
+// var jsonNull = []byte(`null`)
 
 // Marshaller :
 type Marshaller interface {
@@ -17,7 +17,7 @@ type Marshaller interface {
 func Marshal(src interface{}) (b []byte, err error) {
 	v := reflext.ValueOf(src)
 	if src == nil || reflext.IsNull(v) {
-		b = jsonNull
+		b = []byte(`null`)
 		return
 	}
 

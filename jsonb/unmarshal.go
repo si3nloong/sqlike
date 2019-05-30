@@ -37,10 +37,10 @@ func Unmarshal(data []byte, dst interface{}) error {
 		return err
 	}
 
-	buf := bytes.NewBuffer(data)
+	r := bytes.NewBuffer(data)
 	vv := reflext.Zero(t)
 	vv = reflext.Indirect(vv)
-	if err := decoder(buf, vv); err != nil {
+	if err := decoder(r, vv); err != nil {
 		return err
 	}
 	reflext.Indirect(v).Set(vv)

@@ -254,9 +254,9 @@ func (dec *DefaultDecoders) DecodePtr(it interface{}, v reflect.Value) error {
 func (dec DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
 	switch vi := it.(type) {
 	case string:
-		return json.Unmarshal([]byte(vi), v.Interface())
+		return json.Unmarshal([]byte(vi), v.Addr().Interface())
 	case []byte:
-		return json.Unmarshal(vi, v.Interface())
+		return json.Unmarshal(vi, v.Addr().Interface())
 	}
 	return nil
 }
@@ -265,9 +265,9 @@ func (dec DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
 func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
 	switch vi := it.(type) {
 	case string:
-		return json.Unmarshal([]byte(vi), v.Interface())
+		return json.Unmarshal([]byte(vi), v.Addr().Interface())
 	case []byte:
-		return json.Unmarshal(vi, v.Interface())
+		return json.Unmarshal(vi, v.Addr().Interface())
 	}
 	return nil
 }

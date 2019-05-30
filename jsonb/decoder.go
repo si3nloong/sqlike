@@ -8,8 +8,8 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/core"
+	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
@@ -38,6 +38,9 @@ func (dec ValueDecoder) SetDecoders(rg *codec.Registry) {
 	rg.SetKindDecoder(reflect.Float32, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
+	rg.SetKindDecoder(reflect.Slice, dec.DecodeSlice)
+	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
+	// rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	dec.registry = rg
 }
 
@@ -138,5 +141,15 @@ func (dec ValueDecoder) DecodeStruct(r codec.ValueReader, v reflect.Value) error
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(v.Type())
 	log.Println(cdc)
+	return nil
+}
+
+// DecodeSlice :
+func (dec ValueDecoder) DecodeSlice(r codec.ValueReader, v reflect.Value) error {
+	return nil
+}
+
+// DecodeInterface :
+func (dec ValueDecoder) DecodeInterface(r codec.ValueReader, v reflect.Value) error {
 	return nil
 }

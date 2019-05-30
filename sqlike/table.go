@@ -3,6 +3,7 @@ package sqlike
 import (
 	"reflect"
 	"strings"
+
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/reflext"
@@ -34,6 +35,16 @@ type Table struct {
 	dialect  sqlcore.Dialect
 	registry *codec.Registry
 	logger   Logger
+}
+
+// Rename :
+func (tb *Table) Rename(name string) error {
+	_, err := sqldriver.Execute(
+		tb.driver,
+		tb.dialect.RenameTable(tb.name, name),
+		tb.logger,
+	)
+	return err
 }
 
 // Exists :
