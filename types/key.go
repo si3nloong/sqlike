@@ -53,6 +53,9 @@ func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column 
 
 // Value :
 func (k *Key) Value() (driver.Value, error) {
+	if k == nil {
+		return nil, nil
+	}
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	k.marshal(blr, true)
