@@ -61,7 +61,6 @@ func (c *Cursor) Decode(dst interface{}) error {
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
 		fv := mapper.FieldByIndexes(vv, idx)
-		// log.Println(j, fv.Type())
 		decoder, err := c.registry.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
