@@ -263,11 +263,11 @@ func (dec DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
 
 // DecodeArray :
 func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
-	switch vi := it.(type) {
-	case string:
-		return json.Unmarshal([]byte(vi), v.Addr().Interface())
-	case []byte:
-		return json.Unmarshal(vi, v.Addr().Interface())
-	}
+	// switch vi := it.(type) {
+	// case string:
+	// 	return json.Unmarshal([]byte(vi), v.Addr().Interface())
+	// case []byte:
+	// 	return json.Unmarshal(vi, v.Addr().Interface())
+	// }
 	return nil
 }
