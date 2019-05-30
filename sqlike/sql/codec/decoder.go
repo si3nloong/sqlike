@@ -252,12 +252,22 @@ func (dec *DefaultDecoders) DecodePtr(it interface{}, v reflect.Value) error {
 
 // DecodeStruct :
 func (dec DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
-	// v.SetBytes(b)
+	switch vi := it.(type) {
+	case string:
+		return json.Unmarshal([]byte(vi), v.Interface())
+	case []byte:
+		return json.Unmarshal(vi, v.Interface())
+	}
 	return nil
 }
 
 // DecodeArray :
 func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
-	// v.SetBytes(b)
+	switch vi := it.(type) {
+	case string:
+		return json.Unmarshal([]byte(vi), v.Interface())
+	case []byte:
+		return json.Unmarshal(vi, v.Interface())
+	}
 	return nil
 }
