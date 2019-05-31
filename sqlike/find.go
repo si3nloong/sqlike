@@ -1,6 +1,8 @@
 package sqlike
 
 import (
+	"database/sql"
+
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
@@ -24,7 +26,10 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...options.FindOne
 	}
 	x.Limit(1)
 	csr := find(tb, &x.FindActions)
-	csr.Next()
+	csr.close = true
+	if !csr.Next() {
+		csr.err = sql.ErrNoRows
+	}
 	return csr
 }
 

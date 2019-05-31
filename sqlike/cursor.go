@@ -12,6 +12,7 @@ import (
 
 // Cursor :
 type Cursor struct {
+	close    bool
 	rows     *sql.Rows
 	registry *codec.Registry
 	columns  []string
@@ -30,6 +31,9 @@ func (c *Cursor) ColumnTypes() ([]*sql.ColumnType, error) {
 
 // Decode will decode the current document into val.
 func (c *Cursor) Decode(dst interface{}) error {
+	if c.close {
+		defer c.Close()
+	}
 	if c.err != nil {
 		return c.err
 	}
@@ -61,7 +65,6 @@ func (c *Cursor) Decode(dst interface{}) error {
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
 		fv := mapper.FieldByIndexes(vv, idx)
-		// log.Println(j, fv.Type())
 		decoder, err := c.registry.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
@@ -71,9 +74,6 @@ func (c *Cursor) Decode(dst interface{}) error {
 		}
 	}
 	reflext.Indirect(v).Set(reflext.Indirect(vv))
-	if !c.Next() {
-		defer c.Close()
-	}
 	return nil
 }
 

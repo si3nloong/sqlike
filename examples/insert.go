@@ -9,25 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// MigrateExamples :
-func MigrateExamples(t *testing.T, db *sqlike.Database) {
-	var (
-		ns  *normalStruct
-		err error
-	)
-
-	table := db.Table("NormalStruct")
-	{
-		err = table.Migrate(ns)
-		require.NoError(t, err)
-	}
-	{
-		err = table.Truncate()
-		require.NoError(t, err)
-	}
-
-}
-
 // InsertExamples :
 func InsertExamples(t *testing.T, db *sqlike.Database) {
 	var (
@@ -49,6 +30,7 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	// Single upsert
+	// - https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html
 	{
 		ns.Emoji = `🤕`
 		result, err = table.InsertOne(&ns,
