@@ -26,6 +26,6 @@ func TestExamples(t *testing.T) {
 	MigrateExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)
-	// UpdateExamples(t, db)
-	// DeleteExamples(t, db)
+	UpdateExamples(t, db)
+	DeleteExamples(t, db)
 }
