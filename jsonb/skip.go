@@ -21,18 +21,19 @@ func (r *Reader) skipBytes(b []byte) error {
 
 func (r *Reader) skip() {
 	typ := r.peekType()
-	log.Println("skip :", typ.String())
 	switch typ {
 	case jsonString:
 		r.skipString()
-	case jsonObject:
-		r.skipObject()
 	case jsonNumber:
 		r.skipNumber()
-	case jsonNull:
-		r.skipBytes([]byte{'u', 'l', 'l'})
 	case jsonBoolean:
 		r.skipBoolean()
+	case jsonNull:
+		r.skipBytes([]byte{'u', 'l', 'l'})
+	case jsonArray:
+		r.skipArray()
+	case jsonObject:
+		r.skipObject()
 	}
 }
 

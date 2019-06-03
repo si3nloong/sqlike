@@ -155,12 +155,21 @@ func (r *Reader) skipArray() {
 	}
 }
 
+// ReadBytes :
+func (r *Reader) ReadBytes() ([]byte, error) {
+	i := r.pos
+	r.skip()
+	return r.b[i:r.pos], nil
+}
+
 // ReadValue :
 func (r *Reader) ReadValue() (interface{}, error) {
 	typ := r.peekType()
 	switch typ {
 	case jsonString:
 		return r.ReadString(), nil
+	case jsonNumber:
+		return r.ReadNumber(), nil
 	case jsonBoolean:
 		return r.ReadBoolean()
 	case jsonNull:
@@ -227,7 +236,6 @@ func (r *Reader) ReadNumber() (str string) {
 	c := r.nextToken()
 	if c == '-' || (c >= '0' && c <= '9') {
 		r.unreadByte()
-		log.Println("ReadNumber xxx")
 		for i := r.pos; i < r.len; i++ {
 			c = r.b[i]
 			if c >= '0' && c <= '9' {
@@ -236,7 +244,6 @@ func (r *Reader) ReadNumber() (str string) {
 			} else {
 				str = string(r.b[r.pos:i])
 				r.pos = i
-				log.Println("Break on here ", string(c), str)
 				break
 			}
 		}
@@ -319,6 +326,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 // ReadFlattenObject :
 func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	level := 1
+	m := make(map[string][]byte)
 	c := r.nextToken()
 	if c != '{' {
 		return ErrUnexpectedChar{}
@@ -336,6 +344,9 @@ keyLoop:
 			return ErrUnexpectedChar{}
 		}
 		key = r.unreadByte().ReadString()
+		if path != "" {
+			key = path + "." + key
+		}
 		c = r.nextToken()
 		if c != ':' {
 			return ErrUnexpectedChar{}
@@ -345,29 +356,43 @@ keyLoop:
 		switch c {
 		case '{':
 			level++
-			if path != "" {
-				path += "." + key
-			} else {
-				path = key
-			}
+			path = key
 			continue keyLoop
 
-		case '}':
-			level--
-			if level <= 0 {
-				break
-			}
 		default:
-			log.Println("ReadValue", string(c))
-			v, err := r.ReadValue()
-			log.Println(v, err)
+			v, err := r.unreadByte().ReadBytes()
+			if err != nil {
+				return err
+			}
+			m[key] = v
 		}
 
-		log.Println(key)
-
 		c = r.nextToken()
+		if c == ',' {
+			continue keyLoop
+		}
+		for level > 1 {
+			if c != '}' {
+				return ErrUnexpectedChar{}
+			}
+			path = ""
+			c = r.nextToken()
+			level--
+		}
+
 		if c != ',' {
 			break
+		}
+	}
+
+	if c != '}' {
+		return ErrUnexpectedChar{}
+	}
+	log.Println("Debug ============>")
+	for k, v := range m {
+		rdr := NewReader(v)
+		if err := cb(rdr, k); err != nil {
+			return err
 		}
 	}
 	return nil

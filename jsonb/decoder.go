@@ -3,7 +3,6 @@ package jsonb
 import (
 	"encoding/base64"
 	"encoding/json"
-	"log"
 	"reflect"
 	"strconv"
 
@@ -112,35 +111,30 @@ func (dec Decoder) DecodeUint(r codec.ValueReader, v reflect.Value) error {
 
 // DecodeFloat :
 func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
-	// x, err := strconv.ParseFloat(r.String(), 64)
-	// if err != nil {
-	// 	return err
-	// }
-	// if v.OverflowFloat(x) {
-	// 	return xerrors.New("float overflow")
-	// }
-	// v.SetFloat(x)
+	x, err := strconv.ParseFloat(string(r.Bytes()), 64)
+	if err != nil {
+		return err
+	}
+	if v.OverflowFloat(x) {
+		return xerrors.New("float overflow")
+	}
+	v.SetFloat(x)
 	return nil
 }
 
 // DecodeStruct :
 func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	mapper := core.DefaultMapper
-	// cdc := mapper.CodecByType(v.Type())
 	return r.ReadFlattenObject(func(it *Reader, k string) error {
 		vv, exists := mapper.LookUpFieldByName(v, k)
 		if !exists {
-			r.skip()
 			return nil
 		}
 		decoder, err := dec.registry.LookupDecoder(vv.Type())
 		if err != nil {
 			return err
 		}
-		// r.skip()
-		log.Println("Key :", k, vv.Type(), decoder)
-		return decoder(r, vv)
-		return nil
+		return decoder(it, vv)
 	})
 }
 
