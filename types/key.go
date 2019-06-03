@@ -92,10 +92,10 @@ func (k *Key) unmarshal(str string) error {
 	)
 	for {
 		idx = strings.LastIndex(str, "/")
-		if idx < 0 {
-			break
+		path = str
+		if idx > -1 {
+			path = str[idx:]
 		}
-		path = str[idx:]
 		paths = strings.Split(path, ",")
 		if len(paths) != 2 {
 			return xerrors.New("invalid key path")
@@ -115,10 +115,16 @@ func (k *Key) unmarshal(str string) error {
 				return err
 			}
 		}
-		str = str[:idx]
-		if len(str) < 1 {
-			break
+
+		if idx > -1 {
+			str = str[:idx]
+			if len(str) < 1 {
+				return nil
+			}
+		} else {
+			return nil
 		}
+
 		if k.Parent == nil {
 			k.Parent = new(Key)
 		}
