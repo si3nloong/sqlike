@@ -3,6 +3,7 @@ package sqlstmt
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Formatter :
@@ -12,6 +13,8 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
+	start    time.Time
+	duration time.Duration
 	strings.Builder
 	fmt  Formatter
 	c    int
@@ -58,4 +61,19 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 		args = args[1:]
 	}
 	return
+}
+
+// StartTimer :
+func (stmt *Statement) StartTimer() {
+	stmt.start = time.Now()
+}
+
+// StopTimer :
+func (stmt *Statement) StopTimer() {
+	stmt.duration = time.Since(stmt.start)
+}
+
+// TimeElapsed :
+func (stmt *Statement) TimeElapsed() time.Duration {
+	return stmt.duration
 }

@@ -1,7 +1,7 @@
 package jsonb
 
 import (
-	"bytes"
+	"log"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -11,13 +11,6 @@ import (
 // Unmarshaller :
 type Unmarshaller interface {
 	UnmarshalJSONB([]byte) error
-}
-
-var skipByteMap = map[byte]bool{
-	' ':  true,
-	'\n': true,
-	'\t': true,
-	'\r': true,
 }
 
 var sequenceMap = map[byte][]byte{
@@ -37,12 +30,20 @@ func Unmarshal(data []byte, dst interface{}) error {
 		return err
 	}
 
-	r := bytes.NewBuffer(data)
+	log.Println("Data :", string(data))
+	r := NewReader(data)
 	vv := reflext.Zero(t)
+
 	vv = reflext.Indirect(vv)
 	if err := decoder(r, vv); err != nil {
 		return err
 	}
+
+	c := r.nextToken()
+	log.Println("leftover byte :", c, string(c))
+	// if c != 0 {
+	// 	return xerrors.New("invalid json format, extra characters")
+	// }
 	reflext.Indirect(v).Set(vv)
 	return nil
 }

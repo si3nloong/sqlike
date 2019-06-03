@@ -51,6 +51,19 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	return FieldByIndexes(v, fi.Index)
 }
 
+// LookUpFieldByName :
+func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
+	v = Indirect(v)
+	mustBe(v, reflect.Struct)
+
+	tm := m.CodecByType(v.Type())
+	fi, isOk := tm.Names[name]
+	if !isOk {
+		return v, false
+	}
+	return FieldByIndexes(v, fi.Index), true
+}
+
 // FieldByIndexes :
 func (m *Mapper) FieldByIndexes(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexes(v, idxs)
@@ -79,16 +92,22 @@ func (m *Mapper) TraversalsByName(t reflect.Type, names []string) (idxs [][]int)
 	return idxs
 }
 
+// Init :
+func Init(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		v.Set(reflect.New(v.Type().Elem()))
+	}
+	if v.Kind() == reflect.Map && v.IsNil() {
+		v.Set(reflect.MakeMap(v.Type()))
+	}
+	return v
+}
+
 // FieldByIndexes :
 func FieldByIndexes(v reflect.Value, indexes []int) reflect.Value {
 	for _, i := range indexes {
 		v = Indirect(v).Field(i)
-		if v.Kind() == reflect.Ptr && v.IsNil() {
-			v.Set(reflect.New(v.Type().Elem()))
-		}
-		if v.Kind() == reflect.Map && v.IsNil() {
-			v.Set(reflect.MakeMap(v.Type()))
-		}
+		v = Init(v)
 	}
 	return v
 }

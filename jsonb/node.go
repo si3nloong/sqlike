@@ -3,19 +3,38 @@ package jsonb
 type jsonType int
 
 const (
-	jsonUnknown jsonType = iota
+	jsonInvalid jsonType = iota
+	jsonNull
 	jsonObject
 	jsonArray
+	jsonWhitespace
+	jsonArrayStart
+	jsonArrayEnd
+	jsonLiteral
 	jsonString
-	jsonNull
+	jsonStringStart
+	jsonStringEnd
+	jsonObjectStart
+	jsonObjectEnd
+	jsonComma
+	jsonBoolean
+	jsonNumber
 )
 
-// Node :
-type Node struct {
-	typ     jsonType
-	length  int
-	prev    *Node
-	parent  *Node
-	next    *Node
-	current *Node
+func (jt jsonType) String() (name string) {
+	switch jt {
+	case jsonInvalid:
+		name = "invalid"
+	case jsonString:
+		name = "string"
+	case jsonBoolean:
+		name = "boolean"
+	case jsonObject:
+		name = "object"
+	case jsonArray:
+		name = "array"
+	case jsonNumber:
+		name = "number"
+	}
+	return
 }

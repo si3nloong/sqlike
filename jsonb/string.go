@@ -1,10 +1,12 @@
 package jsonb
 
 var escapeCharMap = map[byte][]byte{
-	9:  []byte{92, 116},
-	10: []byte{92, 110},
-	34: []byte{92, 34},
-	92: []byte{92, 92},
+	'\t': []byte(`\t`),
+	'\n': []byte(`\n`),
+	'\r': []byte(`\r`),
+	'"':  []byte(`\"`),
+	'\\': []byte(`\\`),
+	'\b': []byte(`\b`),
 }
 
 func escapeString(w Writer, str string) {

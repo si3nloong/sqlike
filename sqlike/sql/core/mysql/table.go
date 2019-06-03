@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"log"
 	"reflect"
 	"strings"
 
@@ -50,12 +49,16 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 
 // CreateTable :
 func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+	var (
+		col     component.Column
+		virtual bool
+		stored  bool
+	)
+
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`CREATE TABLE ` + ms.Quote(table) + ` `)
 	stmt.WriteRune('(')
 
-	var col component.Column
-	var virtual, stored bool
 	// Main columns :
 	for i, sf := range fields {
 		if i > 0 {
@@ -74,34 +77,36 @@ func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *
 
 		// Generated columns :
 		t := reflext.Deref(sf.Zero.Type())
-		if t.Kind() == reflect.Struct {
-			children := sf.Children
-			for len(children) > 0 {
-				child := children[0]
-				_, virtual = child.Tag.LookUp("virtual_column")
-				_, stored = child.Tag.LookUp("stored_column")
-				if virtual || stored {
-					stmt.WriteRune(',')
-					col, err = ms.schema.GetColumn(child)
-					if err != nil {
-						return
-					}
+		if t.Kind() != reflect.Struct {
+			continue
+		}
 
-					stmt.WriteString(ms.Quote(col.Name))
-					stmt.WriteString(` ` + col.Type)
-					path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
-					stmt.WriteString(` AS `)
-					stmt.WriteString(`(` + ms.Quote(sf.Path) + `->>'$.` + path + `')`)
-					if stored {
-						stmt.WriteString(` STORED`)
-					}
-					if !col.Nullable {
-						stmt.WriteString(` NOT NULL`)
-					}
+		children := sf.Children
+		for len(children) > 0 {
+			child := children[0]
+			_, virtual = child.Tag.LookUp("virtual_column")
+			_, stored = child.Tag.LookUp("stored_column")
+			if virtual || stored {
+				stmt.WriteRune(',')
+				col, err = ms.schema.GetColumn(child)
+				if err != nil {
+					return
 				}
-				children = children[1:]
-				children = append(children, child.Children...)
+
+				stmt.WriteString(ms.Quote(col.Name))
+				stmt.WriteString(` ` + col.Type)
+				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
+				stmt.WriteString(` AS `)
+				stmt.WriteString(`(` + ms.Quote(sf.Path) + `->>'$.` + path + `')`)
+				if stored {
+					stmt.WriteString(` STORED`)
+				}
+				if !col.Nullable {
+					stmt.WriteString(` NOT NULL`)
+				}
 			}
+			children = children[1:]
+			children = append(children, child.Children...)
 		}
 	}
 	stmt.WriteRune(')')
@@ -114,47 +119,92 @@ func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *
 
 // AlterTable :
 func (ms *MySQL) AlterTable(table string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+	var (
+		col     component.Column
+		idx     int
+		virtual bool
+		stored  bool
+	)
+
+	suffix := `FIRST`
 	stmt = sqlstmt.NewStatement(ms)
 	cols := util.StringSlice(columns)
 	stmt.WriteString(`ALTER TABLE ` + ms.Quote(table) + ` `)
 
-	var col component.Column
-	var idx int
 	for i, sf := range fields {
 		if i > 0 {
 			stmt.WriteRune(',')
 		}
-		action := "ADD"
+
+		action := `ADD`
 		idx = cols.IndexOf(sf.Path)
 		if idx > -1 {
-			action = "MODIFY"
+			action = `MODIFY`
 			cols.Splice(idx)
 		}
-
+		if action == `ADD` && sf.Path == `$Key` {
+			stmt.WriteString("ADD PRIMARY KEY (`$Key`)")
+			stmt.WriteRune(',')
+		}
 		stmt.WriteString(action + ` `)
 		col, err = ms.schema.GetColumn(sf)
 		if err != nil {
 			return
 		}
 		ms.buildSchemaByColumn(stmt, col)
-		if i < 1 {
-			stmt.WriteString(` FIRST`)
-		} else {
-			stmt.WriteString(` AFTER ` + ms.Quote(fields[i-1].Path))
+		stmt.WriteString(` ` + suffix)
+		suffix = `AFTER ` + ms.Quote(sf.Path)
+
+		// Generated columns :
+		t := reflext.Deref(sf.Zero.Type())
+		if t.Kind() != reflect.Struct {
+			continue
 		}
 
-		if action == "ADD" && sf.Path == "$Key" {
-			stmt.WriteRune(',')
-			stmt.WriteString("ADD PRIMARY KEY (`$Key`)")
+		children := sf.Children
+		for len(children) > 0 {
+			child := children[0]
+			_, virtual = child.Tag.LookUp("virtual_column")
+			_, stored = child.Tag.LookUp("stored_column")
+			if virtual || stored {
+				stmt.WriteRune(',')
+				col, err = ms.schema.GetColumn(child)
+				if err != nil {
+					return
+				}
+
+				action = `ADD`
+				idx = cols.IndexOf(child.Path)
+				if idx > -1 {
+					action = `MODIFY`
+					cols.Splice(idx)
+				}
+
+				stmt.WriteString(action + ` `)
+				stmt.WriteString(ms.Quote(col.Name))
+				stmt.WriteString(` ` + col.Type)
+				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
+				stmt.WriteString(` AS `)
+				stmt.WriteString(`(` + ms.Quote(sf.Path) + `->>'$.` + path + `')`)
+				if stored {
+					stmt.WriteString(` STORED`)
+				}
+				if !col.Nullable {
+					stmt.WriteString(` NOT NULL`)
+				}
+				suffix = `AFTER ` + ms.Quote(child.Path)
+			}
+			children = children[1:]
+			children = append(children, child.Children...)
 		}
 	}
 
 	if unsafe {
-		// stmt.WriteString(` DROP`)
 		for _, col := range cols {
-			log.Println(col)
+			stmt.WriteString(` DROP COLUMN `)
+			stmt.WriteString(ms.Quote(col))
+			stmt.WriteByte(',')
 		}
-		log.Println("Unsafe columns :")
 	}
 	// stmt.WriteRune(',')
 	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)

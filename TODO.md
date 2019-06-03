@@ -14,26 +14,26 @@ TODO:
 [ok] - Drop selected `Database`
 [ok] - List all `Database`
 [ok] - Support `Tag` such as `auto_increment`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
-[ok] - Truncate selected `Table`
-[ok] - List all column for selected `Table`
-[ok] - Drop selected `Table`
-[ok] - Rename `Table`
-[ok] - Check `Table` exists
-[ok] - Create single `Index` (support `unique`, `fulltext` and `spatial`)
-[ok] - Support primary key on `Migration`
-[ok] - Create multiple `Index`
-[ok] - List all `Index`
-[ok] - Drop selected `Index`
-[x] - Transaction support
-[x] - [Bugs] Virtual column sequence in `ALTER TABLE`
+[ok] - [Feature] Truncate selected `Table`
+[ok] - [Feature] List all column for selected `Table`
+[ok] - [Feature] Drop selected `Table`
+[ok] - [Feature] Rename `Table`
+[ok] - [Feature] Check `Table` exists
+[ok] - [Feature] Create single `Index` (support `unique`, `fulltext` and `spatial`)
+[ok] - [Feature] Support primary key on `Migration`
+[ok] - [Feature] Create multiple `Index`
+[ok] - [Feature] List all `Index`
+[ok] - [Feature] Drop selected `Index`
+[x] - [Feature] Transaction support
+[ok] - [Bugs] Virtual column sequence in `ALTER TABLE`
 [x] - Support custom type (`Key`[ok],`Date`[ok],`Point`)
 [x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds (Pending for API design)
-[ok] - Custom `JSON` encoder (w/o cover `Map` datatype)
+[ok] - [Feature] Custom `JSON` encoder (w/o cover `Map` datatype)
 [wip] - Custom `JSON` decoder
-[ok] - Single database `Migration`
-[ok] - Support generated column for `Migration` (`virtual_column` or `stored_column`)
+[ok] - [Feature] Single database `Migration`
+[ok] - [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
 [wip] - Support `UnsafeMigration`
-[ok] - `InsertIgnore` & `Upsert`
+[ok] - [Feature] `InsertIgnore` & `Upsert`
 [x] - Set omit or setter fields on `Upsert`
 [ok] - Insert single record into `Table`
 [ok] - Insert multiple record into `Table`

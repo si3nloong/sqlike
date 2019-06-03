@@ -20,12 +20,13 @@ type Driver interface {
 // Execute :
 func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result sql.Result, err error) {
 	// if logger != nil {
-	currentTime := time.Now()
+	stmt.StartTimer()
 	defer func() {
 		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
 		// log.Println(stmt.String())
 		log.Println(fmt.Sprintf("%+v", stmt))
-		log.Println("Time Elapsed :", time.Since(currentTime).Seconds(), "seconds")
+		stmt.StopTimer()
+		log.Println("Time Elapsed :", stmt.TimeElapsed(), "seconds")
 	}()
 	// }
 	result, err = driver.Exec(stmt.String(), stmt.Args()...)
@@ -34,15 +35,16 @@ func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result
 
 // Query :
 func Query(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (rows *sql.Rows, err error) {
-	// if logger != nil {
-	currentTime := time.Now()
-	defer func() {
-		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
-		// log.Println(stmt.String())
-		log.Println(fmt.Sprintf("%+v", stmt))
-		log.Println("Time Elapsed :", time.Since(currentTime).Seconds(), "seconds")
-	}()
-	// }
+	if logger != nil {
+		stmt.StartTimer()
+		defer func() {
+			log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
+			// log.Println(stmt.String())
+			stmt.StopTimer()
+			log.Println(fmt.Sprintf("%+v", stmt))
+			log.Println("Time Elapsed :", stmt.TimeElapsed(), "seconds")
+		}()
+	}
 	rows, err = driver.Query(stmt.String(), stmt.Args()...)
 	return
 }

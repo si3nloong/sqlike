@@ -1,0 +1,130 @@
+package jsonb
+
+import (
+	"bytes"
+	"log"
+
+	"golang.org/x/xerrors"
+)
+
+func (r *Reader) skipBytes(b []byte) error {
+	offset := r.pos + len(b)
+	if offset > r.len {
+		return xerrors.New("unexpected json length")
+	}
+	if !bytes.Equal(b, r.b[r.pos:offset]) {
+		return xerrors.New("unexpected json length")
+	}
+	r.pos = offset
+	return nil
+}
+
+func (r *Reader) skip() {
+	typ := r.peekType()
+	log.Println("skip :", typ.String())
+	switch typ {
+	case jsonString:
+		r.skipString()
+	case jsonObject:
+		r.skipObject()
+	case jsonNumber:
+		r.skipNumber()
+	case jsonNull:
+		r.skipBytes([]byte{'u', 'l', 'l'})
+	case jsonBoolean:
+		r.skipBoolean()
+	}
+}
+
+// skipString :
+func (r *Reader) skipString() {
+	c := r.nextToken()
+	if c != '"' {
+		panic("it should be string")
+	}
+	if c == 'n' {
+		r.unreadByte()
+		r.ReadNull()
+	}
+	// r.pos++
+	for i := r.pos; i < r.len; i++ {
+		c = r.b[i]
+		if c == '"' {
+			r.pos = i + 1
+			return
+		} else if c == '\\' {
+			break
+		} else if c < ' ' {
+			panic("unexpected character")
+		}
+	}
+	return
+}
+
+func (r *Reader) skipBoolean() {
+	c := r.nextToken()
+	if c == 't' {
+		r.skipBytes([]byte{'r', 'u', 'e'})
+		return
+	}
+	if c == 'f' {
+		r.skipBytes([]byte{'a', 'l', 's', 'e'})
+		return
+	}
+	log.Println("Boolean :", string(c))
+	return
+}
+
+func (r *Reader) skipNumber() {
+	c := r.nextToken()
+	for i := r.pos; i < r.len; i++ {
+		c = r.b[i]
+		switch c {
+		case ' ', '\n', '\r', '\t', ',', '}', ']':
+			r.pos = i
+			return
+		}
+	}
+	return
+}
+
+func (r *Reader) skipObject() {
+	level := 1
+	log.Println("skipObject", string(r.b[r.pos:]))
+	c := r.nextToken()
+
+	// TODO : index out of range
+	for level > 0 {
+		c = r.nextToken()
+		switch c {
+		case '"':
+		case '{':
+			level++
+		case '}':
+			level--
+		}
+	}
+
+	// for i := r.pos; i < r.len; i++ {
+	// 	switch r.b[i] {
+	// 	case '"': // If inside string, skip it
+	// 		// iter.head = i + 1
+	// 		r.pos = i
+	// 		r.skipString()
+	// 		i = r.pos + 1
+	// 		// i = iter.head - 1 // it will be i++ soon
+	// 	case '{': // If open symbol, increase level
+	// 		level++
+	// 	case '}': // If close symbol, increase level
+	// 		level--
+	// 		log.Println("Pos", i)
+
+	// 		// If we have returned to the original level, we're done
+	// 		if level == 0 {
+	// 			r.pos = i + 1
+	// 			log.Println(r.pos, r.peekType())
+	// 			return
+	// 		}
+	// 	}
+	// }
+}
