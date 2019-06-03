@@ -117,7 +117,7 @@ func (k *Key) unmarshal(str string) error {
 		}
 
 		if idx > -1 {
-			str = str[:idx]
+			str = str[:idx-1]
 			if len(str) < 1 {
 				return nil
 			}
