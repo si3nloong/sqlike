@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/core"
-	"github.com/si3nloong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/reflext"
 	"golang.org/x/xerrors"
 )
 
@@ -19,7 +19,7 @@ type Decoder struct {
 
 // SetDecoders :
 func (dec Decoder) SetDecoders(rg *Registry) {
-	// rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
+	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetKindDecoder(reflect.String, dec.DecodeString)
 	rg.SetKindDecoder(reflect.Bool, dec.DecodeBool)
@@ -28,32 +28,27 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Int16, dec.DecodeInt)
 	rg.SetKindDecoder(reflect.Int32, dec.DecodeInt)
 	rg.SetKindDecoder(reflect.Int64, dec.DecodeInt)
-	// rg.SetKindDecoder(reflect.Uint, dec.DecodeUint)
-	// rg.SetKindDecoder(reflect.Uint8, dec.DecodeUint)
-	// rg.SetKindDecoder(reflect.Uint16, dec.DecodeUint)
-	// rg.SetKindDecoder(reflect.Uint32, dec.DecodeUint)
-	// rg.SetKindDecoder(reflect.Uint64, dec.DecodeUint)
+	rg.SetKindDecoder(reflect.Uint, dec.DecodeUint)
+	rg.SetKindDecoder(reflect.Uint8, dec.DecodeUint)
+	rg.SetKindDecoder(reflect.Uint16, dec.DecodeUint)
+	rg.SetKindDecoder(reflect.Uint32, dec.DecodeUint)
+	rg.SetKindDecoder(reflect.Uint64, dec.DecodeUint)
 	rg.SetKindDecoder(reflect.Float32, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
-	rg.SetKindDecoder(reflect.Slice, dec.DecodeSlice)
+	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
+	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
 	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
-	// rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	dec.registry = rg
 }
 
 // DecodeByte :
-func (dec Decoder) DecodeByte(r codec.ValueReader, v reflect.Value) error {
-	b := r.Bytes()
-	if b == nil {
-		return nil
+func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
+	x, err := r.ReadString()
+	if err != nil {
+		return err
 	}
-	length := len(b)
-	if b[0] != '"' && b[length-1] != '"' {
-		return xerrors.New("invalid byte format")
-	}
-	var err error
-	b, err = base64.StdEncoding.DecodeString(r.String()[1 : length-1])
+	b, err := base64.StdEncoding.DecodeString(x)
 	if err != nil {
 		return err
 	}
@@ -79,7 +74,11 @@ func (dec Decoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
 
 // DecodeString :
 func (dec Decoder) DecodeString(r *Reader, v reflect.Value) error {
-	v.SetString(r.ReadString())
+	x, err := r.ReadString()
+	if err != nil {
+		return err
+	}
+	v.SetString(x)
 	return nil
 }
 
@@ -95,7 +94,7 @@ func (dec Decoder) DecodeBool(r *Reader, v reflect.Value) error {
 
 // DecodeInt :
 func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
-	x, err := strconv.ParseInt(string(r.Bytes()), 10, 64)
+	x, err := r.ReadNumber()
 	if err != nil {
 		return err
 	}
@@ -107,15 +106,19 @@ func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
 }
 
 // DecodeUint :
-func (dec Decoder) DecodeUint(r codec.ValueReader, v reflect.Value) error {
-	x, err := strconv.ParseUint(r.String(), 10, 64)
+func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
+	x, err := r.ReadNumber()
 	if err != nil {
 		return err
 	}
-	if v.OverflowUint(x) {
+	if x < 0 {
+		return xerrors.New("number is not unsigned")
+	}
+	num := uint64(x)
+	if v.OverflowUint(num) {
 		return xerrors.New("unsigned integer overflow")
 	}
-	v.SetUint(x)
+	v.SetUint(num)
 	return nil
 }
 
@@ -148,19 +151,21 @@ func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	})
 }
 
-// DecodeSlice :
-func (dec Decoder) DecodeSlice(r *Reader, v reflect.Value) error {
-	// tkn := r.nextToken()
-	// if tkn.typ != jsonArray {
-	// 	return xerrors.New("expected array")
-	// }
-
-	// reflect.MakeSlice(v.Type().Elem(), 0, 0)
-	// // decoder := dec.registry.LookupDecoder(v.Type().Elem())
-	// log.Println(v.Type().Elem())
-	// log.Println(tkn.typ.String())
-	// log.Println(r)
-	return nil
+// DecodeArray :
+func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
+	t := v.Type().Elem()
+	return r.ReadArray(func(it *Reader) error {
+		vv := reflext.Zero(t)
+		decoder, err := dec.registry.LookupDecoder(t)
+		if err != nil {
+			return err
+		}
+		if err := decoder(it, vv); err != nil {
+			return err
+		}
+		v.Set(reflect.Append(v, vv))
+		return nil
+	})
 }
 
 // DecodeInterface :

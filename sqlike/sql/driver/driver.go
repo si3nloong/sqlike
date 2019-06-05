@@ -24,6 +24,7 @@ func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result
 	defer func() {
 		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
 		// log.Println(stmt.String())
+		log.Println(fmt.Sprintf("%v", stmt))
 		log.Println(fmt.Sprintf("%+v", stmt))
 		stmt.StopTimer()
 		log.Println("Time Elapsed :", stmt.TimeElapsed())

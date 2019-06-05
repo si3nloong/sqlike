@@ -32,7 +32,7 @@ TODO:
 [wip] - Custom `JSON` decoder
 [ok] - [Feature] Single database `Migration`
 [ok] - [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
-[wip] - Support `UnsafeMigration`
+[ok] - Support `UnsafeMigration`
 [ok] - [Feature] `InsertIgnore` & `Upsert`
 [x] - Set omit or setter fields on `Upsert`
 [ok] - Insert single record into `Table`

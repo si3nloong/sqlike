@@ -53,8 +53,10 @@ func (r *Reader) skipBoolean() {
 
 func (r *Reader) skipObject() {
 	level := 1
-	log.Println("skipObject", string(r.b[r.pos:]))
 	c := r.nextToken()
+	if c != '{' {
+		return
+	}
 
 	// TODO : index out of range
 	for level > 0 {

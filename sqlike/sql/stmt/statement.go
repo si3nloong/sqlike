@@ -48,6 +48,10 @@ func (stmt *Statement) AppendArgs(args []interface{}) {
 // Format :
 func (stmt Statement) Format(state fmt.State, verb rune) {
 	str := stmt.String()
+	if !state.Flag('+') {
+		state.Write([]byte(str))
+		return
+	}
 	args := stmt.Args()
 	for {
 		idx := strings.Index(str, `?`)

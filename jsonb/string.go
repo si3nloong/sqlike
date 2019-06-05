@@ -1,29 +1,30 @@
 package jsonb
 
 // ReadString :
-func (r *Reader) ReadString() (str string) {
+func (r *Reader) ReadString() (string, error) {
 	c := r.nextToken()
-	if c != '"' {
-		panic("it should be string")
-	}
 	if c == 'n' {
-		r.unreadByte()
-		r.ReadNull()
+		r.unreadByte().ReadNull()
+		return "", nil
+	}
+
+	if c != '"' {
+		return "", ErrDecode{}
 	}
 	// r.pos++
 	for i := r.pos; i < r.len; i++ {
 		c = r.b[i]
 		if c == '"' {
-			str = string(r.b[r.pos:i])
+			str := string(r.b[r.pos:i])
 			r.pos = i + 1
-			return
+			return str, nil
 		} else if c == '\\' {
 			break
 		} else if c < ' ' {
 			panic("unexpected character")
 		}
 	}
-	return
+	return "", nil
 }
 
 // skipString :
