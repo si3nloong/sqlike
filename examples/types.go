@@ -34,10 +34,10 @@ type normalStruct struct {
 	UFloat32      float32 `sqlike:",unsigned"`
 	EmptyStruct   struct{}
 	Struct        struct {
-		VirtualStr    string `sqlike:",virtual_column"`
-		StoredStr     string `sqlike:",stored_column"`
-		NestedBool    bool   `sqlike:""`
-		NestedNullInt *int
+		VirtualStr string `sqlike:",virtual_column"`
+		StoredStr  string `sqlike:",stored_column"`
+		NestedBool bool   `sqlike:""`
+		// NestedNullInt *int
 	}
 	JSONRaw   json.RawMessage
 	Timestamp time.Time

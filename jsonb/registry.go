@@ -5,35 +5,17 @@ import (
 	"sync"
 )
 
-// ValueWriter :
-type ValueWriter interface {
-	WriteRune(rune) (int, error)
-	Write([]byte) (int, error)
-	WriteByte(byte) error
-	WriteString(string) (int, error)
-	Len() int
-}
-
-// ValueReader :
-type ValueReader interface {
-	ReadByte() (byte, error)
-	Reset()
-	Len() int
-	Bytes() []byte
-	String() string
-}
-
 // ValueDecoder :
 type ValueDecoder func(*Reader, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(ValueWriter, reflect.Value) error
+type ValueEncoder func(*Writer, reflect.Value) error
 
-// ValueCodec :
-type ValueCodec interface {
-	DecodeValue(ValueReader, reflect.Value) error
-	EncodeValue(ValueWriter, reflect.Value) error
-}
+// // ValueCodec :
+// type ValueCodec interface {
+// 	DecodeValue(ValueReader, reflect.Value) error
+// 	EncodeValue(ValueWriter, reflect.Value) error
+// }
 
 // Registry :
 type Registry struct {
@@ -49,6 +31,7 @@ var registry = buildRegistry()
 func buildRegistry() *Registry {
 	rg := NewRegistry()
 	Decoder{}.SetDecoders(rg)
+	Encoder{}.SetEncoders(rg)
 	return rg
 }
 

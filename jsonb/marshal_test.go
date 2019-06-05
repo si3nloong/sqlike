@@ -2,8 +2,11 @@ package jsonb
 
 import (
 	"encoding/json"
+	"log"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 type longStr string
@@ -16,7 +19,7 @@ type normalStruct struct {
 	Byte          []byte
 	Bool          bool
 	priv          int
-	Skip          interface{} `sqlike:"-"`
+	Skip          interface{}
 	Int           int
 	TinyInt       int8
 	SmallInt      int16
@@ -42,17 +45,34 @@ var (
 )
 
 func TestMarshal(t *testing.T) {
-	// var (
-	// 	// ns *normalStruct
-	// 	b []byte
-	// )
+	var (
+		b   []byte
+		err error
+	)
 
-	// str := `hello world`
-	// b, _ = Marshal(str)
-	// assert.Equal(t, string(b), strconv.Quote(str), "it should be quote string")
+	b, err = json.Marshal(nsPtr)
+	log.Println(string(b))
+	require.NoError(t, err)
 
-	// // b, _ = Marshal(ns)
-	// // assert.Equal(t, b, jsonNull, "it should be null")
+	b, err = json.Marshal(nsInit)
+	log.Println(string(b))
+	require.NoError(t, err)
+
+	b, err = json.Marshal(nsPtr)
+	log.Println(string(b))
+	require.NoError(t, err)
+
+	b, err = Marshal(nsPtr)
+	log.Println(string(b))
+	require.NoError(t, err)
+
+	b, err = Marshal(nsInit)
+	log.Println(string(b))
+	require.NoError(t, err)
+
+	b, err = Marshal(nsPtr)
+	log.Println(string(b))
+	require.NoError(t, err)
 
 	// output := `{"Str":"","LongStr":"","CustomStrType":"",`
 	// output += `"EmptyByte":null,"Byte":null,"Bool":false,`
@@ -66,26 +86,38 @@ func TestMarshal(t *testing.T) {
 	// assert.Equal(t, b, []byte(output), "it should match the expected result")
 }
 
-func BenchmarkJSONMarshal(t *testing.B) {
-	// t.Run("Pointer Struct w/o initialize", func(_ *testing.B) {
-	// 	Marshal(nsPtr)
-	// })
-	// t.Run("Pointer Struct w initialize", func(_ *testing.B) {
-	// 	Marshal(nsInit)
-	// })
-	// t.Run("Struct w initialize", func(_ *testing.B) {
-	// 	Marshal(nsPtr)
-	// })
+func BenchmarkJSONMarshal(b *testing.B) {
+	b.Run("Pointer Struct w/o initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			json.Marshal(nsPtr)
+		}
+	})
+	b.Run("Pointer Struct w initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			json.Marshal(nsInit)
+		}
+	})
+	b.Run("Struct w initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			json.Marshal(nsPtr)
+		}
+	})
 }
 
-func BenchmarkJSONBMarshal(t *testing.B) {
-	// t.Run("Pointer Struct w/o initialize", func(_ *testing.B) {
-	// 	Marshal(nsPtr)
-	// })
-	// t.Run("Pointer Struct w initialize", func(_ *testing.B) {
-	// 	Marshal(nsInit)
-	// })
-	// t.Run("Struct w initialize", func(_ *testing.B) {
-	// 	Marshal(nsPtr)
-	// })
+func BenchmarkJSONBMarshal(b *testing.B) {
+	b.Run("Pointer Struct w/o initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			Marshal(nsPtr)
+		}
+	})
+	b.Run("Pointer Struct w initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			Marshal(nsInit)
+		}
+	})
+	b.Run("Struct w initialize", func(t *testing.B) {
+		for n := 0; n < t.N; n++ {
+			Marshal(nsPtr)
+		}
+	})
 }

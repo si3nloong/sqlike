@@ -163,6 +163,16 @@ func (tb Table) Truncate() (err error) {
 	return
 }
 
+// DropIfExits :
+func (tb Table) DropIfExits() (err error) {
+	_, err = sqldriver.Execute(
+		tb.driver,
+		tb.dialect.DropTable(tb.name, true),
+		tb.logger,
+	)
+	return
+}
+
 // Drop :
 func (tb Table) Drop() (err error) {
 	_, err = sqldriver.Execute(

@@ -1,7 +1,7 @@
 package jsonb
 
 import (
-	"log"
+	"strings"
 
 	"golang.org/x/xerrors"
 )
@@ -31,9 +31,12 @@ func init() {
 	valueMap['t'] = jsonBoolean
 	valueMap['f'] = jsonBoolean
 	valueMap['n'] = jsonNull
-	valueMap['\n'] = jsonWhitespace
 	valueMap['['] = jsonArray
 	valueMap['{'] = jsonObject
+	valueMap[' '] = jsonWhitespace
+	valueMap['\r'] = jsonWhitespace
+	valueMap['\t'] = jsonWhitespace
+	valueMap['\n'] = jsonWhitespace
 }
 
 var emptyJSON = []byte(`null`)
@@ -48,9 +51,7 @@ type Token struct {
 // Reader :
 type Reader struct {
 	typ   jsonType
-	ast   *Token
 	b     []byte
-	Value *Token
 	pos   int
 	len   int
 	start int
@@ -67,17 +68,6 @@ func (r *Reader) Bytes() []byte {
 	return r.b
 }
 
-func (r *Reader) setNode(c byte) {
-	if r.ast == nil { // root
-		r.ast = new(Token)
-		r.ast.b = []byte{c}
-		log.Println("Root initialize", *r.ast)
-		return
-	}
-	n := new(Token)
-	r.ast.child = n
-}
-
 // ReadNext :
 func (r *Reader) nextToken() byte {
 	var c byte
@@ -85,12 +75,19 @@ func (r *Reader) nextToken() byte {
 		c = r.b[i]
 		if _, isOk := whiteSpaceMap[c]; isOk {
 			r.b = append(r.b[:i], r.b[i+1:]...)
-			r.len = len(r.b)
+			r.len = r.len - 1
 			i--
 			continue
 		}
 		r.pos = i + 1
 		return c
+	}
+	return 0
+}
+
+func (r *Reader) prevToken() byte {
+	if r.pos > 0 {
+		return r.b[r.pos-1]
 	}
 	return 0
 }
@@ -205,61 +202,9 @@ func (r *Reader) unreadByte() *Reader {
 	return r
 }
 
-// ReadString :
-func (r *Reader) ReadString() (str string) {
-	c := r.nextToken()
-	if c != '"' {
-		panic("it should be string")
-	}
-	if c == 'n' {
-		r.unreadByte()
-		r.ReadNull()
-	}
-	// r.pos++
-	for i := r.pos; i < r.len; i++ {
-		c = r.b[i]
-		if c == '"' {
-			str = string(r.b[r.pos:i])
-			r.pos = i + 1
-			return
-		} else if c == '\\' {
-			break
-		} else if c < ' ' {
-			panic("unexpected character")
-		}
-	}
-	return
-}
-
-// ReadNumber :
-func (r *Reader) ReadNumber() (str string) {
-	c := r.nextToken()
-	if c == '-' || (c >= '0' && c <= '9') {
-		r.unreadByte()
-		for i := r.pos; i < r.len; i++ {
-			c = r.b[i]
-			if c >= '0' && c <= '9' {
-				continue
-			} else if c == '.' || c == 'e' {
-			} else {
-				str = string(r.b[r.pos:i])
-				r.pos = i
-				break
-			}
-		}
-		return
-	}
-	if c == 'n' {
-		r.unreadByte()
-		r.ReadNull()
-	}
-	return
-}
-
 // ReadBoolean :
 func (r *Reader) ReadBoolean() (bool, error) {
 	c := r.nextToken()
-	log.Println("Booolean", string(c))
 	if c == 't' {
 		r.skipBytes([]byte{'r', 'u', 'e'})
 		return true, nil
@@ -294,7 +239,7 @@ func (r *Reader) ReadArray() (arr []interface{}) {
 func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 	c := r.nextToken()
 	if c != '{' {
-		return ErrUnexpectedChar{}
+		return ErrDecode{}
 	}
 
 	var k string
@@ -329,67 +274,76 @@ func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	m := make(map[string][]byte)
 	c := r.nextToken()
 	if c != '{' {
-		return ErrUnexpectedChar{}
+		return ErrDecode{}
 	}
 
 	var (
-		path string
-		key  string
+		paths []string
+		key   string
 	)
 
 keyLoop:
 	for {
 		c = r.nextToken()
+		if c == '}' {
+			r.unreadByte()
+			goto valueLoop
+		}
+
 		if c != '"' {
-			return ErrUnexpectedChar{}
+			return ErrDecode{}
 		}
 		key = r.unreadByte().ReadString()
-		if path != "" {
-			key = path + "." + key
-		}
+		paths = append(paths, key)
 		c = r.nextToken()
 		if c != ':' {
-			return ErrUnexpectedChar{}
+			return ErrDecode{}
 		}
 
 		c = r.nextToken()
 		switch c {
 		case '{':
 			level++
-			path = key
-			continue keyLoop
+			goto keyLoop
 
 		default:
 			v, err := r.unreadByte().ReadBytes()
 			if err != nil {
 				return err
 			}
-			m[key] = v
+			k := strings.Join(paths, ".")
+			m[k] = v
 		}
 
+	valueLoop:
 		c = r.nextToken()
-		if c == ',' {
-			continue keyLoop
-		}
-		for level > 1 {
-			if c != '}' {
-				return ErrUnexpectedChar{}
-			}
-			path = ""
-			c = r.nextToken()
+		switch c {
+		case '}':
 			level--
-		}
+			if level < 1 {
+				break keyLoop
+			}
+			paths = paths[:level-1]
+			c = r.nextToken()
+			if c != ',' {
+				r.unreadByte()
+			}
 
-		if c != ',' {
+		case ',':
+			paths = append([]string{}, paths[:len(paths)-1]...)
+
+		default:
 			break
+
 		}
 	}
 
 	if c != '}' {
-		return ErrUnexpectedChar{}
+		return ErrDecode{}
 	}
-	log.Println("Debug ============>")
+
 	for k, v := range m {
+		// log.Println(k, ":", string(v))
 		rdr := NewReader(v)
 		if err := cb(rdr, k); err != nil {
 			return err

@@ -14,10 +14,13 @@ func TestReader(t *testing.T) {
 			"Test" :"hello world!!" ,
 			"Test2" :"hello world!!" ,
 			"Testxx" :"hello world!!" , 
+			"empty" :    {},
 			"nested"  : {
-				"deep" : {
+				"deep0"  : 100,
+				"deep1" : {
 					"value" : 199303.00
-				}
+				},
+				"deep2": "YOLO"
 			}
 		},
 		"Test0": 100.111,
@@ -37,7 +40,8 @@ func TestReader(t *testing.T) {
 			Nested struct {
 				Deep struct {
 					Value float64 `sqlike:"value"`
-				} `sqlike:"deep"`
+				} `sqlike:"deep1"`
+				YOLO string `sqlike:"deep2"`
 			} `sqlike:"nested"`
 		}
 		Test99 int

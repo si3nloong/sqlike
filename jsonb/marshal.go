@@ -19,18 +19,18 @@ func Marshal(src interface{}) (b []byte, err error) {
 		return
 	}
 
-	// t := reflext.Deref(v.Type())
-	// encoder, err := registry.LookupEncoder(t)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	t := reflext.Deref(v.Type())
+	encoder, err := registry.LookupEncoder(t)
+	if err != nil {
+		return nil, err
+	}
 
-	// v = reflext.Indirect(v)
-	// w := new(bytes.Buffer)
-	// if err := encoder(w, v); err != nil {
-	// 	return nil, err
-	// }
+	v = reflext.Indirect(v)
+	w := NewWriter()
+	if err := encoder(w, v); err != nil {
+		return nil, err
+	}
 
-	// b = w.Bytes()
+	b = w.Bytes()
 	return
 }

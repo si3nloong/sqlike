@@ -26,7 +26,7 @@ func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result
 		// log.Println(stmt.String())
 		log.Println(fmt.Sprintf("%+v", stmt))
 		stmt.StopTimer()
-		log.Println("Time Elapsed :", stmt.TimeElapsed(), "seconds")
+		log.Println("Time Elapsed :", stmt.TimeElapsed())
 	}()
 	// }
 	result, err = driver.Exec(stmt.String(), stmt.Args()...)
@@ -42,7 +42,7 @@ func Query(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (rows *sq
 			// log.Println(stmt.String())
 			stmt.StopTimer()
 			log.Println(fmt.Sprintf("%+v", stmt))
-			log.Println("Time Elapsed :", stmt.TimeElapsed(), "seconds")
+			log.Println("Time Elapsed :", stmt.TimeElapsed())
 		}()
 	}
 	rows, err = driver.Query(stmt.String(), stmt.Args()...)
@@ -56,7 +56,7 @@ func QueryRow(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (row *
 	defer func() {
 		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
 		log.Println(fmt.Sprintf("%+v", stmt))
-		log.Println("Time Elapsed :", time.Since(currentTime).Seconds(), "seconds")
+		log.Println("Time Elapsed :", time.Since(currentTime).Seconds())
 	}()
 	// }
 	row = driver.QueryRow(stmt.String(), stmt.Args()...)

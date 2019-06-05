@@ -12,10 +12,6 @@ const (
 	jsonArrayEnd
 	jsonLiteral
 	jsonString
-	jsonStringStart
-	jsonStringEnd
-	jsonObjectStart
-	jsonObjectEnd
 	jsonComma
 	jsonBoolean
 	jsonNumber

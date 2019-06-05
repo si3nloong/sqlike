@@ -4,11 +4,14 @@ import (
 	"reflect"
 )
 
-type ErrUnexpectedChar struct {
+// ErrDecode :
+type ErrDecode struct {
+	callback string
+	message  string
 }
 
-func (e ErrUnexpectedChar) Error() string {
-	return "unepxected char"
+func (e ErrDecode) Error() string {
+	return "unexpected char"
 }
 
 // ErrNoEncoder :

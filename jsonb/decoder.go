@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/core/codec"
@@ -36,7 +37,7 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
 	rg.SetKindDecoder(reflect.Slice, dec.DecodeSlice)
-	// rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
+	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
 	// rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	dec.registry = rg
 }
@@ -57,6 +58,16 @@ func (dec Decoder) DecodeByte(r codec.ValueReader, v reflect.Value) error {
 		return err
 	}
 	v.SetBytes(b)
+	return nil
+}
+
+// DecodeTime :
+func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
+	x, err := time.Parse(time.RFC3339Nano, string(r.Bytes()))
+	if err != nil {
+		return err
+	}
+	v.Set(reflect.ValueOf(x))
 	return nil
 }
 
@@ -84,15 +95,14 @@ func (dec Decoder) DecodeBool(r *Reader, v reflect.Value) error {
 
 // DecodeInt :
 func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
-	r.ReadNumber()
-	// x, err := strconv.ParseInt("", 10, 64)
-	// if err != nil {
-	// 	return err
-	// }
-	// if v.OverflowInt(x) {
-	// 	return xerrors.New("integer overflow")
-	// }
-	// v.SetInt(x)
+	x, err := strconv.ParseInt(string(r.Bytes()), 10, 64)
+	if err != nil {
+		return err
+	}
+	if v.OverflowInt(x) {
+		return xerrors.New("integer overflow")
+	}
+	v.SetInt(x)
 	return nil
 }
 
@@ -154,6 +164,11 @@ func (dec Decoder) DecodeSlice(r *Reader, v reflect.Value) error {
 }
 
 // DecodeInterface :
-func (dec Decoder) DecodeInterface(r codec.ValueReader, v reflect.Value) error {
+func (dec Decoder) DecodeInterface(r *Reader, v reflect.Value) error {
+	x, err := r.ReadValue()
+	if err != nil {
+		return err
+	}
+	v.Set(reflect.ValueOf(x))
 	return nil
 }

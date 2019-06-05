@@ -37,31 +37,6 @@ func (r *Reader) skip() {
 	}
 }
 
-// skipString :
-func (r *Reader) skipString() {
-	c := r.nextToken()
-	if c != '"' {
-		panic("it should be string")
-	}
-	if c == 'n' {
-		r.unreadByte()
-		r.ReadNull()
-	}
-	// r.pos++
-	for i := r.pos; i < r.len; i++ {
-		c = r.b[i]
-		if c == '"' {
-			r.pos = i + 1
-			return
-		} else if c == '\\' {
-			break
-		} else if c < ' ' {
-			panic("unexpected character")
-		}
-	}
-	return
-}
-
 func (r *Reader) skipBoolean() {
 	c := r.nextToken()
 	if c == 't' {
@@ -73,19 +48,6 @@ func (r *Reader) skipBoolean() {
 		return
 	}
 	log.Println("Boolean :", string(c))
-	return
-}
-
-func (r *Reader) skipNumber() {
-	c := r.nextToken()
-	for i := r.pos; i < r.len; i++ {
-		c = r.b[i]
-		switch c {
-		case ' ', '\n', '\r', '\t', ',', '}', ']':
-			r.pos = i
-			return
-		}
-	}
 	return
 }
 
