@@ -20,6 +20,7 @@ type Decoder struct {
 // SetDecoders :
 func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
+	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetKindDecoder(reflect.String, dec.DecodeString)
 	rg.SetKindDecoder(reflect.Bool, dec.DecodeBool)
@@ -58,7 +59,11 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 
 // DecodeTime :
 func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
-	x, err := time.Parse(time.RFC3339Nano, string(r.Bytes()))
+	str, err := r.ReadString()
+	if err != nil {
+		return err
+	}
+	x, err := time.Parse(time.RFC3339Nano, str)
 	if err != nil {
 		return err
 	}
@@ -154,8 +159,9 @@ func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 // DecodeArray :
 func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
 	t := v.Type().Elem()
-	return r.ReadArray(func(it *Reader) error {
-		vv := reflext.Zero(t)
+	if err := r.ReadArray(func(it *Reader) error {
+		v.Set(reflect.Append(v, reflext.Zero(t)))
+		vv := v.Index(v.Len() - 1)
 		decoder, err := dec.registry.LookupDecoder(t)
 		if err != nil {
 			return err
@@ -163,9 +169,11 @@ func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
 		if err := decoder(it, vv); err != nil {
 			return err
 		}
-		v.Set(reflect.Append(v, vv))
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 // DecodeInterface :

@@ -3,8 +3,8 @@ package jsonb
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -145,16 +145,28 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("Unmarshal Byte", func(it *testing.T) {
-		b = make([]byte, 0)
-		Unmarshal(byteval, &b)
-		log.Println(string(b))
-		// require.Equal(t, pk, b)
+		b = append(b, '"')
+		b = append(b, byteval...)
+		b = append(b, '"')
+		var bytea []byte
+		Unmarshal(b, &bytea)
+		require.Equal(t, pk, bytea)
+	})
+
+	t.Run("Unmarshal Time", func(it *testing.T) {
+		date := `2018-01-02T15:04:33Z`
+		b = []byte(`"` + date + `"`)
+		var dt time.Time
+		Unmarshal(b, &dt)
+		require.Equal(t, date, dt.Format(time.RFC3339))
 	})
 
 	t.Run("Unmarshal Array", func(it *testing.T) {
 		var (
-			strArr []string
-			intArr []int
+			strArr    []string
+			intArr    []int
+			twoDArr   [][]int
+			threeDArr [][][]string
 		)
 
 		Unmarshal([]byte(`["a", "b", "c"]`), &strArr)
@@ -162,6 +174,44 @@ func TestUnmarshal(t *testing.T) {
 
 		Unmarshal([]byte(`[2, 8, 32, 64, 128]`), &intArr)
 		require.ElementsMatch(t, []int{2, 8, 32, 64, 128}, intArr)
+
+		Unmarshal([]byte(`[
+			[2, 8, 32, 64, 128], 
+			[1, 3, 5, 7],
+			[0, 100, 1000, 10000, 100000]
+		]`), &twoDArr)
+		require.ElementsMatch(t, [][]int{
+			[]int{2, 8, 32, 64, 128},
+			[]int{1, 3, 5, 7},
+			[]int{0, 100, 1000, 10000, 100000},
+		}, twoDArr)
+
+		Unmarshal([]byte(`[
+			[
+				["a", "b", "c", "d", "e"],
+				["甲", "乙", "丙", "丁"],
+				["😄", "😅", "😆", "😉", "😊"]
+			], 
+			[
+				["a", "b", "c", "d", "e"],
+				["f", "g", "h", "i", "j"]
+			],
+			[
+				["Java", "JavaScript", "TypeScript"],
+				["Rust", "GoLang"]
+			]
+		]`), &threeDArr)
+		require.ElementsMatch(t, [][][]string{{
+			[]string{"a", "b", "c", "d", "e"},
+			[]string{"甲", "乙", "丙", "丁"},
+			[]string{"😄", "😅", "😆", "😉", "😊"},
+		}, {
+			[]string{"a", "b", "c", "d", "e"},
+			[]string{"f", "g", "h", "i", "j"},
+		}, {
+			[]string{"Java", "JavaScript", "TypeScript"},
+			[]string{"Rust", "GoLang"},
+		}}, threeDArr)
 	})
 
 	t.Run("Unmarshal Struct", func(it *testing.T) {
