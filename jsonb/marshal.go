@@ -1,8 +1,6 @@
 package jsonb
 
 import (
-	"bytes"
-
 	"github.com/si3nloong/sqlike/reflext"
 )
 
@@ -28,7 +26,7 @@ func Marshal(src interface{}) (b []byte, err error) {
 	}
 
 	v = reflext.Indirect(v)
-	w := new(bytes.Buffer)
+	w := NewWriter()
 	if err := encoder(w, v); err != nil {
 		return nil, err
 	}

@@ -9,19 +9,15 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/core"
-
-	"github.com/si3nloong/sqlike/core/codec"
 )
 
-const timeFormat = `"2006-01-02 15:04:05.999999"`
-
-// ValueEncoder :
-type ValueEncoder struct {
-	registry *codec.Registry
+// Encoder :
+type Encoder struct {
+	registry *Registry
 }
 
 // SetEncoders :
-func (enc ValueEncoder) SetEncoders(rg *codec.Registry) {
+func (enc Encoder) SetEncoders(rg *Registry) {
 	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
 	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
 	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
@@ -45,11 +41,12 @@ func (enc ValueEncoder) SetEncoders(rg *codec.Registry) {
 	rg.SetKindEncoder(reflect.Slice, enc.EncodeArray)
 	// TODO: support marshal with map
 	// rg.SetKindEncoder(reflect.Map, enc.EncodeMap)
+	rg.SetKindEncoder(reflect.Interface, enc.EncodeInterface)
 	enc.registry = rg
 }
 
 // EncodeByte :
-func (enc ValueEncoder) EncodeByte(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeByte(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
 		w.Write([]byte(`null`))
 		return nil
@@ -61,7 +58,7 @@ func (enc ValueEncoder) EncodeByte(w codec.ValueWriter, v reflect.Value) error {
 }
 
 // EncodeJSONRaw :
-func (enc ValueEncoder) EncodeJSONRaw(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeJSONRaw(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
 		w.Write([]byte(`null`))
 		return nil
@@ -79,7 +76,7 @@ func (enc ValueEncoder) EncodeJSONRaw(w codec.ValueWriter, v reflect.Value) erro
 }
 
 // EncodeTime :
-func (enc ValueEncoder) EncodeTime(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeTime(w *Writer, v reflect.Value) error {
 	var temp [20]byte
 	x := v.Interface().(time.Time)
 	w.Write(x.UTC().AppendFormat(temp[:0], `"`+time.RFC3339Nano+`"`))
@@ -87,7 +84,7 @@ func (enc ValueEncoder) EncodeTime(w codec.ValueWriter, v reflect.Value) error {
 }
 
 // EncodeString :
-func (enc ValueEncoder) EncodeString(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeString(w *Writer, v reflect.Value) error {
 	w.WriteRune('"')
 	escapeString(w, v.String())
 	w.WriteRune('"')
@@ -95,28 +92,28 @@ func (enc ValueEncoder) EncodeString(w codec.ValueWriter, v reflect.Value) error
 }
 
 // EncodeBool :
-func (enc ValueEncoder) EncodeBool(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeBool(w *Writer, v reflect.Value) error {
 	var temp [4]byte
 	w.Write(strconv.AppendBool(temp[:0], v.Bool()))
 	return nil
 }
 
 // EncodeInt :
-func (enc ValueEncoder) EncodeInt(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeInt(w *Writer, v reflect.Value) error {
 	var temp [8]byte
 	w.Write(strconv.AppendInt(temp[:0], v.Int(), 10))
 	return nil
 }
 
 // EncodeUint :
-func (enc ValueEncoder) EncodeUint(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeUint(w *Writer, v reflect.Value) error {
 	var temp [10]byte
 	w.Write(strconv.AppendUint(temp[:0], v.Uint(), 10))
 	return nil
 }
 
 // EncodeFloat :
-func (enc ValueEncoder) EncodeFloat(w codec.ValueWriter, v reflect.Value) error {
+func (enc Encoder) EncodeFloat(w *Writer, v reflect.Value) error {
 	f64 := v.Float()
 	if f64 <= 0 {
 		w.WriteRune('0')
@@ -127,7 +124,7 @@ func (enc ValueEncoder) EncodeFloat(w codec.ValueWriter, v reflect.Value) error 
 }
 
 // EncodePtr :
-func (enc *ValueEncoder) EncodePtr(w codec.ValueWriter, v reflect.Value) error {
+func (enc *Encoder) EncodePtr(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
 		w.Write([]byte(`null`))
 		return nil
@@ -141,7 +138,7 @@ func (enc *ValueEncoder) EncodePtr(w codec.ValueWriter, v reflect.Value) error {
 }
 
 // EncodeStruct :
-func (enc *ValueEncoder) EncodeStruct(w codec.ValueWriter, v reflect.Value) error {
+func (enc *Encoder) EncodeStruct(w *Writer, v reflect.Value) error {
 	w.WriteRune('{')
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(v.Type())
@@ -165,7 +162,7 @@ func (enc *ValueEncoder) EncodeStruct(w codec.ValueWriter, v reflect.Value) erro
 }
 
 // EncodeArray :
-func (enc *ValueEncoder) EncodeArray(w codec.ValueWriter, v reflect.Value) error {
+func (enc *Encoder) EncodeArray(w *Writer, v reflect.Value) error {
 	if v.Kind() == reflect.Slice && v.IsNil() {
 		w.Write([]byte(`null`))
 		return nil
@@ -190,9 +187,11 @@ func (enc *ValueEncoder) EncodeArray(w codec.ValueWriter, v reflect.Value) error
 	return nil
 }
 
-// Writer :
-type Writer interface {
-	WriteRune(rune) (int, error)
-	Write([]byte) (int, error)
-	WriteByte(byte) error
+// EncodeInterface :
+func (enc *Encoder) EncodeInterface(w *Writer, v reflect.Value) error {
+	if v.Interface() == nil {
+		w.Write([]byte(`null`))
+		return nil
+	}
+	return nil
 }

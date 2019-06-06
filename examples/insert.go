@@ -22,7 +22,9 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 
 	// Single insert
 	{
-		result, err = table.InsertOne(&ns)
+		result, err = table.InsertOne(&ns,
+			options.InsertOne().
+				SetDebug(true))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
@@ -35,6 +37,7 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		ns.Emoji = `🤕`
 		result, err = table.InsertOne(&ns,
 			options.InsertOne().
+				SetDebug(true).
 				SetMode(options.InsertOnDuplicate))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
@@ -49,7 +52,9 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 			newNormalStruct(),
 			newNormalStruct(),
 		}
-		result, err = table.InsertMany(&nss)
+		result, err = table.InsertMany(&nss,
+			options.InsertMany().
+				SetDebug(true))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)

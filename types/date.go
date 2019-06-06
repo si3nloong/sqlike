@@ -3,38 +3,34 @@ package types
 import (
 	"bytes"
 	"database/sql/driver"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/sql/component"
 	"github.com/si3nloong/sqlike/util"
+	"golang.org/x/xerrors"
 )
+
+const dateRegex = `\d{4}\-\d{2}\-\d{2}`
+
+// ErrDateFormat :
+var ErrDateFormat = xerrors.New(`invalid date format, it should be "YYYY-MM-DD"`)
 
 // Date :
 type Date struct {
 	Year, Month, Day int
 }
 
-func (d *Date) init() {
-	if d.Year < 1 {
-		d.Year = 1
-	}
-	if d.Month < 1 {
-		d.Month = 1
-	}
-	if d.Day < 1 {
-		d.Day = 1
-	}
-}
-
 // DataType :
 func (d *Date) DataType(driver string, sf *reflext.StructField) component.Column {
-	dflt := `CURDATE()`
+	dflt := "CURDATE()"
 	return component.Column{
 		Name:         sf.Path,
-		DataType:     `DATE`,
-		Type:         `DATE`,
+		DataType:     "DATE",
+		Type:         "DATE",
 		DefaultValue: &dflt,
 		Nullable:     sf.IsNullable,
 	}
@@ -47,56 +43,119 @@ func (d *Date) Value() (driver.Value, error) {
 
 // Scan :
 func (d *Date) Scan(it interface{}) error {
-	// TODO:
 	switch vi := it.(type) {
 	case []byte:
+		return d.unmarshal(util.UnsafeString(vi))
 
 	case string:
+		return d.unmarshal(vi)
+
 	case time.Time:
 		d.Year = vi.Year()
 		d.Month = int(vi.Month())
 		d.Day = vi.Day()
+		return nil
+
+	case nil:
+		return nil
+
+	default:
+		return xerrors.New("invalid date format")
 	}
-	return nil
 }
 
 // String :
 func (d *Date) String() string {
-	d.init()
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
-	blr.WriteString(lpad(strconv.Itoa(d.Year), "0", 4))
-	blr.WriteRune('-')
-	blr.WriteString(lpad(strconv.Itoa(d.Month), "0", 2))
-	blr.WriteRune('-')
-	blr.WriteString(lpad(strconv.Itoa(d.Day), "0", 2))
+	d.marshal(blr)
 	return blr.String()
 }
 
 // MarshalJSON :
 func (d *Date) MarshalJSON() ([]byte, error) {
-	d.init()
 	b := bytes.NewBuffer(make([]byte, 0, 12))
 	b.WriteRune('"')
-	b.WriteString(lpad(strconv.Itoa(d.Year), "0", 4))
-	b.WriteRune('-')
-	b.WriteString(lpad(strconv.Itoa(d.Month), "0", 2))
-	b.WriteRune('-')
-	b.WriteString(lpad(strconv.Itoa(d.Day), "0", 2))
+	d.marshal(b)
 	b.WriteRune('"')
 	return b.Bytes(), nil
 }
 
 // UnmarshalJSON :
-func (d *Date) UnmarshalJSON(b []byte) error {
-	return nil
+func (d *Date) UnmarshalJSON(b []byte) (err error) {
+	if b == nil || util.UnsafeString(b) == "null" {
+		return nil
+	}
+
+	if !regexp.MustCompile(`^\"` + dateRegex + `\"$`).Match(b) {
+		return ErrDateFormat
+	}
+
+	b = b[1 : len(b)-1]
+	return d.unmarshal(util.UnsafeString(b))
+}
+
+// MarshalText :
+func (d Date) MarshalText() ([]byte, error) {
+	b := bytes.NewBuffer(make([]byte, 0, 10))
+	d.marshal(b)
+	return b.Bytes(), nil
+}
+
+// UnmarshalText :
+func (d *Date) UnmarshalText(b []byte) error {
+	if b == nil || util.UnsafeString(b) == "null" {
+		return nil
+	}
+
+	if !regexp.MustCompile(`^` + dateRegex + `$`).Match(b) {
+		return ErrDateFormat
+	}
+
+	return d.unmarshal(util.UnsafeString(b))
+}
+
+func (d *Date) marshal(w writer) {
+	year, month, day := 1, 1, 1
+	if d.Year > 0 {
+		year = d.Year
+	}
+	if d.Month > 0 {
+		month = d.Month
+	}
+	if d.Day > 0 {
+		day = d.Day
+	}
+	w.WriteString(lpad(strconv.Itoa(year), "0", 4))
+	w.WriteByte('-')
+	w.WriteString(lpad(strconv.Itoa(month), "0", 2))
+	w.WriteByte('-')
+	w.WriteString(lpad(strconv.Itoa(day), "0", 2))
+}
+
+func (d *Date) unmarshal(str string) (err error) {
+	// TODO: verify date is valid date
+	paths := strings.SplitN(str, "-", 3)
+	d.Year, err = strconv.Atoi(paths[0])
+	if err != nil {
+		return
+	}
+	d.Month, err = strconv.Atoi(paths[1])
+	if err != nil {
+		return
+	}
+	d.Day, err = strconv.Atoi(paths[2])
+	if err != nil {
+		return
+	}
+	return
 }
 
 func lpad(str, pad string, length int) string {
 	for {
-		str = pad + str
 		if len(str) >= length {
 			return str[0:length]
 		}
+		str = pad + str
 	}
 }

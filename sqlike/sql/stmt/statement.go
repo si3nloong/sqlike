@@ -3,6 +3,7 @@ package sqlstmt
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Formatter :
@@ -12,6 +13,8 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
+	start   time.Time
+	elapsed time.Duration
 	strings.Builder
 	fmt  Formatter
 	c    int
@@ -31,9 +34,10 @@ func (stmt *Statement) Args() []interface{} {
 }
 
 // AppendArg :
-func (stmt *Statement) AppendArg(arg interface{}) {
+func (stmt *Statement) AppendArg(arg interface{}) *Statement {
 	stmt.args = append(stmt.args, arg)
 	stmt.c = len(stmt.args)
+	return stmt
 }
 
 // AppendArgs :
@@ -45,6 +49,10 @@ func (stmt *Statement) AppendArgs(args []interface{}) {
 // Format :
 func (stmt Statement) Format(state fmt.State, verb rune) {
 	str := stmt.String()
+	if !state.Flag('+') {
+		state.Write([]byte(str))
+		return
+	}
 	args := stmt.Args()
 	for {
 		idx := strings.Index(str, `?`)
@@ -58,4 +66,22 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 		args = args[1:]
 	}
 	return
+}
+
+// StartTimer :
+func (stmt *Statement) StartTimer() {
+	stmt.start = time.Now()
+}
+
+// StopTimer :
+func (stmt *Statement) StopTimer() {
+	stmt.elapsed = time.Since(stmt.start)
+}
+
+// TimeElapsed :
+func (stmt *Statement) TimeElapsed() time.Duration {
+	if stmt.elapsed < 0 {
+		stmt.StopTimer()
+	}
+	return stmt.elapsed
 }

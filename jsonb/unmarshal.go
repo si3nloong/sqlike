@@ -1,7 +1,6 @@
 package jsonb
 
 import (
-	"bytes"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -11,17 +10,6 @@ import (
 // Unmarshaller :
 type Unmarshaller interface {
 	UnmarshalJSONB([]byte) error
-}
-
-var skipByteMap = map[byte]bool{
-	' ':  true,
-	'\n': true,
-	'\t': true,
-	'\r': true,
-}
-
-var sequenceMap = map[byte][]byte{
-	'{': []byte{'}', '"'},
 }
 
 // Unmarshal :
@@ -37,11 +25,45 @@ func Unmarshal(data []byte, dst interface{}) error {
 		return err
 	}
 
-	r := bytes.NewBuffer(data)
+	r := NewReader(data)
 	vv := reflext.Zero(t)
+
 	vv = reflext.Indirect(vv)
 	if err := decoder(r, vv); err != nil {
 		return err
+	}
+
+	c := r.nextToken()
+	if c != 0 {
+		return ErrDecode{
+			callback: "Unmarshal",
+		}
+	}
+	reflext.Indirect(v).Set(vv)
+	return nil
+}
+
+// UnmarshalValue :
+func UnmarshalValue(data []byte, v reflect.Value) error {
+	t := v.Type()
+	decoder, err := registry.LookupDecoder(reflext.Deref(t))
+	if err != nil {
+		return err
+	}
+
+	r := NewReader(data)
+	vv := reflext.Zero(t)
+
+	vv = reflext.Indirect(vv)
+	if err := decoder(r, vv); err != nil {
+		return err
+	}
+
+	c := r.nextToken()
+	if c != 0 {
+		return ErrDecode{
+			callback: "Unmarshal",
+		}
 	}
 	reflext.Indirect(v).Set(vv)
 	return nil

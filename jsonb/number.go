@@ -1,0 +1,49 @@
+package jsonb
+
+import (
+	"strconv"
+)
+
+// ReadNumber :
+func (r *Reader) ReadNumber() (int64, error) {
+	c := r.nextToken()
+	if c == 'n' {
+		r.unreadByte().ReadNull()
+		return 0, nil
+	}
+
+	if valueMap[c] != jsonNumber {
+		return 0, ErrDecode{}
+	}
+
+	r.unreadByte()
+	str := string(r.b[r.pos:])
+	for i := r.pos; i < r.len; i++ {
+		c = r.nextToken()
+		if c != '.' && c != 'e' && valueMap[c] != jsonNumber {
+			str = string(r.b[r.pos:i])
+			r.pos = i
+			break
+		}
+	}
+
+	return strconv.ParseInt(str, 10, 64)
+}
+
+func (r *Reader) skipNumber() {
+	c := r.nextToken()
+	if c == 'n' {
+		r.unreadByte().ReadNull()
+		return
+	}
+
+	for i := r.pos; i < r.len; i++ {
+		c = r.b[i]
+		switch c {
+		case ' ', '\n', '\r', '\t', ',', '}', ']':
+			r.pos = i
+			return
+		}
+	}
+	return
+}

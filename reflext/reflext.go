@@ -124,12 +124,12 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 				Children:   make([]*StructField, 0),
 			}
 
-			if q.pp == "" {
-				if sf.Path == "" {
-					sf.Path = sf.Name
-				}
-			} else {
-				sf.Path = q.pp + "." + sf.Name
+			if sf.Path == "" {
+				sf.Path = sf.Name
+			}
+
+			if q.pp != "" {
+				sf.Path = q.pp + "." + sf.Path
 			}
 
 			ft := Deref(f.Type)

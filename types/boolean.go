@@ -14,16 +14,30 @@ func (x *Boolean) Scan(src interface{}) error {
 	switch vi := src.(type) {
 	case []byte:
 		{
-			val := strings.ToUpper(string(vi))
-			if val == "YES" {
+			val := strings.ToLower(string(vi))
+			switch val {
+			case "yes":
 				*x = true
+			case "no":
+				*x = false
+			default:
+				b, _ := strconv.ParseBool(val)
+				*x = Boolean(b)
 			}
 		}
 
 	case string:
 		{
-			b, _ := strconv.ParseBool(vi)
-			*x = Boolean(b)
+			vi = strings.ToLower(vi)
+			switch vi {
+			case "yes":
+				*x = true
+			case "no":
+				*x = false
+			default:
+				b, _ := strconv.ParseBool(vi)
+				*x = Boolean(b)
+			}
 		}
 
 	case int64:

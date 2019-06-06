@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/si3nloong/sqlike/jsonb"
+
 	"golang.org/x/xerrors"
 )
 
@@ -251,14 +253,15 @@ func (dec *DefaultDecoders) DecodePtr(it interface{}, v reflect.Value) error {
 }
 
 // DecodeStruct :
-func (dec DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
+func (dec *DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
+	var b []byte
 	switch vi := it.(type) {
 	case string:
-		return json.Unmarshal([]byte(vi), v.Addr().Interface())
+		b = []byte(vi)
 	case []byte:
-		return json.Unmarshal(vi, v.Addr().Interface())
+		b = vi
 	}
-	return nil
+	return jsonb.UnmarshalValue(b, v)
 }
 
 // DecodeArray :
