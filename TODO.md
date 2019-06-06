@@ -26,10 +26,13 @@ TODO:
 [ok] - [Feature] Drop selected `Index`
 [x] - [Feature] Transaction support
 [ok] - [Bugs] Virtual column sequence in `ALTER TABLE`
-[x] - Support custom type (`Key`[ok],`Date`[ok],`Point`)
+[ok] - Support custom type `Key`
+[ok] - Support custom type `Date`
+[x] - Support custom type `GeoPoint`
 [x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds (Pending for API design)
 [ok] - [Feature] Custom `JSON` encoder (w/o cover `Map` datatype)
-[wip] - Custom `JSON` decoder
+[90%] - Custom `JSON` decoder
+[x] - [Bug] Unmarshal into `[]byte`
 [ok] - [Feature] Single database `Migration`
 [ok] - [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
 [ok] - Support `UnsafeMigration`

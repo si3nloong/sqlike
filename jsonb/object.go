@@ -48,7 +48,6 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 // ReadFlattenObject :
 func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	level := 1
-	// m := make(map[string][]byte)
 	c := r.nextToken()
 	if c != '{' {
 		return ErrDecode{}
@@ -97,7 +96,6 @@ keyLoop:
 			if err := cb(it, k); err != nil {
 				return err
 			}
-			// m[k] = v
 		}
 
 	valueLoop:

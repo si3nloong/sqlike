@@ -1,5 +1,9 @@
 package jsonb
 
+import (
+	"strconv"
+)
+
 // ReadNumber :
 func (r *Reader) ReadNumber() (int64, error) {
 	c := r.nextToken()
@@ -7,22 +11,23 @@ func (r *Reader) ReadNumber() (int64, error) {
 		r.unreadByte().ReadNull()
 		return 0, nil
 	}
-	// if c == '-' || (c >= '0' && c <= '9') {
-	// 	r.unreadByte()
-	// 	for i := r.pos; i < r.len; i++ {
-	// 		c = r.b[i]
-	// 		if c >= '0' && c <= '9' {
-	// 			continue
-	// 		} else if c == '.' || c == 'e' {
-	// 		} else {
-	// 			str = string(r.b[r.pos:i])
-	// 			r.pos = i
-	// 			break
-	// 		}
-	// 	}
-	// 	return str, nil
-	// }
-	return 0, nil
+
+	if valueMap[c] != jsonNumber {
+		return 0, ErrDecode{}
+	}
+
+	r.unreadByte()
+	str := string(r.b[r.pos:])
+	for i := r.pos; i < r.len; i++ {
+		c = r.nextToken()
+		if c != '.' && c != 'e' && valueMap[c] != jsonNumber {
+			str = string(r.b[r.pos:i])
+			r.pos = i
+			break
+		}
+	}
+
+	return strconv.ParseInt(str, 10, 64)
 }
 
 func (r *Reader) skipNumber() {

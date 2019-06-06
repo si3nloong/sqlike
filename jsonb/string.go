@@ -11,7 +11,7 @@ func (r *Reader) ReadString() (string, error) {
 	if c != '"' {
 		return "", ErrDecode{}
 	}
-	// r.pos++
+
 	for i := r.pos; i < r.len; i++ {
 		c = r.b[i]
 		if c == '"' {
@@ -21,10 +21,10 @@ func (r *Reader) ReadString() (string, error) {
 		} else if c == '\\' {
 			break
 		} else if c < ' ' {
-			panic("unexpected character")
+			// panic("unexpected character")
 		}
 	}
-	return "", nil
+	return "", ErrDecode{}
 }
 
 // skipString :

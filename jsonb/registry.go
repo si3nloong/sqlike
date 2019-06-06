@@ -11,12 +11,6 @@ type ValueDecoder func(*Reader, reflect.Value) error
 // ValueEncoder :
 type ValueEncoder func(*Writer, reflect.Value) error
 
-// // ValueCodec :
-// type ValueCodec interface {
-// 	DecodeValue(ValueReader, reflect.Value) error
-// 	EncodeValue(ValueWriter, reflect.Value) error
-// }
-
 // Registry :
 type Registry struct {
 	mutex        sync.Mutex

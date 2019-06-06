@@ -8,8 +8,6 @@ const (
 	jsonObject
 	jsonArray
 	jsonWhitespace
-	jsonArrayStart
-	jsonArrayEnd
 	jsonLiteral
 	jsonString
 	jsonComma

@@ -43,8 +43,8 @@ type Key struct {
 func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column {
 	return component.Column{
 		Name:      sf.Path,
-		DataType:  `VARCHAR`,
-		Type:      `VARCHAR(512)`,
+		DataType:  "VARCHAR",
+		Type:      "VARCHAR(512)",
 		Nullable:  false,
 		CharSet:   &latin1,
 		Collation: &latin1Bin,

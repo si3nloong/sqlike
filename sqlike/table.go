@@ -37,7 +37,7 @@ type Table struct {
 	logger   Logger
 }
 
-// Rename :
+// Rename : rename the current table name to new table name
 func (tb *Table) Rename(name string) error {
 	_, err := sqldriver.Execute(
 		tb.driver,
@@ -47,7 +47,7 @@ func (tb *Table) Rename(name string) error {
 	return err
 }
 
-// Exists :
+// Exists : this will return true when the table exists in the database
 func (tb *Table) Exists() bool {
 	var count int
 	stmt := tb.dialect.HasTable(tb.dbName, tb.name)
@@ -134,7 +134,7 @@ func (tb *Table) ListIndexes() ([]Index, error) {
 	return idxs, nil
 }
 
-// MustMigrate :
+// MustMigrate : this will ensure the migrate is complete, otherwise it will panic
 func (tb Table) MustMigrate(entity interface{}) {
 	err := tb.Migrate(entity)
 	if err != nil {
@@ -142,13 +142,13 @@ func (tb Table) MustMigrate(entity interface{}) {
 	}
 }
 
-// Migrate :
+// Migrate : migrate will create a new table follows by the definition of struct tag, alter when the table already exists
 func (tb *Table) Migrate(entity interface{}) error {
 	return tb.migrateOne(entity, false)
 }
 
 // UnsafeMigrate : unsafe migration will delete non-exist
-// index and columns, beware to use this
+// index and columns, beware when you use this
 func (tb Table) UnsafeMigrate(entity interface{}) error {
 	return tb.migrateOne(entity, true)
 }
@@ -163,7 +163,7 @@ func (tb Table) Truncate() (err error) {
 	return
 }
 
-// DropIfExits :
+// DropIfExits : will drop the table only if it exists
 func (tb Table) DropIfExits() (err error) {
 	_, err = sqldriver.Execute(
 		tb.driver,
@@ -173,7 +173,7 @@ func (tb Table) DropIfExits() (err error) {
 	return
 }
 
-// Drop :
+// Drop : drop the table, but it might throw error when the table is not exists
 func (tb Table) Drop() (err error) {
 	_, err = sqldriver.Execute(
 		tb.driver,
@@ -184,20 +184,20 @@ func (tb Table) Drop() (err error) {
 }
 
 // ReplaceInto :
-func (tb Table) ReplaceInto(filter interface{}) error {
-	// stmt, args, err := tb.dialect.ReplaceInto(tb.name, filter)
-	// if err != nil {
-	// 	return err
-	// }
-	// _, err = sqldriver.Execute(
-	// 	tb.driver,
-	// 	stmt,
-	// 	args,
-	// 	tb.logger,
-	// )
-	// return err
-	return nil
-}
+// func (tb Table) ReplaceInto(filter interface{}) error {
+// 	// stmt, args, err := tb.dialect.ReplaceInto(tb.name, filter)
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
+// 	// _, err = sqldriver.Execute(
+// 	// 	tb.driver,
+// 	// 	stmt,
+// 	// 	args,
+// 	// 	tb.logger,
+// 	// )
+// 	// return err
+// 	return nil
+// }
 
 // Indexes :
 func (tb *Table) Indexes() *IndexView {

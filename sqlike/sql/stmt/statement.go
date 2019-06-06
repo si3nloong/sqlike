@@ -13,8 +13,8 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
-	start    time.Time
-	duration time.Duration
+	start   time.Time
+	elapsed time.Duration
 	strings.Builder
 	fmt  Formatter
 	c    int
@@ -34,9 +34,10 @@ func (stmt *Statement) Args() []interface{} {
 }
 
 // AppendArg :
-func (stmt *Statement) AppendArg(arg interface{}) {
+func (stmt *Statement) AppendArg(arg interface{}) *Statement {
 	stmt.args = append(stmt.args, arg)
 	stmt.c = len(stmt.args)
+	return stmt
 }
 
 // AppendArgs :
@@ -74,10 +75,13 @@ func (stmt *Statement) StartTimer() {
 
 // StopTimer :
 func (stmt *Statement) StopTimer() {
-	stmt.duration = time.Since(stmt.start)
+	stmt.elapsed = time.Since(stmt.start)
 }
 
 // TimeElapsed :
 func (stmt *Statement) TimeElapsed() time.Duration {
-	return stmt.duration
+	if stmt.elapsed < 0 {
+		stmt.StopTimer()
+	}
+	return stmt.elapsed
 }
