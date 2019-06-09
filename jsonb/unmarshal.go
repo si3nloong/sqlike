@@ -27,7 +27,6 @@ func Unmarshal(data []byte, dst interface{}) error {
 
 	r := NewReader(data)
 	vv := reflext.Zero(t)
-
 	vv = reflext.Indirect(vv)
 	if err := decoder(r, vv); err != nil {
 		return err

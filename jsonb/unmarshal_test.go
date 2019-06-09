@@ -43,6 +43,7 @@ func TestUnmarshal(t *testing.T) {
 	var (
 		strval  = `hello world !!!!!!`
 		byteval = []byte(`LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWFFJQkFBS0JnUUMrYUlTemtOdXFiZmdxWW9IYW1iS0dyaEF6UnV0dWYydWFzOUJIeXllUFJUdUk5ZVdwCnJHY3lRZlhPVlh2OGJBZVMxK2tIS0MvK1ZDTk9EbGZBTFlQWVVZa053eHVvRnFMbU1SR3E1MzMwSEVLSUpySDcKSUU5aUs0QUVZL3h5WjBTUEp5ZkNnQ2ZaeGtJTmpacWFoSS8rVWxrL1BmdWwyaEQ0ZTNUZVpGTm5HUUlEQVFBQgpBb0dBSHpOYlExMWlVV3dSdFVoTkJQZ1lnKzh6NG1NbG93YW9LRUo4eDdibmRaZWZxTks2WG5KTXVyU0tSZFJHCks5ZTc2ZmtOUzBudmkxcFlLcXM0LzltMWQ4Mk9XdmtDeXZvR3pmRXdyNGJ6bVBBZjdkczVkWElhb29wbWV4WWwKbFpsSmtuMDhWNFJmOWc4RFEyNFRsb3BpZ3RrSzY5UktRSzFHaHVyV1A4UjVxeTBDUVFEZ3dxcGVKZFF5RUdaYgpQUElJN2ZsSUVDRjlQNnNVc1ovNW40cEhNNmg2N0dOdGU1cEx4bDkzOXYybVhaN09aSUZHQU1rUmNDL1ZIK3c4Cm5oaytaNE9yQWtFQTJOK01oOWRpN1YreldaNUNIWXBWTHM5Qi9xOVl3YjFCNjN0UnZUbG9QSnFqTHc1NDUzZUUKbEs0ZnJSaVhXbEhLaUpLYlBOTU1ZUVkyTVRrcEQ2dDhTd0pCQUlkU2JRVFdQZFlPcmJITkZlUnVjeUlDSkVlbQpwN2lENFUrSDBOZGhzTlNoc3BOZVVkM0JpQVZRZmhOR1ZyRHBMalFaa1BXZzJBdTNkcUpnaGM1ZXdKVUNRQUVFCkV4RnoxZGZNMGZkQ2dZYkg1aHhCQmtzZUlTbFBMS2JndmdKSDZaQVhIVnFVRThicHpXb3c0cDhaOVdPTDdJbjEKUGRyc0ZpdkNMckRPVnIzbkRMOENRUURKSENwSEVFNTc0ckpzblJNYk5rR0F5dmZheW9MeElhVUF5WXovaGxrMgpzQ0wzb3BsdDNYM0tjYzV1MkRISVFsZTdGM1M4Wmp4REZMSVRrbnJ4QS9UVgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==`)
+		nullval = []byte(`null`)
 	)
 
 	var (
@@ -60,6 +61,10 @@ func TestUnmarshal(t *testing.T) {
 		err = Unmarshal([]byte(`"`+strval+`"`), &str)
 		require.NoError(it, err)
 		require.Equal(it, strval, str)
+
+		err = Unmarshal(nullval, &str)
+		require.NoError(it, err)
+		require.Equal(it, "", str)
 	})
 
 	t.Run("Unmarshal Boolean", func(it *testing.T) {
@@ -67,6 +72,10 @@ func TestUnmarshal(t *testing.T) {
 		Unmarshal([]byte(`true`), &flag)
 		require.Equal(it, true, flag)
 		Unmarshal([]byte(`false`), &flag)
+		require.Equal(it, false, flag)
+
+		err = Unmarshal(nullval, &flag)
+		require.NoError(it, err)
 		require.Equal(it, false, flag)
 	})
 
@@ -83,26 +92,36 @@ func TestUnmarshal(t *testing.T) {
 		require.Equal(it, int8(10), i8)
 		Unmarshal([]byte(`-10`), &i8)
 		require.Equal(it, int8(-10), i8)
+		Unmarshal(nullval, &i8)
+		require.Equal(it, int8(0), i8)
 
 		Unmarshal([]byte(`128`), &i16)
 		require.Equal(it, int16(128), i16)
 		Unmarshal([]byte(`-128`), &i16)
 		require.Equal(it, int16(-128), i16)
+		Unmarshal(nullval, &i16)
+		require.Equal(it, int16(0), i16)
 
 		Unmarshal([]byte(`1354677198`), &i32)
 		require.Equal(it, int32(1354677198), i32)
 		Unmarshal([]byte(`-1354677198`), &i32)
 		require.Equal(it, int32(-1354677198), i32)
+		Unmarshal(nullval, &i32)
+		require.Equal(it, int32(0), i32)
 
 		Unmarshal([]byte(`7354673213123121983`), &i64)
 		require.Equal(it, int64(7354673213123121983), i64)
 		Unmarshal([]byte(`-7354673213123121983`), &i64)
 		require.Equal(it, int64(-7354673213123121983), i64)
+		Unmarshal(nullval, &i64)
+		require.Equal(it, int64(0), i64)
 
 		Unmarshal([]byte(`1354677198`), &i)
 		require.Equal(it, int(1354677198), i)
 		Unmarshal([]byte(`-1354677198`), &i)
 		require.Equal(it, int(-1354677198), i)
+		Unmarshal(nullval, &i)
+		require.Equal(it, int(0), i)
 	})
 
 	t.Run("Unmarshal Unsigned Integer", func(it *testing.T) {
@@ -118,26 +137,36 @@ func TestUnmarshal(t *testing.T) {
 		require.Equal(it, uint8(10), ui8)
 		err = Unmarshal([]byte(`-10`), &ui8)
 		require.Error(t, err)
+		Unmarshal(nullval, &ui8)
+		require.Equal(it, uint8(0), ui8)
 
 		Unmarshal([]byte(`128`), &ui16)
 		require.Equal(it, uint16(128), ui16)
 		err = Unmarshal([]byte(`-128`), &ui16)
 		require.Error(t, err)
+		Unmarshal(nullval, &ui16)
+		require.Equal(it, uint16(0), ui16)
 
 		Unmarshal([]byte(`1354677198`), &ui32)
 		require.Equal(it, uint32(1354677198), ui32)
 		err = Unmarshal([]byte(`-1354677198`), &ui32)
 		require.Error(t, err)
+		Unmarshal(nullval, &ui32)
+		require.Equal(it, uint32(0), ui32)
 
 		Unmarshal([]byte(`7354673213123121983`), &ui64)
 		require.Equal(it, uint64(7354673213123121983), ui64)
 		err = Unmarshal([]byte(`-7354673213123121983`), &ui64)
 		require.Error(t, err)
+		Unmarshal(nullval, &ui64)
+		require.Equal(it, uint64(0), ui64)
 
 		Unmarshal([]byte(`1354677198`), &ui)
 		require.Equal(it, uint(1354677198), ui)
 		err = Unmarshal([]byte(`-1354677198`), &ui)
 		require.Error(t, err)
+		Unmarshal(nullval, &ui)
+		require.Equal(it, uint(0), ui)
 	})
 
 	t.Run("Unmarshal Float", func(it *testing.T) {
@@ -151,6 +180,10 @@ func TestUnmarshal(t *testing.T) {
 		var bytea []byte
 		Unmarshal(b, &bytea)
 		require.Equal(t, pk, bytea)
+
+		bytea = []byte(nil)
+		Unmarshal(nullval, &bytea)
+		require.Equal(t, []byte(nil), bytea)
 	})
 
 	t.Run("Unmarshal Time", func(it *testing.T) {
@@ -159,15 +192,27 @@ func TestUnmarshal(t *testing.T) {
 		var dt time.Time
 		Unmarshal(b, &dt)
 		require.Equal(t, date, dt.Format(time.RFC3339))
+		Unmarshal(nullval, &dt)
+		require.Equal(t, `0001-01-01T00:00:00Z`, dt.Format(time.RFC3339))
 	})
 
 	t.Run("Unmarshal Array", func(it *testing.T) {
 		var (
+			nullArr   []string
+			initArr   []int
 			strArr    []string
 			intArr    []int
 			twoDArr   [][]int
 			threeDArr [][][]string
 		)
+
+		nullArr = []string{"xyz"}
+		Unmarshal(nullval, &nullArr)
+		require.Equal(t, []string(nil), nullArr)
+
+		Unmarshal([]byte("[]"), &initArr)
+		require.NotNil(t, initArr)
+		require.Equal(t, make([]int, 0), initArr)
 
 		Unmarshal([]byte(`["a", "b", "c"]`), &strArr)
 		require.ElementsMatch(t, []string{"a", "b", "c"}, strArr)
@@ -176,7 +221,7 @@ func TestUnmarshal(t *testing.T) {
 		require.ElementsMatch(t, []int{2, 8, 32, 64, 128}, intArr)
 
 		Unmarshal([]byte(`[
-			[2, 8, 32, 64, 128], 
+			[2, 8, 32, 64, 128],
 			[1, 3, 5, 7],
 			[0, 100, 1000, 10000, 100000]
 		]`), &twoDArr)
@@ -191,7 +236,7 @@ func TestUnmarshal(t *testing.T) {
 				["a", "b", "c", "d", "e"],
 				["甲", "乙", "丙", "丁"],
 				["😄", "😅", "😆", "😉", "😊"]
-			], 
+			],
 			[
 				["a", "b", "c", "d", "e"],
 				["f", "g", "h", "i", "j"]

@@ -96,6 +96,18 @@ func (r *Reader) GetBytes() (b []byte) {
 	return
 }
 
+// IsNull :
+func (r *Reader) IsNull() bool {
+	offset := r.pos + 4
+	if offset > r.len {
+		return false
+	}
+	if string(r.b[r.pos:offset]) == null {
+		return true
+	}
+	return false
+}
+
 func (r *Reader) skipArray() {
 	level := 1
 	c := r.nextToken()
@@ -126,7 +138,9 @@ func (r *Reader) skipArray() {
 // ReadBytes :
 func (r *Reader) ReadBytes() ([]byte, error) {
 	i := r.pos
-	r.skip()
+	if err := r.skip(); err != nil {
+		return nil, err
+	}
 	return r.b[i:r.pos], nil
 }
 
@@ -141,7 +155,10 @@ func (r *Reader) ReadValue() (interface{}, error) {
 	case jsonBoolean:
 		return r.ReadBoolean()
 	case jsonNull:
-		return r.ReadNull(), nil
+		if err := r.ReadNull(); err != nil {
+			return nil, err
+		}
+		return nil, nil
 	case jsonArray:
 		var v []interface{}
 		if err := r.ReadArray(func(it *Reader) error {
@@ -186,23 +203,27 @@ func (r *Reader) unreadByte() *Reader {
 // ReadBoolean :
 func (r *Reader) ReadBoolean() (bool, error) {
 	c := r.nextToken()
+	r.unreadByte()
+	if c == 'n' {
+		r.skipBytes([]byte{'n', 'u', 'l', 'l'})
+		return false, nil
+	}
 	if c == 't' {
-		r.skipBytes([]byte{'r', 'u', 'e'})
+		r.skipBytes([]byte{'t', 'r', 'u', 'e'})
 		return true, nil
 	}
 	if c == 'f' {
-		r.skipBytes([]byte{'a', 'l', 's', 'e'})
+		r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'})
 		return false, nil
 	}
 	return false, xerrors.New("invalid boolean value")
 }
 
 // ReadNull :
-func (r *Reader) ReadNull() (b bool) {
+func (r *Reader) ReadNull() error {
 	c := r.nextToken()
 	if c == 'n' {
-		r.skipBytes([]byte{'u', 'l', 'l'})
-		return true
+		return r.skipBytes([]byte{'u', 'l', 'l'})
 	}
-	return
+	return nil
 }

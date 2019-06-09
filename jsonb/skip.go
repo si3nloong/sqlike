@@ -1,25 +1,10 @@
 package jsonb
 
 import (
-	"bytes"
-	"log"
-
 	"golang.org/x/xerrors"
 )
 
-func (r *Reader) skipBytes(b []byte) error {
-	offset := r.pos + len(b)
-	if offset > r.len {
-		return xerrors.New("unexpected json length")
-	}
-	if !bytes.Equal(b, r.b[r.pos:offset]) {
-		return xerrors.New("unexpected json length")
-	}
-	r.pos = offset
-	return nil
-}
-
-func (r *Reader) skip() {
+func (r *Reader) skip() (err error) {
 	typ := r.peekType()
 	switch typ {
 	case jsonString:
@@ -29,25 +14,51 @@ func (r *Reader) skip() {
 	case jsonBoolean:
 		r.skipBoolean()
 	case jsonNull:
-		r.skipBytes([]byte{'u', 'l', 'l'})
+		err = r.skipBytes([]byte{'n', 'u', 'l', 'l'})
 	case jsonArray:
 		r.skipArray()
 	case jsonObject:
 		r.skipObject()
 	}
+	return err
+}
+
+func (r *Reader) skipBytes(b []byte) error {
+	offset := r.pos + len(b)
+	if offset > r.len {
+		return xerrors.New("unexpected json length")
+	}
+	// if !bytes.Equal(b, r.b[r.pos:offset]) {
+	// 	return xerrors.New("unexpected json length")
+	// }
+	r.pos = offset
+	return nil
+}
+
+func (r *Reader) skipNull() error {
+	c := r.nextToken()
+	r.unreadByte()
+	if c == 'n' {
+		return r.skipBytes([]byte{'n', 'u', 'l', 'l'})
+	}
+	return ErrDecode{}
 }
 
 func (r *Reader) skipBoolean() {
 	c := r.nextToken()
+	r.unreadByte()
+	if c == 'n' {
+		r.skipBytes([]byte{'n', 'u', 'l', 'l'})
+		return
+	}
 	if c == 't' {
-		r.skipBytes([]byte{'r', 'u', 'e'})
+		r.skipBytes([]byte{'t', 'r', 'u', 'e'})
 		return
 	}
 	if c == 'f' {
-		r.skipBytes([]byte{'a', 'l', 's', 'e'})
+		r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'})
 		return
 	}
-	log.Println("Boolean :", string(c))
 	return
 }
 

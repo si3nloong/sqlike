@@ -49,9 +49,12 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	b, err := base64.StdEncoding.DecodeString(x)
-	if err != nil {
-		return err
+	var b []byte
+	if x != "" {
+		b, err = base64.StdEncoding.DecodeString(x)
+		if err != nil {
+			return err
+		}
 	}
 	v.SetBytes(b)
 	return nil
@@ -59,11 +62,15 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 
 // DecodeTime :
 func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
-	str, err := r.ReadString()
+	b, err := r.ReadBytes()
 	if err != nil {
 		return err
 	}
-	x, err := time.Parse(time.RFC3339Nano, str)
+	if string(b) == null {
+		v.Set(reflect.ValueOf(time.Time{}))
+		return nil
+	}
+	x, err := time.Parse(`"`+time.RFC3339Nano+`"`, string(b))
 	if err != nil {
 		return err
 	}
@@ -143,6 +150,10 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 // DecodeStruct :
 func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	mapper := core.DefaultMapper
+	// if err := r.ReadNull(); err == nil {
+	// 	v.Set(reflect.Zero(v.Type()))
+	// 	return nil
+	// }
 	return r.ReadFlattenObject(func(it *Reader, k string) error {
 		vv, exists := mapper.LookUpFieldByName(v, k)
 		if !exists {
@@ -158,22 +169,23 @@ func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 
 // DecodeArray :
 func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
-	t := v.Type().Elem()
-	if err := r.ReadArray(func(it *Reader) error {
+	t := v.Type()
+	if r.IsNull() {
+		v.Set(reflect.Zero(t))
+		return r.skipNull()
+	}
+
+	v.Set(reflect.MakeSlice(t, 0, 0))
+	t = t.Elem()
+	return r.ReadArray(func(it *Reader) error {
 		v.Set(reflect.Append(v, reflext.Zero(t)))
 		vv := v.Index(v.Len() - 1)
 		decoder, err := dec.registry.LookupDecoder(t)
 		if err != nil {
 			return err
 		}
-		if err := decoder(it, vv); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-	return nil
+		return decoder(it, vv)
+	})
 }
 
 // DecodeInterface :

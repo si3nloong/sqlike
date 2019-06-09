@@ -2,6 +2,7 @@ package jsonb
 
 var (
 	valueMap = make([]jsonType, 256)
+	null     = "null"
 )
 
 func init() {
