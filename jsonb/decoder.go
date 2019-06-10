@@ -150,10 +150,11 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 // DecodeStruct :
 func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	mapper := core.DefaultMapper
-	// if err := r.ReadNull(); err == nil {
-	// 	v.Set(reflect.Zero(v.Type()))
-	// 	return nil
-	// }
+	if r.IsNull() {
+		v.Set(reflect.Zero(v.Type()))
+		return r.skipNull()
+	}
+
 	return r.ReadFlattenObject(func(it *Reader, k string) error {
 		vv, exists := mapper.LookUpFieldByName(v, k)
 		if !exists {

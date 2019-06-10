@@ -10,8 +10,9 @@ import (
 )
 
 type User struct {
-	Name string
-	Age  int
+	Name  string
+	Email string
+	Age   int
 }
 
 type testStruct struct {
@@ -310,6 +311,20 @@ func TestUnmarshal(t *testing.T) {
 			User{Name: "Junkai"},
 		}, o.Users)
 		require.ElementsMatch(t, []string{"a", "b", "c", "d"}, o.StrSlice)
+
+		var o User
+		o.Name = "testing"
+		o.Email = "sianloong90@gmail.com"
+		o.Age = 100
+		Unmarshal(nullval, &o)
+		require.Equal(t, User{}, o)
+
+		var u User
+		u.Name = "testing"
+		Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), &u)
+		require.Equal(t, "lol", u.Name)
+		require.Equal(t, "test@hotmail.com", u.Email)
+		require.Equal(t, int(18), u.Age)
 	})
 
 }
