@@ -4,13 +4,13 @@ import (
 	"reflect"
 )
 
-// ErrDecode :
-type ErrDecode struct {
+// ErrInvalidJSON :
+type ErrInvalidJSON struct {
 	callback string
 	message  string
 }
 
-func (e ErrDecode) Error() string {
+func (e ErrInvalidJSON) Error() string {
 	return "unexpected char"
 }
 

@@ -48,7 +48,7 @@ func (enc Encoder) SetEncoders(rg *Registry) {
 // EncodeByte :
 func (enc Encoder) EncodeByte(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write([]byte(`null`))
+		w.WriteString(null)
 		return nil
 	}
 	w.WriteRune('"')
@@ -60,7 +60,7 @@ func (enc Encoder) EncodeByte(w *Writer, v reflect.Value) error {
 // EncodeJSONRaw :
 func (enc Encoder) EncodeJSONRaw(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write([]byte(`null`))
+		w.WriteString(null)
 		return nil
 	}
 	buf := new(bytes.Buffer)
@@ -126,7 +126,7 @@ func (enc Encoder) EncodeFloat(w *Writer, v reflect.Value) error {
 // EncodePtr :
 func (enc *Encoder) EncodePtr(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
-		w.Write([]byte(`null`))
+		w.WriteString(null)
 		return nil
 	}
 	v = v.Elem()
@@ -164,7 +164,7 @@ func (enc *Encoder) EncodeStruct(w *Writer, v reflect.Value) error {
 // EncodeArray :
 func (enc *Encoder) EncodeArray(w *Writer, v reflect.Value) error {
 	if v.Kind() == reflect.Slice && v.IsNil() {
-		w.Write([]byte(`null`))
+		w.WriteString(null)
 		return nil
 	}
 	w.WriteRune('[')
@@ -190,7 +190,16 @@ func (enc *Encoder) EncodeArray(w *Writer, v reflect.Value) error {
 // EncodeInterface :
 func (enc *Encoder) EncodeInterface(w *Writer, v reflect.Value) error {
 	if v.Interface() == nil {
-		w.Write([]byte(`null`))
+		w.WriteString(null)
+		return nil
+	}
+	return nil
+}
+
+// EncodeMap :
+func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
+	if v.Interface() == nil {
+		w.WriteString(null)
 		return nil
 	}
 	return nil

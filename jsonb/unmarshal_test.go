@@ -181,7 +181,25 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("Unmarshal Float", func(it *testing.T) {
+		var (
+			f32 float32
+			f64 float64
+		)
 
+		Unmarshal([]byte(`10`), &f32)
+		require.Equal(it, float32(10), f32)
+
+		Unmarshal([]byte(`10.32`), &f32)
+		require.Equal(it, float32(10.32), f32)
+
+		Unmarshal([]byte(`-882.3261239`), &f32)
+		require.Equal(it, float32(-882.3261239), f32)
+
+		Unmarshal([]byte(`-128.32128392`), &f64)
+		require.Equal(it, float64(-128.32128392), f64)
+
+		Unmarshal([]byte(`10.32128392`), &f64)
+		require.Equal(it, float64(10.32128392), f64)
 	})
 
 	t.Run("Unmarshal Byte", func(it *testing.T) {
@@ -198,11 +216,13 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("Unmarshal Time", func(it *testing.T) {
+		var dt time.Time
 		date := `2018-01-02T15:04:33Z`
 		b = []byte(`"` + date + `"`)
-		var dt time.Time
+
 		Unmarshal(b, &dt)
 		require.Equal(t, date, dt.Format(time.RFC3339))
+
 		Unmarshal(nullval, &dt)
 		require.Equal(t, `0001-01-01T00:00:00Z`, dt.Format(time.RFC3339))
 	})

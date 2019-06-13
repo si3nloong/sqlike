@@ -9,13 +9,13 @@ func (r *Reader) ReadEscapeString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", ErrDecode{}
+			return "", ErrInvalidJSON{}
 		}
 		return "", nil
 	}
 
 	if c != '"' {
-		return "", ErrDecode{}
+		return "", ErrInvalidJSON{}
 	}
 
 	blr := util.AcquireString()
@@ -65,7 +65,7 @@ func (r *Reader) ReadEscapeString() (string, error) {
 	}
 
 	if c != '"' {
-		return "", ErrDecode{}
+		return "", ErrInvalidJSON{}
 	}
 
 	return blr.String(), nil
@@ -76,13 +76,13 @@ func (r *Reader) ReadString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", ErrDecode{}
+			return "", ErrInvalidJSON{}
 		}
 		return "", nil
 	}
 
 	if c != '"' {
-		return "", ErrDecode{}
+		return "", ErrInvalidJSON{}
 	}
 
 	for i := r.pos; i < r.len; i++ {
@@ -98,7 +98,7 @@ func (r *Reader) ReadString() (string, error) {
 		}
 	}
 
-	return "", ErrDecode{}
+	return "", ErrInvalidJSON{}
 }
 
 // skipString :
@@ -109,7 +109,7 @@ func (r *Reader) skipString() error {
 	}
 
 	if c != '"' {
-		return ErrDecode{}
+		return ErrInvalidJSON{}
 	}
 
 	for i := r.pos; i < r.len; {
@@ -147,7 +147,7 @@ func (r *Reader) skipString() error {
 	}
 
 	if c != '"' {
-		return ErrDecode{}
+		return ErrInvalidJSON{}
 	}
 
 	return nil

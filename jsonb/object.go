@@ -9,7 +9,7 @@ import (
 func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 	c := r.nextToken()
 	if c != '{' {
-		return ErrDecode{}
+		return ErrInvalidJSON{}
 	}
 
 	var (
@@ -23,7 +23,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 			break
 		}
 		if c != '"' {
-			return ErrDecode{}
+			return ErrInvalidJSON{}
 		}
 		k, err = r.unreadByte().ReadString()
 		if err != nil {
@@ -31,7 +31,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		}
 		c = r.nextToken()
 		if c != ':' {
-			return ErrDecode{}
+			return ErrInvalidJSON{}
 		}
 		// TODO: process the value
 		if err := cb(r, k); err != nil {
@@ -50,7 +50,7 @@ func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	level := 1
 	c := r.nextToken()
 	if c != '{' {
-		return ErrDecode{}
+		return ErrInvalidJSON{}
 	}
 
 	var (
@@ -68,7 +68,7 @@ keyLoop:
 		}
 
 		if c != '"' {
-			return ErrDecode{}
+			return ErrInvalidJSON{}
 		}
 		key, err  = r.unreadByte().ReadString()
 		if err != nil {
@@ -77,7 +77,7 @@ keyLoop:
 		paths = append(paths, key)
 		c = r.nextToken()
 		if c != ':' {
-			return ErrDecode{}
+			return ErrInvalidJSON{}
 		}
 
 		c = r.nextToken()
@@ -122,7 +122,7 @@ keyLoop:
 	}
 
 	if c != '}' {
-		return ErrDecode{}
+		return ErrInvalidJSON{}
 	}
 	return nil
 }

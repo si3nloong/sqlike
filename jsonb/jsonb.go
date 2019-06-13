@@ -1,8 +1,9 @@
 package jsonb
 
+const null = "null"
+
 var (
 	valueMap = make([]jsonType, 256)
-	null     = "null"
 )
 
 func init() {

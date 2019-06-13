@@ -8,7 +8,10 @@ func (r *Reader) ReadArray(cb func(r *Reader) error) error {
 	}
 
 	if c != '[' {
-		return ErrDecode{}
+		return ErrInvalidJSON{
+			callback: "ReadArray",
+			message:  "expect start with [ for array",
+		}
 	}
 
 	c = r.nextToken()
@@ -36,7 +39,10 @@ func (r *Reader) ReadArray(cb func(r *Reader) error) error {
 	}
 
 	if c != ']' {
-		return ErrDecode{}
+		return ErrInvalidJSON{
+			callback: "ReadArray",
+			message:  "expect end with ] for array",
+		}
 	}
 	return nil
 }

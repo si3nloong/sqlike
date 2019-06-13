@@ -34,7 +34,7 @@ func Unmarshal(data []byte, dst interface{}) error {
 
 	c := r.nextToken()
 	if c != 0 {
-		return ErrDecode{
+		return ErrInvalidJSON{
 			callback: "Unmarshal",
 		}
 	}
@@ -60,7 +60,7 @@ func UnmarshalValue(data []byte, v reflect.Value) error {
 
 	c := r.nextToken()
 	if c != 0 {
-		return ErrDecode{
+		return ErrInvalidJSON{
 			callback: "Unmarshal",
 		}
 	}

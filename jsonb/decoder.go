@@ -22,6 +22,7 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
 	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
+	rg.SetTypeDecoder(reflect.TypeOf(json.Number("")), dec.DecodeJSONNumber)
 	rg.SetKindDecoder(reflect.String, dec.DecodeString)
 	rg.SetKindDecoder(reflect.Bool, dec.DecodeBool)
 	rg.SetKindDecoder(reflect.Int, dec.DecodeInt)
@@ -84,6 +85,16 @@ func (dec Decoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
 	return nil
 }
 
+// DecodeJSONNumber :
+func (dec Decoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
+	x, err := r.ReadNumber()
+	if err != nil {
+		return err
+	}
+	v.SetString(x)
+	return nil
+}
+
 // DecodeString :
 func (dec Decoder) DecodeString(r *Reader, v reflect.Value) error {
 	x, err := r.ReadEscapeString()
@@ -106,7 +117,11 @@ func (dec Decoder) DecodeBool(r *Reader, v reflect.Value) error {
 
 // DecodeInt :
 func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
-	x, err := r.ReadNumber()
+	num, err := r.ReadNumber()
+	if err != nil {
+		return err
+	}
+	x, err := strconv.ParseInt(num, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -119,24 +134,28 @@ func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
 
 // DecodeUint :
 func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
-	x, err := r.ReadNumber()
+	num, err := r.ReadNumber()
 	if err != nil {
 		return err
 	}
-	if x < 0 {
-		return xerrors.New("number is not unsigned")
+	x, err := strconv.ParseUint(num, 10, 64)
+	if err != nil {
+		return err
 	}
-	num := uint64(x)
-	if v.OverflowUint(num) {
+	if v.OverflowUint(x) {
 		return xerrors.New("unsigned integer overflow")
 	}
-	v.SetUint(num)
+	v.SetUint(x)
 	return nil
 }
 
 // DecodeFloat :
 func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
-	x, err := strconv.ParseFloat(string(r.Bytes()), 64)
+	num, err := r.ReadNumber()
+	if err != nil {
+		return err
+	}
+	x, err := strconv.ParseFloat(num, 64)
 	if err != nil {
 		return err
 	}

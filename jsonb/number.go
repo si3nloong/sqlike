@@ -1,19 +1,15 @@
 package jsonb
 
-import (
-	"strconv"
-)
-
 // ReadNumber :
-func (r *Reader) ReadNumber() (int64, error) {
+func (r *Reader) ReadNumber() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		r.unreadByte().ReadNull()
-		return 0, nil
+		return "0", nil
 	}
 
 	if valueMap[c] != jsonNumber {
-		return 0, ErrDecode{}
+		return "", ErrInvalidJSON{}
 	}
 
 	r.unreadByte()
@@ -27,7 +23,7 @@ func (r *Reader) ReadNumber() (int64, error) {
 		}
 	}
 
-	return strconv.ParseInt(str, 10, 64)
+	return str, nil
 }
 
 func (r *Reader) skipNumber() {
