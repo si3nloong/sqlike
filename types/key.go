@@ -45,11 +45,18 @@ func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column 
 		Name:      sf.Path,
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(512)",
-		Nullable:  false,
+		Nullable:  reflext.IsNullable(sf.Zero.Type()),
 		CharSet:   &latin1,
 		Collation: &latin1Bin,
 	}
 }
+
+// ID :
+// func (k *Key) ID() (string) {
+// 	if k.Name == "" {
+// 		return strconv.FormatInt(k.ID, 10)
+// 	}
+// }
 
 // Value :
 func (k *Key) Value() (driver.Value, error) {
