@@ -1,10 +1,83 @@
 package jsonb
 
+import (
+	"github.com/si3nloong/sqlike/util"
+)
+
+// ReadEscapeString :
+func (r *Reader) ReadEscapeString() (string, error) {
+	c := r.nextToken()
+	if c == 'n' {
+		if err := r.unreadByte().ReadNull(); err != nil {
+			return "", ErrDecode{}
+		}
+		return "", nil
+	}
+
+	if c != '"' {
+		return "", ErrDecode{}
+	}
+
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+
+	for i := r.pos; i < r.len; {
+		c = r.b[i]
+		if c == '"' {
+			r.pos = i + 1
+			break
+		}
+
+		if c == '\\' {
+			switch r.b[i+1] {
+			case '"':
+				blr.WriteRune('"')
+				i += 2
+			case '\\':
+				blr.WriteRune('\\')
+				i += 2
+			case 'b':
+				blr.WriteRune('\b')
+				i += 2
+			case 'f':
+				blr.WriteRune('\f')
+				i += 2
+			case 'n':
+				blr.WriteRune('\n')
+				i += 2
+			case 'r':
+				blr.WriteRune('\r')
+				i += 2
+			case 't':
+				blr.WriteRune('\t')
+				i += 2
+			case '/':
+				blr.WriteRune('/')
+				i += 2
+			case 'u':
+				i += 2
+			}
+			continue
+		}
+
+		blr.WriteByte(c)
+		i++
+	}
+
+	if c != '"' {
+		return "", ErrDecode{}
+	}
+
+	return blr.String(), nil
+}
+
 // ReadString :
 func (r *Reader) ReadString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
-		r.unreadByte().ReadNull()
+		if err := r.unreadByte().ReadNull(); err != nil {
+			return "", ErrDecode{}
+		}
 		return "", nil
 	}
 
@@ -24,32 +97,60 @@ func (r *Reader) ReadString() (string, error) {
 			// panic("unexpected character")
 		}
 	}
+
 	return "", ErrDecode{}
 }
 
 // skipString :
-func (r *Reader) skipString() {
+func (r *Reader) skipString() error {
 	c := r.nextToken()
-	if c != '"' {
-		panic("it should be string")
-	}
 	if c == 'n' {
-		r.unreadByte()
-		r.ReadNull()
+		return r.unreadByte().ReadNull()
 	}
-	// r.pos++
-	for i := r.pos; i < r.len; i++ {
+
+	if c != '"' {
+		return ErrDecode{}
+	}
+
+	for i := r.pos; i < r.len; {
 		c = r.b[i]
+
 		if c == '"' {
 			r.pos = i + 1
-			return
-		} else if c == '\\' {
 			break
-		} else if c < ' ' {
-			panic("unexpected character")
 		}
+
+		if c == '\\' {
+			switch r.b[i+1] {
+			case '"':
+				i += 2
+			case '\\':
+				i += 2
+			case 'b':
+				i += 2
+			case 'f':
+				i += 2
+			case 'n':
+				i += 2
+			case 'r':
+				i += 2
+			case 't':
+				i += 2
+			case '/':
+				i += 2
+			case 'u':
+				i += 2
+			}
+			continue
+		}
+		i++
 	}
-	return
+
+	if c != '"' {
+		return ErrDecode{}
+	}
+
+	return nil
 }
 
 var escapeCharMap = map[byte][]byte{

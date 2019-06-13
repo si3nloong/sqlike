@@ -149,7 +149,7 @@ func (r *Reader) ReadValue() (interface{}, error) {
 	typ := r.peekType()
 	switch typ {
 	case jsonString:
-		return r.ReadString()
+		return r.ReadEscapeString()
 	case jsonNumber:
 		return r.ReadNumber()
 	case jsonBoolean:

@@ -23,7 +23,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 			break
 		}
 		if c != '"' {
-			panic("1")
+			return ErrDecode{}
 		}
 		k, err = r.unreadByte().ReadString()
 		if err != nil {
@@ -31,7 +31,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		}
 		c = r.nextToken()
 		if c != ':' {
-			panic("2")
+			return ErrDecode{}
 		}
 		// TODO: process the value
 		if err := cb(r, k); err != nil {

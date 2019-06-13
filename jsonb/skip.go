@@ -8,7 +8,7 @@ func (r *Reader) skip() (err error) {
 	typ := r.peekType()
 	switch typ {
 	case jsonString:
-		r.skipString()
+		err = r.skipString()
 	case jsonNumber:
 		r.skipNumber()
 	case jsonBoolean:

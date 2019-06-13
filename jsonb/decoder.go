@@ -86,7 +86,7 @@ func (dec Decoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
 
 // DecodeString :
 func (dec Decoder) DecodeString(r *Reader, v reflect.Value) error {
-	x, err := r.ReadString()
+	x, err := r.ReadEscapeString()
 	if err != nil {
 		return err
 	}
