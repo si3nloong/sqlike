@@ -67,3 +67,11 @@ func UnmarshalValue(data []byte, v reflect.Value) error {
 	reflext.Indirect(v).Set(vv)
 	return nil
 }
+
+// unmarshallerDecoder
+func unmarshallerDecoder() ValueDecoder {
+	return func(r *Reader, v reflect.Value) error {
+		it := v.Interface()
+		return it.(Unmarshaller).UnmarshalJSONB(r.Bytes())
+	}
+}

@@ -73,6 +73,12 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 		enc  ValueEncoder
 		isOk bool
 	)
+
+	it := reflect.TypeOf((*Marshaller)(nil)).Elem()
+	if t.Implements(it) {
+		return marshallerEncoder(), nil
+	}
+
 	enc, isOk = r.typeEncoders[t]
 	if isOk {
 		return enc, nil
@@ -91,6 +97,12 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		dec  ValueDecoder
 		isOk bool
 	)
+
+	it := reflect.TypeOf((*Unmarshaller)(nil)).Elem()
+	if t.Implements(it) {
+		return unmarshallerDecoder(), nil
+	}
+
 	dec, isOk = r.typeDecoders[t]
 	if isOk {
 		return dec, nil

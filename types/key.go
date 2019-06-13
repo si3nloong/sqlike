@@ -84,17 +84,18 @@ func (k *Key) Incomplete() bool {
 
 func (k *Key) unmarshal(str string) error {
 	var (
-		idx   int
-		path  string
-		paths []string
-		value string
-		err   error
+		idx    int
+		path   string
+		length int
+		paths  []string
+		value  string
+		err    error
 	)
 	for {
 		idx = strings.LastIndex(str, "/")
 		path = str
 		if idx > -1 {
-			path = str[idx:]
+			path = str[idx+1:]
 		}
 		paths = strings.Split(path, ",")
 		if len(paths) != 2 {
@@ -102,11 +103,12 @@ func (k *Key) unmarshal(str string) error {
 		}
 		k.Kind = paths[0]
 		value = paths[1]
-		if len(value) < 1 {
+		length = len(value)
+		if length < 1 {
 			return xerrors.New("invalid key string")
 		}
-		if value[0] == '\'' {
-			value = strings.Trim(value, "'")
+		if length > 2 && value[0] == '\'' && value[length-1] == '\'' {
+			value = value[1 : length-1]
 			value, _ = url.PathUnescape(value)
 			k.Name = value
 		} else {
@@ -117,7 +119,7 @@ func (k *Key) unmarshal(str string) error {
 		}
 
 		if idx > -1 {
-			str = str[:idx-1]
+			str = str[:idx]
 			if len(str) < 1 {
 				return nil
 			}
@@ -192,11 +194,53 @@ func (k *Key) marshal(w writer, escape bool) {
 	}
 }
 
+// MarshalJSON :
+func (k *Key) MarshalJSON() ([]byte, error) {
+	return []byte(k.Encode()), nil
+}
+
+// MarshalBinary :
+func (k Key) MarshalBinary() ([]byte, error) {
+	return []byte(k.Encode()), nil
+}
+
 // MarshalText :
 func (k *Key) MarshalText() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	k.marshal(buf, true)
 	return buf.Bytes(), nil
+}
+
+// MarshalJSONB :
+func (k Key) MarshalJSONB() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	k.marshal(buf, true)
+	return buf.Bytes(), nil
+}
+
+// UnmarshalJSON :
+func (k *Key) UnmarshalJSON(b []byte) error {
+	key, err := DecodeKey(string(b))
+	if err != nil {
+		return err
+	}
+	k = key
+	return nil
+}
+
+// UnmarshalBinary :
+func (k *Key) UnmarshalBinary(b []byte) error {
+	key, err := DecodeKey(string(b))
+	if err != nil {
+		return err
+	}
+	k = key
+	return nil
+}
+
+// UnmarshalJSONB :
+func (k *Key) UnmarshalJSONB(b []byte) error {
+	return k.unmarshal(string(b))
 }
 
 type gobKey struct {

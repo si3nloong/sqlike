@@ -1,6 +1,8 @@
 package jsonb
 
 import (
+	"reflect"
+
 	"github.com/si3nloong/sqlike/reflext"
 )
 
@@ -33,4 +35,16 @@ func Marshal(src interface{}) (b []byte, err error) {
 
 	b = w.Bytes()
 	return
+}
+
+// marshallerEncoder
+func marshallerEncoder() ValueEncoder {
+	return func(w *Writer, v reflect.Value) error {
+		b, err := v.Interface().(Marshaller).MarshalJSONB()
+		if err != nil {
+			return err
+		}
+		w.Write(b)
+		return nil
+	}
 }
