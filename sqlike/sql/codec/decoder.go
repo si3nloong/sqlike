@@ -171,6 +171,8 @@ func (dec DefaultDecoders) DecodeInt(it interface{}, v reflect.Value) error {
 		}
 	case int64:
 		x = vi
+	case uint64:
+		x = int64(vi)
 	case nil:
 	}
 	if v.OverflowInt(x) {
@@ -197,6 +199,8 @@ func (dec DefaultDecoders) DecodeUint(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case int64:
+		x = uint64(vi)
 	case uint64:
 		x = vi
 	case nil:
@@ -260,17 +264,20 @@ func (dec *DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error 
 		b = []byte(vi)
 	case []byte:
 		b = vi
+	case nil:
 	}
 	return jsonb.UnmarshalValue(b, v)
 }
 
 // DecodeArray :
 func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
-	// switch vi := it.(type) {
-	// case string:
-	// 	return json.Unmarshal([]byte(vi), v.Addr().Interface())
-	// case []byte:
-	// 	return json.Unmarshal(vi, v.Addr().Interface())
-	// }
-	return nil
+	var b []byte
+	switch vi := it.(type) {
+	case string:
+		b = []byte(vi)
+	case []byte:
+		b = vi
+	case nil:
+	}
+	return jsonb.UnmarshalValue(b, v)
 }
