@@ -34,8 +34,8 @@ var (
 type Key struct {
 	Namespace string
 	Kind      string
-	ID        int64
-	Name      string
+	IntID     int64
+	NameID    string
 	Parent    *Key
 }
 
@@ -52,11 +52,12 @@ func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column 
 }
 
 // ID :
-// func (k *Key) ID() (string) {
-// 	if k.Name == "" {
-// 		return strconv.FormatInt(k.ID, 10)
-// 	}
-// }
+func (k *Key) ID() string {
+	if k.NameID != "" {
+		return k.NameID
+	}
+	return strconv.FormatInt(k.IntID, 10)
+}
 
 // Value :
 func (k *Key) Value() (driver.Value, error) {
@@ -86,7 +87,7 @@ func (k *Key) Scan(it interface{}) error {
 
 // Incomplete :
 func (k *Key) Incomplete() bool {
-	return k.Name == "" && k.ID == 0
+	return k.NameID == "" && k.IntID == 0
 }
 
 func (k *Key) unmarshal(str string) error {
@@ -117,9 +118,9 @@ func (k *Key) unmarshal(str string) error {
 		if length > 2 && value[0] == '\'' && value[length-1] == '\'' {
 			value = value[1 : length-1]
 			value, _ = url.PathUnescape(value)
-			k.Name = value
+			k.NameID = value
 		} else {
-			k.ID, err = strconv.ParseInt(value, 10, 64)
+			k.IntID, err = strconv.ParseInt(value, 10, 64)
 			if err != nil {
 				return err
 			}
@@ -151,7 +152,7 @@ func (k *Key) valid() bool {
 		if k.Kind == "" {
 			return false
 		}
-		if k.Name != "" && k.ID != 0 {
+		if k.NameID != "" && k.IntID != 0 {
 			return false
 		}
 		if k.Parent != nil {
@@ -173,7 +174,7 @@ func (k *Key) Equal(o *Key) bool {
 		if k == nil || o == nil {
 			return k == o // if either is nil, both must be nil
 		}
-		if k.Namespace != o.Namespace || k.Name != o.Name || k.ID != o.ID || k.Kind != o.Kind {
+		if k.Namespace != o.Namespace || k.NameID != o.NameID || k.IntID != o.IntID || k.Kind != o.Kind {
 			return false
 		}
 		if k.Parent == nil && o.Parent == nil {
@@ -192,12 +193,12 @@ func (k *Key) marshal(w writer, escape bool) {
 	}
 	w.WriteString(k.Kind)
 	w.WriteByte(',')
-	if k.Name != "" {
+	if k.NameID != "" {
 		w.WriteByte('\'')
-		w.WriteString(url.PathEscape(k.Name))
+		w.WriteString(url.PathEscape(k.NameID))
 		w.WriteByte('\'')
 	} else {
-		w.WriteString(strconv.FormatInt(k.ID, 10))
+		w.WriteString(strconv.FormatInt(k.IntID, 10))
 	}
 }
 
@@ -265,8 +266,8 @@ func keyToGobKey(k *Key) *gobKey {
 	}
 	return &gobKey{
 		Kind:      k.Kind,
-		StringID:  k.Name,
-		IntID:     k.ID,
+		StringID:  k.NameID,
+		IntID:     k.IntID,
 		Parent:    keyToGobKey(k.Parent),
 		Namespace: k.Namespace,
 	}
@@ -278,8 +279,8 @@ func gobKeyToKey(gk *gobKey) *Key {
 	}
 	return &Key{
 		Kind:      gk.Kind,
-		Name:      gk.StringID,
-		ID:        gk.IntID,
+		IntID:     gk.IntID,
+		NameID:    gk.StringID,
 		Parent:    gobKeyToKey(gk.Parent),
 		Namespace: gk.Namespace,
 	}
@@ -353,7 +354,7 @@ func (k *Key) GobDecode(buf []byte) error {
 func NameKey(kind, name string, parent *Key) *Key {
 	return &Key{
 		Kind:   kind,
-		Name:   name,
+		NameID: name,
 		Parent: parent,
 	}
 }
@@ -365,7 +366,7 @@ func NameKey(kind, name string, parent *Key) *Key {
 func IDKey(kind string, id int64, parent *Key) *Key {
 	return &Key{
 		Kind:   kind,
-		ID:     id,
+		IntID:  id,
 		Parent: parent,
 	}
 }
@@ -383,7 +384,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 
 	return &Key{
 		Kind:   kind,
-		ID:     id,
+		IntID:  id,
 		Parent: parent,
 	}
 }

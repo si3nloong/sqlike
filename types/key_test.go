@@ -15,6 +15,8 @@ func TestKey(t *testing.T) {
 		)
 
 		pk := IDKey("Parent", 1288888, nil)
+		require.Equal(it, "1288888", pk.ID())
+
 		b, err = pk.MarshalJSONB()
 		require.NoError(it, err)
 		require.Equal(it, "Parent,1288888", string(b))
