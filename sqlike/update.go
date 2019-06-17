@@ -7,6 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"golang.org/x/xerrors"
@@ -14,7 +15,15 @@ import (
 
 // ModifyOne :
 func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
+	return modifyOne(tb.name, tb.dialect, tb.driver, tb.logger, update, opts)
+}
+
+func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflect.ValueOf(update)
+	if !v.IsValid() {
+		return xerrors.New("invalid input")
+	}
+
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return ErrUnaddressableEntity
@@ -32,7 +41,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 
 	_, fields := skipGeneratedColumns(cdc.NameFields)
 	x := new(actions.UpdateActions)
-	x.Table = tb.name
+	x.Table = tbName
 
 	for _, sf := range fields {
 		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
@@ -44,15 +53,15 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	}
 
 	x.Limit(1)
-	stmt, err := tb.dialect.Update(x)
+	stmt, err := dialect.Update(x)
 	if err != nil {
 		return err
 	}
 
 	result, err := sqldriver.Execute(
-		tb.driver,
+		driver,
 		stmt,
-		tb.logger,
+		logger,
 	)
 	if err != nil {
 		return err

@@ -8,12 +8,24 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
+	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"golang.org/x/xerrors"
 )
 
 // InsertOne :
 func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+	return insertOne(
+		tb.name,
+		tb.driver,
+		tb.dialect,
+		tb.logger,
+		src,
+		opts,
+	)
+}
+
+func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
@@ -48,11 +60,11 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 		opt = opts[0]
 	}
 
-	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)
+	stmt := dialect.InsertInto(tbName, columns, values, opt)
 	return sqldriver.Execute(
-		tb.driver,
+		driver,
 		stmt,
-		tb.logger,
+		logger,
 	)
 }
 
@@ -119,5 +131,5 @@ func encodeValue(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.S
 	if err != nil {
 		return nil, err
 	}
-	return encoder(fv)
+	return encoder(sf, fv)
 }

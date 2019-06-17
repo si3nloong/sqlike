@@ -74,9 +74,10 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 		enc  ValueEncoder
 		isOk bool
 	)
-	v := reflext.Zero(t)
-	if _, isOk := v.Interface().(driver.Valuer); isOk {
-		return func(v reflect.Value) (interface{}, error) {
+
+	it := reflect.TypeOf((*driver.Valuer)(nil)).Elem()
+	if t.Implements(it) {
+		return func(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 			return v.Interface().(driver.Valuer).Value()
 		}, nil
 	}

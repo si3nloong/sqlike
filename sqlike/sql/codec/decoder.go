@@ -58,7 +58,7 @@ func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 			return err
 		}
 	case []byte:
-		x, err = base64.StdEncoding.DecodeString(b2s(vi))
+		x, err = base64.StdEncoding.DecodeString(string(vi))
 		if err != nil {
 			return err
 		}

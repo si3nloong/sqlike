@@ -115,7 +115,7 @@ func (p *mySQLParser) ParseClause(stmt *sqlstmt.Statement, it interface{}) error
 			if err != nil {
 				return err
 			}
-			it, err := encoder(v)
+			it, err := encoder(nil, v)
 			if err != nil {
 				return err
 			}

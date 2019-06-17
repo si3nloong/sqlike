@@ -5,7 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"time"
+
+	"github.com/si3nloong/sqlike/reflext"
 
 	"github.com/si3nloong/sqlike/jsonb"
 	"golang.org/x/xerrors"
@@ -44,20 +47,17 @@ func (enc DefaultEncoders) SetEncoders(rg *Registry) {
 }
 
 // EncodeByte :
-func (enc DefaultEncoders) EncodeByte(v reflect.Value) (interface{}, error) {
-	buf := new(bytes.Buffer)
-	b64 := base64.NewEncoder(base64.StdEncoding, buf)
-	defer b64.Close()
-	b64.Write(v.Bytes())
-	b := buf.Bytes()
+func (enc DefaultEncoders) EncodeByte(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	b := v.Bytes()
 	if b == nil {
 		return make([]byte, 0, 0), nil
 	}
-	return b, nil
+	x := base64.StdEncoding.EncodeToString(b)
+	return []byte(x), nil
 }
 
 // EncodeJSONRaw :
-func (enc DefaultEncoders) EncodeJSONRaw(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeJSONRaw(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	if v.IsNil() {
 		return []byte(`null`), nil
 	}
@@ -72,7 +72,7 @@ func (enc DefaultEncoders) EncodeJSONRaw(v reflect.Value) (interface{}, error) {
 }
 
 // EncodeTime :
-func (enc DefaultEncoders) EncodeTime(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	x, isOk := v.Interface().(time.Time)
 	if !isOk {
 		return nil, xerrors.New("invalid data type")
@@ -82,32 +82,40 @@ func (enc DefaultEncoders) EncodeTime(v reflect.Value) (interface{}, error) {
 }
 
 // EncodeString :
-func (enc DefaultEncoders) EncodeString(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeString(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
+	if sf != nil {
+		if val, isOk := sf.Tag.LookUp("enum"); isOk {
+			enums := strings.Split(val, "|")
+			if len(enums) > 0 {
+				return enums[0], nil
+			}
+		}
+	}
 	return v.String(), nil
 }
 
 // EncodeBool :
-func (enc DefaultEncoders) EncodeBool(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeBool(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return v.Bool(), nil
 }
 
 // EncodeInt :
-func (enc DefaultEncoders) EncodeInt(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeInt(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return v.Int(), nil
 }
 
 // EncodeUint :
-func (enc DefaultEncoders) EncodeUint(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeUint(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return v.Uint(), nil
 }
 
 // EncodeFloat :
-func (enc DefaultEncoders) EncodeFloat(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeFloat(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return v.Float(), nil
 }
 
 // EncodePtr :
-func (enc *DefaultEncoders) EncodePtr(v reflect.Value) (interface{}, error) {
+func (enc *DefaultEncoders) EncodePtr(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
 	if v.IsNil() {
 		return nil, nil
 	}
@@ -116,20 +124,20 @@ func (enc *DefaultEncoders) EncodePtr(v reflect.Value) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return encoder(v)
+	return encoder(sf, v)
 }
 
 // EncodeStruct :
-func (enc DefaultEncoders) EncodeStruct(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeStruct(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return jsonb.Marshal(v)
 }
 
 // EncodeArray :
-func (enc DefaultEncoders) EncodeArray(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeArray(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return jsonb.Marshal(v)
 }
 
 // EncodeMap :
-func (enc DefaultEncoders) EncodeMap(v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeMap(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	return jsonb.Marshal(v)
 }

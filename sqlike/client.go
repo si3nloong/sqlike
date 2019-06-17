@@ -81,7 +81,11 @@ func (c *Client) BeginTransaction() (*Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Transaction{tx: tx}, nil
+	return &Transaction{
+		driver:  tx,
+		dialect: c.dialect,
+		logger:  c.logger,
+	}, nil
 }
 
 func (c *Client) getVersion() (version semver.Version) {

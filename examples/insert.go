@@ -29,6 +29,7 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
+
 	}
 
 	// Single upsert

@@ -2,13 +2,15 @@ package codec
 
 import (
 	"reflect"
+
+	"github.com/si3nloong/sqlike/reflext"
 )
 
 // ValueDecoder :
 type ValueDecoder func(interface{}, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(reflect.Value) (interface{}, error)
+type ValueEncoder func(*reflext.StructField, reflect.Value) (interface{}, error)
 
 // ValueCodec :
 type ValueCodec interface {

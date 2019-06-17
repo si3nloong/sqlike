@@ -1,22 +1,38 @@
 package sqlike
 
-import "database/sql"
+import (
+	"database/sql"
+
+	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
+)
 
 // Session :
-type Session interface {
+type Session struct {
+	table string
+	tx    *Transaction
 }
 
 // Transaction :
 type Transaction struct {
-	tx *sql.Tx
+	driver  *sql.Tx
+	dialect sqlcore.Dialect
+	logger  Logger
+}
+
+// Table :
+func (tx *Transaction) Table(name string) *Session {
+	return &Session{
+		table: name,
+		tx:    tx,
+	}
 }
 
 // RollbackTransaction :
 func (tx *Transaction) RollbackTransaction() error {
-	return tx.tx.Rollback()
+	return tx.driver.Rollback()
 }
 
 // CommitTransaction :
 func (tx *Transaction) CommitTransaction() error {
-	return tx.tx.Commit()
+	return tx.driver.Commit()
 }

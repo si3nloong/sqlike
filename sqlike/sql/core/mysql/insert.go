@@ -30,7 +30,7 @@ func (ms MySQL) InsertInto(table string, columns []string, values [][]interface{
 		if i > 0 {
 			stmt.WriteRune(',')
 		}
-		stmt.WriteString(`(` + binds[:] + `)`)
+		stmt.WriteString("(" + binds[:] + ")")
 		stmt.AppendArgs(values[0])
 		values = values[1:]
 	}

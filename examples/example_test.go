@@ -23,6 +23,14 @@ func TestExamples(t *testing.T) {
 	log.Println(dbs)
 	db := client.Database("sqlike")
 
+	// tx, err := client.BeginTransaction()
+
+	// tx.Table("User").ModifyOne(nil)
+	// // tx.Table("").InsertMany()
+
+	// tx.CommitTransaction()
+	// tx.RollbackTransaction()
+
 	MigrateExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)

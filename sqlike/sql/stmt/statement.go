@@ -55,7 +55,7 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 	}
 	args := stmt.Args()
 	for {
-		idx := strings.Index(str, `?`)
+		idx := strings.Index(str, "?")
 		if idx < 0 {
 			state.Write([]byte(str))
 			break
