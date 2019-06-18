@@ -28,3 +28,21 @@ func (db *Database) Table(name string) *Table {
 		logger:   db.logger,
 	}
 }
+
+// BeginTransaction :
+func (db *Database) BeginTransaction() (*Transaction, error) {
+	tx, err := db.client.Begin()
+	if err != nil {
+		return nil, err
+	}
+	return &Transaction{
+		driver:  tx,
+		dialect: db.dialect,
+		logger:  db.logger,
+	}, nil
+}
+
+// RunInTransaction :
+// func (db *Database) RunInTransaction() error {
+// 	return nil
+// }

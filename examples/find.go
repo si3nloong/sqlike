@@ -45,6 +45,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.SmallUint = 188
 		ns.MediumUint = 121373123
 		ns.BigUint = 1298738901289381212
+		ns.Float32 = 10.6789
+		ns.Float64 = 19833.6789
 		ns.Timestamp = ts
 
 		_, err = table.InsertOne(&ns)
@@ -72,6 +74,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, uint16(188), ns.SmallUint)
 		require.Equal(t, uint32(121373123), ns.MediumUint)
 		require.Equal(t, uint64(1298738901289381212), ns.BigUint)
+		require.Equal(t, float32(10.6789), ns.Float32)
+		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("SUCCESS"), ns.Enum)
 	}
 

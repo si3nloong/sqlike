@@ -5,8 +5,8 @@ Functionality
 TODO:
 
 1. Logger
-2. JSON encoder & decoder
 
+[x] - [Bug] `WhereIn` and `WhereNotIn`
 [ok] - Connect to `MySQL` server
 [ok] - Connect to `MySQL` server with `options.Connect`
 [x|gth] - Support extra options like charset and collation in connection
@@ -24,14 +24,14 @@ TODO:
 [ok] - [Feature] Create multiple `Index`
 [ok] - [Feature] List all `Index`
 [ok] - [Feature] Drop selected `Index`
-[x] - [Feature] Transaction support
-[ok] - [Bugs] Virtual column sequence in `ALTER TABLE`
+[70%] - [Feature] Transaction support
+[ok] - [Bug] Virtual column sequence in `ALTER TABLE`
 [ok] - Support custom type `Key`
 [ok] - Support custom type `Date`
 [x] - Support custom type `GeoPoint`
 [x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds (Pending for API design)
 [ok] - [Feature] Custom `JSON` encoder (w/o cover `Map` datatype)
-[90%] - Custom `JSON` decoder
+[ok] - Custom `JSON` decoder
 [ok] - [Bug] Unmarshal into `[]byte`
 [ok] - [Feature] Single database `Migration`
 [ok] - [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
@@ -49,7 +49,7 @@ TODO:
 [ok] - Delete multiple record
 [ok] - Delete single record
 [x] - Replace into (Pending for API design)
-[20%] - Write testcases
+[28%] - Write testcases
 
 [xxx] - Support `Postgres`
 

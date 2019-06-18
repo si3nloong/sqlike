@@ -36,16 +36,16 @@ func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result
 
 // Query :
 func Query(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (rows *sql.Rows, err error) {
-	if logger != nil {
-		stmt.StartTimer()
-		defer func() {
-			log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
-			// log.Println(stmt.String())
-			stmt.StopTimer()
-			log.Println(fmt.Sprintf("%+v", stmt))
-			log.Println("Time Elapsed :", stmt.TimeElapsed())
-		}()
-	}
+	// if logger != nil {
+	stmt.StartTimer()
+	defer func() {
+		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
+		// log.Println(stmt.String())
+		stmt.StopTimer()
+		log.Println(fmt.Sprintf("%+v", stmt))
+		log.Println("Time Elapsed :", stmt.TimeElapsed())
+	}()
+	// }
 	rows, err = driver.Query(stmt.String(), stmt.Args()...)
 	return
 }

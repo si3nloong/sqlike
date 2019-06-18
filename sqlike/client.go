@@ -75,19 +75,6 @@ func (c *Client) Database(name string) *Database {
 	}
 }
 
-// BeginTransaction :
-func (c *Client) BeginTransaction() (*Transaction, error) {
-	tx, err := c.Begin()
-	if err != nil {
-		return nil, err
-	}
-	return &Transaction{
-		driver:  tx,
-		dialect: c.dialect,
-		logger:  c.logger,
-	}, nil
-}
-
 func (c *Client) getVersion() (version semver.Version) {
 	stmt := c.dialect.GetVersion()
 	var ver string

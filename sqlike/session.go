@@ -22,6 +22,9 @@ func (sess *Session) FindOne(act actions.SelectOneStatement, opts ...options.Fin
 		&x.FindActions,
 	)
 	csr.close = true
+	if csr.err != nil {
+		return csr
+	}
 	if !csr.Next() {
 		csr.err = sql.ErrNoRows
 	}

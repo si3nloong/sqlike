@@ -38,7 +38,6 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...options.FindOne
 	if csr.err != nil {
 		return csr
 	}
-
 	if !csr.Next() {
 		csr.err = sql.ErrNoRows
 	}

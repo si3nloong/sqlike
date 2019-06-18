@@ -18,22 +18,19 @@ func TestExamples(t *testing.T) {
 			SetPassword(`abcd1234`).
 			SetDatabase(`sqlike`))
 	require.NoError(t, err)
+
 	dbs, err := client.ListDatabases()
 	require.NoError(t, err)
 	log.Println(dbs)
+
 	db := client.Database("sqlike")
-
-	// tx, err := client.BeginTransaction()
-
-	// tx.Table("User").ModifyOne(nil)
-	// // tx.Table("").InsertMany()
-
-	// tx.CommitTransaction()
-	// tx.RollbackTransaction()
 
 	MigrateExamples(t, db)
 	InsertExamples(t, db)
+	TransactionExamples(t, db)
 	FindExamples(t, db)
+	PaginationExamples(t, db)
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
+
 }
