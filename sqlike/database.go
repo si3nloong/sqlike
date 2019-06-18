@@ -42,7 +42,17 @@ func (db *Database) BeginTransaction() (*Transaction, error) {
 	}, nil
 }
 
+type txCallback func(ctx SessionContext) error
+
 // RunInTransaction :
-// func (db *Database) RunInTransaction() error {
-// 	return nil
-// }
+func (db *Database) RunInTransaction(cb txCallback) error {
+	tx, err := db.BeginTransaction()
+	if err != nil {
+		return err
+	}
+	defer tx.RollbackTransaction()
+	if err := cb(tx); err != nil {
+		return err
+	}
+	return tx.CommitTransaction()
+}

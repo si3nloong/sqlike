@@ -24,7 +24,8 @@ TODO:
 [ok] - [Feature] Create multiple `Index`
 [ok] - [Feature] List all `Index`
 [ok] - [Feature] Drop selected `Index`
-[70%] - [Feature] Transaction support
+[ok] - [Feature] `Transaction` support
+[x] - [Feature] Add timeout for `Transaction`
 [ok] - [Bug] Virtual column sequence in `ALTER TABLE`
 [ok] - Support custom type `Key`
 [ok] - Support custom type `Date`

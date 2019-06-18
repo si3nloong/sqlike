@@ -78,3 +78,35 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		require.Error(t, err)
 	}
 }
+
+// InsertErrorExamples :
+func InsertErrorExamples(t *testing.T, db *sqlike.Database) {
+	var (
+		ns  normalStruct
+		err error
+	)
+
+	{
+		_, err = db.Table("NormalStruct").InsertOne(nil)
+		require.Error(t, err)
+
+		var uninitialized *normalStruct
+		_, err = db.Table("NormalStruct").InsertOne(uninitialized)
+		require.Error(t, err)
+
+		ns = normalStruct{}
+		_, err = db.Table("NormalStruct").InsertOne(ns)
+		require.Error(t, err)
+
+		ns = normalStruct{}
+		_, err = db.Table("NormalStruct").InsertOne(&ns)
+		require.Error(t, err)
+	}
+
+	{
+		_, err = db.Table("NormalStruct").InsertMany(
+			[]normalStruct{},
+		)
+		require.Error(t, err)
+	}
+}

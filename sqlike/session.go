@@ -7,6 +7,17 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
+// SessionContext :
+type SessionContext interface {
+	Table(name string) *Session
+}
+
+// Session :
+type Session struct {
+	table string
+	tx    *Transaction
+}
+
 // FindOne :
 func (sess *Session) FindOne(act actions.SelectOneStatement, opts ...options.FindOneOptions) SingleResult {
 	x := new(actions.FindOneActions)
@@ -87,14 +98,38 @@ func (sess *Session) ModifyOne(update interface{}, opts ...*options.ModifyOneOpt
 }
 
 // UpdateOne :
-// func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
-// 	return 0, nil
-// }
+func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
+	x := new(actions.UpdateOneActions)
+	if act != nil {
+		*x = *(act.(*actions.UpdateOneActions))
+	}
+	if x.Table == "" {
+		x.Table = sess.table
+	}
+	return update(
+		sess.tx.driver,
+		sess.tx.dialect,
+		sess.tx.logger,
+		&x.UpdateActions,
+	)
+}
 
-// // UpdateMany :
-// func (sess *Session) UpdateMany(act actions.UpdateStatement) (int64, error) {
-// 	return 0, nil
-// }
+// UpdateMany :
+func (sess *Session) UpdateMany(act actions.UpdateStatement) (int64, error) {
+	x := new(actions.UpdateActions)
+	if act != nil {
+		*x = *(act.(*actions.UpdateActions))
+	}
+	if x.Table == "" {
+		x.Table = sess.table
+	}
+	return update(
+		sess.tx.driver,
+		sess.tx.dialect,
+		sess.tx.logger,
+		x,
+	)
+}
 
 // DestroyOne :
 func (sess *Session) DestroyOne(delete interface{}) error {

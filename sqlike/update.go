@@ -15,7 +15,14 @@ import (
 
 // ModifyOne :
 func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
-	return modifyOne(tb.name, tb.dialect, tb.driver, tb.logger, update, opts)
+	return modifyOne(
+		tb.name,
+		tb.dialect,
+		tb.driver,
+		tb.logger,
+		update,
+		opts,
+	)
 }
 
 func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger Logger, update interface{}, opts []*options.ModifyOneOptions) error {
@@ -81,25 +88,13 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 	if x.Table == "" {
 		x.Table = tb.name
 	}
-
-	if len(x.Values) < 1 {
-		return 0, xerrors.New("sqlike: no value to update")
-	}
-
 	x.Limit(1)
-	stmt, err := tb.dialect.Update(&x.UpdateActions)
-	if err != nil {
-		return 0, err
-	}
-	result, err := sqldriver.Execute(
+	return update(
 		tb.driver,
-		stmt,
+		tb.dialect,
 		tb.logger,
+		&x.UpdateActions,
 	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected()
 }
 
 // UpdateMany :
@@ -111,20 +106,28 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement) (int64, error) {
 	if x.Table == "" {
 		x.Table = tb.name
 	}
+	return update(
+		tb.driver,
+		tb.dialect,
+		tb.logger,
+		x,
+	)
+}
 
-	if len(x.Values) < 1 {
+func update(driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, act *actions.UpdateActions) (int64, error) {
+	if len(act.Values) < 1 {
 		return 0, xerrors.New("sqlike: no value to update")
 	}
 
-	stmt, err := tb.dialect.Update(x)
+	stmt, err := dialect.Update(act)
 	if err != nil {
 		return 0, err
 	}
 
 	result, err := sqldriver.Execute(
-		tb.driver,
+		driver,
 		stmt,
-		tb.logger,
+		logger,
 	)
 	if err != nil {
 		return 0, err

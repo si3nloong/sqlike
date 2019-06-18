@@ -2,8 +2,7 @@ package examples
 
 import (
 	"database/sql"
-	"log"
-	"strings"
+	"errors"
 	"testing"
 	"time"
 
@@ -25,8 +24,6 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		err      error
 		tx       *sqlike.Transaction
 	)
-
-	log.Println("BeginTransaction ", strings.Repeat("=", 20))
 
 	// Commit Transaction
 	{
@@ -55,7 +52,6 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		ns.ID = uid
 		ns.Timestamp = time.Now()
 		tx, err = db.BeginTransaction()
-		log.Println("Error :", err)
 		require.NoError(t, err)
 		result, err = tx.Table("NormalStruct").InsertOne(&ns)
 		require.NoError(t, err)
@@ -73,5 +69,30 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			),
 		).Decode(&ns)
 		require.Equal(t, sql.ErrNoRows, err)
+	}
+
+	// RunInTransaction
+	{
+		err = db.RunInTransaction(func(ctx sqlike.SessionContext) error {
+			uid, _ = uuid.FromString(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
+
+			ns = normalStruct{}
+			ns.ID = uid
+			ns.Timestamp = time.Now()
+			result, err := ctx.Table("NormalStruct").InsertOne(&ns)
+			if err != nil {
+				return err
+			}
+
+			affected, err := result.RowsAffected()
+			if err != nil {
+				return err
+			}
+			if affected < 1 {
+				return errors.New("no result affected")
+			}
+			return nil
+		})
+		require.NoError(t, err)
 	}
 }

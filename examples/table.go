@@ -42,3 +42,34 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 }
+
+// MigrateErrorExamples :
+func MigrateErrorExamples(t *testing.T, db *sqlike.Database) {
+	var (
+		err error
+	)
+
+	{
+		// empty table shouldn't able to migrate
+		err = db.Table("").Migrate(new(normalStruct))
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate(int(1))
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate(struct{}{})
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate(nil)
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate(bool(false))
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate(map[string]interface{}{})
+		require.Error(t, err)
+
+		err = db.Table("NormalStruct").Migrate([]interface{}{})
+		require.Error(t, err)
+	}
+}

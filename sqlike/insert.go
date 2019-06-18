@@ -27,6 +27,9 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 
 func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
+	if !v.IsValid() {
+		return nil, xerrors.New("invalid input <nil>")
+	}
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return nil, ErrUnaddressableEntity

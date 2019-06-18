@@ -33,4 +33,7 @@ func TestExamples(t *testing.T) {
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
 
+	MigrateErrorExamples(t, db)
+	InsertErrorExamples(t, db)
+
 }

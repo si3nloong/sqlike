@@ -6,12 +6,6 @@ import (
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 )
 
-// Session :
-type Session struct {
-	table string
-	tx    *Transaction
-}
-
 // Transaction :
 type Transaction struct {
 	driver  *sql.Tx
