@@ -11,7 +11,6 @@ import (
 	sqltype "github.com/si3nloong/sqlike/sqlike/sql/types"
 	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/util"
-	"golang.org/x/xerrors"
 )
 
 // mySQLSchema :
@@ -86,10 +85,15 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 
+	// charset, isOk := sf.Tag.LookUp("charset")
+	// if isOk {
+
+	// }
+
 	if enum, isOk := sf.Tag.LookUp("enum"); isOk {
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
-			panic(xerrors.New("invalid enum formats"))
+			panic("invalid enum formats")
 		}
 
 		blr := util.AcquireString()

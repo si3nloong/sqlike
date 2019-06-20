@@ -89,3 +89,20 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, err, sql.ErrNoRows)
 	}
 }
+
+// FindErrorExamples :
+func FindErrorExamples(t *testing.T, db *sqlike.Database) {
+	var (
+		err error
+	)
+
+	{
+		_, err = db.Table("NormalStruct").Find(nil)
+		require.Error(t, err)
+
+		_, err = db.Table("NormalStruct").Find(
+			actions.Find(),
+		)
+		require.Error(t, err)
+	}
+}

@@ -24,7 +24,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 }
 
 func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, delete interface{}) error {
-	v := reflect.ValueOf(delete)
+	v := reflext.ValueOf(delete)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return ErrUnaddressableEntity

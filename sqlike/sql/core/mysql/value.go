@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/si3nloong/sqlike/util"
 )
 
 // Format :
 func (ms MySQL) Format(it interface{}) (val string) {
 	switch vi := it.(type) {
 	case []byte:
-		val = strconv.Quote(string(vi))
+		val = strconv.Quote(util.UnsafeString(vi))
 	case string:
 		val = strconv.Quote(vi)
 	case bool:
@@ -28,7 +30,7 @@ func (ms MySQL) Format(it interface{}) (val string) {
 	case time.Time:
 		val = vi.Format(`'2006-01-02 15:04:05.999999'`)
 	case json.RawMessage:
-		val = strconv.Quote(string(vi))
+		val = strconv.Quote(util.UnsafeString(vi))
 	case nil:
 		val = "NULL"
 	case fmt.Stringer:

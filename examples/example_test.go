@@ -16,7 +16,8 @@ func TestExamples(t *testing.T) {
 		options.Connect().
 			SetUsername(`root`).
 			SetPassword(`abcd1234`).
-			SetDatabase(`sqlike`))
+			SetDatabase(`sqlike`),
+	)
 	require.NoError(t, err)
 
 	dbs, err := client.ListDatabases()
@@ -35,5 +36,6 @@ func TestExamples(t *testing.T) {
 
 	MigrateErrorExamples(t, db)
 	InsertErrorExamples(t, db)
+	FindErrorExamples(t, db)
 
 }

@@ -40,7 +40,6 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		err = db.Table("NormalStruct").Migrate(normalStruct{})
 		require.NoError(t, err)
 	}
-
 }
 
 // MigrateErrorExamples :

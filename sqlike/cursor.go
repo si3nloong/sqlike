@@ -39,6 +39,10 @@ func (c *Cursor) Decode(dst interface{}) error {
 	}
 
 	v := reflext.ValueOf(dst)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return ErrUnaddressableEntity
@@ -85,6 +89,10 @@ func (c *Cursor) All(results interface{}) error {
 	}
 
 	v := reflext.ValueOf(results)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
 	if !reflext.IsKind(v.Type(), reflect.Ptr) {
 		return ErrUnaddressableEntity
 	}

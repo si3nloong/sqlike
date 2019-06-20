@@ -36,7 +36,7 @@ func (idv *IndexView) CreateOne(idx indexes.Index) error {
 func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 	for i, idx := range idxs {
 		if len(idx.Columns) < 1 {
-			return xerrors.New("empty columns to create index")
+			return xerrors.New("sqlike: empty columns to create index")
 		}
 		if idx.Name == "" {
 			idxs[i].Name = strings.Join(idx.Columns, "_") + "_idx"

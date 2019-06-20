@@ -121,6 +121,10 @@ func (dec DefaultDecoders) DecodeString(it interface{}, v reflect.Value) error {
 		x = vi
 	case []byte:
 		x = string(vi)
+	case int64:
+		x = strconv.FormatInt(vi, 10)
+	case uint64:
+		x = strconv.FormatUint(vi, 10)
 	case nil:
 	}
 	v.SetString(x)
@@ -146,6 +150,14 @@ func (dec DefaultDecoders) DecodeBool(it interface{}, v reflect.Value) error {
 		}
 	case bool:
 		x = vi
+	case int64:
+		if vi == 1 {
+			x = true
+		}
+	case uint64:
+		if vi == 1 {
+			x = true
+		}
 	case nil:
 	}
 	v.SetBool(x)
@@ -231,6 +243,10 @@ func (dec DefaultDecoders) DecodeFloat(it interface{}, v reflect.Value) error {
 		}
 	case float64:
 		x = vi
+	case int64:
+		x = float64(vi)
+	case uint64:
+		x = float64(vi)
 	case nil:
 
 	}

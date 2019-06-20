@@ -13,6 +13,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
+var ErrInvalidInput = xerrors.New("sqlike: invalid input <nil>")
+
 // InsertOne :
 func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	return insertOne(
@@ -28,7 +30,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
-		return nil, xerrors.New("invalid input <nil>")
+		return nil, ErrInvalidInput
 	}
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {

@@ -26,9 +26,9 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 }
 
 func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger Logger, update interface{}, opts []*options.ModifyOneOptions) error {
-	v := reflect.ValueOf(update)
+	v := reflext.ValueOf(update)
 	if !v.IsValid() {
-		return xerrors.New("invalid input")
+		return ErrInvalidInput
 	}
 
 	t := v.Type()
@@ -37,7 +37,7 @@ func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, 
 	}
 
 	if v.IsNil() {
-		return xerrors.New("entity is nil")
+		return xerrors.New("sqlike: entity is nil")
 	}
 
 	mapper := core.DefaultMapper

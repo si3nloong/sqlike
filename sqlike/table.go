@@ -205,9 +205,9 @@ func (tb *Table) Indexes() *IndexView {
 }
 
 func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
-	v := reflect.ValueOf(entity)
+	v := reflext.ValueOf(entity)
 	if !v.IsValid() {
-		return xerrors.New("invalid input <nil>")
+		return ErrInvalidInput
 	}
 
 	t := reflext.Deref(v.Type())
