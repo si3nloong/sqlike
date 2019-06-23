@@ -1,11 +1,13 @@
 package sqlike
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/sql/expr"
@@ -23,7 +25,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	)
 }
 
-func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, delete interface{}) error {
+func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
@@ -50,8 +52,8 @@ func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect,
 	if err != nil {
 		return err
 	}
-
 	result, err := sqldriver.Execute(
+		context.Background(),
 		driver,
 		stmt,
 		logger,
@@ -76,7 +78,7 @@ func (tb *Table) DeleteMany(act actions.DeleteStatement) (int64, error) {
 	)
 }
 
-func deleteMany(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, act actions.DeleteStatement) (int64, error) {
+func deleteMany(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
@@ -93,8 +95,8 @@ func deleteMany(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect,
 	if err != nil {
 		return 0, err
 	}
-
 	result, err := sqldriver.Execute(
+		context.Background(),
 		driver,
 		stmt,
 		logger,

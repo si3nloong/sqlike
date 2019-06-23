@@ -85,10 +85,12 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 
-	// charset, isOk := sf.Tag.LookUp("charset")
-	// if isOk {
-
-	// }
+	charset := `utf8mb4`
+	collation := `utf8mb4_unicode_ci`
+	if cs, isOk := sf.Tag.LookUp("charset"); isOk {
+		charset = strings.ToLower(cs)
+		collation = charset + "_unicode_ci"
+	}
 
 	if enum, isOk := sf.Tag.LookUp("enum"); isOk {
 		paths := strings.Split(enum, "|")
@@ -112,6 +114,8 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 		col.DataType = `ENUM`
 		col.Type = blr.String()
 		col.DefaultValue = &dflt
+		col.CharSet = &charset
+		col.Collation = &collation
 		return
 	} else if _, isOk := sf.Tag.LookUp("longtext"); isOk {
 		col.DataType = `TEXT`
@@ -126,8 +130,6 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 	}
 
 	dflt := ``
-	charset := `utf8mb4`
-	collation := `utf8mb4_unicode_ci`
 
 	col.DefaultValue = &dflt
 	col.DataType = `VARCHAR`
@@ -156,10 +158,10 @@ func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col component.Column)
 	col.DataType = dataType
 	col.Type = dataType
 	col.Nullable = sf.IsNullable
+	col.DefaultValue = &dflt
 	if _, isOk := sf.Tag.LookUp("auto_increment"); isOk {
 		col.Extra = "AUTO_INCREMENT"
-	} else {
-		col.DefaultValue = &dflt
+		col.DefaultValue = nil
 	}
 	return
 }
@@ -173,10 +175,10 @@ func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col component.Column
 	col.DataType = dataType
 	col.Type = dataType + ` UNSIGNED`
 	col.Nullable = sf.IsNullable
+	col.DefaultValue = &dflt
 	if _, isOk := sf.Tag.LookUp("auto_increment"); isOk {
 		col.Extra = "AUTO_INCREMENT"
-	} else {
-		col.DefaultValue = &dflt
+		col.DefaultValue = nil
 	}
 	return
 }

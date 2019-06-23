@@ -47,6 +47,8 @@ func (p mySQLParser) SetParsers(parser *sqlstmt.StatementParser) {
 	parser.SetParser(reflect.TypeOf(primitive.Col("")), p.ParseString)
 	parser.SetParser(reflect.TypeOf(primitive.Operator(0)), p.ParseOperator)
 	parser.SetParser(reflect.TypeOf(primitive.G{}), p.ParseGroup)
+	parser.SetParser(reflect.TypeOf(primitive.GV{}), p.ParseGroupValue)
+	parser.SetParser(reflect.TypeOf(primitive.R{}), p.ParseRange)
 	parser.SetParser(reflect.TypeOf(primitive.Sort{}), p.ParseSort)
 	parser.SetParser(reflect.TypeOf(primitive.KV{}), p.ParseKeyValue)
 	parser.SetParser(reflect.TypeOf(primitive.Math{}), p.ParseMath)
@@ -94,36 +96,26 @@ func (p *mySQLParser) ParseClause(stmt *sqlstmt.Statement, it interface{}) error
 	}
 
 	stmt.WriteString(" " + operatorMap[x.Operator] + " ")
-	length := len(x.Values)
-	if length > 0 {
-		for i := 0; i < length; i++ {
-			val := x.Values[i]
-			if parser, isOk := p.parser.LookupParser(val); isOk {
-				stmt.WriteRune('(')
-				if err := parser(stmt, val); err != nil {
-					return err
-				}
-				stmt.WriteRune(')')
-				continue
-			}
-			if i > 0 {
-				stmt.WriteString(" AND ")
-			}
-
-			v := reflext.ValueOf(val)
-			encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
-			if err != nil {
-				return err
-			}
-			it, err := encoder(nil, v)
-			if err != nil {
-				return err
-			}
-			stmt.AppendArg(it)
-			stmt.WriteRune('?')
+	if parser, isOk := p.parser.LookupParser(x.Value); isOk {
+		stmt.WriteRune('(')
+		if err := parser(stmt, x.Value); err != nil {
+			return err
 		}
-
+		stmt.WriteRune(')')
+		return nil
 	}
+
+	v := reflext.ValueOf(x.Value)
+	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	if err != nil {
+		return err
+	}
+	arg, err := encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArg(arg)
+	stmt.WriteRune('?')
 	return nil
 }
 
@@ -153,10 +145,10 @@ func (p *mySQLParser) ParseKeyValue(stmt *sqlstmt.Statement, it interface{}) (er
 		err = parser(stmt, it)
 		return
 	}
-	log.Println(parser)
+	// log.Println(parser)
 	stmt.WriteString(`?`)
-	log.Println("Value should normalize before add into arguments")
-	log.Println("Value :", x.Value)
+	// log.Println("Value should normalize before add into arguments")
+	// log.Println("Value :", x.Value)
 	stmt.AppendArg(x.Value)
 	return
 }
@@ -182,12 +174,74 @@ func (p *mySQLParser) ParseGroup(stmt *sqlstmt.Statement, it interface{}) (err e
 		return xerrors.New("data type not match")
 	}
 	for len(x) > 0 {
+		log.Println(reflect.TypeOf(x[0]))
 		err = p.parser.BuildStatement(stmt, x[0])
 		if err != nil {
 			return
 		}
 		x = x[1:]
+		if len(x) > 0 {
+			stmt.WriteRune(',')
+		}
 	}
+	return
+}
+
+func (p *mySQLParser) ParseGroupValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
+	x, isOk := it.(primitive.GV)
+	if !isOk {
+		return xerrors.New("expected data type primitive.GV")
+	}
+	for len(x) > 0 {
+		v := reflext.ValueOf(x[0])
+		encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+		if err != nil {
+			return err
+		}
+		arg, err := encoder(nil, v)
+		if err != nil {
+			return err
+		}
+		stmt.AppendArg(arg)
+		stmt.WriteRune('?')
+		x = x[1:]
+		if len(x) > 0 {
+			stmt.WriteRune(',')
+		}
+	}
+	return
+}
+
+func (p *mySQLParser) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
+	x, isOk := it.(primitive.R)
+	if !isOk {
+		return xerrors.New("expected data type primitive.GV")
+	}
+
+	v := reflext.ValueOf(x.From)
+	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	if err != nil {
+		return err
+	}
+	arg, err := encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArg(arg)
+
+	v = reflext.ValueOf(x.To)
+	encoder, err = codec.DefaultRegistry.LookupEncoder(v.Type())
+	if err != nil {
+		return err
+	}
+	arg, err = encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArg(arg)
+	stmt.WriteRune('?')
+	stmt.WriteString(" AND ")
+	stmt.WriteRune('?')
 	return
 }
 
@@ -202,6 +256,9 @@ func (p *mySQLParser) ParseFindActions(stmt *sqlstmt.Statement, it interface{}) 
 		return xerrors.New("empty table name")
 	}
 	stmt.WriteString(`SELECT `)
+	if x.DistinctOn {
+		stmt.WriteString("DISTINCT ")
+	}
 	if err := p.appendSelect(stmt, x.Projections); err != nil {
 		return err
 	}
@@ -319,11 +376,9 @@ func (p *mySQLParser) appendOrderBy(stmt *sqlstmt.Statement, sorts []primitive.S
 }
 
 func (p *mySQLParser) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset uint) {
-	// No limit is very harmful, default limit is 100
-	if limit < 1 {
-		limit = 100
+	if limit > 0 {
+		stmt.WriteString(` LIMIT ` + strconv.FormatUint(uint64(limit), 10))
 	}
-	stmt.WriteString(` LIMIT ` + strconv.FormatUint(uint64(limit), 10))
 	if offset > 0 {
 		stmt.WriteString(` OFFSET ` + strconv.FormatUint(uint64(offset), 10))
 	}

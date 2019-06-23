@@ -1,7 +1,13 @@
 package sqlike
 
 import (
+	"context"
+	"database/sql"
+	"time"
+
 	"github.com/si3nloong/sqlike/core/codec"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )
@@ -13,7 +19,7 @@ type Database struct {
 	driver   sqldriver.Driver
 	dialect  sqlcore.Dialect
 	registry *codec.Registry
-	logger   Logger
+	logger   logs.Logger
 }
 
 // Table :
@@ -31,11 +37,16 @@ func (db *Database) Table(name string) *Table {
 
 // BeginTransaction :
 func (db *Database) BeginTransaction() (*Transaction, error) {
-	tx, err := db.client.Begin()
+	return db.beginTrans(context.Background(), nil)
+}
+
+func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transaction, error) {
+	tx, err := db.client.BeginTx(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
 	return &Transaction{
+		context: ctx,
 		driver:  tx,
 		dialect: db.dialect,
 		logger:  db.logger,
@@ -45,8 +56,21 @@ func (db *Database) BeginTransaction() (*Transaction, error) {
 type txCallback func(ctx SessionContext) error
 
 // RunInTransaction :
-func (db *Database) RunInTransaction(cb txCallback) error {
-	tx, err := db.BeginTransaction()
+func (db *Database) RunInTransaction(cb txCallback, opts ...*options.TransactionOptions) error {
+	opt := new(options.TransactionOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+	duration := 60 * time.Second
+	if opt.Duration.Seconds() > 0 {
+		duration = opt.Duration
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), duration)
+	defer cancel()
+	tx, err := db.beginTrans(ctx, &sql.TxOptions{
+		Isolation: opt.IsolationLevel,
+		ReadOnly:  opt.ReadOnly,
+	})
 	if err != nil {
 		return err
 	}

@@ -1,16 +1,19 @@
 package sqlike
 
 import (
+	"context"
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 )
 
 // Transaction :
 type Transaction struct {
+	context context.Context
 	driver  *sql.Tx
 	dialect sqlcore.Dialect
-	logger  Logger
+	logger  logs.Logger
 }
 
 // Table :

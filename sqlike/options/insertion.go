@@ -10,6 +10,6 @@ const (
 
 // InsertOptions :
 type InsertOptions struct {
-	Mode    insertMode
-	IsDebug bool
+	Mode  insertMode
+	Debug bool
 }

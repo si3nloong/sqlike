@@ -59,6 +59,16 @@ func (k *Key) ID() string {
 	return strconv.FormatInt(k.IntID, 10)
 }
 
+// Root :
+func (k *Key) Root() *Key {
+	for {
+		if k.Parent == nil {
+			return k
+		}
+		k = k.Parent
+	}
+}
+
 // Value :
 func (k *Key) Value() (driver.Value, error) {
 	if k == nil {

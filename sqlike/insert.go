@@ -1,11 +1,13 @@
 package sqlike
 
 import (
+	"context"
 	"database/sql"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
@@ -13,11 +15,13 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// ErrInvalidInput :
 var ErrInvalidInput = xerrors.New("sqlike: invalid input <nil>")
 
 // InsertOne :
 func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	return insertOne(
+		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -27,7 +31,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	)
 }
 
-func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -67,6 +71,7 @@ func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, 
 
 	stmt := dialect.InsertInto(tbName, columns, values, opt)
 	return sqldriver.Execute(
+		ctx,
 		driver,
 		stmt,
 		logger,
@@ -75,7 +80,12 @@ func insertOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, 
 
 // InsertMany :
 func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions) (sql.Result, error) {
-	v := reflext.Indirect(reflect.ValueOf(srcs))
+	v := reflext.ValueOf(srcs)
+	if !v.IsValid() {
+		return nil, ErrInvalidInput
+	}
+
+	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Array) && !reflext.IsKind(t, reflect.Slice) {
 		return nil, xerrors.New("InsertMany only support array or slice of entity")
@@ -121,9 +131,10 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 
 	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)
 	return sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		stmt,
-		tb.logger,
+		getLogger(tb.logger, opt.Debug),
 	)
 }
 

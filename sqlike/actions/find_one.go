@@ -9,6 +9,7 @@ import (
 
 // SelectOneStatement :
 type SelectOneStatement interface {
+	Distinct() SelectOneStatement
 	Select(fields ...interface{}) SelectOneStatement
 	From(table string) SelectOneStatement
 	Where(fields ...interface{}) SelectOneStatement
@@ -29,9 +30,10 @@ func (f *FindOneActions) Select(fields ...interface{}) SelectOneStatement {
 }
 
 // Distinct :
-// func (f *FindOneActions) Distinct() *SelectOneStatement {
-// 	return f
-// }
+func (f *FindOneActions) Distinct() SelectOneStatement {
+	f.DistinctOn = true
+	return f
+}
 
 // From :
 func (f *FindOneActions) From(table string) SelectOneStatement {

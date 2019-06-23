@@ -1,9 +1,11 @@
 package sqlike
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/blang/semver"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )
@@ -13,7 +15,7 @@ type Client struct {
 	driverName string
 	version    semver.Version
 	*sql.DB
-	logger  Logger
+	logger  logs.Logger
 	dialect sqlcore.Dialect
 }
 
@@ -29,11 +31,12 @@ func newClient(driver string, db *sql.DB, dialect sqlcore.Dialect) (*Client, err
 
 // SetLogger : this is to set the logger for debugging, it will panic
 // if the logger input is nil
-func (c *Client) SetLogger(logger Logger) {
+func (c *Client) SetLogger(logger logs.Logger) *Client {
 	if logger == nil {
 		panic("logger cannot be nil")
 	}
 	c.logger = logger
+	return c
 }
 
 // Version :
@@ -46,6 +49,7 @@ func (c *Client) Version() (version semver.Version) {
 func (c Client) ListDatabases() ([]string, error) {
 	stmt := c.dialect.GetDatabases()
 	rows, err := sqldriver.Query(
+		context.Background(),
 		c.DB,
 		stmt,
 		c.logger,
@@ -78,7 +82,8 @@ func (c *Client) Database(name string) *Database {
 func (c *Client) getVersion() (version semver.Version) {
 	stmt := c.dialect.GetVersion()
 	var ver string
-	sqldriver.QueryRow(
+	sqldriver.QueryRowContext(
+		context.Background(),
 		c.DB,
 		stmt,
 		c.logger,

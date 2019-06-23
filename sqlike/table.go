@@ -1,13 +1,16 @@
 package sqlike
 
 import (
+	"context"
 	"reflect"
 	"strings"
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"golang.org/x/xerrors"
@@ -34,12 +37,13 @@ type Table struct {
 	driver   sqldriver.Driver
 	dialect  sqlcore.Dialect
 	registry *codec.Registry
-	logger   Logger
+	logger   logs.Logger
 }
 
 // Rename : rename the current table name to new table name
 func (tb *Table) Rename(name string) error {
 	_, err := sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		tb.dialect.RenameTable(tb.name, name),
 		tb.logger,
@@ -51,7 +55,8 @@ func (tb *Table) Rename(name string) error {
 func (tb *Table) Exists() bool {
 	var count int
 	stmt := tb.dialect.HasTable(tb.dbName, tb.name)
-	row := sqldriver.QueryRow(
+	row := sqldriver.QueryRowContext(
+		context.Background(),
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -69,6 +74,7 @@ func (tb *Table) Columns() *ColumnView {
 func (tb *Table) ListColumns() ([]Column, error) {
 	stmt := tb.dialect.GetColumns(tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
+		context.Background(),
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -108,6 +114,7 @@ func (tb *Table) ListColumns() ([]Column, error) {
 func (tb *Table) ListIndexes() ([]Index, error) {
 	stmt := tb.dialect.GetIndexes(tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
+		context.Background(),
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -154,8 +161,9 @@ func (tb Table) UnsafeMigrate(entity interface{}) error {
 }
 
 // Truncate :
-func (tb Table) Truncate() (err error) {
+func (tb *Table) Truncate() (err error) {
 	_, err = sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		tb.dialect.TruncateTable(tb.name),
 		tb.logger,
@@ -166,6 +174,7 @@ func (tb Table) Truncate() (err error) {
 // DropIfExits : will drop the table only if it exists
 func (tb Table) DropIfExits() (err error) {
 	_, err = sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		tb.dialect.DropTable(tb.name, true),
 		tb.logger,
@@ -176,6 +185,7 @@ func (tb Table) DropIfExits() (err error) {
 // Drop : drop the table, but it might throw error when the table is not exists
 func (tb Table) Drop() (err error) {
 	_, err = sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		tb.dialect.DropTable(tb.name, false),
 		tb.logger,
@@ -183,21 +193,21 @@ func (tb Table) Drop() (err error) {
 	return
 }
 
-// ReplaceInto :
-// func (tb Table) ReplaceInto(filter interface{}) error {
-// 	// stmt, args, err := tb.dialect.ReplaceInto(tb.name, filter)
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
-// 	// _, err = sqldriver.Execute(
-// 	// 	tb.driver,
-// 	// 	stmt,
-// 	// 	args,
-// 	// 	tb.logger,
-// 	// )
-// 	// return err
-// 	return nil
-// }
+// ReplaceWith :
+func (tb *Table) ReplaceWith(act actions.SelectStatement) error {
+	// tb.dialect.Select(act)
+	// stmt, args, err := tb.dialect.ReplaceInto(tb.name, filter)
+	// 	// if err != nil {
+	// 	// 	return err
+	// 	// }
+	// _, err = sqldriver.Execute(
+	// 	tb.driver,
+	// 	stmt,
+	// 	args,
+	// 	tb.logger,
+	// )
+	return nil
+}
 
 // Indexes :
 func (tb *Table) Indexes() *IndexView {
@@ -245,6 +255,7 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 		return err
 	}
 	if _, err := sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -260,6 +271,7 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 		return err
 	}
 	if _, err := sqldriver.Execute(
+		context.Background(),
 		tb.driver,
 		stmt,
 		tb.logger,

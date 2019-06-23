@@ -81,6 +81,56 @@ func (c *Cursor) Decode(dst interface{}) error {
 	return nil
 }
 
+// ScanSlice :
+func (c *Cursor) ScanSlice(results interface{}) error {
+	defer c.Close()
+	if c.err != nil {
+		return c.err
+	}
+
+	v := reflext.ValueOf(results)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
+	if !reflext.IsKind(v.Type(), reflect.Ptr) {
+		return ErrUnaddressableEntity
+	}
+
+	v = reflext.Indirect(v)
+	t := v.Type()
+	if !reflext.IsKind(t, reflect.Slice) {
+		return xerrors.New("it must be a slice of entity")
+	}
+
+	length := len(c.columns)
+	slice := reflect.MakeSlice(t, 0, 0)
+	t = t.Elem()
+	// decoders := make([]codec.ValueDecoder, length, length)
+
+	for i := 0; c.rows.Next(); i++ {
+		values := make([]interface{}, length, length)
+		for j := 0; j < length; j++ {
+			values[j] = &values[j]
+		}
+		if err := c.rows.Scan(values...); err != nil {
+			return err
+		}
+
+		slice = reflect.Append(slice, reflext.Zero(t))
+		fv := slice.Index(i)
+		decoder, err := c.registry.LookupDecoder(fv.Type())
+		if err != nil {
+			return err
+		}
+		if err := decoder(values[0], fv); err != nil {
+			return err
+		}
+	}
+	v.Set(slice)
+	return nil
+}
+
 // All :
 func (c *Cursor) All(results interface{}) error {
 	defer c.Close()

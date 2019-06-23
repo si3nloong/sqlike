@@ -33,7 +33,7 @@ func (f *UpdateActions) Set(field string, value interface{}) UpdateStatement {
 	f.Values = append(f.Values, primitive.C{
 		Field:    primitive.Col(field),
 		Operator: primitive.Equal,
-		Values:   []interface{}{value},
+		Value:    value,
 	})
 	return f
 }

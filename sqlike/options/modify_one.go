@@ -2,7 +2,7 @@ package options
 
 // ModifyOneOptions :
 type ModifyOneOptions struct {
-	IsDebug bool
+	Debug bool
 }
 
 // ModifyOne :
@@ -12,6 +12,6 @@ func ModifyOne() *ModifyOneOptions {
 
 // SetDebug :
 func (opt *ModifyOneOptions) SetDebug(debug bool) *ModifyOneOptions {
-	opt.IsDebug = debug
+	opt.Debug = debug
 	return opt
 }

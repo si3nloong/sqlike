@@ -10,6 +10,7 @@ import (
 
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
@@ -91,6 +92,22 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			if affected < 1 {
 				return errors.New("no result affected")
 			}
+			return nil
+		})
+		require.NoError(t, err)
+	}
+
+	{
+		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
+			nss := []normalStruct{}
+			cursor, err := sessCtx.Table("NormalStruct").Find(
+				nil, options.LockForUpdate)
+			if err != nil {
+				return err
+			}
+			defer cursor.Close()
+			cursor.All(&nss)
+			time.Sleep(3 * time.Second)
 			return nil
 		})
 		require.NoError(t, err)

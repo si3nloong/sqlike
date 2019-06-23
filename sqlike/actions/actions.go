@@ -10,6 +10,11 @@ func Find() SelectStatement {
 	return &FindActions{}
 }
 
+// ReplaceInto :
+func ReplaceInto() SelectStatement {
+	return &ReplaceIntoActions{}
+}
+
 // UpdateOne :
 func UpdateOne() UpdateOneStatement {
 	return &UpdateOneActions{}

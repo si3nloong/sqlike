@@ -1,9 +1,11 @@
 package sqlike
 
 import (
+	"context"
 	"strings"
 
 	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/xerrors"
@@ -19,7 +21,7 @@ type Index struct {
 // IndexView :
 type IndexView struct {
 	tb     *Table
-	logger Logger
+	logger logs.Logger
 }
 
 // List :
@@ -43,6 +45,7 @@ func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 		}
 	}
 	_, err := sqldriver.Execute(
+		context.Background(),
 		idv.tb.driver,
 		idv.tb.dialect.CreateIndexes(idv.tb.name, idxs),
 		idv.logger,
@@ -53,6 +56,7 @@ func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 // DropOne :
 func (idv IndexView) DropOne(name string) error {
 	_, err := sqldriver.Execute(
+		context.Background(),
 		idv.tb.driver,
 		idv.tb.dialect.DropIndex(idv.tb.name, name),
 		idv.logger,

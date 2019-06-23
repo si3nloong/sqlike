@@ -1,24 +1,36 @@
 package options
 
-// LockMode :
-type LockMode int
+// // LockMode :
+// type LockMode int
 
-// locks :
-const (
-	ShareLock LockMode = iota
-	UpdateLock
-)
+// // locks :
+// const (
+// 	ShareLock LockMode = iota
+// 	UpdateLock
+// )
 
 // FindOptions :
 type FindOptions struct {
 	OmitFields []string
-	LockMode   LockMode
-	IsDebug    bool
+	NoLimit    bool
+	// LockMode   LockMode
+	Debug bool
+}
+
+// Find :
+func Find() *FindOptions {
+	return &FindOptions{}
+}
+
+// SetNoLimit :
+func (opt *FindOptions) SetNoLimit() *FindOptions {
+	opt.NoLimit = true
+	return opt
 }
 
 // SetDebug :
 func (opt *FindOptions) SetDebug(debug bool) *FindOptions {
-	opt.IsDebug = debug
+	opt.Debug = debug
 	return opt
 }
 
@@ -29,10 +41,23 @@ func (opt *FindOptions) SetOmitFields(fields ...string) *FindOptions {
 }
 
 // SetLock :
-func (opt *FindOptions) SetLock(lm LockMode) *FindOptions {
-	opt.LockMode = lm
-	return opt
-}
+// func (opt *FindOptions) SetLock(lm LockMode) *FindOptions {
+// 	opt.LockMode = lm
+// 	return opt
+// }
 
 // FindOneOptions :
-type FindOneOptions = FindOptions
+type FindOneOptions struct {
+	FindOptions
+}
+
+// FindOne :
+func FindOne() *FindOneOptions {
+	return &FindOneOptions{}
+}
+
+// SetDebug :
+func (opt *FindOneOptions) SetDebug(debug bool) *FindOneOptions {
+	opt.Debug = debug
+	return opt
+}

@@ -1,6 +1,9 @@
 package expr
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
@@ -8,7 +11,7 @@ import (
 func Equal(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.Equal
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -16,7 +19,7 @@ func Equal(field string, value interface{}) (c primitive.C) {
 func NotEqual(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.NotEqual
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -36,17 +39,35 @@ func NotNull(field string) (c primitive.C) {
 
 // In :
 func In(field string, value interface{}) (c primitive.C) {
+	v := reflect.ValueOf(value)
 	c.Field = primitive.L(field)
 	c.Operator = primitive.In
-	c.Values = append(c.Values, value)
+	k := v.Kind()
+	if k != reflect.Array && k != reflect.Slice {
+		panic(fmt.Errorf("expr.In not support data type %v", v.Type()))
+	}
+	grp := primitive.GV{}
+	for i := 0; i < v.Len(); i++ {
+		grp = append(grp, v.Index(i).Interface())
+	}
+	c.Value = grp
 	return
 }
 
 // NotIn :
 func NotIn(field string, value interface{}) (c primitive.C) {
+	v := reflect.ValueOf(value)
 	c.Field = primitive.L(field)
 	c.Operator = primitive.NotIn
-	c.Values = append(c.Values, value)
+	k := v.Kind()
+	if k != reflect.Array && k != reflect.Slice {
+		panic(fmt.Errorf("expr.In not support data type %v", v.Type()))
+	}
+	grp := primitive.GV{}
+	for i := 0; i < v.Len(); i++ {
+		grp = append(grp, v.Index(i).Interface())
+	}
+	c.Value = grp
 	return
 }
 
@@ -54,7 +75,7 @@ func NotIn(field string, value interface{}) (c primitive.C) {
 func Like(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.Like
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -62,7 +83,7 @@ func Like(field string, value interface{}) (c primitive.C) {
 func NotLike(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.NotLike
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -70,7 +91,7 @@ func NotLike(field string, value interface{}) (c primitive.C) {
 func GreaterEqual(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.GreaterEqual
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -78,7 +99,7 @@ func GreaterEqual(field string, value interface{}) (c primitive.C) {
 func GreaterThan(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.GreaterThan
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -86,7 +107,7 @@ func GreaterThan(field string, value interface{}) (c primitive.C) {
 func LowerEqual(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.LowerEqual
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -94,7 +115,7 @@ func LowerEqual(field string, value interface{}) (c primitive.C) {
 func LowerThan(field string, value interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.LowerThan
-	c.Values = append(c.Values, value)
+	c.Value = value
 	return
 }
 
@@ -102,7 +123,7 @@ func LowerThan(field string, value interface{}) (c primitive.C) {
 func Between(field string, from, to interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.Between
-	c.Values = append(c.Values, from, to)
+	c.Value = primitive.R{From: from, To: to}
 	return
 }
 
@@ -110,7 +131,7 @@ func Between(field string, from, to interface{}) (c primitive.C) {
 func NotBetween(field string, from, to interface{}) (c primitive.C) {
 	c.Field = primitive.L(field)
 	c.Operator = primitive.NotBetween
-	c.Values = append(c.Values, from, to)
+	c.Value = primitive.R{From: from, To: to}
 	return
 }
 

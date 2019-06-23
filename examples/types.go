@@ -66,6 +66,12 @@ type Address struct {
 // Enum :
 type Enum string
 
+const (
+	Success Enum = "SUCCESS"
+	Failed  Enum = "FAILED"
+	Unknown Enum = "UNKNOWN"
+)
+
 type model struct {
 	No int64
 	ID string `sqlike:"id"`
@@ -99,7 +105,7 @@ func newNormalStruct() normalStruct {
 	ns := normalStruct{}
 	// ns.Key = types.IDKey("NormalStruct", id, nil)
 	ns.ID = uuid.NewV1()
-	ns.Emoji = `😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊 `
+	ns.Emoji = `😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`
 	ns.Byte = []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCklQio4TeIZo63S0FvNonY2/nA
 ZUvrnDRPIzEKK4A7Hu4UjxNhebxuEA/PqSJgxOIHVPnASrSwj+IlPokcdrR6Ekyn

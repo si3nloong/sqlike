@@ -9,14 +9,23 @@ type L string
 // G :
 type G []interface{}
 
+// GV :
+type GV []interface{}
+
 // Col :
 type Col string
+
+// R :
+type R struct {
+	From interface{}
+	To   interface{}
+}
 
 // C :
 type C struct {
 	Field    interface{}
 	Operator Operator
-	Values   []interface{}
+	Value    interface{}
 }
 
 // KV :

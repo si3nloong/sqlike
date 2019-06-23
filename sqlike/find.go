@@ -1,9 +1,11 @@
 package sqlike
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
@@ -21,18 +23,25 @@ type SingleResult interface {
 }
 
 // FindOne :
-func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...options.FindOneOptions) SingleResult {
+func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOneOptions) SingleResult {
 	x := new(actions.FindOneActions)
 	if act != nil {
 		*x = *(act.(*actions.FindOneActions))
 	}
+	opt := new(options.FindOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	x.Limit(1)
 	csr := find(
+		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
 		&x.FindActions,
+		&opt.FindOptions,
+		options.NoLock,
 	)
 	csr.close = true
 	if csr.err != nil {
@@ -50,12 +59,19 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
 	}
+	opt := new(options.FindOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	csr := find(
+		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
 		x,
+		opt,
+		options.NoLock,
 	)
 	if csr.err != nil {
 		return nil, csr.err
@@ -63,18 +79,22 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	return csr, nil
 }
 
-func find(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, act *actions.FindActions) *Cursor {
+func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Cursor {
 	if act.Table == "" {
 		act.Table = tbName
 	}
+	if !opt.NoLimit && act.Offs < 1 {
+		act.Limit(100)
+	}
 	csr := new(Cursor)
 	csr.registry = codec.DefaultRegistry
-	stmt, err := dialect.Select(act)
+	stmt, err := dialect.Select(act, lock)
 	if err != nil {
 		csr.err = err
 		return csr
 	}
 	rows, err := sqldriver.Query(
+		ctx,
 		driver,
 		stmt,
 		logger,

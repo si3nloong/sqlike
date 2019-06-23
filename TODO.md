@@ -6,14 +6,14 @@ TODO:
 
 1. Logger
 
-[x] - [Bug] `WhereIn` and `WhereNotIn`
+[ok] - [Bug] `WhereIn` and `WhereNotIn`
 [ok] - Connect to `MySQL` server
 [ok] - Connect to `MySQL` server with `options.Connect`
 [x|gth] - Support extra options like charset and collation in connection
 [ok] - Get `MySQL` server version
 [ok] - Drop selected `Database`
 [ok] - List all `Database`
-[ok] - Support `Tag` such as `auto_increment`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
+[ok] - Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
 [ok] - [Feature] Truncate selected `Table`
 [ok] - [Feature] List all column for selected `Table`
 [ok] - [Feature] Drop selected `Table`
@@ -25,15 +25,15 @@ TODO:
 [ok] - [Feature] List all `Index`
 [ok] - [Feature] Drop selected `Index`
 [ok] - [Feature] `Transaction` support
-[x] - [Feature] Add timeout for `Transaction`
+[ok] - [Feature] Add timeout for `Transaction`
 [ok] - [Bug] Virtual column sequence in `ALTER TABLE`
 [ok] - Support custom type `Key`
 [ok] - Support custom type `Date`
 [x] - Support custom type `GeoPoint`
-[x] - Create `Logger` using `github.com/valyala/fasttemplate` // logger must be have query, arguments and milliseconds (Pending for API design)
+[ok] - [Feature] Create `Logger`
 [ok] - [Feature] Custom `JSON` encoder (w/o cover `Map` datatype)
 [ok] - Custom `JSON` decoder
-[ok] - [Bug] Unmarshal into `[]byte`
+[ok] - [Bug] `UnmarshalJSONB` into `[]byte`
 [ok] - [Feature] Single database `Migration`
 [ok] - [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
 [ok] - Support `UnsafeMigration`
@@ -50,7 +50,7 @@ TODO:
 [ok] - Delete multiple record
 [ok] - Delete single record
 [x] - Replace into (Pending for API design)
-[28%] - Write testcases
+[30%] - Write testcases
 
 [xxx] - Support `Postgres`
 

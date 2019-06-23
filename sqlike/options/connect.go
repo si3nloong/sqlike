@@ -1,6 +1,10 @@
 package options
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/si3nloong/sqlike/sqlike/logs"
+)
 
 // ConnectOptions :
 type ConnectOptions struct {
@@ -9,7 +13,7 @@ type ConnectOptions struct {
 	Host     string
 	Port     string
 	Database string
-	Logger   interface{}
+	Logger   logs.Logger
 }
 
 // Connect :

@@ -2,16 +2,24 @@ package mysql
 
 import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Select :
-func (ms *MySQL) Select(f *actions.FindActions) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) Select(f *actions.FindActions, lck options.LockMode) (stmt *sqlstmt.Statement, err error) {
 	stmt = sqlstmt.NewStatement(ms)
-	err = buildStatement(stmt, ms.parser, f)
+	err = ms.parser.BuildStatement(stmt, f)
 	if err != nil {
 		return
 	}
+	switch lck {
+	case options.LockForUpdate:
+		stmt.WriteString(" FOR UPDATE")
+	case options.LockForRead:
+		stmt.WriteString(" LOCK IN SHARE MODE")
+	}
+	stmt.WriteRune(';')
 	return
 }
 

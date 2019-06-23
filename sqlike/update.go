@@ -1,11 +1,13 @@
 package sqlike
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
@@ -25,7 +27,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	)
 }
 
-func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -59,6 +61,11 @@ func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, 
 		x.Set(sf.Path, fv.Interface())
 	}
 
+	opt := new(options.ModifyOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+
 	x.Limit(1)
 	stmt, err := dialect.Update(x)
 	if err != nil {
@@ -66,9 +73,10 @@ func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, 
 	}
 
 	result, err := sqldriver.Execute(
+		context.Background(),
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
 		return err
@@ -88,17 +96,22 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 	if x.Table == "" {
 		x.Table = tb.name
 	}
+	opt := new(options.UpdateOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+
 	x.Limit(1)
 	return update(
 		tb.driver,
 		tb.dialect,
-		tb.logger,
+		getLogger(tb.logger, opt.Debug),
 		&x.UpdateActions,
 	)
 }
 
 // UpdateMany :
-func (tb *Table) UpdateMany(act actions.UpdateStatement) (int64, error) {
+func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.UpdateManyOptions) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
@@ -106,15 +119,19 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement) (int64, error) {
 	if x.Table == "" {
 		x.Table = tb.name
 	}
+	opt := new(options.UpdateManyOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return update(
 		tb.driver,
 		tb.dialect,
-		tb.logger,
+		getLogger(tb.logger, opt.Debug),
 		x,
 	)
 }
 
-func update(driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, act *actions.UpdateActions) (int64, error) {
+func update(driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
 	if len(act.Values) < 1 {
 		return 0, xerrors.New("sqlike: no value to update")
 	}
@@ -125,6 +142,7 @@ func update(driver sqldriver.Driver, dialect sqlcore.Dialect, logger Logger, act
 	}
 
 	result, err := sqldriver.Execute(
+		context.Background(),
 		driver,
 		stmt,
 		logger,

@@ -8,6 +8,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
@@ -16,8 +17,9 @@ import (
 func FindExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		// result sql.Result
-		ns  normalStruct
-		err error
+		cursor *sqlike.Cursor
+		ns     normalStruct
+		err    error
 	)
 
 	emoji := `🤕`
@@ -59,6 +61,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			actions.FindOne().Where(
 				expr.Equal("$Key", uid),
 			),
+			options.FindOne().SetDebug(true),
 		).Decode(&ns)
 		require.NoError(t, err)
 
@@ -88,6 +91,41 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		).Decode(&ns)
 		require.Equal(t, err, sql.ErrNoRows)
 	}
+
+	{
+		ns = normalStruct{}
+		cursor, err = table.Find(
+			actions.Find().Where(
+				expr.Between("TinyInt", 1, 100),
+				expr.In("Enum", []Enum{
+					Success,
+					Failed,
+					Unknown,
+				}),
+			),
+			options.Find().SetDebug(true),
+		)
+		require.NoError(t, err)
+	}
+
+	{
+		ns = normalStruct{}
+		cursor, err = table.Find(
+			actions.Find().Select("Emoji"),
+			options.Find().SetDebug(true),
+		)
+		require.NoError(t, err)
+		var emojis []string
+		err = cursor.ScanSlice(&emojis)
+		require.NoError(t, err)
+		require.ElementsMatch(t, []string{
+			`🤕`,
+			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
+			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
+			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
+			`🤕`,
+		}, emojis)
+	}
 }
 
 // FindErrorExamples :
@@ -97,12 +135,16 @@ func FindErrorExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	{
-		_, err = db.Table("NormalStruct").Find(nil)
+		_, err = db.Table("unknown_table").Find(nil, options.Find().SetDebug(true))
 		require.Error(t, err)
 
-		_, err = db.Table("NormalStruct").Find(
-			actions.Find(),
-		)
+		err = db.Table("NormalStruct").
+			FindOne(nil, options.FindOne().
+				SetDebug(true)).Decode(nil)
 		require.Error(t, err)
+		// _, err = db.Table("NormalStruct").Find(
+		// 	actions.Find(),
+		// )
+		// require.Error(t, err)
 	}
 }

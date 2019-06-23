@@ -19,18 +19,25 @@ type Session struct {
 }
 
 // FindOne :
-func (sess *Session) FindOne(act actions.SelectOneStatement, opts ...options.FindOneOptions) SingleResult {
+func (sess *Session) FindOne(act actions.SelectOneStatement, lock options.LockMode, opts ...*options.FindOneOptions) SingleResult {
 	x := new(actions.FindOneActions)
 	if act != nil {
 		*x = *(act.(*actions.FindOneActions))
 	}
+	opt := new(options.FindOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	x.Limit(1)
 	csr := find(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
 		&x.FindActions,
+		&opt.FindOptions,
+		lock,
 	)
 	csr.close = true
 	if csr.err != nil {
@@ -43,17 +50,24 @@ func (sess *Session) FindOne(act actions.SelectOneStatement, opts ...options.Fin
 }
 
 // Find :
-func (sess *Session) Find(act actions.SelectStatement, opts ...*options.FindOptions) (*Cursor, error) {
+func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, opts ...*options.FindOptions) (*Cursor, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
 	}
+	opt := new(options.FindOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	csr := find(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
 		x,
+		opt,
+		lock,
 	)
 	if csr.err != nil {
 		return nil, csr.err
@@ -64,6 +78,7 @@ func (sess *Session) Find(act actions.SelectStatement, opts ...*options.FindOpti
 // InsertOne :
 func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	return insertOne(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
@@ -76,6 +91,7 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 // InsertMany :
 func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	return insertOne(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,

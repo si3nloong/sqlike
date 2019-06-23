@@ -1,65 +1,55 @@
 package sqldriver
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
-	"log"
-	"strings"
-	"time"
 
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Driver :
 type Driver interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-	Query(query string, args ...interface{}) (*sql.Rows, error)
-	QueryRow(query string, args ...interface{}) *sql.Row
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }
 
 // Execute :
-func Execute(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (result sql.Result, err error) {
-	// if logger != nil {
-	stmt.StartTimer()
-	defer func() {
-		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
-		// log.Println(stmt.String())
-		log.Println(fmt.Sprintf("%v", stmt))
-		log.Println(fmt.Sprintf("%+v", stmt))
-		stmt.StopTimer()
-		log.Println("Time Elapsed :", stmt.TimeElapsed())
-	}()
-	// }
-	result, err = driver.Exec(stmt.String(), stmt.Args()...)
+func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (result sql.Result, err error) {
+	if logger != nil {
+		stmt.StartTimer()
+		defer func() {
+			stmt.StopTimer()
+			logger.Format(stmt)
+		}()
+	}
+	result, err = driver.ExecContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }
 
 // Query :
-func Query(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (rows *sql.Rows, err error) {
-	// if logger != nil {
-	stmt.StartTimer()
-	defer func() {
-		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
-		// log.Println(stmt.String())
-		stmt.StopTimer()
-		log.Println(fmt.Sprintf("%+v", stmt))
-		log.Println("Time Elapsed :", stmt.TimeElapsed())
-	}()
-	// }
-	rows, err = driver.Query(stmt.String(), stmt.Args()...)
+func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (rows *sql.Rows, err error) {
+	if logger != nil {
+		stmt.StartTimer()
+		defer func() {
+			stmt.StopTimer()
+			logger.Format(stmt)
+		}()
+	}
+	rows, err = driver.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }
 
-// QueryRow :
-func QueryRow(driver Driver, stmt *sqlstmt.Statement, logger interface{}) (row *sql.Row) {
-	// if logger != nil {
-	currentTime := time.Now()
-	defer func() {
-		log.Println("===== SQL " + strings.Repeat("=", 60) + ">")
-		log.Println(fmt.Sprintf("%+v", stmt))
-		log.Println("Time Elapsed :", time.Since(currentTime).Seconds())
-	}()
-	// }
-	row = driver.QueryRow(stmt.String(), stmt.Args()...)
+// QueryRowContext :
+func QueryRowContext(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (row *sql.Row) {
+	if logger != nil {
+		stmt.StartTimer()
+		defer func() {
+			stmt.StopTimer()
+			logger.Format(stmt)
+		}()
+	}
+	row = driver.QueryRowContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }

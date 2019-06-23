@@ -9,6 +9,7 @@ import (
 
 // SelectStatement :
 type SelectStatement interface {
+	Distinct() SelectStatement
 	Select(fields ...interface{}) SelectStatement
 	From(table string) SelectStatement
 	Where(fields ...interface{}) SelectStatement
@@ -22,6 +23,7 @@ type SelectStatement interface {
 // FindActions :
 type FindActions struct {
 	Table       string
+	DistinctOn  bool
 	Projections []interface{}
 	Conditions  []interface{}
 	Havings     []interface{}
@@ -38,9 +40,10 @@ func (f *FindActions) Select(fields ...interface{}) SelectStatement {
 }
 
 // Distinct :
-// func (f *FindActions) Distinct() *SelectStatement {
-// 	return f
-// }
+func (f *FindActions) Distinct() SelectStatement {
+	f.DistinctOn = true
+	return f
+}
 
 // From :
 func (f *FindActions) From(table string) SelectStatement {
