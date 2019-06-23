@@ -23,8 +23,8 @@ func Find() *FindOptions {
 }
 
 // SetNoLimit :
-func (opt *FindOptions) SetNoLimit() *FindOptions {
-	opt.NoLimit = true
+func (opt *FindOptions) SetNoLimit(limit bool) *FindOptions {
+	opt.NoLimit = limit
 	return opt
 }
 

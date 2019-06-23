@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/si3nloong/sqlike/core/codec"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )

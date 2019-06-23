@@ -6,6 +6,7 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 )
@@ -71,11 +72,12 @@ func (c Client) ListDatabases() ([]string, error) {
 // Database :
 func (c *Client) Database(name string) *Database {
 	return &Database{
-		name:    name,
-		client:  c,
-		dialect: c.dialect,
-		driver:  c.DB,
-		logger:  c.logger,
+		name:     name,
+		client:   c,
+		dialect:  c.dialect,
+		driver:   c.DB,
+		logger:   c.logger,
+		registry: codec.DefaultRegistry,
 	}
 }
 

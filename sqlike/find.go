@@ -10,11 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
-	"golang.org/x/xerrors"
 )
-
-// ErrUnaddressableEntity :
-var ErrUnaddressableEntity = xerrors.New("unaddressable entity")
 
 // SingleResult :
 type SingleResult interface {
@@ -83,7 +79,8 @@ func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect s
 	if act.Table == "" {
 		act.Table = tbName
 	}
-	if !opt.NoLimit && act.Offs < 1 {
+	// has limit and limit value is zero
+	if !opt.NoLimit && act.Record < 1 {
 		act.Limit(100)
 	}
 	csr := new(Cursor)

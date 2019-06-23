@@ -39,7 +39,7 @@ func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, 
 	}
 
 	if v.IsNil() {
-		return xerrors.New("sqlike: entity is nil")
+		return ErrNilEntity
 	}
 
 	mapper := core.DefaultMapper
@@ -103,6 +103,7 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 
 	x.Limit(1)
 	return update(
+		context.Background(),
 		tb.driver,
 		tb.dialect,
 		getLogger(tb.logger, opt.Debug),
@@ -124,6 +125,7 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.Update
 		opt = opts[0]
 	}
 	return update(
+		context.Background(),
 		tb.driver,
 		tb.dialect,
 		getLogger(tb.logger, opt.Debug),
@@ -131,18 +133,16 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.Update
 	)
 }
 
-func update(driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
+func update(ctx context.Context, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
 	if len(act.Values) < 1 {
-		return 0, xerrors.New("sqlike: no value to update")
+		return 0, ErrNoValueUpdate
 	}
-
 	stmt, err := dialect.Update(act)
 	if err != nil {
 		return 0, err
 	}
-
 	result, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		driver,
 		stmt,
 		logger,

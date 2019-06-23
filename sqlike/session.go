@@ -123,6 +123,7 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 		x.Table = sess.table
 	}
 	return update(
+		sess.tx.context,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -140,6 +141,7 @@ func (sess *Session) UpdateMany(act actions.UpdateStatement) (int64, error) {
 		x.Table = sess.table
 	}
 	return update(
+		sess.tx.context,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -150,6 +152,7 @@ func (sess *Session) UpdateMany(act actions.UpdateStatement) (int64, error) {
 // DestroyOne :
 func (sess *Session) DestroyOne(delete interface{}) error {
 	return destroyOne(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
@@ -161,6 +164,7 @@ func (sess *Session) DestroyOne(delete interface{}) error {
 // DeleteMany :
 func (sess *Session) DeleteMany(act actions.DeleteStatement) (int64, error) {
 	return deleteMany(
+		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,

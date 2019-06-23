@@ -10,6 +10,9 @@ import (
 
 // Open : connect to sql server with connection string
 func Open(driver string, opt *options.ConnectOptions) (client *Client, err error) {
+	if opt == nil {
+		panic("sqlike: invalid connection options <nil>")
+	}
 	var conn *sql.DB
 	dialect := sqlcore.GetDialectByDriver(driver)
 	connStr := dialect.Connect(opt)

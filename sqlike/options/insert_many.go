@@ -8,7 +8,6 @@ func InsertMany() *InsertManyOptions {
 	return &InsertManyOptions{}
 }
 
-
 // SetMode : 
 func (opt *InsertManyOptions) SetMode(mode insertMode) *InsertManyOptions{
 	opt.Mode = mode

@@ -29,8 +29,8 @@ type FindActions struct {
 	Havings     []interface{}
 	GroupBys    []interface{}
 	Sorts       []primitive.Sort
+	Skip        uint
 	Record      uint
-	Offs        uint
 }
 
 // Select :
@@ -89,7 +89,7 @@ func (f *FindActions) Limit(num uint) SelectStatement {
 // Offset :
 func (f *FindActions) Offset(num uint) SelectStatement {
 	if num > 0 {
-		f.Offs = num
+		f.Skip = num
 	}
 	return f
 }

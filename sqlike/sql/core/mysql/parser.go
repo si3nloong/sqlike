@@ -96,6 +96,17 @@ func (p *mySQLParser) ParseClause(stmt *sqlstmt.Statement, it interface{}) error
 	}
 
 	stmt.WriteString(" " + operatorMap[x.Operator] + " ")
+	switch x.Operator {
+	case primitive.IsNull, primitive.NotNull:
+		return nil
+	}
+
+	if x.Value == nil {
+		stmt.AppendArg(nil)
+		stmt.WriteRune('?')
+		return nil
+	}
+
 	if parser, isOk := p.parser.LookupParser(x.Value); isOk {
 		stmt.WriteRune('(')
 		if err := parser(stmt, x.Value); err != nil {
@@ -272,7 +283,7 @@ func (p *mySQLParser) ParseFindActions(stmt *sqlstmt.Statement, it interface{}) 
 	if err := p.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	p.appendLimitNOffset(stmt, x.Record, x.Offs)
+	p.appendLimitNOffset(stmt, x.Record, x.Skip)
 
 	return nil
 }

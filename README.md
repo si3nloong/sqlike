@@ -16,8 +16,11 @@ We don't really care about legacy support, we want latest feature that mysql and
 ### What we provide apart from native package (database/sql)?
 
 1. Support `JSON`
-2. Support `stored column` and `virtual column`
-3. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany` and `ModifyOne` apis
+2. Support `Enum`
+3. Support `UUID`
+4. Support `stored column` and `virtual column`
+5. Extra type such as `Date`, `Timestamp`, `Key` and `GeoPoint`
+6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany` and `ModifyOne` apis
 
 ```go
 import (

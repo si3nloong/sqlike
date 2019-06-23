@@ -17,6 +17,7 @@ import (
 // DestroyOne :
 func (tb *Table) DestroyOne(delete interface{}) error {
 	return destroyOne(
+		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -25,15 +26,17 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	)
 }
 
-func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
 		return ErrUnaddressableEntity
 	}
-
 	if v.IsNil() {
-		return xerrors.New("entity is nil")
+		return ErrNilEntity
 	}
 
 	mapper := core.DefaultMapper
@@ -53,7 +56,7 @@ func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect,
 		return err
 	}
 	result, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		driver,
 		stmt,
 		logger,
@@ -70,6 +73,7 @@ func destroyOne(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect,
 // DeleteMany :
 func (tb *Table) DeleteMany(act actions.DeleteStatement) (int64, error) {
 	return deleteMany(
+		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -78,7 +82,7 @@ func (tb *Table) DeleteMany(act actions.DeleteStatement) (int64, error) {
 	)
 }
 
-func deleteMany(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
+func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
@@ -96,7 +100,7 @@ func deleteMany(tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect,
 		return 0, err
 	}
 	result, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		driver,
 		stmt,
 		logger,

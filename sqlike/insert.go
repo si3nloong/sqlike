@@ -15,9 +15,6 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// ErrInvalidInput :
-var ErrInvalidInput = xerrors.New("sqlike: invalid input <nil>")
-
 // InsertOne :
 func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	return insertOne(
@@ -42,7 +39,7 @@ func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dial
 	}
 
 	if v.IsNil() {
-		return nil, xerrors.New("entity is nil")
+		return nil, ErrNilEntity
 	}
 
 	mapper := core.DefaultMapper
@@ -88,11 +85,11 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Array) && !reflext.IsKind(t, reflect.Slice) {
-		return nil, xerrors.New("InsertMany only support array or slice of entity")
+		return nil, xerrors.New("sqlike.InsertMany only support array or slice of entity")
 	}
 
 	if v.Len() < 1 {
-		return nil, xerrors.New("empty entity")
+		return nil, ErrInvalidInput
 	}
 
 	t = reflext.Deref(t.Elem())
