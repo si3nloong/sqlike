@@ -94,7 +94,7 @@ func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect s
 		ctx,
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
 		csr.err = err

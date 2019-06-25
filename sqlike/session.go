@@ -77,6 +77,10 @@ func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, op
 
 // InsertOne :
 func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+	opt := new(options.InsertOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return insertOne(
 		sess.tx.context,
 		sess.table,
@@ -84,12 +88,16 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 		sess.tx.dialect,
 		sess.tx.logger,
 		src,
-		opts,
+		opt,
 	)
 }
 
 // InsertMany :
-func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertManyOptions) (sql.Result, error) {
+	opt := new(options.InsertManyOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return insertOne(
 		sess.tx.context,
 		sess.table,
@@ -97,13 +105,14 @@ func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertOneOptio
 		sess.tx.dialect,
 		sess.tx.logger,
 		src,
-		opts,
+		opt,
 	)
 }
 
 // ModifyOne :
 func (sess *Session) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
 	return modifyOne(
+		sess.tx.context,
 		sess.table,
 		sess.tx.dialect,
 		sess.tx.driver,

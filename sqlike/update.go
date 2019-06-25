@@ -18,6 +18,7 @@ import (
 // ModifyOne :
 func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
 	return modifyOne(
+		context.Background(),
 		tb.name,
 		tb.dialect,
 		tb.driver,
@@ -27,7 +28,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	)
 }
 
-func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(ctx context.Context, tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -72,18 +73,17 @@ func modifyOne(tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, 
 		return err
 	}
 
-	result, err := sqldriver.Execute(
-		context.Background(),
+	if _, err := sqldriver.Execute(
+		ctx,
 		driver,
 		stmt,
 		getLogger(logger, opt.Debug),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
-	if affected, _ := result.RowsAffected(); affected <= 0 {
-		return xerrors.New("unable to modify entity")
-	}
+	// if affected, _ := result.RowsAffected(); affected <= 0 {
+	// 	return xerrors.New("unable to modify entity")
+	// }
 	return err
 }
 

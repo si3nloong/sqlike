@@ -17,6 +17,10 @@ import (
 
 // InsertOne :
 func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+	opt := new(options.InsertOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return insertOne(
 		context.Background(),
 		tb.name,
@@ -24,11 +28,11 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 		tb.dialect,
 		tb.logger,
 		src,
-		opts,
+		opt,
 	)
 }
 
-func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opts []*options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -61,17 +65,12 @@ func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dial
 	}
 	values[0] = rows
 
-	opt := new(options.InsertOneOptions)
-	if len(opts) > 0 && opts[0] != nil {
-		opt = opts[0]
-	}
-
 	stmt := dialect.InsertInto(tbName, columns, values, opt)
 	return sqldriver.Execute(
 		ctx,
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 }
 
