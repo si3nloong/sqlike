@@ -48,7 +48,7 @@ func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dial
 
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	columns, fields := skipGeneratedColumns(cdc.NameFields)
+	columns, fields := skipGeneratedColumns(cdc.Properties)
 	length := len(columns)
 	if length < 1 {
 		return nil, ErrEmptyFields
@@ -98,7 +98,7 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	columns, fields := skipGeneratedColumns(cdc.NameFields)
+	columns, fields := skipGeneratedColumns(cdc.Properties)
 	length := len(columns)
 	if length < 1 {
 		return nil, ErrEmptyFields

@@ -4,18 +4,34 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestIsNull(t *testing.T) {
+func TestHelper(t *testing.T) {
 	var (
-		ptr      *string
-		nilSlice []string
-		nilMap   map[string]interface{}
+		ptr         *string
+		multiptrint *****int
+		nilSlice    []string
+		nilMap      map[string]interface{}
+		v           reflect.Value
 	)
-	// TODO: nil
-	// assert.Equal(t, true, IsNull(reflect.ValueOf(nil)), "this should be null")
-	assert.Equal(t, true, IsNull(reflect.ValueOf(ptr)))
-	assert.Equal(t, true, IsNull(reflect.ValueOf(nilSlice)))
-	assert.Equal(t, true, IsNull(reflect.ValueOf(nilMap)))
+
+	{
+		require.True(t, IsNull(reflect.ValueOf(ptr)))
+		require.True(t, IsNull(reflect.ValueOf(nilSlice)))
+		require.True(t, IsNull(reflect.ValueOf(nilMap)))
+	}
+
+	{
+		rt := reflect.TypeOf(multiptrint)
+		rt = Deref(rt)
+		// require.Equal(t, reflect.TypeOf(int(1)), multiptrint)
+	}
+
+	{
+		v = ValueOf(multiptrint)
+		require.Equal(t, reflect.ValueOf(multiptrint), v)
+		require.Equal(t, reflect.ValueOf(multiptrint), ValueOf(reflect.ValueOf(multiptrint)))
+	}
+
 }

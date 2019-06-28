@@ -226,7 +226,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 	}
 
 	cdc := core.DefaultMapper.CodecByType(t)
-	_, fields := skipGeneratedColumns(cdc.NameFields)
+	_, fields := skipGeneratedColumns(cdc.Properties)
 	if len(fields) < 1 {
 		return ErrEmptyFields
 	}

@@ -1,6 +1,7 @@
 package jsonb
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -15,19 +16,29 @@ type Unmarshaller interface {
 // Unmarshal :
 func Unmarshal(data []byte, dst interface{}) error {
 	v := reflext.ValueOf(dst)
+	if !v.IsValid() {
+		return xerrors.New("invalid value for jsonb.Unmarshal")
+	}
+
 	t := v.Type()
-	if !reflext.IsKind(t, reflect.Ptr) {
+	v = v.Elem()
+	if !v.IsValid() {
 		return xerrors.New("unaddressable destination")
 	}
 
-	decoder, err := registry.LookupDecoder(reflext.Deref(t))
+	if !v.CanSet() {
+		return xerrors.New("unaddressable destination")
+	}
+
+	t = t.Elem()
+	// log.Println(t, ", Value:", v.CanSet(), t)
+	decoder, err := registry.LookupDecoder(t)
 	if err != nil {
 		return err
 	}
 
 	r := NewReader(data)
 	vv := reflext.Zero(t)
-	vv = reflext.Indirect(vv)
 	if err := decoder(r, vv); err != nil {
 		return err
 	}
@@ -36,9 +47,10 @@ func Unmarshal(data []byte, dst interface{}) error {
 	if c != 0 {
 		return ErrInvalidJSON{
 			callback: "Unmarshal",
+			message:  fmt.Sprintf("invalid json string, extra char %q found", c),
 		}
 	}
-	reflext.Indirect(v).Set(vv)
+	v.Set(vv)
 	return nil
 }
 

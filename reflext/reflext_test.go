@@ -1,11 +1,16 @@
 package reflext
 
 import (
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
+type Enum string
+
 type normalStruct struct {
-	ID      int64 `goloquent:"$Key"`
+	ID      int64 `sqlike:"$Key"`
 	private bool
 	Name    string
 	Num     int
@@ -18,8 +23,8 @@ type pointerStruct struct {
 }
 
 type tagStruct struct {
-	ID   int64  `goloquent:"id"`
-	Skip string `goloquent:"-"`
+	ID   int64  `sqlike:"id"`
+	Skip string `sqlike:"-"`
 }
 
 type PublicStruct struct {
@@ -27,8 +32,8 @@ type PublicStruct struct {
 }
 
 type embeddedStruct struct {
-	tagStruct    `goloquent:"test"`
-	PublicStruct `goloquent:"public"`
+	tagStruct    `sqlike:"test"`
+	PublicStruct `sqlike:"public"`
 }
 
 func TestReflect(t *testing.T) {
@@ -90,4 +95,22 @@ func TestReflect(t *testing.T) {
 	// log.Println(rt)
 	// getCodec(rt, "goloquent")
 	// queue := []queue{}
+}
+
+func TestCodec(t *testing.T) {
+	var i struct {
+		Name   string
+		Nested struct {
+			embeddedStruct
+			Enum Enum
+		}
+		embeddedStruct
+	}
+
+	codec := getCodec(reflect.TypeOf(i), "sqlike", func(sf *StructField) bool {
+		return false
+	})
+
+	require.Equal(t, len(codec.Fields), 13)
+	require.Equal(t, len(codec.Properties), 4)
 }

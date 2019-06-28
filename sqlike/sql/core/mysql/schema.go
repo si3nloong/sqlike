@@ -13,6 +13,11 @@ import (
 	"github.com/si3nloong/sqlike/util"
 )
 
+var charsetMap = map[string]string{
+	"utf8mb4": "utf8mb4_unicode_ci",
+	"latin1":  "latin1_bin",
+}
+
 // mySQLSchema :
 type mySQLSchema struct {
 	sqlutil.MySQLUtil
@@ -86,10 +91,10 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 	col.Nullable = sf.IsNullable
 
 	charset := `utf8mb4`
-	collation := `utf8mb4_unicode_ci`
+	collation := charsetMap[charset]
 	if cs, isOk := sf.Tag.LookUp("charset"); isOk {
 		charset = strings.ToLower(cs)
-		collation = charset + "_unicode_ci"
+		collation = charsetMap[charset]
 	}
 
 	if enum, isOk := sf.Tag.LookUp("enum"); isOk {

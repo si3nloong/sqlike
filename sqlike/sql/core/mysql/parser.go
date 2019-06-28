@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -185,15 +184,11 @@ func (p *mySQLParser) ParseGroup(stmt *sqlstmt.Statement, it interface{}) (err e
 		return xerrors.New("data type not match")
 	}
 	for len(x) > 0 {
-		log.Println(reflect.TypeOf(x[0]))
 		err = p.parser.BuildStatement(stmt, x[0])
 		if err != nil {
 			return
 		}
 		x = x[1:]
-		if len(x) > 0 {
-			stmt.WriteRune(',')
-		}
 	}
 	return
 }

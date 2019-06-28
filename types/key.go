@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/sql/component"
 	"github.com/si3nloong/sqlike/util"
@@ -402,6 +403,15 @@ func NewIDKey(kind string, parent *Key) *Key {
 	return &Key{
 		Kind:   kind,
 		IntID:  id,
+		Parent: parent,
+	}
+}
+
+// NewNameKey :
+func NewNameKey(kind string, parent *Key) *Key {
+	return &Key{
+		Kind:   kind,
+		NameID: uuid.NewV1().String(),
 		Parent: parent,
 	}
 }

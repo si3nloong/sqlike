@@ -142,7 +142,7 @@ func (enc *Encoder) EncodeStruct(w *Writer, v reflect.Value) error {
 	w.WriteRune('{')
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(v.Type())
-	for i, sf := range cdc.NameFields {
+	for i, sf := range cdc.Properties {
 		if i > 0 {
 			w.WriteRune(',')
 		}

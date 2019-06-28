@@ -9,7 +9,9 @@ import (
 func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 	c := r.nextToken()
 	if c != '{' {
-		return ErrInvalidJSON{}
+		return ErrInvalidJSON{
+			callback: "ReadObject",
+		}
 	}
 
 	var (
@@ -23,7 +25,9 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 			break
 		}
 		if c != '"' {
-			return ErrInvalidJSON{}
+			return ErrInvalidJSON{
+				callback: "ReadObject",
+			}
 		}
 		k, err = r.unreadByte().ReadString()
 		if err != nil {
@@ -31,7 +35,9 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		}
 		c = r.nextToken()
 		if c != ':' {
-			return ErrInvalidJSON{}
+			return ErrInvalidJSON{
+				callback: "ReadObject",
+			}
 		}
 		// TODO: process the value
 		if err := cb(r, k); err != nil {
@@ -50,7 +56,9 @@ func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	level := 1
 	c := r.nextToken()
 	if c != '{' {
-		return ErrInvalidJSON{}
+		return ErrInvalidJSON{
+			callback: "ReadFlattenObject",
+		}
 	}
 
 	var (
@@ -122,7 +130,9 @@ keyLoop:
 	}
 
 	if c != '}' {
-		return ErrInvalidJSON{}
+		return ErrInvalidJSON{
+			callback: "ReadFlattenObject",
+		}
 	}
 	return nil
 }

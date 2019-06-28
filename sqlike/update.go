@@ -49,7 +49,7 @@ func modifyOne(ctx context.Context, tbName string, dialect sqlcore.Dialect, driv
 		return xerrors.New(`missing $Key field`)
 	}
 
-	_, fields := skipGeneratedColumns(cdc.NameFields)
+	_, fields := skipGeneratedColumns(cdc.Properties)
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 

@@ -1,15 +1,24 @@
 package jsonb
 
+import (
+	"fmt"
+)
+
 // ReadNumber :
 func (r *Reader) ReadNumber() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
-		r.unreadByte().ReadNull()
+		if err := r.unreadByte().ReadNull(); err != nil {
+			return "", err
+		}
 		return "0", nil
 	}
 
 	if valueMap[c] != jsonNumber {
-		return "", ErrInvalidJSON{}
+		return "", ErrInvalidJSON{
+			callback: "ReadNumber",
+			message:  fmt.Sprintf("invalid character %q, expected number", c),
+		}
 	}
 
 	r.unreadByte()

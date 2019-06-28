@@ -53,7 +53,11 @@ func Zero(t reflect.Type) (v reflect.Value) {
 // IsNullable :
 func IsNullable(t reflect.Type) bool {
 	k := t.Kind()
-	return k == reflect.Ptr || k == reflect.Slice
+	return k == reflect.Ptr ||
+		k == reflect.Slice ||
+		k == reflect.Map ||
+		k == reflect.Func ||
+		k == reflect.Interface
 }
 
 // IsKind :

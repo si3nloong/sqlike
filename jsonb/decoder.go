@@ -37,6 +37,7 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Uint64, dec.DecodeUint)
 	rg.SetKindDecoder(reflect.Float32, dec.DecodeFloat)
 	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
+	rg.SetKindDecoder(reflect.Ptr, dec.DecodePtr)
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
 	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
@@ -166,6 +167,27 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 	return nil
 }
 
+// DecodePtr :
+func (dec *Decoder) DecodePtr(r *Reader, v reflect.Value) error {
+	t := v.Type()
+	if r.IsNull() {
+		v.Set(reflect.Zero(t))
+		return r.skipNull()
+	}
+
+	t = t.Elem()
+	decoder, err := dec.registry.LookupDecoder(t)
+	if err != nil {
+		return err
+	}
+	vv := reflect.New(t)
+	if err := decoder(r, vv.Elem()); err != nil {
+		return err
+	}
+	v.Set(vv)
+	return nil
+}
+
 // DecodeStruct :
 func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	mapper := core.DefaultMapper
@@ -214,6 +236,8 @@ func (dec Decoder) DecodeInterface(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	v.Set(reflect.ValueOf(x))
+	if x != nil {
+		v.Set(reflect.ValueOf(x))
+	}
 	return nil
 }

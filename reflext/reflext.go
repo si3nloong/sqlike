@@ -38,11 +38,23 @@ type StructField struct {
 	Children   []*StructField
 }
 
+// ParentByTraversal :
+func (sf *StructField) ParentByTraversal(cb func(*StructField) bool) *StructField {
+	prnt := sf.Parent
+	for prnt != nil {
+		if cb(prnt) {
+			break
+		}
+		prnt = prnt.Parent
+	}
+	return prnt
+}
+
 // Struct :
 type Struct struct {
 	Tree       *StructField
-	Fields     Fields         // all fields belong to this struct
-	NameFields []*StructField // names fields in sequence
+	Fields     Fields // all fields belong to this struct
+	Properties Fields // available properties in sequence
 	Indexes    map[string]*StructField
 	Names      map[string]*StructField
 }
@@ -120,8 +132,11 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 				IsNullable: q.sf.IsNullable || IsNullable(f.Type),
 				Zero:       reflect.Zero(f.Type),
 				Tag:        tag,
-				Parent:     q.sf,
 				Children:   make([]*StructField, 0),
+			}
+
+			if len(q.sf.Index) > 0 {
+				sf.Parent = q.sf
 			}
 
 			if sf.Path == "" {
@@ -166,7 +181,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 	codec := &Struct{
 		Tree:       root,
 		Fields:     fields,
-		NameFields: make([]*StructField, 0, len(fields)),
+		Properties: make([]*StructField, 0, len(fields)),
 		Indexes:    make(map[string]*StructField),
 		Names:      make(map[string]*StructField),
 	}
@@ -177,13 +192,17 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 		codec.Indexes[sf.ID] = sf
 		if sf.Name != "" && !sf.Embedded {
 			codec.Names[sf.Path] = sf
-			if len(sf.Index) > 1 && sf.Parent != nil && !sf.Parent.Embedded {
+			prnt := sf.ParentByTraversal(func(f *StructField) bool {
+				return f.Embedded == false
+			})
+			if len(sf.Index) > 1 &&
+				sf.Parent != nil && prnt != nil {
 				continue
 			}
-			codec.NameFields = append(codec.NameFields, sf)
+			// not nested embedded struct or embedded struct
+			codec.Properties = append(codec.Properties, sf)
 		}
 	}
-
 	return codec
 }
 

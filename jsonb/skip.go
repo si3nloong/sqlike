@@ -2,6 +2,7 @@ package jsonb
 
 import (
 	"bytes"
+	"fmt"
 
 	"golang.org/x/xerrors"
 )
@@ -30,8 +31,12 @@ func (r *Reader) skipBytes(b []byte) error {
 	if offset > r.len {
 		return xerrors.New("unexpected json length")
 	}
-	if !bytes.Equal(b, r.b[r.pos:offset]) {
-		return ErrInvalidJSON{}
+	cutset := r.b[r.pos:offset]
+	if !bytes.Equal(b, cutset) {
+		return ErrInvalidJSON{
+			callback: "skipBytes",
+			message:  fmt.Sprintf("expected %s", b),
+		}
 	}
 	r.pos = offset
 	return nil

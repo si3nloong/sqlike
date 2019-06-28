@@ -31,6 +31,11 @@ func NewReader(b []byte) *Reader {
 	return &Reader{b: copier, len: length}
 }
 
+func (r *Reader) reset() *Reader {
+	r.pos = 0
+	return r
+}
+
 // Bytes :
 func (r *Reader) Bytes() []byte {
 	return r.b
