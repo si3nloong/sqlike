@@ -40,18 +40,19 @@ func NotNull(field string) (c primitive.C) {
 // In :
 func In(field string, value interface{}) (c primitive.C) {
 	v := reflect.ValueOf(value)
+	k := v.Kind()
 	c.Field = primitive.L(field)
 	c.Operator = primitive.In
-	k := v.Kind()
-	if k != reflect.Array && k != reflect.Slice {
-		panic(fmt.Errorf("expr.In not support data type %v", v.Type()))
+	if k == reflect.Array || k == reflect.Slice {
+		grp := primitive.GV{}
+		for i := 0; i < v.Len(); i++ {
+			grp = append(grp, v.Index(i).Interface())
+		}
+		c.Value = grp
+		return c
 	}
-	grp := primitive.GV{}
-	for i := 0; i < v.Len(); i++ {
-		grp = append(grp, v.Index(i).Interface())
-	}
-	c.Value = grp
-	return
+	c.Value = value
+	return c
 }
 
 // NotIn :
