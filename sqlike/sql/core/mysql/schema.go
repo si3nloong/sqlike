@@ -92,10 +92,15 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 
 	charset := `utf8mb4`
 	collation := charsetMap[charset]
+	dflt := ""
 	if cs, isOk := sf.Tag.LookUp("charset"); isOk {
 		charset = strings.ToLower(cs)
 		collation = charsetMap[charset]
 	}
+
+	col.DefaultValue = &dflt
+	col.CharSet = &charset
+	col.Collation = &collation
 
 	if enum, isOk := sf.Tag.LookUp("enum"); isOk {
 		paths := strings.Split(enum, "|")
@@ -105,7 +110,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 
 		blr := util.AcquireString()
 		defer util.ReleaseString(blr)
-		blr.WriteString(`ENUM`)
+		blr.WriteString("ENUM")
 		blr.WriteRune('(')
 		for i, p := range paths {
 			if i > 0 {
@@ -115,16 +120,24 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 		}
 		blr.WriteRune(')')
 
-		dflt := paths[0]
-		col.DataType = `ENUM`
+		dflt = paths[0]
+		col.DataType = "ENUM"
 		col.Type = blr.String()
 		col.DefaultValue = &dflt
-		col.CharSet = &charset
-		col.Collation = &collation
+		return
+	} else if char, isOk := sf.Tag.LookUp("char"); isOk {
+		if _, err := strconv.Atoi(char); err != nil {
+			panic("invalid value for char data type")
+		}
+		col.DataType = `CHAR(` + char + `)`
+		col.Type = `CHAR(` + char + `)`
 		return
 	} else if _, isOk := sf.Tag.LookUp("longtext"); isOk {
 		col.DataType = `TEXT`
 		col.Type = `TEXT`
+		col.DefaultValue = nil
+		col.CharSet = nil
+		col.Collation = nil
 		return
 	}
 
@@ -134,13 +147,8 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 		charLen = 191
 	}
 
-	dflt := ``
-
-	col.DefaultValue = &dflt
 	col.DataType = `VARCHAR`
 	col.Type = `VARCHAR(` + strconv.Itoa(charLen) + `)`
-	col.CharSet = &charset
-	col.Collation = &collation
 	return
 }
 
