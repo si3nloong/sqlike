@@ -2,6 +2,7 @@ package options
 
 // ModifyOneOptions :
 type ModifyOneOptions struct {
+	Omits []string
 	Debug bool
 }
 
@@ -13,5 +14,17 @@ func ModifyOne() *ModifyOneOptions {
 // SetDebug :
 func (opt *ModifyOneOptions) SetDebug(debug bool) *ModifyOneOptions {
 	opt.Debug = debug
+	return opt
+}
+
+// SetOmitFields :
+func (opt *ModifyOneOptions) SetOmitFields(fields ...string) *ModifyOneOptions {
+	opt.Omits = fields
+	return opt
+}
+
+// AppendOmitField :
+func (opt *ModifyOneOptions) AppendOmitField(field string) *ModifyOneOptions {
+	opt.Omits = append(opt.Omits, field)
 	return opt
 }

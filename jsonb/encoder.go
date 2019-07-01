@@ -40,7 +40,7 @@ func (enc Encoder) SetEncoders(rg *Registry) {
 	rg.SetKindEncoder(reflect.Array, enc.EncodeArray)
 	rg.SetKindEncoder(reflect.Slice, enc.EncodeArray)
 	// TODO: support marshal with map
-	// rg.SetKindEncoder(reflect.Map, enc.EncodeMap)
+	rg.SetKindEncoder(reflect.Map, enc.EncodeMap)
 	rg.SetKindEncoder(reflect.Interface, enc.EncodeInterface)
 	enc.registry = rg
 }
@@ -198,7 +198,7 @@ func (enc *Encoder) EncodeInterface(w *Writer, v reflect.Value) error {
 
 // EncodeMap :
 func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
-	if v.Interface() == nil {
+	if v.IsNil() {
 		w.WriteString(null)
 		return nil
 	}

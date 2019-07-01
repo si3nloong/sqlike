@@ -334,7 +334,17 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("Unmarshal Struct", func(it *testing.T) {
-		b = []byte(`
+
+		{
+			// unmarshal with empty object {}
+			b = []byte(`   {   } `)
+			var a struct{}
+			err = Unmarshal(b, &a)
+			require.NoError(it, err)
+		}
+
+		{
+			b = []byte(`
 		{
 			"Str" :"hello world!!" ,
 			"SymbolStr"   : "x1#$%^\t!\n\t\t@#$%^&*())))?\\<>.,/:\":;'{}[]-=+_~",
@@ -364,42 +374,47 @@ func TestUnmarshal(t *testing.T) {
 			"Bool": true
 		}`)
 
-		cp := make([]byte, len(b), len(b))
-		copy(cp, b)
+			cp := make([]byte, len(b), len(b))
+			copy(cp, b)
 
-		var o testStruct
-		err = Unmarshal(cp, &o)
-		require.NoError(t, err)
-		// after unmarshal, the input should be the same (input shouldn't modified)
-		require.Equal(t, b, cp)
+			var o testStruct
+			err = Unmarshal(cp, &o)
+			require.NoError(t, err)
+			// after unmarshal, the input should be the same (input shouldn't modified)
+			require.Equal(t, b, cp)
 
-		require.Equal(t, `hello world!!`, o.Str)
-		require.Equal(t, `x1#$%^	!
+			require.Equal(t, `hello world!!`, o.Str)
+			require.Equal(t, `x1#$%^	!
 		@#$%^&*())))?\<>.,/:":;'{}[]-=+_~`, o.SymbolStr)
-		require.Equal(t, pk, o.Nested.Security.PrivateKey)
-		require.Equal(t, true, o.Bool)
+			require.Equal(t, pk, o.Nested.Security.PrivateKey)
+			require.Equal(t, true, o.Bool)
 
-		require.Equal(t, int(6000), o.Integer)
-		require.Equal(t, float64(100.111), o.BigDecimal)
-		require.ElementsMatch(t, []User{
-			User{Name: "SianLoong", Age: 18},
-			User{Name: "Junkai"},
-		}, o.Users)
-		require.ElementsMatch(t, []string{"a", "b", "c", "d"}, o.StrSlice)
+			require.Equal(t, int(6000), o.Integer)
+			require.Equal(t, float64(100.111), o.BigDecimal)
+			require.ElementsMatch(t, []User{
+				User{Name: "SianLoong", Age: 18},
+				User{Name: "Junkai"},
+			}, o.Users)
+			require.ElementsMatch(t, []string{"a", "b", "c", "d"}, o.StrSlice)
+		}
 
-		var i User
-		i.Name = "testing"
-		i.Email = "sianloong90@gmail.com"
-		i.Age = 100
-		Unmarshal(nullval, &i)
-		require.Equal(t, User{}, i)
+		{
+			var i User
+			i.Name = "testing"
+			i.Email = "sianloong90@gmail.com"
+			i.Age = 100
+			Unmarshal(nullval, &i)
+			require.Equal(t, User{}, i)
+		}
 
-		var u User
-		u.Name = "testing"
-		Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), &u)
-		require.Equal(t, "lol", u.Name)
-		require.Equal(t, "test@hotmail.com", u.Email)
-		require.Equal(t, int(18), u.Age)
+		{
+			var u User
+			u.Name = "testing"
+			Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), &u)
+			require.Equal(t, "lol", u.Name)
+			require.Equal(t, "test@hotmail.com", u.Email)
+			require.Equal(t, int(18), u.Age)
+		}
 	})
 
 	t.Run("Unmarshal Pointer Struct", func(it *testing.T) {

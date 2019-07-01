@@ -43,28 +43,29 @@ func modifyOne(ctx context.Context, tbName string, dialect sqlcore.Dialect, driv
 		return ErrNilEntity
 	}
 
+	pk := "$Key"
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	if _, exists := cdc.Names["$Key"]; !exists {
-		return xerrors.New(`missing $Key field`)
-	}
-
-	_, fields := skipGeneratedColumns(cdc.Properties)
-	x := new(actions.UpdateActions)
-	x.Table = tbName
-
-	for _, sf := range fields {
-		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-		if sf.Path == "$Key" {
-			x.Where(expr.Equal("$Key", fv.Interface()))
-			continue
-		}
-		x.Set(sf.Path, fv.Interface())
+	if _, exists := cdc.Names[pk]; !exists {
+		return xerrors.Errorf(`missing %s field`, pk)
 	}
 
 	opt := new(options.ModifyOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
+	}
+
+	_, fields := skipColumns(cdc.Properties, opt.Omits)
+	x := new(actions.UpdateActions)
+	x.Table = tbName
+
+	for _, sf := range fields {
+		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
+		if sf.Path == pk {
+			x.Where(expr.Equal(pk, fv.Interface()))
+			continue
+		}
+		x.Set(sf.Path, fv.Interface())
 	}
 
 	x.Limit(1)

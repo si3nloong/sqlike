@@ -11,7 +11,7 @@ type ErrInvalidJSON struct {
 }
 
 func (e ErrInvalidJSON) Error() string {
-	return "unexpected char"
+	return "jsonb." + e.callback + ": " + e.message
 }
 
 // ErrNoEncoder :

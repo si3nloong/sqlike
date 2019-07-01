@@ -76,13 +76,16 @@ func (r *Reader) ReadString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", ErrInvalidJSON{}
+			return "", err
 		}
 		return "", nil
 	}
 
 	if c != '"' {
-		return "", ErrInvalidJSON{}
+		return "", ErrInvalidJSON{
+			callback: "ReadString",
+			message:  "expect start with \"",
+		}
 	}
 
 	for i := r.pos; i < r.len; i++ {
@@ -98,7 +101,10 @@ func (r *Reader) ReadString() (string, error) {
 		}
 	}
 
-	return "", ErrInvalidJSON{}
+	return "", ErrInvalidJSON{
+		callback: "ReadString",
+		message:  "expect end with \"",
+	}
 }
 
 // skipString :
@@ -109,7 +115,10 @@ func (r *Reader) skipString() error {
 	}
 
 	if c != '"' {
-		return ErrInvalidJSON{}
+		return ErrInvalidJSON{
+			callback: "skipString",
+			message:  "expect start with \"",
+		}
 	}
 
 	for i := r.pos; i < r.len; {
@@ -147,7 +156,10 @@ func (r *Reader) skipString() error {
 	}
 
 	if c != '"' {
-		return ErrInvalidJSON{}
+		return ErrInvalidJSON{
+			callback: "skipString",
+			message:  "expect end with \"",
+		}
 	}
 
 	return nil

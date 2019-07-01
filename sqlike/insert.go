@@ -48,7 +48,7 @@ func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dial
 
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	columns, fields := skipGeneratedColumns(cdc.Properties)
+	columns, fields := skipColumns(cdc.Properties, opt.Omits)
 	length := len(columns)
 	if length < 1 {
 		return nil, ErrEmptyFields
@@ -96,9 +96,14 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 		return nil, ErrUnaddressableEntity
 	}
 
+	opt := new(options.InsertManyOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	columns, fields := skipGeneratedColumns(cdc.Properties)
+	columns, fields := skipColumns(cdc.Properties, opt.Omits)
 	length := len(columns)
 	if length < 1 {
 		return nil, ErrEmptyFields
@@ -118,11 +123,6 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 			rows[j] = val
 		}
 		values = append(values, rows)
-	}
-
-	opt := new(options.InsertManyOptions)
-	if len(opts) > 0 && opts[0] != nil {
-		opt = opts[0]
 	}
 
 	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)

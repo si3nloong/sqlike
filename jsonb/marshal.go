@@ -6,8 +6,6 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 )
 
-// var jsonNull = []byte(`null`)
-
 // Marshaller :
 type Marshaller interface {
 	MarshalJSONB() ([]byte, error)

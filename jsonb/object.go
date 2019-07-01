@@ -11,6 +11,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 	if c != '{' {
 		return ErrInvalidJSON{
 			callback: "ReadObject",
+			message:  "expect start with { for object",
 		}
 	}
 
@@ -27,6 +28,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		if c != '"' {
 			return ErrInvalidJSON{
 				callback: "ReadObject",
+				message:  "expect \" for object key",
 			}
 		}
 		k, err = r.unreadByte().ReadString()
@@ -37,6 +39,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		if c != ':' {
 			return ErrInvalidJSON{
 				callback: "ReadObject",
+				message:  "expect : after object key",
 			}
 		}
 		// TODO: process the value
@@ -58,6 +61,7 @@ func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	if c != '{' {
 		return ErrInvalidJSON{
 			callback: "ReadFlattenObject",
+			message:  "expect start with { for object",
 		}
 	}
 
@@ -76,7 +80,10 @@ keyLoop:
 		}
 
 		if c != '"' {
-			return ErrInvalidJSON{}
+			return ErrInvalidJSON{
+				callback: "ReadObject",
+				message:  "expect \" for object key",
+			}
 		}
 		key, err  = r.unreadByte().ReadString()
 		if err != nil {
@@ -85,7 +92,10 @@ keyLoop:
 		paths = append(paths, key)
 		c = r.nextToken()
 		if c != ':' {
-			return ErrInvalidJSON{}
+			return ErrInvalidJSON{
+				callback: "ReadObject",
+				message:  "expect : after object key",
+			}
 		}
 
 		c = r.nextToken()
@@ -132,6 +142,7 @@ keyLoop:
 	if c != '}' {
 		return ErrInvalidJSON{
 			callback: "ReadFlattenObject",
+			message:  "expect start with } for object",
 		}
 	}
 	return nil

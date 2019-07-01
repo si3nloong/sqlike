@@ -21,17 +21,16 @@ func Unmarshal(data []byte, dst interface{}) error {
 	}
 
 	t := v.Type()
-	v = v.Elem()
-	if !v.IsValid() {
+	if !reflext.IsKind(t, reflect.Ptr) {
 		return xerrors.New("unaddressable destination")
 	}
 
+	v = v.Elem()
 	if !v.CanSet() {
 		return xerrors.New("unaddressable destination")
 	}
 
 	t = t.Elem()
-	// log.Println(t, ", Value:", v.CanSet(), t)
 	decoder, err := registry.LookupDecoder(t)
 	if err != nil {
 		return err

@@ -24,12 +24,12 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 	{
 		result, err = table.InsertOne(&ns,
 			options.InsertOne().
+				SetOmitFields("Int").
 				SetDebug(true))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
-
 	}
 
 	// Single upsert

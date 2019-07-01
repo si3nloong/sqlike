@@ -50,6 +50,8 @@ func (p mySQLParser) SetParsers(parser *sqlstmt.StatementParser) {
 	parser.SetParser(reflect.TypeOf(primitive.R{}), p.ParseRange)
 	parser.SetParser(reflect.TypeOf(primitive.Sort{}), p.ParseSort)
 	parser.SetParser(reflect.TypeOf(primitive.KV{}), p.ParseKeyValue)
+	parser.SetParser(reflect.TypeOf(primitive.JC{}), p.ParseJSONContains)
+	parser.SetParser(reflect.TypeOf(primitive.JQ("")), p.ParseJSONQuote)
 	parser.SetParser(reflect.TypeOf(primitive.Math{}), p.ParseMath)
 	parser.SetParser(reflect.TypeOf(&actions.FindActions{}), p.ParseFindActions)
 	parser.SetParser(reflect.TypeOf(&actions.UpdateActions{}), p.ParseUpdateActions)
@@ -163,6 +165,41 @@ func (p *mySQLParser) ParseKeyValue(stmt *sqlstmt.Statement, it interface{}) (er
 	return
 }
 
+func (p *mySQLParser) ParseJSONContains(stmt *sqlstmt.Statement, it interface{}) error {
+	x, isOk := it.(primitive.JC)
+	if !isOk {
+		return xerrors.New("expected json_contains")
+	}
+	stmt.WriteString("JSON_CONTAINS")
+	stmt.WriteByte('(')
+	args, err := p.encodeValue(x.Field)
+	if err != nil {
+		return err
+	}
+	stmt.WriteByte('?')
+	stmt.AppendArg(args)
+	stmt.WriteRune(',')
+	if err := p.parser.BuildStatement(stmt, x.Value); err != nil {
+		return err
+	}
+	stmt.WriteRune(',')
+	stmt.WriteString("'" + x.Path + "'")
+	stmt.WriteByte(')')
+	return nil
+}
+
+func (p *mySQLParser) ParseJSONQuote(stmt *sqlstmt.Statement, it interface{}) error {
+	x, isOk := it.(primitive.JQ)
+	if !isOk {
+		return xerrors.New("data type not match")
+	}
+	stmt.WriteString("JSON_QUOTE")
+	stmt.WriteByte('(')
+	stmt.WriteString(string(x))
+	stmt.WriteByte(')')
+	return nil
+}
+
 func (p *mySQLParser) ParseMath(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x, isOk := it.(primitive.Math)
 	if !isOk {
@@ -216,6 +253,15 @@ func (p *mySQLParser) ParseGroupValue(stmt *sqlstmt.Statement, it interface{}) (
 		}
 	}
 	return
+}
+
+func (p *mySQLParser) encodeValue(it interface{}) (interface{}, error) {
+	v := reflext.ValueOf(it)
+	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	if err != nil {
+		return nil, err
+	}
+	return encoder(nil, v)
 }
 
 func (p *mySQLParser) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err error) {

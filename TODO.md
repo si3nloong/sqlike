@@ -10,6 +10,9 @@ TODO:
 [ok] - Connect to `MySQL` server
 [ok] - Connect to `MySQL` server with `options.Connect`
 [x|gth] - Support extra options like charset and collation in connection
+[ok] - Support omit options on `InsertOne` and `InsertMany`
+[x] - Support omit options on `ModifyOne`
+[x] - Add index using `AddIndex`
 [ok] - Get `MySQL` server version
 [ok] - Drop selected `Database`
 [ok] - List all `Database`

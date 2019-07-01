@@ -13,6 +13,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/sql/util"
 	"golang.org/x/xerrors"
 )
 
@@ -226,7 +227,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 	}
 
 	cdc := core.DefaultMapper.CodecByType(t)
-	_, fields := skipGeneratedColumns(cdc.Properties)
+	_, fields := skipColumns(cdc.Properties, nil)
 	if len(fields) < 1 {
 		return ErrEmptyFields
 	}
@@ -282,10 +283,14 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 }
 
 // we should skip virtual columns on insertion and migration
-func skipGeneratedColumns(sfs []*reflext.StructField) (columns []string, fields []*reflext.StructField) {
+func skipColumns(sfs []*reflext.StructField, omits util.StringSlice) (columns []string, fields []*reflext.StructField) {
 	fields = make([]*reflext.StructField, 0, len(sfs))
+	length := len(omits)
 	for _, sf := range sfs {
 		if _, isOk := sf.Tag.LookUp("generated"); isOk {
+			continue
+		}
+		if length > 0 && omits.IndexOf(sf.Path) > -1 {
 			continue
 		}
 		columns = append(columns, sf.Path)

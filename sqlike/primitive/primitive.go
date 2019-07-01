@@ -61,3 +61,13 @@ type Sort struct {
 	Field string
 	Order order
 }
+
+// JQ :
+type JQ string
+
+// JC :
+type JC struct {
+	Field interface{}
+	Value interface{}
+	Path  string
+}

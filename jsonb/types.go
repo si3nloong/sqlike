@@ -19,6 +19,8 @@ func (jt jsonType) String() (name string) {
 	switch jt {
 	case jsonInvalid:
 		name = "invalid"
+	case jsonNull:
+		name = "null"
 	case jsonString:
 		name = "string"
 	case jsonBoolean:
