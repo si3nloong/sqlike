@@ -20,6 +20,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	return modifyOne(
 		context.Background(),
 		tb.name,
+		tb.pk,
 		tb.dialect,
 		tb.driver,
 		tb.logger,
@@ -28,7 +29,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	)
 }
 
-func modifyOne(ctx context.Context, tbName string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(ctx context.Context, tbName, pk string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -43,11 +44,10 @@ func modifyOne(ctx context.Context, tbName string, dialect sqlcore.Dialect, driv
 		return ErrNilEntity
 	}
 
-	pk := "$Key"
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	if _, exists := cdc.Names[pk]; !exists {
-		return xerrors.Errorf(`missing %s field`, pk)
+		return xerrors.Errorf("missing primary key field %q", pk)
 	}
 
 	opt := new(options.ModifyOneOptions)

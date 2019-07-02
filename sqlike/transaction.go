@@ -10,6 +10,7 @@ import (
 
 // Transaction :
 type Transaction struct {
+	pk      string
 	context context.Context
 	driver  *sql.Tx
 	dialect sqlcore.Dialect
@@ -20,6 +21,7 @@ type Transaction struct {
 func (tx *Transaction) Table(name string) *Session {
 	return &Session{
 		table: name,
+		pk:    tx.pk,
 		tx:    tx,
 	}
 }

@@ -15,6 +15,7 @@ import (
 // Database :
 type Database struct {
 	name     string
+	pk       string
 	client   *Client
 	driver   sqldriver.Driver
 	dialect  sqlcore.Dialect
@@ -27,6 +28,7 @@ func (db *Database) Table(name string) *Table {
 	return &Table{
 		dbName:   db.name,
 		name:     name,
+		pk:       db.pk,
 		client:   db.client,
 		driver:   db.driver,
 		dialect:  db.dialect,
@@ -46,6 +48,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		return nil, err
 	}
 	return &Transaction{
+		pk:      db.pk,
 		context: ctx,
 		driver:  tx,
 		dialect: db.dialect,

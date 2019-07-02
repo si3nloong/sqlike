@@ -13,6 +13,7 @@ TODO:
 [ok] - Support omit options on `InsertOne` and `InsertMany`
 [x] - Support omit options on `ModifyOne`
 [x] - Add index using `AddIndex`
+[ok] - Allow custom name of primary key with `SetPrimaryKey`
 [ok] - Get `MySQL` server version
 [ok] - Drop selected `Database`
 [ok] - List all `Database`

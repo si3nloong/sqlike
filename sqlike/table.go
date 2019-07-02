@@ -34,6 +34,7 @@ var ErrEmptyFields = xerrors.New("empty fields")
 type Table struct {
 	dbName   string
 	name     string
+	pk       string
 	client   *Client
 	driver   sqldriver.Driver
 	dialect  sqlcore.Dialect

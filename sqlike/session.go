@@ -15,6 +15,7 @@ type SessionContext interface {
 // Session :
 type Session struct {
 	table string
+	pk    string
 	tx    *Transaction
 }
 
@@ -114,6 +115,7 @@ func (sess *Session) ModifyOne(update interface{}, opts ...*options.ModifyOneOpt
 	return modifyOne(
 		sess.tx.context,
 		sess.table,
+		sess.pk,
 		sess.tx.dialect,
 		sess.tx.driver,
 		sess.tx.logger,
@@ -163,6 +165,7 @@ func (sess *Session) DestroyOne(delete interface{}) error {
 	return destroyOne(
 		sess.tx.context,
 		sess.table,
+		sess.pk,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,

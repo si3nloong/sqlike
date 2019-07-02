@@ -16,6 +16,7 @@ type Client struct {
 	driverName string
 	version    semver.Version
 	*sql.DB
+	pk      string
 	logger  logs.Logger
 	dialect sqlcore.Dialect
 }
@@ -26,6 +27,7 @@ func newClient(driver string, db *sql.DB, dialect sqlcore.Dialect) (*Client, err
 		DB:         db,
 		dialect:    dialect,
 	}
+	client.pk = "$Key"
 	client.version = client.getVersion()
 	return client, nil
 }
@@ -37,6 +39,12 @@ func (c *Client) SetLogger(logger logs.Logger) *Client {
 		panic("logger cannot be nil")
 	}
 	c.logger = logger
+	return c
+}
+
+// SetPrimaryKey :
+func (c *Client) SetPrimaryKey(pk string) *Client {
+	c.pk = pk
 	return c
 }
 
@@ -73,6 +81,7 @@ func (c Client) ListDatabases() ([]string, error) {
 func (c *Client) Database(name string) *Database {
 	return &Database{
 		name:     name,
+		pk:       c.pk,
 		client:   c,
 		dialect:  c.dialect,
 		driver:   c.DB,

@@ -19,6 +19,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	return destroyOne(
 		context.Background(),
 		tb.name,
+		tb.pk,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -26,7 +27,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	)
 }
 
-func destroyOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -41,9 +42,9 @@ func destroyOne(ctx context.Context, tbName string, driver sqldriver.Driver, dia
 
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	f, exists := cdc.Names["$Key"]
+	f, exists := cdc.Names[pk]
 	if !exists {
-		return xerrors.New(`missing $Key field`)
+		return xerrors.Errorf("missing primary key field %q", pk)
 	}
 
 	x := new(actions.DeleteActions)
