@@ -48,7 +48,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     component.Column
 		virtual bool
@@ -69,8 +69,8 @@ func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *
 		if err != nil {
 			return
 		}
-		if sf.Path == "$Key" {
-			stmt.WriteString("PRIMARY KEY (`$Key`)")
+		if sf.Path == pk {
+			stmt.WriteString("PRIMARY KEY (`" + pk + "`)")
 			stmt.WriteRune(',')
 		}
 		ms.buildSchemaByColumn(stmt, col)
@@ -118,7 +118,7 @@ func (ms MySQL) CreateTable(table string, fields []*reflext.StructField) (stmt *
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(table string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     component.Column
 		idx     int
@@ -142,8 +142,8 @@ func (ms *MySQL) AlterTable(table string, fields []*reflext.StructField, columns
 			action = `MODIFY`
 			cols.Splice(idx)
 		}
-		if action == `ADD` && sf.Path == `$Key` {
-			stmt.WriteString("ADD PRIMARY KEY (`$Key`)")
+		if action == `ADD` && sf.Path == pk {
+			stmt.WriteString("ADD PRIMARY KEY (`" + pk + "`)")
 			stmt.WriteRune(',')
 		}
 		stmt.WriteString(action + ` `)

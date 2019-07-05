@@ -252,7 +252,7 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}
-	stmt, err := tb.dialect.AlterTable(tb.name, fields, cols, idxs, unsafe)
+	stmt, err := tb.dialect.AlterTable(tb.name, tb.pk, fields, cols, idxs, unsafe)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.name, fields)
+	stmt, err := tb.dialect.CreateTable(tb.name, tb.pk, fields)
 	if err != nil {
 		return err
 	}
