@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"github.com/si3nloong/sqlike/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sqlike/sql/internal"
 	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
@@ -19,7 +20,7 @@ func New() *MySQL {
 	pr := sqlstmt.NewStatementParser()
 
 	mySQLSchema{}.SetBuilders(sb)
-	mySQLParser{}.SetParsers(pr)
+	mySQLParser{}.SetRegistryAndParsers(codec.DefaultRegistry, pr)
 
 	return &MySQL{
 		schema: sb,

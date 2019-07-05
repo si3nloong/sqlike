@@ -10,6 +10,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// ErrNoRows :
+var ErrNoRows = sql.ErrNoRows
+
 // Cursor :
 type Cursor struct {
 	close    bool

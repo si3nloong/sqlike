@@ -41,7 +41,7 @@ const (
 )
 
 type User struct {
-    ID        uuid.UUID  `sqlike:"$Key"`
+    ID        uuid.UUID 
     Name      string
     Email     string     `sqlike:",size:200"`
     Address   string     `sqlike:",longtext"`
@@ -61,48 +61,93 @@ func newUser() (user User) {
 func main() {
     client := sqlike.MustConnect("mysql",
         options.Connect().
-        SetUsername(`root`).
-        SetPassword(``).
-        SetHost(`localhost`).
-        SetPort(`3306`).
-        SetDatabase(`sqlike`),
+        SetUsername("root").
+        SetPassword("").
+        SetHost("localhost").
+        SetPort("3306").
+        SetDatabase("sqlike"),
     )
 
+    client.SetPrimaryKey("ID") // Change default primary key name
     version := client.Version() // Display driver version
     dbs, _ := client.ListDatabases() // List databases
 
     userTable := client.Database("sqlike").Table("User")
-    userTable.Drop() // Drop Table
-    userTable.Migrate(new(User)) // Migration
 
-    user := newUser()
-    if _, err := userTable.InsertOne(&user); err != nil {
-        panic(err)
+    // Drop Table
+    userTable.Drop() 
+
+    // Migrate Table
+    userTable.Migrate(User{})
+
+    // Truncate Table
+    userTable.Truncate()
+
+    // Insert one record
+    {
+        user := newUser()
+        if _, err := userTable.InsertOne(&user); err != nil {
+            panic(err)
+        }
     }
 
-    users := [...]User{
-        newUser(),
-        newUser(),
-        newUser(),
-    }
-    if _, err := userTable.InsertMany(&users); err != nil {
-        panic(err)
-    }
-
-    user.Name = `🤖 Hello World!`
-    if err := userTable.ModifyOne(&user); err != nil {
-        panic(err)
+    // Insert multiple record
+    {
+        users := [...]User{
+            newUser(),
+            newUser(),
+            newUser(),
+        }
+        if _, err := userTable.InsertMany(&users); err != nil {
+            panic(err)
+        }
     }
 
-    result := User{}
-    if err := userTable.FindOne(nil).Decode(&result); err != nil {
-        panic(err)
+    // Find one record
+    {
+        user := User{}
+        err := userTable.FindOne(nil).Decode(&user)
+        if err != nil {
+            if err != sqlike.ErrNoRows {
+                panic(err)
+            }
+            // record not exist
+        }
     }
 
+    // Find multiple records
+    {
+        users := make([]User, 0)
+        cursor, err := userTable.Find(
+            actions.Find().Where(
+                expr.Equal("ID", result.ID),
+            ),
+        )
+        if err != nil {
+            panic(err)
+        }
+        cursor.All(&users) // map into the struct of slice
+    }
 
-    cursor, err := userTable.Find(
-        actions.Find().
-        Where(expr.Equal("$Key", result.ID)),
-    )
+    // Update one record with all fields of struct
+    {
+        user.Name = `🤖 Hello World!`
+        if err := userTable.ModifyOne(&user); err != nil {
+            panic(err)
+        }
+    }
+
+    // Update one record with selected fields
+    {
+        userTable.UpdateOne(
+            actions.UpdateOne().Where(
+                expr.Equal("ID", 100),
+            ).Set(
+                expr.Field("Name", "SianLoong"),
+                expr.Field("Email", "test@gmail.com"),
+            ),
+            options.UpdateOne().SetDebug(true), // debug the query
+        )
+    }
 }
 ```

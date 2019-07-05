@@ -8,7 +8,7 @@ import (
 // UpdateOneStatement :
 type UpdateOneStatement interface {
 	Where(fields ...interface{}) UpdateOneStatement
-	Set(field string, value interface{}) UpdateOneStatement
+	Set(values ...primitive.KV) UpdateOneStatement
 	OrderBy(fields ...primitive.Sort) UpdateOneStatement
 }
 
@@ -24,12 +24,8 @@ func (f *UpdateOneActions) Where(fields ...interface{}) UpdateOneStatement {
 }
 
 // Set :
-func (f *UpdateOneActions) Set(field string, value interface{}) UpdateOneStatement {
-	f.Values = append(f.Values, primitive.C{
-		Field:    primitive.Col(field),
-		Operator: primitive.Equal,
-		Value:    value,
-	})
+func (f *UpdateOneActions) Set(values ...primitive.KV) UpdateOneStatement {
+	f.Values = append(f.Values, values...)
 	return f
 }
 

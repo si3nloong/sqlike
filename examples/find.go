@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"database/sql"
 	"testing"
 	"time"
 
@@ -89,7 +88,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 				expr.Equal("$Key", "1000"),
 			),
 		).Decode(&ns)
-		require.Equal(t, err, sql.ErrNoRows)
+		require.Equal(t, err, sqlike.ErrNoRows)
 	}
 
 	{

@@ -65,7 +65,7 @@ func modifyOne(ctx context.Context, tbName, pk string, dialect sqlcore.Dialect, 
 			x.Where(expr.Equal(pk, fv.Interface()))
 			continue
 		}
-		x.Set(sf.Path, fv.Interface())
+		x.Set(expr.Field(sf.Path, fv.Interface()))
 	}
 
 	x.Limit(1)

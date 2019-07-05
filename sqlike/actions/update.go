@@ -8,7 +8,7 @@ import (
 // UpdateStatement :
 type UpdateStatement interface {
 	Where(fields ...interface{}) UpdateStatement
-	Set(field string, value interface{}) UpdateStatement
+	Set(values ...primitive.KV) UpdateStatement
 	OrderBy(fields ...primitive.Sort) UpdateStatement
 	Limit(num uint) UpdateStatement
 }
@@ -17,7 +17,7 @@ type UpdateStatement interface {
 type UpdateActions struct {
 	Table      string
 	Conditions []interface{}
-	Values     []primitive.C
+	Values     []primitive.KV
 	Sorts      []primitive.Sort
 	Record     uint
 }
@@ -29,12 +29,8 @@ func (f *UpdateActions) Where(fields ...interface{}) UpdateStatement {
 }
 
 // Set :
-func (f *UpdateActions) Set(field string, value interface{}) UpdateStatement {
-	f.Values = append(f.Values, primitive.C{
-		Field:    primitive.Col(field),
-		Operator: primitive.Equal,
-		Value:    value,
-	})
+func (f *UpdateActions) Set(values ...primitive.KV) UpdateStatement {
+	f.Values = append(f.Values, values...)
 	return f
 }
 

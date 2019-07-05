@@ -30,7 +30,7 @@ type C struct {
 
 // KV :
 type KV struct {
-	Field Col
+	Field string
 	Value interface{}
 }
 

@@ -39,7 +39,13 @@ type mySQLParser struct {
 	sqlutil.MySQLUtil
 }
 
-func (p mySQLParser) SetParsers(parser *sqlstmt.StatementParser) {
+func (p mySQLParser) SetRegistryAndParsers(registry *codec.Registry, parser *sqlstmt.StatementParser) {
+	if registry == nil {
+		panic("missing required registry")
+	}
+	if parser == nil {
+		panic("missing required parser")
+	}
 	parser.SetParser(reflect.TypeOf(primitive.L("")), p.ParseString)
 	parser.SetParser(reflect.TypeOf(primitive.Raw("")), p.ParseRaw)
 	parser.SetParser(reflect.TypeOf(primitive.C{}), p.ParseClause)
@@ -57,16 +63,17 @@ func (p mySQLParser) SetParsers(parser *sqlstmt.StatementParser) {
 	parser.SetParser(reflect.TypeOf(&actions.UpdateActions{}), p.ParseUpdateActions)
 	parser.SetParser(reflect.TypeOf(&actions.DeleteActions{}), p.ParseDeleteActions)
 	parser.SetParser(reflect.String, p.ParseString)
+	p.registry = registry
 	p.parser = parser
 }
 
-func (p mySQLParser) ParseString(stmt *sqlstmt.Statement, it interface{}) error {
+func (p *mySQLParser) ParseString(stmt *sqlstmt.Statement, it interface{}) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(p.Quote(v.String()))
 	return nil
 }
 
-func (p mySQLParser) ParseRaw(stmt *sqlstmt.Statement, it interface{}) error {
+func (p *mySQLParser) ParseRaw(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(primitive.Raw)
 	if !isOk {
 		return xerrors.New("raw")
@@ -75,7 +82,7 @@ func (p mySQLParser) ParseRaw(stmt *sqlstmt.Statement, it interface{}) error {
 	return nil
 }
 
-func (p mySQLParser) ParseOperator(stmt *sqlstmt.Statement, it interface{}) error {
+func (p *mySQLParser) ParseOperator(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(primitive.Operator)
 	if !isOk {
 		return xerrors.New("operator")
@@ -118,7 +125,7 @@ func (p *mySQLParser) ParseClause(stmt *sqlstmt.Statement, it interface{}) error
 	}
 
 	v := reflext.ValueOf(x.Value)
-	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	encoder, err := p.registry.LookupEncoder(v.Type())
 	if err != nil {
 		return err
 	}
@@ -150,18 +157,21 @@ func (p *mySQLParser) ParseKeyValue(stmt *sqlstmt.Statement, it interface{}) (er
 		return xerrors.New("data type not match")
 	}
 	stmt.WriteString(p.Quote(string(x.Field)))
-	stmt.WriteString(` = `)
-	var parser sqlstmt.ParseStatementFunc
-	parser, isOk = p.parser.LookupParser(reflext.ValueOf(it))
-	if isOk {
-		err = parser(stmt, it)
+	stmt.WriteString(` = ?`)
+	if x.Value == nil {
+		stmt.AppendArg(nil)
 		return
 	}
-	// log.Println(parser)
-	stmt.WriteString(`?`)
-	// log.Println("Value should normalize before add into arguments")
-	// log.Println("Value :", x.Value)
-	stmt.AppendArg(x.Value)
+	v := reflext.ValueOf(x.Value)
+	encoder, err := p.registry.LookupEncoder(v.Type())
+	if err != nil {
+		return err
+	}
+	vv, err := encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArg(vv)
 	return
 }
 
@@ -237,7 +247,7 @@ func (p *mySQLParser) ParseGroupValue(stmt *sqlstmt.Statement, it interface{}) (
 	}
 	for len(x) > 0 {
 		v := reflext.ValueOf(x[0])
-		encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+		encoder, err := p.registry.LookupEncoder(v.Type())
 		if err != nil {
 			return err
 		}
@@ -257,7 +267,7 @@ func (p *mySQLParser) ParseGroupValue(stmt *sqlstmt.Statement, it interface{}) (
 
 func (p *mySQLParser) encodeValue(it interface{}) (interface{}, error) {
 	v := reflext.ValueOf(it)
-	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	encoder, err := p.registry.LookupEncoder(v.Type())
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +281,7 @@ func (p *mySQLParser) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err e
 	}
 
 	v := reflext.ValueOf(x.From)
-	encoder, err := codec.DefaultRegistry.LookupEncoder(v.Type())
+	encoder, err := p.registry.LookupEncoder(v.Type())
 	if err != nil {
 		return err
 	}
@@ -282,7 +292,7 @@ func (p *mySQLParser) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err e
 	stmt.AppendArg(arg)
 
 	v = reflext.ValueOf(x.To)
-	encoder, err = codec.DefaultRegistry.LookupEncoder(v.Type())
+	encoder, err = p.registry.LookupEncoder(v.Type())
 	if err != nil {
 		return err
 	}
@@ -436,7 +446,7 @@ func (p *mySQLParser) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset 
 	}
 }
 
-func (p *mySQLParser) appendSet(stmt *sqlstmt.Statement, values []primitive.C) error {
+func (p *mySQLParser) appendSet(stmt *sqlstmt.Statement, values []primitive.KV) error {
 	length := len(values)
 	if length > 0 {
 		stmt.WriteString(`SET `)

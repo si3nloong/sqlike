@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -201,6 +202,11 @@ func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
+	}
+	// TODO:
+	r := v.MapRange()
+	for r.Next() {
+		log.Println(r.Key(), r.Value())
 	}
 	return nil
 }

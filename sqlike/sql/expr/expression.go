@@ -170,6 +170,13 @@ func Or(conds ...interface{}) (g primitive.G) {
 	return
 }
 
+// Field :
+func Field(field string, value interface{}) (kv primitive.KV) {
+	kv.Field = field
+	kv.Value = value
+	return
+}
+
 // Asc :
 func Asc(field string) (s primitive.Sort) {
 	s.Field = field

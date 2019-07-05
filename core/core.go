@@ -1,13 +1,10 @@
 package core
 
 import (
-	// "encoding/base64"
+	"reflect"
+
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/types"
-
-	// "github.com/si3nloong/sqlike/core/codec"
-	"reflect"
-	// "strconv"
 )
 
 var typeOfKey = reflect.TypeOf(types.Key{})
