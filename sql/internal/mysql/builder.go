@@ -15,22 +15,22 @@ import (
 )
 
 var operatorMap = map[primitive.Operator]string{
-	primitive.Equal:        "=",
-	primitive.NotEqual:     "<>",
-	primitive.Like:         "LIKE",
-	primitive.NotLike:      "NOT LIKE",
-	primitive.In:           "IN",
-	primitive.NotIn:        "NOT IN",
-	primitive.Between:      "BETWEEN",
-	primitive.NotBetween:   "NOT BETWEEN",
-	primitive.IsNull:       "IS NULL",
-	primitive.NotNull:      "IS NOT NULL",
-	primitive.GreaterThan:  ">",
-	primitive.GreaterEqual: ">=",
-	primitive.LowerThan:    "<",
-	primitive.LowerEqual:   "<=",
-	primitive.Or:           "OR",
-	primitive.And:          "AND",
+	primitive.Equal:          "=",
+	primitive.NotEqual:       "<>",
+	primitive.Like:           "LIKE",
+	primitive.NotLike:        "NOT LIKE",
+	primitive.In:             "IN",
+	primitive.NotIn:          "NOT IN",
+	primitive.Between:        "BETWEEN",
+	primitive.NotBetween:     "NOT BETWEEN",
+	primitive.IsNull:         "IS NULL",
+	primitive.NotNull:        "IS NOT NULL",
+	primitive.GreaterThan:    ">",
+	primitive.GreaterOrEqual: ">=",
+	primitive.LesserThan:     "<",
+	primitive.LesserOrEqual:  "<=",
+	primitive.Or:             "OR",
+	primitive.And:            "AND",
 }
 
 type mySQLBuilder struct {
@@ -47,7 +47,9 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 		panic("missing required parser")
 	}
 	blr.SetBuilder(reflect.TypeOf(primitive.L("")), b.ParseString)
-	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.ParseRaw)
+	blr.SetBuilder(reflect.TypeOf(primitive.As{}), b.BuildAs)
+	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.BuildRaw)
+	blr.SetBuilder(reflect.TypeOf(primitive.Aggregate{}), b.BuildAggregate)
 	blr.SetBuilder(reflect.TypeOf(primitive.Column{}), b.BuildColumn)
 	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.ParseClause)
 	blr.SetBuilder(reflect.TypeOf(primitive.Col("")), b.ParseString)
@@ -87,12 +89,55 @@ func unmatchedDataType(callback string) error {
 	return xerrors.New("invalid data type")
 }
 
-func (b *mySQLBuilder) ParseRaw(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildRaw(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(primitive.Raw)
 	if !isOk {
-		return unmatchedDataType("ParseRaw")
+		return unmatchedDataType("BuildRaw")
 	}
 	stmt.WriteString(x.Value)
+	return nil
+}
+
+func (b *mySQLBuilder) BuildAs(stmt *sqlstmt.Statement, it interface{}) error {
+	x, isOk := it.(primitive.As)
+	if !isOk {
+		return unmatchedDataType("BuildAs")
+	}
+	if err := b.getValue(stmt, x.Field); err != nil {
+		return err
+	}
+	stmt.WriteString(" AS ")
+	stmt.WriteString(b.Quote(x.Name))
+	return nil
+}
+
+func (b *mySQLBuilder) BuildAggregate(stmt *sqlstmt.Statement, it interface{}) error {
+	x, isOk := it.(primitive.Aggregate)
+	if !isOk {
+		return unmatchedDataType("BuildAggregate")
+	}
+	switch x.By {
+	case primitive.Sum:
+		stmt.WriteString("COALESCE(SUM(")
+		if err := b.getValue(stmt, x.Field); err != nil {
+			return err
+		}
+		stmt.WriteString("),0)")
+		return nil
+	case primitive.Average:
+		stmt.WriteString("AVG")
+	case primitive.Count:
+		stmt.WriteString("COUNT")
+	case primitive.Max:
+		stmt.WriteString("MAX")
+	case primitive.Min:
+		stmt.WriteString("MIN")
+	}
+	stmt.WriteByte('(')
+	if err := b.getValue(stmt, x.Field); err != nil {
+		return err
+	}
+	stmt.WriteByte(')')
 	return nil
 }
 

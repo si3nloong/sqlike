@@ -1,7 +1,6 @@
 package expr
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/sqlike/primitive"
@@ -13,6 +12,13 @@ func Raw(value string) (r primitive.Raw) {
 	return
 }
 
+// As :
+func As(field interface{}, alias string) (as primitive.As) {
+	as.Field = wrapColumn(field)
+	as.Name = alias
+	return
+}
+
 // Column :
 func Column(name string) (c primitive.Column) {
 	c.Name = name
@@ -21,17 +27,13 @@ func Column(name string) (c primitive.Column) {
 
 // Equal :
 func Equal(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.Equal
-	c.Value = value
+	c = clause(field, primitive.Equal, value)
 	return
 }
 
 // NotEqual :
 func NotEqual(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.NotEqual
-	c.Value = value
+	c = clause(field, primitive.NotEqual, value)
 	return
 }
 
@@ -50,8 +52,19 @@ func NotNull(field string) (c primitive.C) {
 }
 
 // In :
-func In(field, value interface{}) (c primitive.C) {
-	v := reflect.ValueOf(value)
+func In(field, values interface{}) (c primitive.C) {
+	c = inGroup(field, primitive.In, values)
+	return
+}
+
+// NotIn :
+func NotIn(field, values interface{}) (c primitive.C) {
+	c = inGroup(field, primitive.NotIn, values)
+	return
+}
+
+func inGroup(field interface{}, op primitive.Operator, values interface{}) (c primitive.C) {
+	v := reflect.ValueOf(values)
 	k := v.Kind()
 	c.Field = wrapColumn(field)
 	c.Operator = primitive.In
@@ -65,91 +78,58 @@ func In(field, value interface{}) (c primitive.C) {
 			grp = append(grp, v.Index(i).Interface())
 		}
 	} else {
-		grp = append(grp, value)
+		grp = append(grp, values)
 	}
 	grp = append(grp, Raw(")"))
 	c.Value = grp
 	return c
 }
 
-// NotIn :
-func NotIn(field string, value interface{}) (c primitive.C) {
-	v := reflect.ValueOf(value)
-	c.Field = primitive.L(field)
-	c.Operator = primitive.NotIn
-	k := v.Kind()
-	if k != reflect.Array && k != reflect.Slice {
-		panic(fmt.Errorf("expr.In not support data type %v", v.Type()))
-	}
-	grp := primitive.G{}
-	for i := 0; i < v.Len(); i++ {
-		grp = append(grp, v.Index(i).Interface())
-	}
-	c.Value = grp
-	return
-}
-
 // Like :
 func Like(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.Like
-	c.Value = value
+	c = clause(field, primitive.Like, value)
 	return
 }
 
 // NotLike :
 func NotLike(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.NotLike
-	c.Value = value
+	c = clause(field, primitive.NotLike, value)
 	return
 }
 
 // GreaterOrEqual :
 func GreaterOrEqual(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.GreaterEqual
-	c.Value = value
+	c = clause(field, primitive.GreaterOrEqual, value)
 	return
 }
 
 // GreaterThan :
 func GreaterThan(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.GreaterThan
-	c.Value = value
+	c = clause(field, primitive.GreaterThan, value)
 	return
 }
 
 // LesserOrEqual :
 func LesserOrEqual(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.LowerEqual
-	c.Value = value
+	c = clause(field, primitive.LesserOrEqual, value)
 	return
 }
 
 // LesserThan :
 func LesserThan(field, value interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.LowerThan
-	c.Value = value
+	c = clause(field, primitive.LesserThan, value)
 	return
 }
 
 // Between :
 func Between(field, from, to interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.Between
-	c.Value = primitive.R{From: from, To: to}
+	c = clause(field, primitive.Between, primitive.R{From: from, To: to})
 	return
 }
 
 // NotBetween :
 func NotBetween(field, from, to interface{}) (c primitive.C) {
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.NotBetween
-	c.Value = primitive.R{From: from, To: to}
+	c = clause(field, primitive.NotBetween, primitive.R{From: from, To: to})
 	return
 }
 
@@ -221,5 +201,12 @@ func wrapColumn(it interface{}) interface{} {
 func Desc(field string) (s primitive.Sort) {
 	s.Field = field
 	s.Order = primitive.Descending
+	return
+}
+
+func clause(field interface{}, op primitive.Operator, value interface{}) (c primitive.C) {
+	c.Field = wrapColumn(field)
+	c.Operator = op
+	c.Value = value
 	return
 }

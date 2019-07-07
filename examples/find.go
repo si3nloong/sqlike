@@ -135,21 +135,54 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		cursor, err = table.Find(
-			actions.Find().Where(
-				expr.In("$Key", actions.Find().
-					Select("$Key").
-					From("NormalStruct").
-					Where(
-						expr.Between("Tinyint", 1, 100),
-					).
-					OrderBy(
-						expr.Desc("Timestamp"),
+			actions.Find().
+				Where(
+					expr.In("$Key", actions.Find().
+						Select("$Key").
+						From("NormalStruct").
+						Where(
+							expr.Between("Tinyint", 1, 100),
+						).
+						OrderBy(
+							expr.Desc("Timestamp"),
+						),
 					),
 				),
-			),
 			options.Find().SetDebug(true),
 		)
 		require.NoError(t, err)
+	}
+
+	// Aggregation
+	{
+		ns = normalStruct{}
+		cursor, err = table.Find(
+			actions.Find().
+				Select(
+					expr.As("Enum", "A"),
+					expr.As(expr.Count("$Key"), "B"),
+					expr.Average("MediumInt"),
+					expr.As(expr.Sum("SmallInt"), "C"),
+					expr.Max("BigInt"),
+					expr.As(expr.Min("BigInt"), "D"),
+				).
+				GroupBy(
+					"Enum",
+					"$Key",
+				).
+				OrderBy(
+					expr.Desc("$Key"),
+				),
+			options.Find().
+				SetDebug(true).
+				SetNoLimit(true),
+		)
+		require.NoError(t, err)
+		require.ElementsMatch(t,
+			[]string{
+				"A", "B", "AVG(`MediumInt`)",
+				"C", "MAX(`BigInt`)", "D",
+			}, cursor.Columns())
 	}
 }
 

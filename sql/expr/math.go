@@ -10,3 +10,14 @@ func Increment(field string, inc uint) primitive.Math {
 		Value: int(inc),
 	}
 }
+
+// Multiply :
+func Multiply(fields ...interface{}) (grp primitive.G) {
+	for i, f := range fields {
+		if i > 0 {
+			grp = append(grp, Raw("*"))
+		}
+		grp = append(grp, wrapColumn(f))
+	}
+	return
+}

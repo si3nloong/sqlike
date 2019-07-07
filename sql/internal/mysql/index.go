@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/sqlike/indexes"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
 )
 
 // GetIndexes :
@@ -23,7 +23,7 @@ func (ms MySQL) CreateIndexes(table string, idxs []indexes.Index) (stmt *sqlstmt
 		}
 
 		stmt.WriteString(` ADD ` + ms.getIndexByType(idx.Kind))
-		stmt.WriteString(` ` + ms.Quote(idx.Name) + ` `)
+		stmt.WriteString(` ` + ms.Quote(idx.GetName()) + ` `)
 		stmt.WriteRune('(')
 		for j, col := range idx.Columns {
 			if j > 0 {

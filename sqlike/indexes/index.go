@@ -1,5 +1,7 @@
 package indexes
 
+import "strings"
+
 // Kind :
 type Kind int
 
@@ -25,4 +27,19 @@ type Index struct {
 	Kind    Kind
 	Order   Order
 	Columns []string
+}
+
+// GetName :
+func (idx *Index) GetName() string {
+	if idx.Name == "" {
+		name := strings.Join(idx.Columns, "_")
+		switch idx.Kind {
+		case FullText:
+		case Unique:
+			idx.Name = "UX_" + name
+		default:
+			idx.Name = "IX_" + name
+		}
+	}
+	return idx.Name
 }

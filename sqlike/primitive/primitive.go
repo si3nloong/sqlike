@@ -88,3 +88,25 @@ type JC struct {
 	Value interface{}
 	Path  string
 }
+
+type aggregate int
+
+const (
+	Sum aggregate = iota + 1
+	Count
+	Average
+	Max
+	Min
+)
+
+// Aggregate :
+type Aggregate struct {
+	Field interface{}
+	By    aggregate
+}
+
+// As :
+type As struct {
+	Field interface{}
+	Name  string
+}

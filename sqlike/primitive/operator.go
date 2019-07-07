@@ -8,9 +8,9 @@ const (
 	Equal Operator = iota
 	NotEqual
 	GreaterThan
-	LowerThan
-	GreaterEqual
-	LowerEqual
+	LesserThan
+	GreaterOrEqual
+	LesserOrEqual
 	Like
 	NotLike
 	In
