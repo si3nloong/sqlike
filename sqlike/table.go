@@ -233,26 +233,19 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 		return ErrEmptyFields
 	}
 
-	if tb.Exists() {
-		columns, err := tb.ListColumns()
-		if err != nil {
-			return err
-		}
-		return tb.alterTable(fields, columns, nil, unsafe)
+	if !tb.Exists() {
+		return tb.createTable(fields)
 	}
-	return tb.createTable(fields)
+
+	columns, err := tb.ListColumns()
+	if err != nil {
+		return err
+	}
+	return tb.alterTable(fields, columns, nil, unsafe)
 }
 
-func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []indexes.Index, unsafe bool) error {
-	cols := make([]string, len(columns), len(columns))
-	for i, col := range columns {
-		cols[i] = col.Name
-	}
-	idxs := make([]string, len(indexs), len(indexs))
-	for i, idx := range indexs {
-		idxs[i] = idx.Name
-	}
-	stmt, err := tb.dialect.AlterTable(tb.name, tb.pk, fields, cols, idxs, unsafe)
+func (tb *Table) createTable(fields []*reflext.StructField) error {
+	stmt, err := tb.dialect.CreateTable(tb.name, tb.pk, fields)
 	if err != nil {
 		return err
 	}
@@ -267,8 +260,16 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 	return nil
 }
 
-func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.name, tb.pk, fields)
+func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []indexes.Index, unsafe bool) error {
+	cols := make([]string, len(columns), len(columns))
+	for i, col := range columns {
+		cols[i] = col.Name
+	}
+	idxs := make([]string, len(indexs), len(indexs))
+	for i, idx := range indexs {
+		idxs[i] = idx.Name
+	}
+	stmt, err := tb.dialect.AlterTable(tb.name, tb.pk, fields, cols, idxs, unsafe)
 	if err != nil {
 		return err
 	}

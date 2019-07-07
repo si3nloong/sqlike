@@ -9,8 +9,14 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+type indexStruct struct {
+	Unique string `sqlike:",unique_index"`
+	ID     string `sqlike:""`
+}
+
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
+	SID           string    `sqlike:",charset:latin1"`
 	Emoji         string    `sqlike:""`
 	LongStr       string    `sqlike:",longtext"`
 	CustomStrType LongStr   `sqlike:",size:300"`
@@ -39,7 +45,8 @@ type normalStruct struct {
 		NestedBool bool   `sqlike:""`
 		// NestedNullInt *int
 	}
-	JSONRaw   json.RawMessage
+	JSONRaw json.RawMessage
+	// GeoPoint  types.GeoPoint
 	Timestamp time.Time
 	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }

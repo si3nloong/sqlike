@@ -73,6 +73,11 @@ func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (st
 			stmt.WriteString("PRIMARY KEY (`" + pk + "`)")
 			stmt.WriteRune(',')
 		}
+		if _, isOk := sf.Tag.LookUp("unique_index"); isOk {
+			stmt.WriteString("UNIQUE INDEX `UX_" + sf.Path + "`(`" + sf.Path + "`)")
+			stmt.WriteRune(',')
+		}
+
 		ms.buildSchemaByColumn(stmt, col)
 
 		// Generated columns :

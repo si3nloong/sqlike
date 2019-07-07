@@ -85,6 +85,7 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 	return insertOne(
 		sess.tx.context,
 		sess.table,
+		sess.pk,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -102,6 +103,7 @@ func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertManyOpti
 	return insertOne(
 		sess.tx.context,
 		sess.table,
+		sess.pk,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,

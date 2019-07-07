@@ -8,8 +8,7 @@ import (
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(table string, columns []string, values [][]interface{}, opt *options.InsertOptions) (stmt *sqlstmt.Statement) {
-
+func (ms MySQL) InsertInto(table, pk string, columns []string, values [][]interface{}, opt *options.InsertOptions) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`INSERT`)
 	if opt.Mode == options.InsertIgnore {
@@ -38,7 +37,7 @@ func (ms MySQL) InsertInto(table string, columns []string, values [][]interface{
 		stmt.WriteString(` ON DUPLICATE KEY UPDATE `)
 		next := false
 		for _, col := range columns {
-			if col == "$Key" {
+			if col == pk {
 				next = false
 				continue
 			}

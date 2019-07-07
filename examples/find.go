@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -48,6 +49,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.BigUint = 1298738901289381212
 		ns.Float32 = 10.6789
 		ns.Float64 = 19833.6789
+		ns.JSONRaw = json.RawMessage(`{"test":"hello world"}`)
 		ns.Timestamp = ts
 
 		_, err = table.InsertOne(&ns)
@@ -79,6 +81,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float32(10.6789), ns.Float32)
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("SUCCESS"), ns.Enum)
+		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 	}
 
 	{

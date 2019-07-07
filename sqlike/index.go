@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/xerrors"
@@ -20,8 +19,7 @@ type Index struct {
 
 // IndexView :
 type IndexView struct {
-	tb     *Table
-	logger logs.Logger
+	tb *Table
 }
 
 // List :
@@ -41,14 +39,14 @@ func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 			return xerrors.New("sqlike: empty columns to create index")
 		}
 		if idx.Name == "" {
-			idxs[i].Name = strings.Join(idx.Columns, "_") + "_idx"
+			idxs[i].Name = "IX_" + strings.Join(idx.Columns, "_")
 		}
 	}
 	_, err := sqldriver.Execute(
 		context.Background(),
 		idv.tb.driver,
 		idv.tb.dialect.CreateIndexes(idv.tb.name, idxs),
-		idv.logger,
+		idv.tb.logger,
 	)
 	return err
 }
@@ -59,7 +57,7 @@ func (idv IndexView) DropOne(name string) error {
 		context.Background(),
 		idv.tb.driver,
 		idv.tb.dialect.DropIndex(idv.tb.name, name),
-		idv.logger,
+		idv.tb.logger,
 	)
 	return err
 }

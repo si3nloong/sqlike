@@ -16,7 +16,7 @@ type Logger struct {
 
 func (l Logger) Format(stmt *sqlstmt.Statement) {
 	log.Println("Debug here ======================>")
-	log.Printf("%v", stmt)
+	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
 	return
 }
@@ -31,15 +31,16 @@ func TestExamples(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	db := client.SetLogger(Logger{}).
+		Database("sqlike")
+
 	dbs, err := client.ListDatabases()
 	require.NoError(t, err)
 	// client.SetLogger()
 	log.Println(dbs)
 
-	db := client.SetLogger(Logger{}).
-		Database("sqlike")
-
 	MigrateExamples(t, db)
+	IndexExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)
 	TransactionExamples(t, db)

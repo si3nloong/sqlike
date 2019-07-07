@@ -24,6 +24,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	return insertOne(
 		context.Background(),
 		tb.name,
+		tb.pk,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -32,7 +33,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	)
 }
 
-func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -65,7 +66,7 @@ func insertOne(ctx context.Context, tbName string, driver sqldriver.Driver, dial
 	}
 	values[0] = rows
 
-	stmt := dialect.InsertInto(tbName, columns, values, opt)
+	stmt := dialect.InsertInto(tbName, pk, columns, values, opt)
 	return sqldriver.Execute(
 		ctx,
 		driver,
@@ -125,7 +126,7 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 		values = append(values, rows)
 	}
 
-	stmt := tb.dialect.InsertInto(tb.name, columns, values, opt)
+	stmt := tb.dialect.InsertInto(tb.name, tb.pk, columns, values, opt)
 	return sqldriver.Execute(
 		context.Background(),
 		tb.driver,

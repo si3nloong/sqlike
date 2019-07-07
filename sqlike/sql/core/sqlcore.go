@@ -29,7 +29,7 @@ type Dialect interface {
 	CreateTable(table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error)
 	AlterTable(table, pk string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error)
 	// ReplaceInto(table string, filter *sql.Query) (stmt string, args []interface{}, err error)
-	InsertInto(table string, columns []string, values [][]interface{}, opts *options.InsertOptions) (stmt *sqlstmt.Statement)
+	InsertInto(table, pk string, columns []string, values [][]interface{}, opts *options.InsertOptions) (stmt *sqlstmt.Statement)
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)
 	Update(*actions.UpdateActions) (stmt *sqlstmt.Statement, err error)
 	Delete(*actions.DeleteActions) (stmt *sqlstmt.Statement, err error)

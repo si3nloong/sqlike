@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 )
@@ -22,18 +23,14 @@ type Column struct {
 
 // ColumnView :
 type ColumnView struct {
-	tb *Table
+	tb     *Table
+	logger logs.Logger
 }
 
 // List :
 func (cv *ColumnView) List() ([]Column, error) {
 	return cv.tb.ListColumns()
 }
-
-// // AddOne :
-// func (cv *ColumnView) AddOne() error {
-// 	return nil
-// }
 
 // DropOne :
 func (cv *ColumnView) DropOne(name string) error {

@@ -61,8 +61,9 @@ func (sb *SchemaBuilder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bo
 // GetColumn :
 func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (component.Column, error) {
 	v := sf.Zero
-	if x, isOk := v.Interface().(ColumnTyper); isOk {
-		return x.DataType("mysql", sf), nil
+	it := reflect.TypeOf((*ColumnTyper)(nil)).Elem()
+	if v.Type().Implements(it) {
+		return v.Interface().(ColumnTyper).DataType("mysql", sf), nil
 	}
 
 	t := reflext.Deref(v.Type())

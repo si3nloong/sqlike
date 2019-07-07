@@ -1,85 +1,73 @@
 package types
 
-import (
-	"database/sql/driver"
-	"strconv"
-	"strings"
+// // GeoPoint :
+// type GeoPoint struct {
+// 	Latitude  float64
+// 	Longitude float64
+// }
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
-	"github.com/si3nloong/sqlike/util"
-	"golang.org/x/xerrors"
-)
+// // DataType :
+// func (gp GeoPoint) DataType(driver string, sf *reflext.StructField) component.Column {
+// 	return component.Column{
+// 		Name:     sf.Path,
+// 		DataType: "POINT",
+// 		Type:     "POINT",
+// 		Nullable: sf.IsNullable,
+// 	}
+// }
 
-// GeoPoint :
-type GeoPoint struct {
-	Latitude  float64
-	Longitude float64
-}
+// // Value :
+// func (gp GeoPoint) Value() (driver.Value, error) {
+// 	return gp.String(), nil
+// }
 
-// DataType :
-func (gp *GeoPoint) DataType(driver string, sf *reflext.StructField) component.Column {
-	dflt := "(0,0)"
-	return component.Column{
-		Name:         sf.Path,
-		DataType:     "POINT",
-		Type:         "POINT",
-		DefaultValue: &dflt,
-		Nullable:     sf.IsNullable,
-	}
-}
+// // Scan :
+// func (gp *GeoPoint) Scan(it interface{}) error {
+// 	switch vi := it.(type) {
+// 	case []byte:
+// 		return gp.unmarshal(util.UnsafeString(vi))
 
-// Value :
-func (gp *GeoPoint) Value() (driver.Value, error) {
-	return gp.String(), nil
-}
+// 	case string:
+// 		return gp.unmarshal(vi)
 
-// Scan :
-func (gp *GeoPoint) Scan(it interface{}) error {
-	switch vi := it.(type) {
-	case []byte:
-		return gp.unmarshal(util.UnsafeString(vi))
+// 	case nil:
+// 		return nil
 
-	case string:
-		return gp.unmarshal(vi)
+// 	default:
+// 		return xerrors.New("invalid date format")
+// 	}
+// }
 
-	case nil:
-		return nil
+// // String :
+// func (gp GeoPoint) String() string {
+// 	blr := util.AcquireString()
+// 	defer util.ReleaseString(blr)
+// 	gp.marshal(blr)
+// 	return blr.String()
+// }
 
-	default:
-		return xerrors.New("invalid date format")
-	}
-}
+// func (gp *GeoPoint) marshal(w writer) {
+// 	w.WriteString("POINT")
+// 	w.WriteByte('(')
+// 	w.WriteString(strconv.FormatFloat(gp.Latitude, 'f', -1, 64))
+// 	w.WriteByte(' ')
+// 	w.WriteString(strconv.FormatFloat(gp.Longitude, 'f', -1, 64))
+// 	w.WriteByte(')')
+// }
 
-// String :
-func (gp *GeoPoint) String() string {
-	blr := util.AcquireString()
-	defer util.ReleaseString(blr)
-	gp.marshal(blr)
-	return blr.String()
-}
+// func (gp *GeoPoint) unmarshal(str string) (err error) {
+// 	paths := strings.SplitN(str, ",", 2)
+// 	if len(paths) != 2 {
+// 		return xerrors.New("invalid value for GeoPoint")
+// 	}
 
-func (gp *GeoPoint) marshal(w writer) {
-	w.WriteByte('(')
-	w.WriteString(strconv.FormatFloat(gp.Latitude, 'f', 64, 10))
-	w.WriteByte(',')
-	w.WriteString(strconv.FormatFloat(gp.Longitude, 'f', 64, 10))
-	w.WriteByte(')')
-}
-
-func (gp *GeoPoint) unmarshal(str string) (err error) {
-	paths := strings.SplitN(str, ",", 2)
-	if len(paths) != 2 {
-		return xerrors.New("invalid value for GeoPoint")
-	}
-
-	gp.Latitude, err = strconv.ParseFloat(paths[0], 64)
-	if err != nil {
-		return
-	}
-	gp.Longitude, err = strconv.ParseFloat(paths[1], 64)
-	if err != nil {
-		return
-	}
-	return
-}
+// 	gp.Latitude, err = strconv.ParseFloat(paths[0], 64)
+// 	if err != nil {
+// 		return
+// 	}
+// 	gp.Longitude, err = strconv.ParseFloat(paths[1], 64)
+// 	if err != nil {
+// 		return
+// 	}
+// 	return
+// }
