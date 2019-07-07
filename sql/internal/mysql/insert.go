@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sqlike/options"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 )
 
 // InsertInto :

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 )
 
 // Driver :

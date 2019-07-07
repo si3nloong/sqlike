@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,8 +16,8 @@ type Logger struct {
 
 func (l Logger) Format(stmt *sqlstmt.Statement) {
 	log.Println("Debug here ======================>")
-	// log.Printf("%v", stmt)
-	log.Printf("%+v", stmt)
+	log.Printf("%v", stmt)
+	// log.Printf("%+v", stmt)
 	return
 }
 

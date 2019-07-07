@@ -14,7 +14,7 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
@@ -41,8 +41,8 @@ type Key struct {
 }
 
 // DataType :
-func (k *Key) DataType(driver string, sf *reflext.StructField) component.Column {
-	return component.Column{
+func (k *Key) DataType(driver string, sf *reflext.StructField) columns.Column {
+	return columns.Column{
 		Name:      sf.Path,
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(512)",

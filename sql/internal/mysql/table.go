@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/sql/util"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 )
 
 // RenameTable :
@@ -50,7 +50,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 // CreateTable :
 func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
-		col     component.Column
+		col     columns.Column
 		virtual bool
 		stored  bool
 	)
@@ -123,9 +123,9 @@ func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (st
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
-		col     component.Column
+		col     columns.Column
 		idx     int
 		virtual bool
 		stored  bool
@@ -133,7 +133,6 @@ func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, col
 
 	suffix := `FIRST`
 	stmt = sqlstmt.NewStatement(ms)
-	cols := util.StringSlice(columns)
 	stmt.WriteString(`ALTER TABLE ` + ms.Quote(table) + ` `)
 
 	for i, sf := range fields {
@@ -218,7 +217,7 @@ func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, col
 	return
 }
 
-func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col component.Column) {
+func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(` ` + col.Type)
 	if col.CharSet != nil {

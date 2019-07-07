@@ -3,8 +3,7 @@ package sqlike
 import (
 	"context"
 
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 )
 
@@ -23,8 +22,7 @@ type Column struct {
 
 // ColumnView :
 type ColumnView struct {
-	tb     *Table
-	logger logs.Logger
+	tb *Table
 }
 
 // List :

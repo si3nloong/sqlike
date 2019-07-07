@@ -8,10 +8,10 @@ import (
 
 	uuid "github.com/satori/go.uuid"
 
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -100,14 +100,15 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	{
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			nss := []normalStruct{}
-			cursor, err := sessCtx.Table("NormalStruct").Find(
-				nil, options.LockForUpdate)
+			cursor, err := sessCtx.Table("NormalStruct").
+				Find(nil, options.LockForUpdate,
+					options.Find().SetDebug(true))
 			if err != nil {
 				return err
 			}
 			defer cursor.Close()
 			cursor.All(&nss)
-			time.Sleep(3 * time.Second)
+			time.Sleep(1 * time.Second)
 			return nil
 		})
 		require.NoError(t, err)

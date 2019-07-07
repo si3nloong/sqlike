@@ -10,10 +10,10 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sql/codec"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/util"
 	"golang.org/x/xerrors"
 )
 
@@ -37,7 +37,7 @@ type Table struct {
 	pk       string
 	client   *Client
 	driver   sqldriver.Driver
-	dialect  sqlcore.Dialect
+	dialect  sqldialect.Dialect
 	registry *codec.Registry
 	logger   logs.Logger
 }

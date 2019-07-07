@@ -1,16 +1,33 @@
 package primitive
 
 // Raw :
-type Raw string
+type Raw struct {
+	Value string
+}
+
+// Column :
+type Column struct {
+	Table string
+	Name  string
+}
+
+// Alias :
+type Alias struct {
+	Name  string
+	Alias string
+}
 
 // L :
 type L string
 
+// Func :
+type Func struct {
+	Name  string
+	Value interface{}
+}
+
 // G :
 type G []interface{}
-
-// GV :
-type GV []interface{}
 
 // Col :
 type Col string

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/si3nloong/sqlike/sqlike/options"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 )
 
 // Open : connect to sql server with connection string
@@ -14,7 +14,7 @@ func Open(driver string, opt *options.ConnectOptions) (client *Client, err error
 		panic("sqlike: invalid connection options <nil>")
 	}
 	var conn *sql.DB
-	dialect := sqlcore.GetDialectByDriver(driver)
+	dialect := sqldialect.GetDialectByDriver(driver)
 	connStr := dialect.Connect(opt)
 	log.Println("Connect to :", connStr)
 	conn, err = sql.Open(driver, connStr)

@@ -7,9 +7,9 @@ import (
 
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/codec"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 )
 
 // Database :
@@ -18,7 +18,7 @@ type Database struct {
 	pk       string
 	client   *Client
 	driver   sqldriver.Driver
-	dialect  sqlcore.Dialect
+	dialect  sqldialect.Dialect
 	registry *codec.Registry
 	logger   logs.Logger
 }

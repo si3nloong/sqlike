@@ -6,10 +6,10 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,24 +23,46 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("NormalStruct")
+	uid, _ := uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
 
 	{
-
-		uid, _ := uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
-
 		ns = normalStruct{}
 		ns.ID = uid
 		ns.Timestamp = time.Now()
-		result, err = table.InsertOne(&ns)
+		result, err = table.InsertOne(&ns,
+			options.InsertOne().
+				SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
+	}
 
+	// Update single record
+	{
+		affected, err = table.UpdateOne(
+			actions.UpdateOne().
+				Where(expr.Equal("$Key", uid)).
+				Set(
+					expr.Field("LongStr", "1234abcd"),
+					expr.Field("Emoji", "<😗>"),
+				),
+			options.UpdateOne().SetDebug(true),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
+	}
+
+	// Advance update query
+	{
 		affected, err = table.UpdateOne(
 			actions.UpdateOne().
 				Where(expr.Equal("$Key", uid)).
 				Set(
 					expr.Field("Emoji", "<😗>"),
+					expr.Field("SID", expr.Column("LongStr")),
+					expr.Field("Int", expr.Increment("Int", 100)),
+					expr.Field("Tinyint", expr.Raw("80")),
 				),
 			options.UpdateOne().SetDebug(true),
 		)

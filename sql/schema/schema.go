@@ -1,4 +1,4 @@
-package internal
+package schema
 
 import (
 	"encoding/json"
@@ -7,18 +7,18 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
-	sqltype "github.com/si3nloong/sqlike/sqlike/sql/types"
+	sqltype "github.com/si3nloong/sqlike/sql/types"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 	"golang.org/x/xerrors"
 )
 
 // ColumnTyper :
 type ColumnTyper interface {
-	DataType(driver string, sf *reflext.StructField) component.Column
+	DataType(driver string, sf *reflext.StructField) columns.Column
 }
 
 // DataTypeFunc :
-type DataTypeFunc func(sf *reflext.StructField) component.Column
+type DataTypeFunc func(sf *reflext.StructField) columns.Column
 
 // SchemaBuilder :
 type SchemaBuilder struct {
@@ -59,7 +59,7 @@ func (sb *SchemaBuilder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bo
 }
 
 // GetColumn :
-func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (component.Column, error) {
+func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, error) {
 	v := sf.Zero
 	it := reflect.TypeOf((*ColumnTyper)(nil)).Elem()
 	if v.Type().Implements(it) {
@@ -75,7 +75,7 @@ func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (component.Column, e
 		return sb.builders[x](sf), nil
 	}
 
-	return component.Column{}, xerrors.Errorf("invalid data type support %v", t)
+	return columns.Column{}, xerrors.Errorf("invalid data type support %v", t)
 }
 
 // SetDefaultTypes :

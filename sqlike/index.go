@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sqlike/indexes"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/xerrors"
 )

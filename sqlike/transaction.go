@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 )
 
 // Transaction :
@@ -13,7 +13,7 @@ type Transaction struct {
 	pk      string
 	context context.Context
 	driver  *sql.Tx
-	dialect sqlcore.Dialect
+	dialect sqldialect.Dialect
 	logger  logs.Logger
 }
 

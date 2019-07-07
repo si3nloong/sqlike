@@ -9,9 +9,9 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"golang.org/x/xerrors"
 )
 
@@ -29,7 +29,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	)
 }
 
-func modifyOne(ctx context.Context, tbName, pk string, dialect sqlcore.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(ctx context.Context, tbName, pk string, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -134,7 +134,7 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.Update
 	)
 }
 
-func update(ctx context.Context, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
+func update(ctx context.Context, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
 	if len(act.Values) < 1 {
 		return 0, ErrNoValueUpdate
 	}
