@@ -8,9 +8,9 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"golang.org/x/xerrors"
 )
 
@@ -27,7 +27,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	)
 }
 
-func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -83,7 +83,7 @@ func (tb *Table) DeleteMany(act actions.DeleteStatement) (int64, error) {
 	)
 }
 
-func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
+func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))

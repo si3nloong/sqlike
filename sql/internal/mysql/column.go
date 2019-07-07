@@ -1,6 +1,6 @@
 package mysql
 
-import sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
+import sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 
 // DropColumn :
 func (ms *MySQL) DropColumn(table, column string) (stmt *sqlstmt.Statement) {

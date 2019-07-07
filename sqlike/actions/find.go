@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sqlike/primitive"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sql/expr"
 )
 
 // SelectStatement :

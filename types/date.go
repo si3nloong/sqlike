@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
@@ -25,9 +25,9 @@ type Date struct {
 }
 
 // DataType :
-func (d *Date) DataType(driver string, sf *reflext.StructField) component.Column {
+func (d *Date) DataType(driver string, sf *reflext.StructField) columns.Column {
 	dflt := "CURDATE()"
-	return component.Column{
+	return columns.Column{
 		Name:         sf.Path,
 		DataType:     "DATE",
 		Type:         "DATE",

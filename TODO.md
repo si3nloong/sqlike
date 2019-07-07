@@ -7,6 +7,7 @@ TODO:
 1. Logger
 
 [ok] - [Bug] `WhereIn` and `WhereNotIn`
+[ok] - Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
 [ok] - Connect to `MySQL` server
 [ok] - Connect to `MySQL` server with `options.Connect`
 [ok] - Support omit options on `InsertOne` and `InsertMany`

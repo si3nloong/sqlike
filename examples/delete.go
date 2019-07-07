@@ -5,7 +5,7 @@ import (
 
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 

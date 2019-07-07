@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"log"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sqlike"
@@ -42,6 +41,6 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		var idxs []sqlike.Index
 		idxs, err = idx.List()
 		require.NoError(t, err)
-		log.Println(idxs)
+		require.Equal(t, int(2), len(idxs))
 	}
 }

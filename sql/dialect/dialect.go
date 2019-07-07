@@ -1,14 +1,15 @@
-package sqlcore
+package sqldialect
 
 import (
 	"sync"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/internal/mysql"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/core/mysql"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
 )
 
 // Dialect :
@@ -27,7 +28,7 @@ type Dialect interface {
 	CreateIndexes(table string, idxs []indexes.Index) (stmt *sqlstmt.Statement)
 	DropIndex(table, idxName string) (stmt *sqlstmt.Statement)
 	CreateTable(table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error)
-	AlterTable(table, pk string, fields []*reflext.StructField, columns []string, indexes []string, unsafe bool) (stmt *sqlstmt.Statement, err error)
+	AlterTable(table, pk string, fields []*reflext.StructField, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error)
 	// ReplaceInto(table string, filter *sql.Query) (stmt string, args []interface{}, err error)
 	InsertInto(table, pk string, columns []string, values [][]interface{}, opts *options.InsertOptions) (stmt *sqlstmt.Statement)
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)

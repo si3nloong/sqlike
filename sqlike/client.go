@@ -6,9 +6,9 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/codec"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 )
 
 // Client :
@@ -18,10 +18,10 @@ type Client struct {
 	*sql.DB
 	pk      string
 	logger  logs.Logger
-	dialect sqlcore.Dialect
+	dialect sqldialect.Dialect
 }
 
-func newClient(driver string, db *sql.DB, dialect sqlcore.Dialect) (*Client, error) {
+func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect) (*Client, error) {
 	client := &Client{
 		driverName: driver,
 		DB:         db,

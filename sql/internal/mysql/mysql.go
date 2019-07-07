@@ -1,26 +1,26 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sqlike/sql/internal"
-	sqlstmt "github.com/si3nloong/sqlike/sqlike/sql/stmt"
-	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/schema"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	sqlutil "github.com/si3nloong/sqlike/sql/util"
 )
 
 // MySQL :
 type MySQL struct {
-	schema *internal.SchemaBuilder
-	parser *sqlstmt.StatementParser
+	schema *schema.SchemaBuilder
+	parser *sqlstmt.StatementBuilder
 	sqlutil.MySQLUtil
 }
 
 // New :
 func New() *MySQL {
-	sb := internal.NewSchemaBuilder()
-	pr := sqlstmt.NewStatementParser()
+	sb := schema.NewSchemaBuilder()
+	pr := sqlstmt.NewStatementBuilder()
 
 	mySQLSchema{}.SetBuilders(sb)
-	mySQLParser{}.SetRegistryAndParsers(codec.DefaultRegistry, pr)
+	mySQLBuilder{}.SetRegistryAndBuilders(codec.DefaultRegistry, pr)
 
 	return &MySQL{
 		schema: sb,

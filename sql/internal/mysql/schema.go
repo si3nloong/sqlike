@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/component"
-	"github.com/si3nloong/sqlike/sqlike/sql/internal"
-	sqltype "github.com/si3nloong/sqlike/sqlike/sql/types"
-	sqlutil "github.com/si3nloong/sqlike/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sql/schema"
+	sqltype "github.com/si3nloong/sqlike/sql/types"
+	"github.com/si3nloong/sqlike/sqlike/columns"
+	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/util"
 )
 
@@ -24,7 +24,7 @@ type mySQLSchema struct {
 }
 
 // SetBuilders :
-func (s mySQLSchema) SetBuilders(sb *internal.SchemaBuilder) {
+func (s mySQLSchema) SetBuilders(sb *schema.SchemaBuilder) {
 	sb.SetTypeBuilder(sqltype.Byte, s.ByteDataType)
 	sb.SetTypeBuilder(sqltype.Date, s.DateDataType)
 	sb.SetTypeBuilder(sqltype.DateTime, s.TimeDataType)
@@ -50,7 +50,7 @@ func (s mySQLSchema) SetBuilders(sb *internal.SchemaBuilder) {
 	sb.SetTypeBuilder(sqltype.Map, s.JSONDataType)
 }
 
-func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
 	col.DataType = `MEDIUMBLOB`
 	col.Type = `MEDIUMBLOB`
@@ -58,7 +58,7 @@ func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) DateDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) DateDataType(sf *reflext.StructField) (col columns.Column) {
 	dflt := `CURDATE()`
 	col.Name = sf.Path
 	col.DataType = `DATE`
@@ -68,7 +68,7 @@ func (s mySQLSchema) DateDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) TimeDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) TimeDataType(sf *reflext.StructField) (col columns.Column) {
 	dflt := `CURRENT_TIMESTAMP(6)`
 	col.Name = sf.Path
 	col.DataType = `DATETIME(6)`
@@ -78,7 +78,7 @@ func (s mySQLSchema) TimeDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) JSONDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) JSONDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
 	col.DataType = `JSON`
 	col.Type = `JSON`
@@ -86,7 +86,7 @@ func (s mySQLSchema) JSONDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 
@@ -152,7 +152,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col component.Colu
 	return
 }
 
-func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col columns.Column) {
 	dflt := `0`
 	col.Name = sf.Path
 	col.DataType = `TINYINT`
@@ -162,7 +162,7 @@ func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
 	t := sf.Zero.Type()
 	dflt := `0`
 	dataType := s.getIntDataType(reflext.Deref(t))
@@ -179,7 +179,7 @@ func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col component.Column)
 	return
 }
 
-func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col columns.Column) {
 	t := sf.Zero.Type()
 	dflt := `0`
 	dataType := s.getIntDataType(reflext.Deref(t))
@@ -196,7 +196,7 @@ func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col component.Column
 	return
 }
 
-func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col columns.Column) {
 	dflt := `0`
 	col.Name = sf.Path
 	col.DataType = `REAL`
@@ -209,7 +209,7 @@ func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col component.Colum
 	return
 }
 
-func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col component.Column) {
+func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 	// length := sf.Zero.Len()

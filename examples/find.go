@@ -6,10 +6,10 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,6 +56,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Find one record by primary key
 	{
 		ns = normalStruct{}
 		err = table.FindOne(
@@ -84,6 +85,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 	}
 
+	// Find one record by primary key
 	{
 		ns = normalStruct{}
 		err = table.FindOne(
@@ -94,6 +96,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, err, sqlike.ErrNoRows)
 	}
 
+	// Find multiple records by where condition
 	{
 		ns = normalStruct{}
 		cursor, err = table.Find(
@@ -127,6 +130,59 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
 			`🤕`,
 		}, emojis)
+	}
+
+	{
+		ns = normalStruct{}
+		cursor, err = table.Find(
+			actions.Find().
+				Where(
+					expr.In("$Key", actions.Find().
+						Select("$Key").
+						From("NormalStruct").
+						Where(
+							expr.Between("Tinyint", 1, 100),
+						).
+						OrderBy(
+							expr.Desc("Timestamp"),
+						),
+					),
+				),
+			options.Find().SetDebug(true),
+		)
+		require.NoError(t, err)
+	}
+
+	// Aggregation
+	{
+		ns = normalStruct{}
+		cursor, err = table.Find(
+			actions.Find().
+				Select(
+					expr.As("Enum", "A"),
+					expr.As(expr.Count("$Key"), "B"),
+					expr.Average("MediumInt"),
+					expr.As(expr.Sum("SmallInt"), "C"),
+					expr.Max("BigInt"),
+					expr.As(expr.Min("BigInt"), "D"),
+				).
+				GroupBy(
+					"Enum",
+					"$Key",
+				).
+				OrderBy(
+					expr.Desc("$Key"),
+				),
+			options.Find().
+				SetDebug(true).
+				SetNoLimit(true),
+		)
+		require.NoError(t, err)
+		require.ElementsMatch(t,
+			[]string{
+				"A", "B", "AVG(`MediumInt`)",
+				"C", "MAX(`BigInt`)", "D",
+			}, cursor.Columns())
 	}
 }
 

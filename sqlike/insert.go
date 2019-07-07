@@ -9,9 +9,9 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/codec"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"golang.org/x/xerrors"
 )
 
@@ -33,7 +33,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	)
 }
 
-func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput

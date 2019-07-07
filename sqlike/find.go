@@ -7,9 +7,9 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
-	sqlcore "github.com/si3nloong/sqlike/sqlike/sql/core"
-	sqldriver "github.com/si3nloong/sqlike/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/codec"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 )
 
 // SingleResult :
@@ -75,7 +75,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	return csr, nil
 }
 
-func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqlcore.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Cursor {
+func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Cursor {
 	if act.Table == "" {
 		act.Table = tbName
 	}

@@ -7,8 +7,8 @@ package types
 // }
 
 // // DataType :
-// func (gp GeoPoint) DataType(driver string, sf *reflext.StructField) component.Column {
-// 	return component.Column{
+// func (gp GeoPoint) DataType(driver string, sf *reflext.StructField) columns.Column {
+// 	return columns.Column{
 // 		Name:     sf.Path,
 // 		DataType: "POINT",
 // 		Type:     "POINT",

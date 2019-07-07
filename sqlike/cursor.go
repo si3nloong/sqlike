@@ -6,7 +6,7 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/codec"
 	"golang.org/x/xerrors"
 )
 
