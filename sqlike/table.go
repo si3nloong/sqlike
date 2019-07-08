@@ -7,13 +7,13 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	"golang.org/x/xerrors"
 )
 
@@ -195,20 +195,26 @@ func (tb Table) Drop() (err error) {
 	return
 }
 
-// ReplaceWith :
-func (tb *Table) ReplaceWith(act actions.SelectStatement) error {
-	// tb.dialect.Select(act)
-	// stmt, args, err := tb.dialect.ReplaceInto(tb.name, filter)
-	// 	// if err != nil {
-	// 	// 	return err
-	// 	// }
-	// _, err = sqldriver.Execute(
-	// 	tb.driver,
-	// 	stmt,
-	// 	args,
-	// 	tb.logger,
-	// )
-	return nil
+// Copy :
+func (tb *Table) Copy(fields []string, act actions.CopyStatement) error {
+	x := new(actions.CopyActions)
+	if act != nil {
+		*x = *(act.(*actions.CopyActions))
+	}
+	if x.Table == "" {
+		return xerrors.New("empty table name")
+	}
+	stmt, err := tb.dialect.Copy(tb.name, fields, x)
+	if err != nil {
+		return err
+	}
+	_, err = sqldriver.Execute(
+		context.Background(),
+		tb.driver,
+		stmt,
+		tb.logger,
+	)
+	return err
 }
 
 // Indexes :

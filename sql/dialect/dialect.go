@@ -34,6 +34,7 @@ type Dialect interface {
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)
 	Update(*actions.UpdateActions) (stmt *sqlstmt.Statement, err error)
 	Delete(*actions.DeleteActions) (stmt *sqlstmt.Statement, err error)
+	Copy(table string, columns []string, act *actions.CopyActions) (stmt *sqlstmt.Statement, err error)
 }
 
 var (

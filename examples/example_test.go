@@ -47,6 +47,7 @@ func TestExamples(t *testing.T) {
 	PaginationExamples(t, db)
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
+	ExtraExamples(t, db)
 
 	MigrateErrorExamples(t, db)
 	InsertErrorExamples(t, db)

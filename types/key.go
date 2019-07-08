@@ -151,7 +151,6 @@ func (k *Key) unmarshal(str string) error {
 		}
 		k = k.Parent
 	}
-	return nil
 }
 
 // valid returns whether the key is valid.

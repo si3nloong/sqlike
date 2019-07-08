@@ -10,11 +10,6 @@ func Find() SelectStatement {
 	return &FindActions{}
 }
 
-// ReplaceInto :
-func ReplaceInto() SelectStatement {
-	return &ReplaceIntoActions{}
-}
-
 // UpdateOne :
 func UpdateOne() UpdateOneStatement {
 	return &UpdateOneActions{}
@@ -28,4 +23,9 @@ func UpdateMany() UpdateStatement {
 // Delete :
 func Delete() DeleteStatement {
 	return &DeleteActions{}
+}
+
+// Copy :
+func Copy() CopyStatement {
+	return &CopyActions{}
 }
