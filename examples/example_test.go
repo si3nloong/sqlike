@@ -39,18 +39,18 @@ func TestExamples(t *testing.T) {
 	// client.SetLogger()
 	log.Println(dbs)
 
+	MigrateErrorExamples(t, db)
+	InsertErrorExamples(t, db)
+	FindErrorExamples(t, db)
+
 	MigrateExamples(t, db)
 	IndexExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)
 	TransactionExamples(t, db)
-	PaginationExamples(t, db)
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
 	ExtraExamples(t, db)
-
-	MigrateErrorExamples(t, db)
-	InsertErrorExamples(t, db)
-	FindErrorExamples(t, db)
+	PaginationExamples(t, client)
 
 }

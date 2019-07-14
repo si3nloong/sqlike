@@ -51,7 +51,7 @@ func (sess *Session) FindOne(act actions.SelectOneStatement, lock options.LockMo
 }
 
 // Find :
-func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, opts ...*options.FindOptions) (*Cursor, error) {
+func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, opts ...*options.FindOptions) (*Result, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))

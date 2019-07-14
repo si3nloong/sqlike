@@ -41,7 +41,7 @@ const (
 )
 
 type User struct {
-    ID        uuid.UUID 
+    ID        uuid.UUID
     Name      string
     Email     string     `sqlike:",size:200"`
     Address   string     `sqlike:",longtext"`
@@ -75,7 +75,7 @@ func main() {
     userTable := client.Database("sqlike").Table("User")
 
     // Drop Table
-    userTable.Drop() 
+    userTable.Drop()
 
     // Migrate Table
     userTable.Migrate(User{})
@@ -118,7 +118,7 @@ func main() {
     // Find multiple records
     {
         users := make([]User, 0)
-        cursor, err := userTable.Find(
+        result, err := userTable.Find(
             actions.Find().Where(
                 expr.Equal("ID", result.ID),
             ),
@@ -126,7 +126,7 @@ func main() {
         if err != nil {
             panic(err)
         }
-        cursor.All(&users) // map into the struct of slice
+        result.All(&users) // map into the struct of slice
     }
 
     // Update one record with all fields of struct

@@ -100,14 +100,13 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	{
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			nss := []normalStruct{}
-			cursor, err := sessCtx.Table("NormalStruct").
+			result, err := sessCtx.Table("NormalStruct").
 				Find(nil, options.LockForUpdate,
 					options.Find().SetDebug(true))
 			if err != nil {
 				return err
 			}
-			defer cursor.Close()
-			cursor.All(&nss)
+			result.All(&nss)
 			time.Sleep(1 * time.Second)
 			return nil
 		})

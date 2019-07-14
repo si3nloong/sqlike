@@ -10,6 +10,11 @@ func Find() SelectStatement {
 	return &FindActions{}
 }
 
+// Paginate :
+func Paginate() PaginateStatement {
+	return &PaginateActions{}
+}
+
 // UpdateOne :
 func UpdateOne() UpdateOneStatement {
 	return &UpdateOneActions{}

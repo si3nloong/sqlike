@@ -13,8 +13,8 @@ import (
 // ErrNoRows :
 var ErrNoRows = sql.ErrNoRows
 
-// Cursor :
-type Cursor struct {
+// Result :
+type Result struct {
 	close    bool
 	rows     *sql.Rows
 	registry *codec.Registry
@@ -23,17 +23,17 @@ type Cursor struct {
 }
 
 // Columns :
-func (c *Cursor) Columns() []string {
+func (c *Result) Columns() []string {
 	return c.columns
 }
 
 // ColumnTypes :
-func (c *Cursor) ColumnTypes() ([]*sql.ColumnType, error) {
+func (c *Result) ColumnTypes() ([]*sql.ColumnType, error) {
 	return c.rows.ColumnTypes()
 }
 
 // Decode will decode the current document into val.
-func (c *Cursor) Decode(dst interface{}) error {
+func (c *Result) Decode(dst interface{}) error {
 	if c.close {
 		defer c.Close()
 	}
@@ -85,7 +85,7 @@ func (c *Cursor) Decode(dst interface{}) error {
 }
 
 // ScanSlice :
-func (c *Cursor) ScanSlice(results interface{}) error {
+func (c *Result) ScanSlice(results interface{}) error {
 	defer c.Close()
 	if c.err != nil {
 		return c.err
@@ -135,7 +135,7 @@ func (c *Cursor) ScanSlice(results interface{}) error {
 }
 
 // All :
-func (c *Cursor) All(results interface{}) error {
+func (c *Result) All(results interface{}) error {
 	defer c.Close()
 	if c.err != nil {
 		return c.err
@@ -193,7 +193,7 @@ func (c *Cursor) All(results interface{}) error {
 }
 
 // Error :
-func (c *Cursor) Error() error {
+func (c *Result) Error() error {
 	if c.rows != nil {
 		defer c.rows.Close()
 	}
@@ -201,12 +201,12 @@ func (c *Cursor) Error() error {
 }
 
 // Next :
-func (c *Cursor) Next() bool {
+func (c *Result) Next() bool {
 	return c.rows.Next()
 }
 
 // Close :
-func (c *Cursor) Close() error {
+func (c *Result) Close() error {
 	if c.rows != nil {
 		defer c.rows.Close()
 		return nil

@@ -50,7 +50,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 }
 
 // Find :
-func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions) (*Cursor, error) {
+func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions) (*Result, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
@@ -75,7 +75,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	return csr, nil
 }
 
-func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Cursor {
+func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
 	if act.Table == "" {
 		act.Table = tbName
 	}
@@ -83,7 +83,7 @@ func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect s
 	if !opt.NoLimit && act.Record < 1 {
 		act.Limit(100)
 	}
-	csr := new(Cursor)
+	csr := new(Result)
 	csr.registry = codec.DefaultRegistry
 	stmt, err := dialect.Select(act, lock)
 	if err != nil {
