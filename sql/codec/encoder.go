@@ -83,7 +83,8 @@ func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (
 
 // EncodeString :
 func (enc DefaultEncoders) EncodeString(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
-	if sf != nil {
+	str := v.String()
+	if str == "" && sf != nil {
 		if val, isOk := sf.Tag.LookUp("enum"); isOk {
 			enums := strings.Split(val, "|")
 			if len(enums) > 0 {
@@ -91,7 +92,7 @@ func (enc DefaultEncoders) EncodeString(sf *reflext.StructField, v reflect.Value
 			}
 		}
 	}
-	return v.String(), nil
+	return str, nil
 }
 
 // EncodeBool :
