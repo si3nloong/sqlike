@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"database/sql"
+	"io"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
@@ -13,6 +14,9 @@ import (
 // ErrNoRows :
 var ErrNoRows = sql.ErrNoRows
 
+// EOF :
+var EOF = io.EOF
+
 // Result :
 type Result struct {
 	close    bool
@@ -23,22 +27,41 @@ type Result struct {
 }
 
 // Columns :
-func (c *Result) Columns() []string {
-	return c.columns
+func (r *Result) Columns() []string {
+	return r.columns
 }
 
 // ColumnTypes :
-func (c *Result) ColumnTypes() ([]*sql.ColumnType, error) {
-	return c.rows.ColumnTypes()
+func (r *Result) ColumnTypes() ([]*sql.ColumnType, error) {
+	return r.rows.ColumnTypes()
+}
+
+func (r *Result) nextValues() ([]interface{}, error) {
+	if !r.Next() {
+		return nil, EOF
+	}
+	return r.values()
+}
+
+func (r *Result) values() ([]interface{}, error) {
+	length := len(r.columns)
+	values := make([]interface{}, length, length)
+	for j := 0; j < length; j++ {
+		values[j] = &values[j]
+	}
+	if err := r.rows.Scan(values...); err != nil {
+		return nil, err
+	}
+	return values, nil
 }
 
 // Decode will decode the current document into val.
-func (c *Result) Decode(dst interface{}) error {
-	if c.close {
-		defer c.Close()
+func (r *Result) Decode(dst interface{}) error {
+	if r.close {
+		defer r.Close()
 	}
-	if c.err != nil {
-		return c.err
+	if r.err != nil {
+		return r.err
 	}
 
 	v := reflext.ValueOf(dst)
@@ -57,22 +80,17 @@ func (c *Result) Decode(dst interface{}) error {
 		return xerrors.New("it must be struct to decode")
 	}
 
-	length := len(c.columns)
 	mapper := core.DefaultMapper
-	idxs := mapper.TraversalsByName(t, c.columns)
-	values := make([]interface{}, length, length)
-
-	for j := 0; j < length; j++ {
-		values[j] = &values[j]
-	}
-	if err := c.rows.Scan(values...); err != nil {
+	idxs := mapper.TraversalsByName(t, r.columns)
+	values, err := r.values()
+	if err != nil {
 		return err
 	}
 
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
 		fv := mapper.FieldByIndexes(vv, idx)
-		decoder, err := c.registry.LookupDecoder(fv.Type())
+		decoder, err := r.registry.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -85,10 +103,10 @@ func (c *Result) Decode(dst interface{}) error {
 }
 
 // ScanSlice :
-func (c *Result) ScanSlice(results interface{}) error {
-	defer c.Close()
-	if c.err != nil {
-		return c.err
+func (r *Result) ScanSlice(results interface{}) error {
+	defer r.Close()
+	if r.err != nil {
+		return r.err
 	}
 
 	v := reflext.ValueOf(results)
@@ -106,23 +124,18 @@ func (c *Result) ScanSlice(results interface{}) error {
 		return xerrors.New("it must be a slice of entity")
 	}
 
-	length := len(c.columns)
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
-	// decoders := make([]codec.ValueDecoder, length, length)
+	// decoders := make([]coder.ValueDecoder, length, length)
 
-	for i := 0; c.rows.Next(); i++ {
-		values := make([]interface{}, length, length)
-		for j := 0; j < length; j++ {
-			values[j] = &values[j]
-		}
-		if err := c.rows.Scan(values...); err != nil {
+	for i := 0; r.rows.Next(); i++ {
+		values, err := r.values()
+		if err != nil {
 			return err
 		}
-
 		slice = reflect.Append(slice, reflext.Zero(t))
 		fv := slice.Index(i)
-		decoder, err := c.registry.LookupDecoder(fv.Type())
+		decoder, err := r.registry.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -135,10 +148,10 @@ func (c *Result) ScanSlice(results interface{}) error {
 }
 
 // All :
-func (c *Result) All(results interface{}) error {
-	defer c.Close()
-	if c.err != nil {
-		return c.err
+func (r *Result) All(results interface{}) error {
+	defer r.Close()
+	if r.err != nil {
+		return r.err
 	}
 
 	v := reflext.ValueOf(results)
@@ -156,27 +169,22 @@ func (c *Result) All(results interface{}) error {
 		return xerrors.New("it must be a slice of entity")
 	}
 
-	length := len(c.columns)
+	length := len(r.columns)
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
 	mapper := core.DefaultMapper
-	idxs := mapper.TraversalsByName(t, c.columns)
+	idxs := mapper.TraversalsByName(t, r.columns)
 	decoders := make([]codec.ValueDecoder, length, length)
-
-	for i := 0; c.rows.Next(); i++ {
-		values := make([]interface{}, length, length)
-		for j := 0; j < length; j++ {
-			values[j] = &values[j]
-		}
-		if err := c.rows.Scan(values...); err != nil {
+	for i := 0; r.rows.Next(); i++ {
+		values, err := r.values()
+		if err != nil {
 			return err
 		}
-
 		vv := reflext.Zero(t)
 		for j, idx := range idxs {
 			fv := mapper.FieldByIndexes(vv, idx)
 			if i < 1 {
-				decoder, err := c.registry.LookupDecoder(fv.Type())
+				decoder, err := r.registry.LookupDecoder(fv.Type())
 				if err != nil {
 					return err
 				}
@@ -193,22 +201,22 @@ func (c *Result) All(results interface{}) error {
 }
 
 // Error :
-func (c *Result) Error() error {
-	if c.rows != nil {
-		defer c.rows.Close()
+func (r *Result) Error() error {
+	if r.rows != nil {
+		defer r.rows.Close()
 	}
-	return c.err
+	return r.err
 }
 
 // Next :
-func (c *Result) Next() bool {
-	return c.rows.Next()
+func (r *Result) Next() bool {
+	return r.rows.Next()
 }
 
 // Close :
-func (c *Result) Close() error {
-	if c.rows != nil {
-		defer c.rows.Close()
+func (r *Result) Close() error {
+	if r.rows != nil {
+		defer r.rows.Close()
 		return nil
 	}
 	return nil

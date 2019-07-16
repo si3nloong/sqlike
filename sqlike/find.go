@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
 // SingleResult :
@@ -59,6 +59,10 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}
+	// has limit and limit value is zero
+	if !opt.NoLimit && x.Record < 1 {
+		x.Limit(100)
+	}
 	csr := find(
 		context.Background(),
 		tb.name,
@@ -78,10 +82,6 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
 	if act.Table == "" {
 		act.Table = tbName
-	}
-	// has limit and limit value is zero
-	if !opt.NoLimit && act.Record < 1 {
-		act.Limit(100)
 	}
 	csr := new(Result)
 	csr.registry = codec.DefaultRegistry
