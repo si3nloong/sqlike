@@ -1,7 +1,7 @@
 package examples
 
 import (
-	"log"
+	"sort"
 	"testing"
 	"time"
 
@@ -28,6 +28,18 @@ type User struct {
 	CreatedAt time.Time
 }
 
+type Users []User
+
+// Len is part of sort.Interface.
+func (usrs Users) Len() int {
+	return len(usrs)
+}
+
+// Swap is part of sort.Interface.
+func (usrs Users) Swap(i, j int) {
+	usrs[i], usrs[j] = usrs[j], usrs[i]
+}
+
 // PaginationExamples :
 func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	var (
@@ -49,15 +61,15 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	}
 
 	data := []User{
-		User{10, "User A", 18, StatusActive, time.Now()},
-		User{88, "User B", 12, StatusActive, time.Now()},
-		User{8, "User F", 20, StatusActive, time.Now()},
-		User{27, "User C", 16, StatusSuspend, time.Now()},
-		User{20, "User C", 16, StatusActive, time.Now()},
-		User{100, "User G", 10, StatusSuspend, time.Now()},
-		User{21, "User C", 16, StatusActive, time.Now()},
-		User{50, "User D", 23, StatusActive, time.Now()},
-		User{5, "User E", 30, StatusSuspend, time.Now()},
+		User{10, "User A", 18, StatusActive, time.Now().UTC()},
+		User{88, "User B", 12, StatusActive, time.Now().UTC()},
+		User{8, "User F", 20, StatusActive, time.Now().UTC()},
+		User{27, "User C", 16, StatusSuspend, time.Now().UTC()},
+		User{20, "User C", 16, StatusActive, time.Now().UTC()},
+		User{100, "User G", 10, StatusSuspend, time.Now().UTC()},
+		User{21, "User C", 16, StatusActive, time.Now().UTC()},
+		User{50, "User D", 23, StatusActive, time.Now().UTC()},
+		User{5, "User E", 30, StatusSuspend, time.Now().UTC()},
 	}
 
 	{
@@ -66,54 +78,71 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		require.NoError(t, err)
 	}
 
-	{
-		var (
-		// users []User
-		// cursor interface{}
-		)
+	var (
+		users  []User
+		cursor interface{}
+	)
 
-		paginator, err := table.Paginate(actions.Paginate().
+	sort.SliceStable(data, func(i, j int) bool {
+		if data[i].Age > data[j].Age {
+			return true
+		}
+		if data[i].Age < data[j].Age {
+			return false
+		}
+		return data[i].ID > data[j].ID
+	})
+
+	{
+
+		pg, err := table.Paginate(actions.Paginate().
 			Where().
 			OrderBy(
 				expr.Desc("Age"),
-			).Limit(100),
+			).Limit(1),
 			options.Paginate().
 				SetDebug(true))
 		require.NoError(t, err)
 
-		log.Println(paginator)
-		// for {
+		for i := 0; i < 10; i++ {
+			if pg.NextPage(cursor) != nil {
+				break
+			}
+			pg.All(&users)
+			if len(users) == 0 {
+				break
+			}
 
-		// 	err = result.All(&users)
-		// 	require.NoError(t, err)
-		// 	if len(users) == 0 {
-		// 		break
-		// 	}
-		// 	cursor = users[len(users)-1].ID
-		// }
-
+			require.Equal(t, data[i], users[0])
+			cursor = users[len(users)-1].ID
+		}
 	}
 
-	// limits := uint(2)
+	{
+		actuals := [][]User{
+			data[:5],
+			data[5:],
+		}
 
-	// SELECT * FROM `NormalStruct` ORDER BY `Float64`, `$Key` LIMIT 3;
-	//
+		pg, err := table.Paginate(actions.Paginate().
+			Where().
+			OrderBy(
+				expr.Desc("Age"),
+			).Limit(5),
+			options.Paginate().
+				SetDebug(true))
+		require.NoError(t, err)
 
-	// result, err = db.Table("NormalStruct").
-	// 	Find(actions.Find().
-	// 		OrderBy(
-	// 			expr.Asc("Float64"),
-	// 			expr.Asc("$Key"),
-	// 		).
-	// 		Limit(limits+1),
-	// 		options.Find().SetDebug(true))
-	// require.NoError(t, err)
+		for i := 0; i < 10; i++ {
+			if pg.NextPage(cursor) != nil {
+				break
+			}
+			pg.All(&users)
+			if len(users) == 0 {
+				break
+			}
 
-	// err = result.All(&nss)
-	// require.NoError(t, err)
-	// length := len(nss)
-	// if uint(length) > limits {
-	// 	// csr := nss[length-1].ID.String()
-	// 	nss = nss[:length-1]
-	// }
+			require.ElementsMatch(t, actuals[i], users)
+		}
+	}
 }

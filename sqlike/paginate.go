@@ -10,11 +10,12 @@ import (
 )
 
 type Paginator struct {
-	Result
-}
-
-func (p *Paginator) NextPage() bool {
-	return true
+	table  *Table
+	fields []interface{}
+	values []interface{}
+	action actions.FindActions
+	option *options.FindOptions
+	err    error
 }
 
 // Paginate :
@@ -23,6 +24,9 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	if act != nil {
 		*x = *(act.(*actions.PaginateActions))
 	}
+	if x.Table == "" {
+		x.Table = tb.name
+	}
 	opt := new(options.PaginateOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -30,59 +34,77 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	// sort by primary key
 	x.Sorts = append(x.Sorts, expr.Desc(tb.pk))
 	x.OrderBy(x.Sorts...)
-	if opt.Cursor != nil {
-		length := len(x.Sorts)
-		fields := make([]interface{}, length, length)
-		for i, sf := range x.Sorts {
-			fields[i] = sf.Field
-		}
-		fa := actions.FindOne().Select(fields...).Where(
-			expr.Equal(tb.pk, opt.Cursor),
+	length := len(x.Sorts)
+	fields := make([]interface{}, length, length)
+	for i, sf := range x.Sorts {
+		fields[i] = sf.Field
+	}
+	return &Paginator{
+		table:  tb,
+		fields: fields,
+		action: x.FindActions,
+		option: &opt.FindOptions,
+	}, nil
+}
+
+func (pg *Paginator) NextPage(cursor interface{}) (err error) {
+	if cursor != nil {
+		fa := actions.FindOne().Select(pg.fields...).Where(
+			expr.Equal(pg.table.pk, cursor),
 		).(*actions.FindOneActions)
+		fa.Limit(1)
 		result := find(
 			context.Background(),
-			tb.name,
-			tb.driver,
-			tb.dialect,
-			tb.logger,
+			pg.table.name,
+			pg.table.driver,
+			pg.table.dialect,
+			pg.table.logger,
 			&fa.FindActions,
-			&options.FindOptions{Debug: opt.Debug},
+			&options.FindOptions{Debug: pg.option.Debug},
 			0,
 		)
-		values, err := result.nextValues()
+		pg.values, err = result.nextValues()
 		if err != nil {
-			return nil, err
+			return
 		}
-		filters := make([]interface{}, 0)
-		for i, sf := range x.Sorts {
+	}
+	return
+}
+
+// All :
+func (pg *Paginator) All(results interface{}) error {
+	action := pg.action
+	if len(pg.values) > 0 {
+		length := len(pg.fields)
+		filters := make([]interface{}, 0, length)
+		fields := make([]interface{}, length, length)
+		for i, sf := range action.Sorts {
 			v := primitive.C{}
 			if sf.Order == primitive.Ascending {
-				if sf.Field != tb.pk {
-					filters = append(filters, expr.GreaterOrEqual(sf.Field, values[i]))
+				if sf.Field != pg.table.pk {
+					filters = append(filters, expr.GreaterOrEqual(sf.Field, pg.values[i]))
 				}
-				v = expr.GreaterThan(sf.Field, values[i])
+				v = expr.GreaterThan(sf.Field, pg.values[i])
 			} else {
-				if sf.Field != tb.pk {
-					filters = append(filters, expr.LesserOrEqual(sf.Field, values[i]))
+				if sf.Field != pg.table.pk {
+					filters = append(filters, expr.LesserOrEqual(sf.Field, pg.values[i]))
 				}
-				v = expr.LesserThan(sf.Field, values[i])
+				v = expr.LesserThan(sf.Field, pg.values[i])
 			}
 			fields[i] = v
 		}
 		filters = append(filters, expr.Or(fields...))
-		x.Conditions = append(x.Conditions, expr.And(filters...))
+		action.Conditions = append(action.Conditions, expr.And(filters...))
 	}
 	result := find(
 		context.Background(),
-		tb.name,
-		tb.driver,
-		tb.dialect,
-		tb.logger,
-		&x.FindActions,
-		&opt.FindOptions,
+		pg.table.name,
+		pg.table.driver,
+		pg.table.dialect,
+		pg.table.logger,
+		&action,
+		pg.option,
 		0,
 	)
-	return &Paginator{
-		Result: *result,
-	}, nil
+	return result.All(results)
 }
