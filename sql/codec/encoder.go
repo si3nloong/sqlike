@@ -2,6 +2,7 @@ package codec
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
@@ -23,6 +24,7 @@ type DefaultEncoders struct {
 func (enc DefaultEncoders) SetEncoders(rg *Registry) {
 	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
 	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
+	rg.SetTypeEncoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes)
 	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
 	rg.SetKindEncoder(reflect.String, enc.EncodeString)
 	rg.SetKindEncoder(reflect.Bool, enc.EncodeBool)
@@ -54,6 +56,11 @@ func (enc DefaultEncoders) EncodeByte(_ *reflext.StructField, v reflect.Value) (
 	}
 	x := base64.StdEncoding.EncodeToString(b)
 	return []byte(x), nil
+}
+
+// EncodeRawBytes :
+func (enc DefaultEncoders) EncodeRawBytes(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	return sql.RawBytes(v.Bytes()), nil
 }
 
 // EncodeJSONRaw :

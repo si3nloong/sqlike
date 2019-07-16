@@ -80,16 +80,17 @@ func (pg *Paginator) All(results interface{}) error {
 		fields := make([]interface{}, length, length)
 		for i, sf := range action.Sorts {
 			v := primitive.C{}
+			val := toString(pg.values[i])
 			if sf.Order == primitive.Ascending {
 				if sf.Field != pg.table.pk {
-					filters = append(filters, expr.GreaterOrEqual(sf.Field, pg.values[i]))
+					filters = append(filters, expr.GreaterOrEqual(sf.Field, val))
 				}
-				v = expr.GreaterThan(sf.Field, pg.values[i])
+				v = expr.GreaterThan(sf.Field, val)
 			} else {
 				if sf.Field != pg.table.pk {
-					filters = append(filters, expr.LesserOrEqual(sf.Field, pg.values[i]))
+					filters = append(filters, expr.LesserOrEqual(sf.Field, val))
 				}
-				v = expr.LesserThan(sf.Field, pg.values[i])
+				v = expr.LesserThan(sf.Field, val)
 			}
 			fields[i] = v
 		}
@@ -107,4 +108,13 @@ func (pg *Paginator) All(results interface{}) error {
 		0,
 	)
 	return result.All(results)
+}
+
+func toString(v interface{}) interface{} {
+	switch vi := v.(type) {
+	case []byte:
+		return string(vi)
+	default:
+		return vi
+	}
 }
