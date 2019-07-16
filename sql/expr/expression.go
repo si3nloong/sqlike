@@ -6,25 +6,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
-// Raw :
-func Raw(value string) (r primitive.Raw) {
-	r.Value = value
-	return
-}
-
-// As :
-func As(field interface{}, alias string) (as primitive.As) {
-	as.Field = wrapColumn(field)
-	as.Name = alias
-	return
-}
-
-// Column :
-func Column(name string) (c primitive.Column) {
-	c.Name = name
-	return
-}
-
 // Equal :
 func Equal(field, value interface{}) (c primitive.C) {
 	c = clause(field, primitive.Equal, value)

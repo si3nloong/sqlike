@@ -7,11 +7,11 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"golang.org/x/xerrors"
 )
 
@@ -125,7 +125,6 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 		}
 		values = append(values, rows)
 	}
-
 	stmt := tb.dialect.InsertInto(tb.name, tb.pk, columns, values, opt)
 	return sqldriver.Execute(
 		context.Background(),

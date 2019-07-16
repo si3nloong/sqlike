@@ -17,7 +17,7 @@ import (
 func FindExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		// result sql.Result
-		cursor *sqlike.Cursor
+		result *sqlike.Result
 		ns     normalStruct
 		err    error
 	)
@@ -100,7 +100,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	// Find multiple records by where condition
 	{
 		ns = normalStruct{}
-		cursor, err = table.Find(
+		result, err = table.Find(
 			actions.Find().Where(
 				expr.Between("TinyInt", 1, 100),
 				expr.In("Enum", []Enum{
@@ -116,13 +116,13 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 		ns = normalStruct{}
-		cursor, err = table.Find(
+		result, err = table.Find(
 			actions.Find().Select("Emoji"),
 			options.Find().SetDebug(true),
 		)
 		require.NoError(t, err)
 		var emojis []string
-		err = cursor.ScanSlice(&emojis)
+		err = result.ScanSlice(&emojis)
 		require.NoError(t, err)
 		require.ElementsMatch(t, []string{
 			`🤕`,
@@ -135,7 +135,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 		ns = normalStruct{}
-		cursor, err = table.Find(
+		result, err = table.Find(
 			actions.Find().
 				Where(
 					expr.In("$Key", actions.Find().
@@ -157,7 +157,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	// Aggregation
 	{
 		ns = normalStruct{}
-		cursor, err = table.Find(
+		result, err = table.Find(
 			actions.Find().
 				Select(
 					expr.As("Enum", "A"),
@@ -183,7 +183,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			[]string{
 				"A", "B", "AVG(`MediumInt`)",
 				"C", "MAX(`BigInt`)", "D",
-			}, cursor.Columns())
+			}, result.Columns())
 	}
 }
 
