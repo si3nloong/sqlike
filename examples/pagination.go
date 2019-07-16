@@ -94,7 +94,6 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	})
 
 	{
-
 		pg, err := table.Paginate(actions.Paginate().
 			Where().
 			OrderBy(
@@ -104,11 +103,13 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 				SetDebug(true))
 		require.NoError(t, err)
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < len(data); i++ {
 			if pg.NextPage(cursor) != nil {
 				break
 			}
-			pg.All(&users)
+			users = []User{}
+			err = pg.All(&users)
+			require.NoError(t, err)
 			if len(users) == 0 {
 				break
 			}
@@ -124,6 +125,7 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 			data[5:],
 		}
 
+		cursor = nil
 		pg, err := table.Paginate(actions.Paginate().
 			Where().
 			OrderBy(
@@ -133,16 +135,18 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 				SetDebug(true))
 		require.NoError(t, err)
 
-		for i := 0; i < 10; i++ {
+		for i := 0; i < len(actuals); i++ {
 			if pg.NextPage(cursor) != nil {
 				break
 			}
-			pg.All(&users)
+			users = []User{}
+			err = pg.All(&users)
+			require.NoError(t, err)
 			if len(users) == 0 {
 				break
 			}
-
 			require.ElementsMatch(t, actuals[i], users)
+			cursor = users[len(users)-1].ID
 		}
 	}
 }
