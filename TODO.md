@@ -1,6 +1,7 @@
 #### TODO
 
-- [ ] `WhereIn` and `WhereNotIn`
+- [x] `In` and `NotIn`
+- [x] Cursor pagination using `Paginate` api
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
 - [x] Connect to `MySQL` server
 - [x] Connect to `MySQL` server with `options.Connect`
