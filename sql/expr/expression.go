@@ -160,13 +160,6 @@ func Date(field string) (d primitive.Func) {
 	return
 }
 
-// Asc :
-func Asc(field string) (s primitive.Sort) {
-	s.Field = field
-	s.Order = primitive.Ascending
-	return
-}
-
 func wrapColumn(it interface{}) interface{} {
 	switch vi := it.(type) {
 	case string:
@@ -176,13 +169,6 @@ func wrapColumn(it interface{}) interface{} {
 	default:
 		return vi
 	}
-}
-
-// Desc :
-func Desc(field string) (s primitive.Sort) {
-	s.Field = field
-	s.Order = primitive.Descending
-	return
 }
 
 func clause(field interface{}, op primitive.Operator, value interface{}) (c primitive.C) {

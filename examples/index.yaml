@@ -1,0 +1,22 @@
+indexes:
+
+- table: A
+  columns:
+  - name: SID
+    direction: asc
+  - name: Emoji
+    direction: asc
+  - name: Bool
+    direction: desc
+
+- table: A
+  name: test_idx
+  columns:
+  - name: TinyUint
+  - name: BigInt
+
+- table: NormalStruct
+  columns:
+  - name: TinyInt
+  - name: SmallInt
+    

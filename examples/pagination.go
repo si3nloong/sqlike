@@ -93,9 +93,12 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		return data[i].ID > data[j].ID
 	})
 
+	// Paginate with simple query
 	{
 		pg, err := table.Paginate(actions.Paginate().
-			Where().
+			Where(
+				expr.GreaterOrEqual("Age", 0),
+			).
 			OrderBy(
 				expr.Desc("Age"),
 			).Limit(1),
@@ -120,9 +123,11 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	}
 
 	{
+		length := 4
 		actuals := [][]User{
-			data[:5],
-			data[5:],
+			data[:length],
+			data[length:(length * 2)],
+			data[length*2:],
 		}
 
 		cursor = nil
@@ -130,7 +135,7 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 			Where().
 			OrderBy(
 				expr.Desc("Age"),
-			).Limit(5),
+			).Limit(uint(length)),
 			options.Paginate().
 				SetDebug(true))
 		require.NoError(t, err)

@@ -95,6 +95,9 @@ func (pg *Paginator) All(results interface{}) error {
 			fields[i] = v
 		}
 		filters = append(filters, expr.Or(fields...))
+		if len(action.Conditions) > 0 {
+			action.Conditions = append(action.Conditions, primitive.And)
+		}
 		action.Conditions = append(action.Conditions, expr.And(filters...))
 	}
 	result := find(
