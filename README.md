@@ -19,8 +19,8 @@ We don't really care about legacy support, we want latest feature that mysql and
 2. Support `Enum`
 3. Support `UUID`
 4. Support `stored column` and `virtual column`
-5. Extra type such as `Date`, `Timestamp`, `Key` and `GeoPoint`
-6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany` and `ModifyOne` apis
+5. Extra type such as `Date`, `Key`
+6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany`, `ModifyOne` and `Paginate` apis
 
 ```go
 import (
@@ -148,6 +148,37 @@ func main() {
             ),
             options.UpdateOne().SetDebug(true), // debug the query
         )
+    }
+
+    {
+        pg, err := userTable.Paginate(
+            actions.Paginate().
+                OrderBy(
+                    expr.Desc("CreatedAt"),
+                ),
+             options.Paginate().SetDebug(true), 
+        )
+        if err != nil {
+            panic(err)
+        }
+
+        for {
+            var users []User
+            if err := pg.All(&users); err != nil {
+                panic(err)
+            }
+            if len(users) == 0 {
+                break
+            }
+            cursor := users[len(users)-1].ID
+            if err := pg.NextPage(cursor); err != nil {
+                if err == sqlike.ErrInvalidCursor {
+                    break
+                }
+                panic(err)
+            }
+        }
+      
     }
 }
 ```
