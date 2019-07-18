@@ -107,43 +107,62 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		require.NoError(t, err)
 
 		for i := 0; i < len(data); i++ {
-			if pg.NextPage(cursor) != nil {
-				break
-			}
 			users = []User{}
 			err = pg.All(&users)
 			require.NoError(t, err)
 			if len(users) == 0 {
 				break
 			}
-
 			require.Equal(t, data[i], users[0])
 			cursor = users[len(users)-1].ID
-		}
-	}
-
-	{
-		length := 4
-		actuals := [][]User{
-			data[:length],
-			data[length:(length * 2)],
-			data[length*2:],
-		}
-
-		cursor = nil
-		pg, err := table.Paginate(actions.Paginate().
-			Where().
-			OrderBy(
-				expr.Desc("Age"),
-			).Limit(uint(length)),
-			options.Paginate().
-				SetDebug(true))
-		require.NoError(t, err)
-
-		for i := 0; i < len(actuals); i++ {
 			if pg.NextPage(cursor) != nil {
 				break
 			}
+		}
+	}
+
+	length := 4
+	actuals := [][]User{
+		data[:length],
+		data[length:(length * 2)],
+		data[length*2:],
+	}
+
+	cursor = nil
+	pg, err := table.Paginate(actions.Paginate().
+		OrderBy(
+			expr.Desc("Age"),
+		).Limit(uint(length)),
+		options.Paginate().
+			SetDebug(true))
+	require.NoError(t, err)
+
+	// Expected paginate with error
+	{
+		err = pg.NextPage(nil)
+		require.Error(t, err)
+		err = pg.NextPage([]string{})
+		require.Error(t, err)
+		var nilslice []string
+		err = pg.NextPage(nilslice)
+		require.Error(t, err)
+		var nilmap map[string]interface{}
+		err = pg.NextPage(nilmap)
+		require.Error(t, err)
+		err = pg.NextPage("")
+		require.Error(t, err)
+		err = pg.NextPage(0)
+		require.Error(t, err)
+		err = pg.NextPage(false)
+		require.Error(t, err)
+		err = pg.NextPage(float64(0))
+		require.Error(t, err)
+		err = pg.NextPage([]byte(nil))
+		require.Error(t, err)
+	}
+
+	{
+		for i := 0; i < len(actuals); i++ {
 			users = []User{}
 			err = pg.All(&users)
 			require.NoError(t, err)
@@ -152,6 +171,9 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 			}
 			require.ElementsMatch(t, actuals[i], users)
 			cursor = users[len(users)-1].ID
+			if pg.NextPage(cursor) != nil {
+				break
+			}
 		}
 	}
 }

@@ -2,12 +2,17 @@ package sqlike
 
 import (
 	"context"
+	"errors"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
+
+// ErrInvalidCursor :
+var ErrInvalidCursor = errors.New("sqlike: invalid cursor")
 
 type Paginator struct {
 	table  *Table
@@ -48,25 +53,26 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 }
 
 func (pg *Paginator) NextPage(cursor interface{}) (err error) {
-	if cursor != nil {
-		fa := actions.FindOne().Select(pg.fields...).Where(
-			expr.Equal(pg.table.pk, cursor),
-		).(*actions.FindOneActions)
-		fa.Limit(1)
-		result := find(
-			context.Background(),
-			pg.table.name,
-			pg.table.driver,
-			pg.table.dialect,
-			pg.table.logger,
-			&fa.FindActions,
-			&options.FindOptions{Debug: pg.option.Debug},
-			0,
-		)
-		pg.values, err = result.nextValues()
-		if err != nil {
-			return
-		}
+	if cursor == nil || reflext.IsZero(reflext.ValueOf(cursor)) {
+		return ErrInvalidCursor
+	}
+	fa := actions.FindOne().Select(pg.fields...).Where(
+		expr.Equal(pg.table.pk, cursor),
+	).(*actions.FindOneActions)
+	fa.Limit(1)
+	result := find(
+		context.Background(),
+		pg.table.name,
+		pg.table.driver,
+		pg.table.dialect,
+		pg.table.logger,
+		&fa.FindActions,
+		&options.FindOptions{Debug: pg.option.Debug},
+		0,
+	)
+	pg.values, err = result.nextValues()
+	if err != nil {
+		return
 	}
 	return
 }
