@@ -45,13 +45,13 @@ func TestExamples(t *testing.T) {
 	FindErrorExamples(t, db)
 
 	MigrateExamples(t, db)
-	IndexExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)
 	TransactionExamples(t, db)
+	PaginationExamples(t, client)
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
 	ExtraExamples(t, db)
-	PaginationExamples(t, client)
+	IndexExamples(t, db)
 
 }

@@ -3,8 +3,11 @@ package sqlike
 import (
 	"context"
 
+	"github.com/blang/semver"
+	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/xerrors"
 )
@@ -18,7 +21,8 @@ type Index struct {
 
 // IndexView :
 type IndexView struct {
-	tb *Table
+	tb          *Table
+	supportDesc *bool
 }
 
 // List :
@@ -41,7 +45,7 @@ func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 	_, err := sqldriver.Execute(
 		context.Background(),
 		idv.tb.driver,
-		idv.tb.dialect.CreateIndexes(idv.tb.name, idxs),
+		idv.tb.dialect.CreateIndexes(idv.tb.name, idxs, idv.isSupportDesc()),
 		idv.tb.logger,
 	)
 	return err
@@ -56,4 +60,30 @@ func (idv IndexView) DropOne(name string) error {
 		idv.tb.logger,
 	)
 	return err
+}
+
+func (idv *IndexView) isSupportDesc() bool {
+	if idv.supportDesc != nil {
+		return *idv.supportDesc
+	}
+	mysql8 := semver.MustParse("8.0.0")
+	version := idv.tb.client.Version()
+	if idv.tb.client.driverName == "mysql" && version.GTE(mysql8) {
+		f := true
+		idv.supportDesc = &f
+	}
+	return *idv.supportDesc
+}
+
+func isIndexExists(dbName, table, indexName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger) bool {
+	var count int
+	if err := sqldriver.QueryRowContext(
+		context.Background(),
+		driver,
+		dialect.HasIndex(dbName, table, indexName),
+		logger,
+	).Scan(&count); err != nil {
+		panic(err)
+	}
+	return count > 0
 }

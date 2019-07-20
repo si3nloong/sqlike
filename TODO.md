@@ -1,5 +1,6 @@
 #### TODO
 
+- [x] Support auto build index
 - [x] `In` and `NotIn`
 - [x] Cursor pagination using `Paginate` api
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`

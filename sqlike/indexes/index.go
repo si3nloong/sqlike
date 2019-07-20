@@ -1,45 +1,85 @@
 package indexes
 
-import "strings"
+import (
+	"github.com/si3nloong/sqlike/util"
+)
 
-// Kind :
-type Kind int
+// Type :
+type Type int
 
 // types :
 const (
-	FullText Kind = iota + 1
+	BTree Type = iota + 1
+	FullText
 	Unique
 	Spatial
 )
 
-// Order :
-type Order int
-
-// ordering
-const (
-	Desc Order = iota
-	Asc
-)
+func (t Type) String() string {
+	switch t {
+	case FullText:
+		return "FULLTEXT"
+	case Unique:
+		return "UNIQUE"
+	case Spatial:
+		return "SPATIAL"
+	default:
+		return "BTREE"
+	}
+}
 
 // Index :
 type Index struct {
 	Name    string
-	Kind    Kind
-	Order   Order
-	Columns []string
+	Type    Type
+	Columns []Column
+}
+
+// Direction :
+type Direction int
+
+const (
+	Ascending Direction = iota
+	Descending
+)
+
+// Columns :
+func Columns(cols ...interface{}) []Column {
+	return nil
+}
+
+// Column :
+type Column struct {
+	Name      string
+	Direction Direction
 }
 
 // GetName :
 func (idx *Index) GetName() string {
-	if idx.Name == "" {
-		name := strings.Join(idx.Columns, "_")
-		switch idx.Kind {
-		case FullText:
+	if idx.Name != "" {
+		return idx.Name
+	}
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+	for i, col := range idx.Columns {
+		if i > 0 {
+			blr.WriteByte('-')
+		}
+		switch idx.Type {
 		case Unique:
-			idx.Name = "UX_" + name
+			blr.WriteString("UX")
 		default:
-			idx.Name = "IX_" + name
+			blr.WriteString("IX")
+		}
+		blr.WriteByte('_')
+		blr.WriteString(col.Name)
+		blr.WriteByte('_')
+		if col.Direction == 0 {
+			blr.WriteString("ASC")
+		} else {
+			blr.WriteString("DESC")
 		}
 	}
+	idx.Name = blr.String()
 	return idx.Name
 }

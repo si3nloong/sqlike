@@ -5,10 +5,10 @@ import (
 	"database/sql"
 
 	"github.com/blang/semver"
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
 // Client :
@@ -50,7 +50,11 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 
 // Version :
 func (c *Client) Version() (version semver.Version) {
-	version = c.version
+	if c.version.String() != "" {
+		version = c.version
+		return
+	}
+	c.version = c.getVersion()
 	return
 }
 
@@ -80,25 +84,35 @@ func (c Client) ListDatabases() ([]string, error) {
 // Database :
 func (c *Client) Database(name string) *Database {
 	return &Database{
-		name:     name,
-		pk:       c.pk,
-		client:   c,
-		dialect:  c.dialect,
-		driver:   c.DB,
-		logger:   c.logger,
-		registry: codec.DefaultRegistry,
+		driverName: c.driverName,
+		name:       name,
+		pk:         c.pk,
+		client:     c,
+		dialect:    c.dialect,
+		driver:     c.DB,
+		logger:     c.logger,
+		registry:   codec.DefaultRegistry,
 	}
 }
 
 func (c *Client) getVersion() (version semver.Version) {
+	var (
+		ver string
+		err error
+	)
 	stmt := c.dialect.GetVersion()
-	var ver string
-	sqldriver.QueryRowContext(
+	err = sqldriver.QueryRowContext(
 		context.Background(),
 		c.DB,
 		stmt,
 		c.logger,
 	).Scan(&ver)
-	version, _ = semver.Parse(ver)
+	if err != nil {
+		panic(err)
+	}
+	version, err = semver.Parse(ver)
+	if err != nil {
+		panic(err)
+	}
 	return
 }

@@ -11,11 +11,11 @@ import (
 // IndexExamples :
 func IndexExamples(t *testing.T, db *sqlike.Database) {
 	var (
-		err error
+		err  error
+		idxs []sqlike.Index
 	)
 
 	table := db.Table("Index")
-	idx := table.Indexes()
 
 	{
 
@@ -31,16 +31,32 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 
 	// Create one index
 	{
+		idx := table.Indexes()
 		err = idx.CreateOne(indexes.Index{
-			Columns: []string{"ID"},
+			Columns: []indexes.Column{
+				indexes.Column{Name: "ID"},
+			},
 		})
 		require.NoError(t, err)
+		idxs, err = idx.List()
+		require.True(t, len(idxs) > 1)
 	}
 
 	{
-		var idxs []sqlike.Index
-		idxs, err = idx.List()
+		err = db.BuildIndexes()
 		require.NoError(t, err)
-		require.Equal(t, int(2), len(idxs))
+		idxs, err = db.Table("A").Indexes().List()
+		require.NoError(t, err)
+		require.Contains(t, idxs, sqlike.Index{
+			Name:      "IX_SID_ASC-IX_Emoji_ASC-IX_Bool_DESC",
+			Type:      "BTREE",
+			IsVisible: true,
+		})
+		require.Contains(t, idxs, sqlike.Index{
+			Name:      "test_idx",
+			Type:      "BTREE",
+			IsVisible: true,
+		})
 	}
+
 }
