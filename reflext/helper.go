@@ -68,9 +68,14 @@ func IsKind(t reflect.Type, k reflect.Kind) bool {
 // IsZero :
 func IsZero(v reflect.Value) bool {
 	switch v.Kind() {
-	case reflect.Func, reflect.Map, reflect.Slice:
+	case reflect.Func, reflect.Map:
 		return v.IsNil()
+	case reflect.Slice:
+		return v.IsNil() || v.Len() == 0
 	case reflect.Array:
+		if v.Len() == 0 {
+			return true
+		}
 		z := true
 		for i := 0; i < v.Len(); i++ {
 			z = z && IsZero(v.Index(i))
