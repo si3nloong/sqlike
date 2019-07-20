@@ -10,8 +10,8 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 We don't really care about legacy support, we want latest feature that mysql and golang offer us :
 
-1. mysql 5.7 and above
-2. Golang 1.10 and above
+1. **mysql 5.7** and above
+2. **GoLang 1.10** and above
 
 ### What we provide apart from native package (database/sql)?
 
@@ -21,6 +21,9 @@ We don't really care about legacy support, we want latest feature that mysql and
 4. Support `stored column` and `virtual column`
 5. Extra type such as `Date`, `Key`
 6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany`, `ModifyOne` and `Paginate` apis
+
+### Missing DOC?
+You can refer to `examples` folder to see what apis we offer and learn how to use those apis
 
 ```go
 import (
@@ -45,7 +48,7 @@ type User struct {
     Name      string
     Email     string     `sqlike:",size:200"`
     Address   string     `sqlike:",longtext"`
-    Status    UserStatus `sqlike:",enum:ACTIVE|SUSPEND"`
+    Status    UserStatus `sqlike:",charset=latin1,enum:ACTIVE|SUSPEND"`
     CreatedAt time.Time
     UpdatedAt time.Time
 }

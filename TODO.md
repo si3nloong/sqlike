@@ -55,5 +55,5 @@
 - [x] Delete multiple record
 - [x] Delete single record
 - [x] Replace into (replace with `Copy` API)
-- [ ] Write testcases (40%)
+- [ ] Write testcases (50%)
 - [ ] Support `Postgres`

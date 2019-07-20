@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/blang/semver"
 	"github.com/si3nloong/sqlike/sql/codec"
@@ -22,6 +23,7 @@ type Client struct {
 }
 
 func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect) (*Client, error) {
+	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
 		driverName: driver,
 		DB:         db,

@@ -68,10 +68,11 @@ func (idv *IndexView) isSupportDesc() bool {
 	}
 	mysql8 := semver.MustParse("8.0.0")
 	version := idv.tb.client.Version()
+	flag := false
 	if idv.tb.client.driverName == "mysql" && version.GTE(mysql8) {
-		f := true
-		idv.supportDesc = &f
+		flag = true
 	}
+	idv.supportDesc = &flag
 	return *idv.supportDesc
 }
 
