@@ -3,24 +3,31 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 	"time"
 
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
+	"gopkg.in/yaml.v3"
 )
 
 // Database :
 type Database struct {
-	name     string
-	pk       string
-	client   *Client
-	driver   sqldriver.Driver
-	dialect  sqldialect.Dialect
-	registry *codec.Registry
-	logger   logs.Logger
+	driverName string
+	name       string
+	pk         string
+	client     *Client
+	driver     sqldriver.Driver
+	dialect    sqldialect.Dialect
+	registry   *codec.Registry
+	logger     logs.Logger
 }
 
 // Table :
@@ -82,4 +89,91 @@ func (db *Database) RunInTransaction(cb txCallback, opts ...*options.Transaction
 		return err
 	}
 	return tx.CommitTransaction()
+}
+
+type indexDefinition struct {
+	Indexes []struct {
+		Table   string `yaml:"table"`
+		Name    string `yaml:"name"`
+		Type    string `yaml:"type"`
+		Columns []struct {
+			Name      string `yaml:"name"`
+			Direction string `yaml:"direction"`
+		} `yaml:"columns"`
+	} `yaml:"indexes"`
+}
+
+func (db *Database) BuildIndexes(filepath ...string) error {
+	var id indexDefinition
+	pwd, _ := os.Getwd()
+	file := pwd + "/index.yaml"
+	if len(filepath) > 0 {
+		file = filepath[0]
+	}
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+	if err := yaml.Unmarshal(b, &id); err != nil {
+		return err
+	}
+
+	for _, idx := range id.Indexes {
+		columns := make([]indexes.Column, 0, len(idx.Columns))
+		for _, col := range idx.Columns {
+			dir := indexes.Ascending
+			if col.Direction == "desc" || col.Direction == "descending" {
+				dir = indexes.Descending
+			}
+			columns = append(columns, indexes.Column{
+				Name:      col.Name,
+				Direction: dir,
+			})
+		}
+
+		index := indexes.Index{
+			Name:    idx.Name,
+			Type:    parseIndexType(idx.Type),
+			Columns: columns,
+		}
+
+		if isIndexExists(
+			db.name,
+			idx.Table,
+			index.GetName(),
+			db.driver,
+			db.dialect,
+			db.logger,
+		) {
+			continue
+		}
+
+		iv := db.Table(idx.Table).Indexes()
+		if err := iv.CreateOne(index); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func parseIndexType(name string) (idxType indexes.Type) {
+	name = strings.TrimSpace(strings.ToLower(name))
+	if name == "" {
+		idxType = indexes.BTree
+		return
+	}
+
+	switch name {
+	case "spatial":
+		idxType = indexes.Spatial
+	case "unique":
+		idxType = indexes.Unique
+	case "btree":
+		idxType = indexes.BTree
+	case "fulltext":
+		idxType = indexes.FullText
+	default:
+		panic(fmt.Errorf("invalid index type %q", name))
+	}
+	return
 }
