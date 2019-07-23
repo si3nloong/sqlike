@@ -71,6 +71,37 @@ func (r *Reader) ReadEscapeString() (string, error) {
 	return blr.String(), nil
 }
 
+func (r *Reader) ReadRawString() (string, error) {
+	c := r.nextToken()
+	if c == 'n' {
+		if err := r.unreadByte().ReadNull(); err != nil {
+			return "", err
+		}
+		return "null", nil
+	}
+
+	if c != '"' {
+		return "", ErrInvalidJSON{
+			callback: "ReadString",
+			message:  "expect start with \"",
+		}
+	}
+
+	for i := r.pos; i < r.len; i++ {
+		c = r.b[i]
+		if c == '"' {
+			str := string(r.b[r.pos:i])
+			r.pos = i + 1
+			return str, nil
+		}
+	}
+
+	return "", ErrInvalidJSON{
+		callback: "ReadString",
+		message:  "expect end with \"",
+	}
+}
+
 // ReadString :
 func (r *Reader) ReadString() (string, error) {
 	c := r.nextToken()

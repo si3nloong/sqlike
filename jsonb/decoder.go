@@ -3,7 +3,9 @@ package jsonb
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"reflect"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -47,16 +49,21 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 
 // DecodeByte :
 func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
-	x, err := r.ReadString()
+	x, err := r.ReadRawString()
 	if err != nil {
 		return err
 	}
 	var b []byte
-	if x != "" {
-		b, err = base64.StdEncoding.DecodeString(x)
-		if err != nil {
-			return err
-		}
+	if x == null {
+		v.SetBytes(b)
+		return nil
+	} else if x == "" {
+		v.SetBytes(make([]byte, 0))
+		return nil
+	}
+	b, err = base64.StdEncoding.DecodeString(x)
+	if err != nil {
+		return err
 	}
 	v.SetBytes(b)
 	return nil
@@ -68,11 +75,24 @@ func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	if string(b) == null {
+	str := string(b)
+	if str == null || str == `""` {
 		v.Set(reflect.ValueOf(time.Time{}))
 		return nil
 	}
-	x, err := time.Parse(`"`+time.RFC3339Nano+`"`, string(b))
+	if len(b) < 2 || b[0] != '"' || b[len(b)-1] != '"' {
+		return errors.New("jsonb: invalid format of date")
+	}
+	str = string(b[1 : len(b)-1])
+	var x time.Time
+	switch {
+	case regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`).MatchString(str):
+		x, err = time.Parse(`2006-01-02`, str)
+	case regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`).MatchString(str):
+		x, err = time.Parse(`2006-01-02 15:04:05`, str)
+	default:
+		x, err = time.Parse(time.RFC3339Nano, str)
+	}
 	if err != nil {
 		return err
 	}
