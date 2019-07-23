@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"log"
 	"reflect"
 	"strconv"
 	"time"
@@ -39,7 +40,6 @@ func (enc Encoder) SetEncoders(rg *Registry) {
 	rg.SetKindEncoder(reflect.Struct, enc.EncodeStruct)
 	rg.SetKindEncoder(reflect.Array, enc.EncodeArray)
 	rg.SetKindEncoder(reflect.Slice, enc.EncodeArray)
-	// TODO: support marshal with map
 	rg.SetKindEncoder(reflect.Map, enc.EncodeMap)
 	rg.SetKindEncoder(reflect.Interface, enc.EncodeInterface)
 	enc.registry = rg
@@ -202,10 +202,14 @@ func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
 		w.WriteString(null)
 		return nil
 	}
-	// TODO:
-	// r := v.MapRange()
-	// for r.Next() {
-	// 	log.Println(r.Key(), r.Value())
-	// }
+	if v.Len() == 0 {
+		w.WriteString("{}")
+		return nil
+	}
+	// TODO: support marshal with map
+	r := v.MapRange()
+	for r.Next() {
+		log.Println(r.Key(), r.Value())
+	}
 	return nil
 }
