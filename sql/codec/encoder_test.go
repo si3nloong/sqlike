@@ -16,7 +16,7 @@ func TestEncodeMap(t *testing.T) {
 
 	// Nil map
 	{
-		var nilmap map[string]interface{}
+		var nilmap map[string]string
 		it, err = enc.EncodeMap(nil, reflect.ValueOf(nilmap))
 		require.NoError(t, err)
 		require.Equal(t, `null`, it)
@@ -24,7 +24,15 @@ func TestEncodeMap(t *testing.T) {
 
 	// Initialized map
 	{
-		initmap := make(map[string]interface{})
+		initmap := make(map[string]int)
+		it, err = enc.EncodeMap(nil, reflect.ValueOf(initmap))
+		require.NoError(t, err)
+		require.Equal(t, []byte(`{}`), it)
+	}
+
+	// Initialized map
+	{
+		initmap := make(map[string]int)
 		it, err = enc.EncodeMap(nil, reflect.ValueOf(initmap))
 		require.NoError(t, err)
 		require.Equal(t, []byte(`{}`), it)

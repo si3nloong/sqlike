@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"log"
+	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
 	"time"
 
 	"github.com/si3nloong/sqlike/core"
+	"github.com/si3nloong/sqlike/reflext"
 )
 
 // Encoder :
@@ -189,27 +191,56 @@ func (enc *Encoder) EncodeArray(w *Writer, v reflect.Value) error {
 
 // EncodeInterface :
 func (enc *Encoder) EncodeInterface(w *Writer, v reflect.Value) error {
-	if v.Interface() == nil {
+	it := v.Interface()
+	if it == nil {
 		w.WriteString(null)
 		return nil
 	}
-	return nil
+	t := reflect.TypeOf(it)
+	encoder, err := enc.registry.LookupEncoder(t)
+	if err != nil {
+		return err
+	}
+	return encoder(w, reflect.ValueOf(it))
 }
 
 // EncodeMap :
 func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
+	t := v.Type()
+	k := t.Key()
+	if k.Kind() != reflect.String {
+		return fmt.Errorf("jsonb: unsupported data type %q for map key, it must be string", k.Kind())
+	}
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
 	}
+	w.WriteByte('{')
 	if v.Len() == 0 {
-		w.WriteString("{}")
+		w.WriteByte('}')
 		return nil
 	}
-	// TODO: support marshal with map
-	r := v.MapRange()
-	for r.Next() {
-		log.Println(r.Key(), r.Value())
+	keys := reflext.MapKeys(v.MapKeys())
+	sort.Sort(keys)
+	length := len(keys)
+	for i := 0; i < length; i++ {
+		if i > 0 {
+			w.WriteByte(',')
+		}
+		k := keys[i]
+		vv := v.MapIndex(k)
+		w.WriteRune('"')
+		escapeString(w, k.String())
+		w.WriteRune('"')
+		w.WriteByte(':')
+		encoder, err := enc.registry.LookupEncoder(vv.Type())
+		if err != nil {
+			return err
+		}
+		if err := encoder(w, vv); err != nil {
+			return err
+		}
 	}
+	w.WriteByte('}')
 	return nil
 }
