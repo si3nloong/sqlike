@@ -23,7 +23,7 @@ We don't really care about legacy support, we want latest feature that mysql and
 6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany`, `ModifyOne` and `Paginate` apis
 
 ### Missing DOC?
-You can refer to `examples` folder to see what apis we offer and learn how to use those apis
+You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
 
 ```go
 import (

@@ -44,10 +44,11 @@ func TestEncodeMap(t *testing.T) {
 		m["d"] = true
 		m["e"] = int64(103123213)
 		m["f"] = uint8(10)
+		m["z"] = nil
 
 		v = reflect.ValueOf(m)
 		err = enc.EncodeMap(w, v)
 		require.NoError(t, err)
-		require.Equal(t, []byte(`{"a":"v1","b":-2246,"c":1.0888E+01,"d":true,"e":103123213,"f":10}`), w.Bytes())
+		require.Equal(t, []byte(`{"a":"v1","b":-2246,"c":1.0888E+01,"d":true,"e":103123213,"f":10,"z":null}`), w.Bytes())
 	}
 }
