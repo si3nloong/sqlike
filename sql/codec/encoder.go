@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -12,7 +14,6 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 
 	"github.com/si3nloong/sqlike/jsonb"
-	"golang.org/x/xerrors"
 )
 
 // DefaultEncoders :
@@ -82,7 +83,7 @@ func (enc DefaultEncoders) EncodeJSONRaw(_ *reflext.StructField, v reflect.Value
 func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	x, isOk := v.Interface().(time.Time)
 	if !isOk {
-		return nil, xerrors.New("invalid data type")
+		return nil, errors.New("sqlike/sql/codec: invalid data type")
 	}
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
@@ -124,7 +125,7 @@ func (enc DefaultEncoders) EncodeFloat(_ *reflext.StructField, v reflect.Value) 
 
 // EncodePtr :
 func (enc *DefaultEncoders) EncodePtr(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
-	if v.IsNil() {
+	if !v.IsValid() || v.IsNil() {
 		return nil, nil
 	}
 	v = v.Elem()
@@ -147,5 +148,39 @@ func (enc DefaultEncoders) EncodeArray(_ *reflext.StructField, v reflect.Value) 
 
 // EncodeMap :
 func (enc DefaultEncoders) EncodeMap(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	t := v.Type()
+	k := t.Key()
+	if k.Kind() != reflect.String {
+		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map key, it must be string", k.Kind())
+	}
+	k = t.Elem()
+	if !isBaseType(k) {
+		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map value", k.Kind())
+	}
+	if v.IsNil() {
+		return string("null"), nil
+	}
 	return jsonb.Marshal(v)
+}
+
+func isBaseType(t reflect.Type) bool {
+	for {
+		k := t.Kind()
+		switch k {
+		case reflect.String:
+			return true
+		case reflect.Bool:
+			return true
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			return true
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			return true
+		case reflect.Float32, reflect.Float64:
+			return true
+		case reflect.Ptr:
+			t = t.Elem()
+		default:
+			return false
+		}
+	}
 }
