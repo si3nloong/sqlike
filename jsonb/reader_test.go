@@ -1,6 +1,7 @@
 package jsonb
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -25,7 +26,7 @@ func TestReader(t *testing.T) {
 		flag, _ := r.reset().ReadBoolean()
 		require.Equal(t, false, flag)
 		num, _ := r.reset().ReadNumber()
-		require.Equal(t, "0", num)
+		require.Equal(t, json.Number("0"), num)
 		b, _ := r.reset().ReadBytes()
 		require.Equal(t, []byte("null"), b)
 		v, _ := r.reset().ReadValue()

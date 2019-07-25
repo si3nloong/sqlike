@@ -1,11 +1,14 @@
 package jsonb
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
+type Number = json.Number
+
 // ReadNumber :
-func (r *Reader) ReadNumber() (string, error) {
+func (r *Reader) ReadNumber() (Number, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		if err := r.unreadByte().ReadNull(); err != nil {
@@ -32,7 +35,7 @@ func (r *Reader) ReadNumber() (string, error) {
 		}
 	}
 
-	return str, nil
+	return json.Number(str), nil
 }
 
 func (r *Reader) skipNumber() {

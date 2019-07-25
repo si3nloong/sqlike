@@ -114,7 +114,7 @@ func (dec Decoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	v.SetString(x)
+	v.SetString(x.String())
 	return nil
 }
 
@@ -144,7 +144,7 @@ func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	x, err := strconv.ParseInt(num, 10, 64)
+	x, err := strconv.ParseInt(num.String(), 10, 64)
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	x, err := strconv.ParseUint(num, 10, 64)
+	x, err := strconv.ParseUint(num.String(), 10, 64)
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	x, err := strconv.ParseFloat(num, 64)
+	x, err := strconv.ParseFloat(num.String(), 64)
 	if err != nil {
 		return err
 	}

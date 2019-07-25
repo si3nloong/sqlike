@@ -79,35 +79,42 @@ func TestDecodeMap(t *testing.T) {
 	)
 
 	v := reflext.ValueOf(&x).Elem()
-	r = NewReader([]byte(`null`))
-	err = dec.DecodeMap(r, v)
-	require.NoError(t, err)
-	require.Equal(t, map[string]interface{}(nil), x)
 
-	r = NewReader([]byte(`{}`))
-	err = dec.DecodeMap(r, v)
-	require.NoError(t, err)
-	require.Equal(t, make(map[string]interface{}), x)
+	t.Run("Decode with null", func(ti *testing.T) {
+		r = NewReader([]byte(`null`))
+		err = dec.DecodeMap(r, v)
+		require.NoError(t, err)
+		require.Equal(t, map[string]interface{}(nil), x)
+	})
 
-	r = NewReader([]byte(`
-	{
-		"a":"123", 
-		"b":   108213312, 
-		"c": true, 
-		"d": "alSLKaj28173-021@#$%^&*\"",
-		"e": 0.3127123
-	}`))
-	err = dec.DecodeMap(r, v)
-	require.NoError(t, err)
-	require.Equal(t, map[string]interface{}{
-		"a": "123",
-		"b": float64(108213312),
-		"c": true,
-		"d": `alSLKaj28173-021@#$%^&*"`,
-		"e": float64(0.3127123),
-	}, x)
+	t.Run("Decode with empty object", func(ti *testing.T) {
+		r = NewReader([]byte(`{}`))
+		err = dec.DecodeMap(r, v)
+		require.NoError(t, err)
+		require.Equal(t, make(map[string]interface{}), x)
+	})
 
-	t.Run("Decode Map<string,string>", func(ti *testing.T) {
+	t.Run("Decode to map<string,interface{}>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"a":"123", 
+			"b":   108213312, 
+			"c": true, 
+			"d": "alSLKaj28173-021@#$%^&*\"",
+			"e": 0.3127123
+		}`))
+		err = dec.DecodeMap(r, v)
+		require.NoError(t, err)
+		require.Equal(t, map[string]interface{}{
+			"a": "123",
+			"b": float64(108213312),
+			"c": true,
+			"d": `alSLKaj28173-021@#$%^&*"`,
+			"e": float64(0.3127123),
+		}, x)
+	})
+
+	t.Run("Decode to map<string,string>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"number":      "1234567890", 
@@ -127,7 +134,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode Map<string,bool>", func(ti *testing.T) {
+	t.Run("Decode to map<string,bool>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"true":     true, 
@@ -143,7 +150,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode Map<string,int>", func(ti *testing.T) {
+	t.Run("Decode to map<string,int>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"minus-one": -1,
@@ -167,7 +174,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode Map<string,uint8>", func(ti *testing.T) {
+	t.Run("Decode to map<string,uint8>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"one":      1, 
@@ -187,7 +194,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode Map<string,float32>", func(ti *testing.T) {
+	t.Run("Decode to map<string,float32>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"minus-one": -1,
@@ -213,7 +220,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode Map<string,float64>", func(ti *testing.T) {
+	t.Run("Decode to map<string,float64>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"minus-one": -1,
@@ -236,6 +243,38 @@ func TestDecodeMap(t *testing.T) {
 			"eleven":    11,
 			"hundred":   100,
 			"number":    3123123799213,
+		}, m)
+	})
+
+	t.Run("Decode to map<string,interface{}>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"negative": -183,
+			"string": "textasjdhasljdlasjkdjlsa:'dasdas",
+			"number":    3123123799213,
+			"nested": {
+				"k": {
+					"bool": true,
+					"no": 10,
+					"string": "😀😁😂"
+				}
+			}
+		}`))
+		m := make(map[string]interface{})
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]interface{}{
+			"negative": float64(-183),
+			"string":   "textasjdhasljdlasjkdjlsa:'dasdas",
+			"number":   float64(3123123799213),
+			"nested": map[string]interface{}{
+				"k": map[string]interface{}{
+					"bool":   true,
+					"no":     float64(10),
+					"string": "😀😁😂",
+				},
+			},
 		}, m)
 	})
 }

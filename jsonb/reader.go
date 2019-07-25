@@ -1,8 +1,6 @@
 package jsonb
 
 import (
-	"strconv"
-
 	"golang.org/x/xerrors"
 )
 
@@ -162,7 +160,7 @@ func (r *Reader) ReadValue() (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		return strconv.ParseFloat(num, 64)
+		return num.Float64()
 	case jsonBoolean:
 		return r.ReadBoolean()
 	case jsonNull:
