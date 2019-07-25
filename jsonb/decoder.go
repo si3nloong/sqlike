@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -43,6 +44,7 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
 	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
+	rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
 	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
 	dec.registry = rg
 }
@@ -248,6 +250,36 @@ func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
 		}
 		return decoder(it, vv)
 	})
+}
+
+// DecodeMap :
+func (dec *Decoder) DecodeMap(r *Reader, v reflect.Value) error {
+	if r.IsNull() {
+		v.Set(reflect.Zero(v.Type()))
+		return r.skipNull()
+	}
+	t := v.Type()
+	if t.Key().Kind() != reflect.String {
+		return fmt.Errorf("jsonb: unsupported data type of map key, %q", t.Key().Kind())
+	}
+	decoder, err := dec.registry.LookupDecoder(t.Elem())
+	if err != nil {
+		return err
+	}
+	x := reflect.MakeMap(t)
+	if err := r.ReadObject(func(it *Reader, k string) error {
+		vi := reflext.Zero(t.Elem())
+		err = decoder(it, vi)
+		if err != nil {
+			return err
+		}
+		x.SetMapIndex(reflect.ValueOf(k), vi)
+		return nil
+	}); err != nil {
+		return err
+	}
+	v.Set(x)
+	return nil
 }
 
 // DecodeInterface :

@@ -36,6 +36,10 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 	// - https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html
 	{
 		ns.Emoji = `🤕`
+		m := make(map[string]int)
+		m["one"] = 1
+		m["two"] = 2
+		ns.Map = m
 		result, err = table.InsertOne(&ns,
 			options.InsertOne().
 				SetDebug(true).

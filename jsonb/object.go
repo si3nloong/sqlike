@@ -1,9 +1,8 @@
-package jsonb 
+package jsonb
 
 import (
 	"strings"
 )
-
 
 // ReadObject :
 func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
@@ -16,7 +15,7 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 	}
 
 	var (
-		k string
+		k   string
 		err error
 	)
 
@@ -42,8 +41,12 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 				message:  "expect : after object key",
 			}
 		}
-		// TODO: process the value
-		if err := cb(r, k); err != nil {
+		v, err := r.ReadBytes()
+		if err != nil {
+			return err
+		}
+		it := NewReader(v)
+		if err := cb(it, k); err != nil {
 			return err
 		}
 		c = r.nextToken()
@@ -68,7 +71,7 @@ func (r *Reader) ReadFlattenObject(cb func(*Reader, string) error) error {
 	var (
 		paths []string
 		key   string
-		err error
+		err   error
 	)
 
 keyLoop:
@@ -85,7 +88,7 @@ keyLoop:
 				message:  "expect \" for object key",
 			}
 		}
-		key, err  = r.unreadByte().ReadString()
+		key, err = r.unreadByte().ReadString()
 		if err != nil {
 			return err
 		}

@@ -51,6 +51,10 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.Float64 = 19833.6789
 		ns.JSONRaw = json.RawMessage(`{"test":"hello world"}`)
 		ns.Enum = Failed
+		ns.Map = make(map[string]int)
+		ns.Map["one"] = 1
+		ns.Map["three"] = 3
+		ns.Map["eleven"] = 11
 		ns.Timestamp = ts
 
 		_, err = table.InsertOne(&ns)
@@ -83,6 +87,11 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float32(10.6789), ns.Float32)
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("FAILED"), ns.Enum)
+		require.Equal(t, map[string]int{
+			"one":    1,
+			"three":  3,
+			"eleven": 11,
+		}, ns.Map)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 	}
 

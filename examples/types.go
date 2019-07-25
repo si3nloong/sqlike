@@ -46,6 +46,7 @@ type normalStruct struct {
 		// NestedNullInt *int
 	}
 	JSONRaw json.RawMessage
+	Map     map[string]int
 	// GeoPoint  types.GeoPoint
 	Timestamp time.Time
 	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`

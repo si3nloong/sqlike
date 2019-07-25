@@ -41,7 +41,7 @@ func (dec DefaultDecoders) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
 	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
 	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
-	// rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
+	rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
 	dec.registry = rg
 }
 
@@ -280,7 +280,6 @@ func (dec *DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error 
 		b = []byte(vi)
 	case []byte:
 		b = vi
-	case nil:
 	}
 	return jsonb.UnmarshalValue(b, v)
 }
@@ -293,7 +292,17 @@ func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
 		b = []byte(vi)
 	case []byte:
 		b = vi
-	case nil:
+	}
+	return jsonb.UnmarshalValue(b, v)
+}
+
+func (dec DefaultDecoders) DecodeMap(it interface{}, v reflect.Value) error {
+	var b []byte
+	switch vi := it.(type) {
+	case string:
+		b = []byte(vi)
+	case []byte:
+		b = vi
 	}
 	return jsonb.UnmarshalValue(b, v)
 }
