@@ -1,6 +1,7 @@
 package jsonb
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -105,4 +106,136 @@ func TestDecodeMap(t *testing.T) {
 		"d": `alSLKaj28173-021@#$%^&*"`,
 		"e": float64(0.3127123),
 	}, x)
+
+	t.Run("Decode Map<string,string>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"number":      "1234567890", 
+			"b":"abcdefghijklmnopqrstuvwxyz",
+			"emoji": "😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊",
+			"japanese": "福岡市美術館で夜間開館スタート！7月～10月の金曜日と土曜日は20時まで延長開館"
+		}`))
+		m := make(map[string]string)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]string{
+			"number":   "1234567890",
+			"b":        "abcdefghijklmnopqrstuvwxyz",
+			"emoji":    "😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊",
+			"japanese": "福岡市美術館で夜間開館スタート！7月～10月の金曜日と土曜日は20時まで延長開館",
+		}, m)
+	})
+
+	t.Run("Decode Map<string,bool>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"true":     true, 
+			"false": false
+		}`))
+		m := make(map[string]bool)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]bool{
+			"true":  true,
+			"false": false,
+		}, m)
+	})
+
+	t.Run("Decode Map<string,int>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"minus-one": -1,
+			"negative": -31231237,
+			"one":      1, 
+			"two":2,
+			"eleven": 11,
+			"hundred": 100
+		}`))
+		m := make(map[string]int)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]int{
+			"minus-one": -1,
+			"negative":  -31231237,
+			"one":       1,
+			"two":       2,
+			"eleven":    11,
+			"hundred":   100,
+		}, m)
+	})
+
+	t.Run("Decode Map<string,uint8>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"one":      1, 
+			"two":2,
+			"eleven": 11,
+			"hundred": 100
+		}`))
+		m := make(map[string]uint8)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]uint8{
+			"one":     1,
+			"two":     2,
+			"eleven":  11,
+			"hundred": 100,
+		}, m)
+	})
+
+	t.Run("Decode Map<string,float32>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"minus-one": -1,
+			"negative":  -31231237,
+			"one":      1, 
+			"two":2,
+			"eleven": 11,
+			"hundred": 100,
+			"number":    3123123799213,
+		}`))
+		m := make(map[string]float32)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]float32{
+			"minus-one": -1,
+			"negative":  -31231237,
+			"one":       1,
+			"two":       2,
+			"eleven":    11,
+			"hundred":   100,
+			"number":    3123123799213,
+		}, m)
+	})
+
+	t.Run("Decode Map<string,float64>", func(ti *testing.T) {
+		r = NewReader([]byte(`
+		{
+			"minus-one": -1,
+			"negative":  -3123123799213,
+			"one":      1, 
+			"two":2,
+			"eleven": 11,
+			"hundred": 100,
+			"number":    3123123799213,
+		}`))
+		m := make(map[string]float64)
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		require.Equal(ti, map[string]float64{
+			"minus-one": -1,
+			"negative":  -3123123799213,
+			"one":       1,
+			"two":       2,
+			"eleven":    11,
+			"hundred":   100,
+			"number":    3123123799213,
+		}, m)
+	})
 }
