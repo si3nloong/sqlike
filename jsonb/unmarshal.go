@@ -55,6 +55,11 @@ func Unmarshal(data []byte, dst interface{}) error {
 
 // UnmarshalValue :
 func UnmarshalValue(data []byte, v reflect.Value) error {
+	if data == nil {
+		v.Set(reflect.Zero(v.Type()))
+		return nil
+	}
+
 	t := v.Type()
 	decoder, err := registry.LookupDecoder(reflext.Deref(t))
 	if err != nil {
