@@ -4,7 +4,6 @@
 - [x] `In` and `NotIn`
 - [x] Cursor pagination using `Paginate` api
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
-- [x] Connect to `MySQL` server
 - [x] Connect to `MySQL` server with `options.Connect`
 - [x] Support omit options on `InsertOne` and `InsertMany`
 - [x] Support option tag `unique_index` and `index` on create table
@@ -12,7 +11,7 @@
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [ ] Support custom type `GeoPoint`
 - [x] Allow custom name of primary key with `SetPrimaryKey`
-- [ ] Eager loading with foreign key
+<!-- - [ ] Eager loading with foreign key -->
 - [x] Support extra options like `charset` and `collation` in connection
 - [x] Get `MySQL` server version
 - [x] Drop selected `Database`

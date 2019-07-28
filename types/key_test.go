@@ -46,5 +46,10 @@ func TestKey(t *testing.T) {
 		err = k.UnmarshalJSONB(b)
 		require.NoError(it, err)
 		require.Equal(it, keyvalue, k.String())
+
+		k = new(Key)
+		err = k.UnmarshalJSONB([]byte("null"))
+		require.NoError(it, err)
+		require.Equal(it, new(Key), k)
 	})
 }

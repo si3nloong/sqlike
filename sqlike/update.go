@@ -6,12 +6,12 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"golang.org/x/xerrors"
 )
 
@@ -47,7 +47,7 @@ func modifyOne(ctx context.Context, tbName, pk string, dialect sqldialect.Dialec
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	if _, exists := cdc.Names[pk]; !exists {
-		return xerrors.Errorf("missing primary key field %q", pk)
+		return xerrors.Errorf("sqlike: missing primary key field %q", pk)
 	}
 
 	opt := new(options.ModifyOneOptions)

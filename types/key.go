@@ -102,6 +102,10 @@ func (k *Key) Incomplete() bool {
 }
 
 func (k *Key) unmarshal(str string) error {
+	if str == "null" {
+		k = nil
+		return nil
+	}
 	var (
 		idx    int
 		path   string
@@ -264,8 +268,13 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 	if length < 2 {
 		return xerrors.New("types.UnmarshalJSONB: invalid key json value")
 	}
-	b = b[1 : length-1]
-	return k.unmarshal(string(b))
+	str := string(b)
+	if str == "null" {
+		k = nil
+		return nil
+	}
+	str = string(b[1 : length-1])
+	return k.unmarshal(str)
 }
 
 type gobKey struct {
