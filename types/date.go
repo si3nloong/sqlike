@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"database/sql/driver"
+	"errors"
 	"regexp"
 	"strconv"
 	"strings"
@@ -34,6 +35,11 @@ func (d *Date) DataType(driver string, sf *reflext.StructField) columns.Column {
 		DefaultValue: &dflt,
 		Nullable:     sf.IsNullable,
 	}
+}
+
+// IsZero :
+func (d *Date) IsZero() bool {
+	return d.Day == 0 && d.Month == 0 && d.Year == 0
 }
 
 // Value :
@@ -134,6 +140,9 @@ func (d *Date) marshal(w writer) {
 }
 
 func (d *Date) unmarshal(str string) (err error) {
+	if str == "" {
+		return errors.New("types: empty date string")
+	}
 	// TODO: verify date is valid date
 	paths := strings.SplitN(str, "-", 3)
 	d.Year, err = strconv.Atoi(paths[0])

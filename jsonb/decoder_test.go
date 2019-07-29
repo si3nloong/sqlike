@@ -278,3 +278,22 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 }
+
+func TestDecodeArray(t *testing.T) {
+	var (
+		err error
+	)
+
+	t.Run("Decode to [2]string", func(ti *testing.T) {
+		arr := [2]string{}
+		err = Unmarshal([]byte(`["test", "abc", "ddd"]`), &arr)
+		require.Error(ti, err)
+
+		err = Unmarshal([]byte(`["京都着物レンタル夢館", "aBcdEfgHiJklmnO"]`), &arr)
+		require.NoError(ti, err)
+		require.ElementsMatch(ti, [...]string{
+			"京都着物レンタル夢館",
+			"aBcdEfgHiJklmnO",
+		}, arr)
+	})
+}

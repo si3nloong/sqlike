@@ -43,7 +43,7 @@ func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetKindDecoder(reflect.Ptr, dec.DecodePtr)
 	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
 	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
-	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
+	rg.SetKindDecoder(reflect.Slice, dec.DecodeSlice)
 	rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
 	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
 	dec.registry = rg
@@ -239,6 +239,32 @@ func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
 		return r.skipNull()
 	}
 
+	i, length := 0, v.Len()
+	t = t.Elem()
+	if err := r.ReadArray(func(it *Reader) error {
+		if i >= length {
+			return errors.New("jsonb: invalid array length")
+		}
+		vv := v.Index(i)
+		i++
+		decoder, err := dec.registry.LookupDecoder(t)
+		if err != nil {
+			return err
+		}
+		return decoder(it, vv)
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// DecodeSlice :
+func (dec *Decoder) DecodeSlice(r *Reader, v reflect.Value) error {
+	t := v.Type()
+	if r.IsNull() {
+		v.Set(reflect.Zero(t))
+		return r.skipNull()
+	}
 	v.Set(reflect.MakeSlice(t, 0, 0))
 	t = t.Elem()
 	return r.ReadArray(func(it *Reader) error {

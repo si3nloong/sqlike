@@ -1,5 +1,7 @@
 #### TODO
 
+- [ ] Change `DataType` api.
+- [ ] Allow nil on where conditions, skip it if nil 
 - [x] Support auto build index
 - [x] `In` and `NotIn`
 - [x] Cursor pagination using `Paginate` api
