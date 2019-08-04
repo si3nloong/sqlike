@@ -1,5 +1,8 @@
 #### TODO
 
+- [ ] Add database name as `table` prefix.
+- [ ] Escape `%` and `_` on `LIKE` condition. 
+- [ ] Prevent toxic query.
 - [ ] Change `DataType` api.
 - [ ] Allow nil on where conditions, skip it if nil 
 - [x] Support auto build index

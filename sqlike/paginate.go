@@ -37,9 +37,15 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 		opt = opts[0]
 	}
 	// sort by primary key
-	x.Sorts = append(x.Sorts, expr.Desc(tb.pk))
-	x.OrderBy(x.Sorts...)
 	length := len(x.Sorts)
+	sort := expr.Asc(tb.pk)
+	if length > 0 {
+		if x.Sorts[length-1].Order == primitive.Descending {
+			sort = expr.Desc(tb.pk)
+		}
+	}
+	x.Sorts = append(x.Sorts, sort)
+	length++
 	fields := make([]interface{}, length, length)
 	for i, sf := range x.Sorts {
 		fields[i] = sf.Field
