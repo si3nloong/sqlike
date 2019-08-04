@@ -14,15 +14,6 @@ import (
 // ErrInvalidCursor :
 var ErrInvalidCursor = errors.New("sqlike: invalid cursor")
 
-type Paginator struct {
-	table  *Table
-	fields []interface{}
-	values []interface{}
-	action actions.FindActions
-	option *options.FindOptions
-	err    error
-}
-
 // Paginate :
 func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.PaginateOptions) (*Paginator, error) {
 	x := new(actions.PaginateActions)
@@ -58,6 +49,17 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	}, nil
 }
 
+// Paginator :
+type Paginator struct {
+	table  *Table
+	fields []interface{}
+	values []interface{}
+	action actions.FindActions
+	option *options.FindOptions
+	err    error
+}
+
+// NextPage :
 func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 	if cursor == nil || reflext.IsZero(reflext.ValueOf(cursor)) {
 		return ErrInvalidCursor
@@ -85,44 +87,49 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 
 // All :
 func (pg *Paginator) All(results interface{}) error {
-	action := pg.action
-	if len(pg.values) > 0 {
-		length := len(pg.fields)
-		filters := make([]interface{}, 0, length)
-		fields := make([]interface{}, length, length)
-		for i, sf := range action.Sorts {
-			v := primitive.C{}
-			val := toString(pg.values[i])
-			if sf.Order == primitive.Ascending {
-				if sf.Field != pg.table.pk {
-					filters = append(filters, expr.GreaterOrEqual(sf.Field, val))
-				}
-				v = expr.GreaterThan(sf.Field, val)
-			} else {
-				if sf.Field != pg.table.pk {
-					filters = append(filters, expr.LesserOrEqual(sf.Field, val))
-				}
-				v = expr.LesserThan(sf.Field, val)
-			}
-			fields[i] = v
-		}
-		filters = append(filters, expr.Or(fields...))
-		if len(action.Conditions) > 0 {
-			action.Conditions = append(action.Conditions, primitive.And)
-		}
-		action.Conditions = append(action.Conditions, expr.And(filters...))
-	}
 	result := find(
 		context.Background(),
 		pg.table.name,
 		pg.table.driver,
 		pg.table.dialect,
 		pg.table.logger,
-		&action,
+		pg.buildAction(),
 		pg.option,
 		0,
 	)
 	return result.All(results)
+}
+
+func (pg *Paginator) buildAction() *actions.FindActions {
+	action := pg.action
+	if len(pg.values) < 1 {
+		return &action
+	}
+	length := len(pg.fields)
+	filters := make([]interface{}, 0, length)
+	fields := make([]interface{}, length, length)
+	for i, sf := range action.Sorts {
+		v := primitive.C{}
+		val := toString(pg.values[i])
+		if sf.Order == primitive.Ascending {
+			if sf.Field != pg.table.pk {
+				filters = append(filters, expr.GreaterOrEqual(sf.Field, val))
+			}
+			v = expr.GreaterThan(sf.Field, val)
+		} else {
+			if sf.Field != pg.table.pk {
+				filters = append(filters, expr.LesserOrEqual(sf.Field, val))
+			}
+			v = expr.LesserThan(sf.Field, val)
+		}
+		fields[i] = v
+	}
+	filters = append(filters, expr.Or(fields...))
+	if len(action.Conditions) > 0 {
+		action.Conditions = append(action.Conditions, primitive.And)
+	}
+	action.Conditions = append(action.Conditions, expr.And(filters...))
+	return &action
 }
 
 func toString(v interface{}) interface{} {
