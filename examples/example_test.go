@@ -45,6 +45,7 @@ func TestExamples(t *testing.T) {
 	FindErrorExamples(t, db)
 
 	MigrateExamples(t, db)
+	IndexExamples(t, db)
 	InsertExamples(t, db)
 	FindExamples(t, db)
 	TransactionExamples(t, db)
@@ -52,6 +53,5 @@ func TestExamples(t *testing.T) {
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
 	ExtraExamples(t, db)
-	IndexExamples(t, db)
 
 }

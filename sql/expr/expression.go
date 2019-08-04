@@ -3,6 +3,7 @@ package expr
 import (
 	"reflect"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
@@ -116,35 +117,40 @@ func NotBetween(field, from, to interface{}) (c primitive.C) {
 
 // And :
 func And(conds ...interface{}) (g primitive.G) {
-	if len(conds) > 1 {
-		g = append(g, Raw("("))
-		for i, cond := range conds {
-			if i > 0 {
-				g = append(g, primitive.And)
-			}
-			g = append(g, cond)
-		}
-		g = append(g, Raw(")"))
-		return
-	}
-	g = append(g, conds...)
+	g = buildGroup(primitive.And, conds)
 	return
 }
 
 // Or :
 func Or(conds ...interface{}) (g primitive.G) {
-	if len(conds) > 1 {
-		g = append(g, Raw("("))
-		for i, cond := range conds {
-			if i > 0 {
-				g = append(g, primitive.Or)
+	g = buildGroup(primitive.Or, conds)
+	return
+}
+
+func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.G) {
+	length := len(conds)
+	if length > 0 {
+		sg := make([]interface{}, 0, length)
+		for len(conds) > 0 {
+			cond := conds[0]
+			conds = conds[1:]
+			if cond == nil || reflext.IsZero(reflect.ValueOf(cond)) {
+				continue
 			}
-			g = append(g, Raw("("), cond, Raw(")"))
+			if len(sg) > 0 {
+				sg = append(sg, op)
+			}
+			sg = append(sg, cond)
 		}
-		g = append(g, Raw(")"))
+		if len(sg) > 1 {
+			g = append(g, Raw("("))
+			g = append(g, sg...)
+			g = append(g, Raw(")"))
+			return
+		}
+		g = append(g, sg...)
 		return
 	}
-	g = append(g, conds...)
 	return
 }
 
