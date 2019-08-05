@@ -25,8 +25,13 @@ func UpdateMany() UpdateStatement {
 	return &UpdateActions{}
 }
 
-// Delete :
-func Delete() DeleteStatement {
+// DeleteOne :
+func DeleteOne() DeleteOneStatement {
+	return &DeleteOneActions{}
+}
+
+// DeleteMany :
+func DeleteMany() DeleteStatement {
 	return &DeleteActions{}
 }
 

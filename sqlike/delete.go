@@ -6,11 +6,12 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/sqlike/options"
 	"golang.org/x/xerrors"
 )
 
@@ -71,32 +72,57 @@ func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver,
 	return err
 }
 
-// DeleteMany :
-func (tb *Table) DeleteMany(act actions.DeleteStatement) (int64, error) {
+// DeleteOne :
+func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.DeleteOneOptions) (int64, error) {
+	x := new(actions.DeleteOneActions)
+	if act != nil {
+		*x = *(act.(*actions.DeleteOneActions))
+	}
+	opt := new(options.DeleteOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+	x.Limit(1)
 	return deleteMany(
 		context.Background(),
 		tb.name,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
-		act,
+		&x.DeleteActions,
+		&opt.DeleteManyOptions,
 	)
 }
 
-func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act actions.DeleteStatement) (int64, error) {
+// DeleteMany :
+func (tb *Table) DeleteMany(act actions.DeleteStatement, opts ...*options.DeleteManyOptions) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
 	}
-	if x.Table == "" {
-		x.Table = tbName
+	opt := new(options.DeleteManyOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
 	}
+	return deleteMany(
+		context.Background(),
+		tb.name,
+		tb.driver,
+		tb.dialect,
+		tb.logger,
+		x,
+		opt,
+	)
+}
 
-	if len(x.Conditions) < 1 {
+func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteManyOptions) (int64, error) {
+	if act.Table == "" {
+		act.Table = tbName
+	}
+	if len(act.Conditions) < 1 {
 		return 0, xerrors.New("sqlike: no condition is not allow for delete")
 	}
-
-	stmt, err := dialect.Delete(x)
+	stmt, err := dialect.Delete(act)
 	if err != nil {
 		return 0, err
 	}

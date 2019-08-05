@@ -176,13 +176,22 @@ func (sess *Session) DestroyOne(delete interface{}) error {
 }
 
 // DeleteMany :
-func (sess *Session) DeleteMany(act actions.DeleteStatement) (int64, error) {
+func (sess *Session) DeleteMany(act actions.DeleteStatement, opts ...*options.DeleteManyOptions) (int64, error) {
+	x := new(actions.DeleteActions)
+	if act != nil {
+		*x = *(act.(*actions.DeleteActions))
+	}
+	opt := new(options.DeleteManyOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return deleteMany(
 		sess.tx.context,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
-		act,
+		x,
+		opt,
 	)
 }
