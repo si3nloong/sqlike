@@ -1,17 +1,17 @@
 package options
 
-// DeleteManyOptions :
-type DeleteManyOptions struct {
+// DeleteOptions :
+type DeleteOptions struct {
 	Debug bool
 }
 
-// DeleteMany :
-func DeleteMany() *DeleteManyOptions {
-	return &DeleteManyOptions{}
+// Delete :
+func Delete() *DeleteOptions {
+	return &DeleteOptions{}
 }
 
 // SetDebug :
-func (opt *DeleteManyOptions) SetDebug(debug bool) *DeleteManyOptions {
+func (opt *DeleteOptions) SetDebug(debug bool) *DeleteOptions {
 	opt.Debug = debug
 	return opt
 }

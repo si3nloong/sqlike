@@ -112,8 +112,8 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 	)
 }
 
-// UpdateMany :
-func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.UpdateManyOptions) (int64, error) {
+// Update :
+func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOptions) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
@@ -121,7 +121,7 @@ func (tb *Table) UpdateMany(act actions.UpdateStatement, opts ...*options.Update
 	if x.Table == "" {
 		x.Table = tb.name
 	}
-	opt := new(options.UpdateManyOptions)
+	opt := new(options.UpdateOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}

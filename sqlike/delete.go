@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"context"
+	"errors"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
@@ -67,7 +68,7 @@ func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver,
 		return err
 	}
 	if affected, _ := result.RowsAffected(); affected <= 0 {
-		return xerrors.New("unable to modify entity")
+		return errors.New("sqlike: unable to modify entity")
 	}
 	return err
 }
@@ -90,17 +91,17 @@ func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.Dele
 		tb.dialect,
 		tb.logger,
 		&x.DeleteActions,
-		&opt.DeleteManyOptions,
+		&opt.DeleteOptions,
 	)
 }
 
-// DeleteMany :
-func (tb *Table) DeleteMany(act actions.DeleteStatement, opts ...*options.DeleteManyOptions) (int64, error) {
+// Delete :
+func (tb *Table) Delete(act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
 	}
-	opt := new(options.DeleteManyOptions)
+	opt := new(options.DeleteOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}
@@ -115,7 +116,7 @@ func (tb *Table) DeleteMany(act actions.DeleteStatement, opts ...*options.Delete
 	)
 }
 
-func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteManyOptions) (int64, error) {
+func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteOptions) (int64, error) {
 	if act.Table == "" {
 		act.Table = tbName
 	}

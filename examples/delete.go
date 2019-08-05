@@ -62,23 +62,23 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 			newNormalStruct(),
 			newNormalStruct(),
 		}
-		result, err = table.InsertMany(&nss,
-			options.InsertMany().
+		result, err = table.Insert(&nss,
+			options.Insert().
 				SetDebug(true),
 		)
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(3), affected)
-		affected, err = table.DeleteMany(
-			actions.DeleteMany().
+		affected, err = table.Delete(
+			actions.Delete().
 				Where(
 					expr.In("$Key", []uuid.UUID{
 						nss[0].ID,
 						nss[1].ID,
 						nss[2].ID,
 					}),
-				), options.DeleteMany().
+				), options.Delete().
 				SetDebug(true),
 		)
 		require.NoError(t, err)

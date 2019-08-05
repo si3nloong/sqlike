@@ -20,8 +20,8 @@ func UpdateOne() UpdateOneStatement {
 	return &UpdateOneActions{}
 }
 
-// UpdateMany :
-func UpdateMany() UpdateStatement {
+// Update :
+func Update() UpdateStatement {
 	return &UpdateActions{}
 }
 
@@ -30,8 +30,8 @@ func DeleteOne() DeleteOneStatement {
 	return &DeleteOneActions{}
 }
 
-// DeleteMany :
-func DeleteMany() DeleteStatement {
+// Delete :
+func Delete() DeleteStatement {
 	return &DeleteActions{}
 }
 

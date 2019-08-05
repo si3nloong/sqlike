@@ -210,9 +210,5 @@ func FindErrorExamples(t *testing.T, db *sqlike.Database) {
 			FindOne(nil, options.FindOne().
 				SetDebug(true)).Decode(nil)
 		require.Error(t, err)
-		// _, err = db.Table("NormalStruct").Find(
-		// 	actions.Find(),
-		// )
-		// require.Error(t, err)
 	}
 }

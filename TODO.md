@@ -10,7 +10,7 @@
 - [x] Cursor pagination using `Paginate` api
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
 - [x] Connect to `MySQL` server with `options.Connect`
-- [x] Support omit options on `InsertOne` and `InsertMany`
+- [x] Support omit options on `InsertOne` and `Insert`
 - [x] Support option tag `unique_index` and `index` on create table
 - [ ] Support option tag `unique_index` and `index` on alter table
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal

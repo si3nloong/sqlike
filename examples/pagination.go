@@ -73,8 +73,8 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	}
 
 	{
-		_, err = table.InsertMany(data, options.
-			InsertMany().SetDebug(true))
+		_, err = table.Insert(data, options.
+			Insert().SetDebug(true))
 		require.NoError(t, err)
 	}
 

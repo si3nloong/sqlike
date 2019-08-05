@@ -2,7 +2,7 @@ package options
 
 // DeleteOneOptions :
 type DeleteOneOptions struct {
-	DeleteManyOptions
+	DeleteOptions
 }
 
 // DeleteOne :

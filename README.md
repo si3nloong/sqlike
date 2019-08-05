@@ -20,7 +20,7 @@ We don't really care about legacy support, we want latest feature that mysql and
 3. Support `UUID`
 4. Support `stored column` and `virtual column`
 5. Extra type such as `Date`, `Key`
-6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `InsertMany`, `ModifyOne` and `Paginate` apis
+6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne` and `Paginate` apis
 
 ### Missing DOC?
 You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
@@ -101,7 +101,7 @@ func main() {
             newUser(),
             newUser(),
         }
-        if _, err := userTable.InsertMany(&users); err != nil {
+        if _, err := userTable.Insert(&users); err != nil {
             panic(err)
         }
     }

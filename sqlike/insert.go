@@ -66,7 +66,7 @@ func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, 
 	}
 	values[0] = rows
 
-	stmt := dialect.InsertInto(tbName, pk, columns, values, opt)
+	stmt := dialect.InsertInto(tbName, pk, columns, values, &opt.InsertOptions)
 	return sqldriver.Execute(
 		ctx,
 		driver,
@@ -75,9 +75,26 @@ func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, 
 	)
 }
 
-// InsertMany :
-func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions) (sql.Result, error) {
-	v := reflext.ValueOf(srcs)
+// Insert :
+func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
+	opt := new(options.InsertOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+	return insertMany(
+		context.Background(),
+		tb.name,
+		tb.pk,
+		tb.driver,
+		tb.dialect,
+		tb.logger,
+		src,
+		opt,
+	)
+}
+
+func insertMany(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
+	v := reflext.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
 	}
@@ -85,7 +102,7 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Array) && !reflext.IsKind(t, reflect.Slice) {
-		return nil, xerrors.New("sqlike.InsertMany only support array or slice of entity")
+		return nil, xerrors.New("sqlike.Insert only support array or slice of entity")
 	}
 
 	if v.Len() < 1 {
@@ -95,11 +112,6 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 	t = reflext.Deref(t.Elem())
 	if !reflext.IsKind(t, reflect.Struct) {
 		return nil, ErrUnaddressableEntity
-	}
-
-	opt := new(options.InsertManyOptions)
-	if len(opts) > 0 && opts[0] != nil {
-		opt = opts[0]
 	}
 
 	mapper := core.DefaultMapper
@@ -125,12 +137,12 @@ func (tb *Table) InsertMany(srcs interface{}, opts ...*options.InsertManyOptions
 		}
 		values = append(values, rows)
 	}
-	stmt := tb.dialect.InsertInto(tb.name, tb.pk, columns, values, opt)
+	stmt := dialect.InsertInto(tbName, pk, columns, values, opt)
 	return sqldriver.Execute(
 		context.Background(),
-		tb.driver,
+		driver,
 		stmt,
-		getLogger(tb.logger, opt.Debug),
+		getLogger(logger, opt.Debug),
 	)
 }
 

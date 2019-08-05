@@ -15,6 +15,11 @@ type InsertOptions struct {
 	Debug bool
 }
 
+// Insert :
+func Insert() *InsertOptions {
+	return &InsertOptions{}
+}
+
 // SetMode :
 func (opt *InsertOptions) SetMode(mode insertMode) *InsertOptions {
 	opt.Mode = mode

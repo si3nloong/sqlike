@@ -94,13 +94,13 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 	)
 }
 
-// InsertMany :
-func (sess *Session) InsertMany(src interface{}, opts ...*options.InsertManyOptions) (sql.Result, error) {
-	opt := new(options.InsertManyOptions)
+// Insert :
+func (sess *Session) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
+	opt := new(options.InsertOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}
-	return insertOne(
+	return insertMany(
 		sess.tx.context,
 		sess.table,
 		sess.pk,
@@ -144,8 +144,8 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 	)
 }
 
-// UpdateMany :
-func (sess *Session) UpdateMany(act actions.UpdateStatement) (int64, error) {
+// Update :
+func (sess *Session) Update(act actions.UpdateStatement) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
@@ -175,13 +175,13 @@ func (sess *Session) DestroyOne(delete interface{}) error {
 	)
 }
 
-// DeleteMany :
-func (sess *Session) DeleteMany(act actions.DeleteStatement, opts ...*options.DeleteManyOptions) (int64, error) {
+// Delete :
+func (sess *Session) Delete(act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
 	}
-	opt := new(options.DeleteManyOptions)
+	opt := new(options.DeleteOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}

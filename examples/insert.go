@@ -57,8 +57,8 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 			newNormalStruct(),
 			newNormalStruct(),
 		}
-		result, err = table.InsertMany(&nss,
-			options.InsertMany().
+		result, err = table.Insert(&nss,
+			options.Insert().
 				SetDebug(true))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
@@ -78,7 +78,7 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		_, err = table.InsertOne(empty)
 		require.Error(t, err)
 
-		_, err = table.InsertMany([]interface{}{})
+		_, err = table.Insert([]interface{}{})
 		require.Error(t, err)
 	}
 }
@@ -108,7 +108,7 @@ func InsertErrorExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		_, err = db.Table("NormalStruct").InsertMany(
+		_, err = db.Table("NormalStruct").Insert(
 			[]normalStruct{},
 		)
 		require.Error(t, err)
