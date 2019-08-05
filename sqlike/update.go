@@ -19,6 +19,7 @@ import (
 func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
 	return modifyOne(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.pk,
 		tb.dialect,
@@ -29,7 +30,7 @@ func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions
 	)
 }
 
-func modifyOne(ctx context.Context, tbName, pk string, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -69,6 +70,8 @@ func modifyOne(ctx context.Context, tbName, pk string, dialect sqldialect.Dialec
 	}
 
 	x.Limit(1)
+	x.Table = tbName
+	x.Database = dbName
 	stmt, err := dialect.Update(x)
 	if err != nil {
 		return err
@@ -94,9 +97,6 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 	if act != nil {
 		*x = *(act.(*actions.UpdateOneActions))
 	}
-	if x.Table == "" {
-		x.Table = tb.name
-	}
 	opt := new(options.UpdateOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -105,6 +105,8 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 	x.Limit(1)
 	return update(
 		context.Background(),
+		tb.dbName,
+		tb.name,
 		tb.driver,
 		tb.dialect,
 		getLogger(tb.logger, opt.Debug),
@@ -118,15 +120,14 @@ func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOpti
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
 	}
-	if x.Table == "" {
-		x.Table = tb.name
-	}
 	opt := new(options.UpdateOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}
 	return update(
 		context.Background(),
+		tb.dbName,
+		tb.name,
 		tb.driver,
 		tb.dialect,
 		getLogger(tb.logger, opt.Debug),
@@ -134,7 +135,13 @@ func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOpti
 	)
 }
 
-func update(ctx context.Context, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
+func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
+	if act.Database == "" {
+		act.Database = dbName
+	}
+	if act.Table == "" {
+		act.Table = tbName
+	}
 	if len(act.Values) < 1 {
 		return 0, ErrNoValueUpdate
 	}

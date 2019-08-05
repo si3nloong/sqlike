@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
 // Transaction :
 type Transaction struct {
+	dbName  string
 	pk      string
 	context context.Context
 	driver  *sql.Tx
@@ -20,9 +21,10 @@ type Transaction struct {
 // Table :
 func (tx *Transaction) Table(name string) *Session {
 	return &Session{
-		table: name,
-		pk:    tx.pk,
-		tx:    tx,
+		dbName: tx.dbName,
+		table:  name,
+		pk:     tx.pk,
+		tx:     tx,
 	}
 }
 

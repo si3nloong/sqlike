@@ -420,7 +420,7 @@ func (b *mySQLBuilder) ParseFindActions(stmt *sqlstmt.Statement, it interface{})
 	if err := b.appendSelect(stmt, x.Projections); err != nil {
 		return err
 	}
-	stmt.WriteString(` FROM ` + b.Quote(x.Table))
+	stmt.WriteString(` FROM ` + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
 		return err
 	}
@@ -440,7 +440,7 @@ func (b *mySQLBuilder) ParseUpdateActions(stmt *sqlstmt.Statement, it interface{
 	if !isOk {
 		return xerrors.New("data type not match")
 	}
-	stmt.WriteString(`UPDATE ` + b.Quote(x.Table) + ` `)
+	stmt.WriteString(`UPDATE ` + b.TableName(x.Database, x.Table) + ` `)
 	if err := b.appendSet(stmt, x.Values); err != nil {
 		return err
 	}
@@ -459,7 +459,7 @@ func (b *mySQLBuilder) ParseDeleteActions(stmt *sqlstmt.Statement, it interface{
 	if !isOk {
 		return xerrors.New("data type not match")
 	}
-	stmt.WriteString(`DELETE FROM ` + b.Quote(x.Table))
+	stmt.WriteString(`DELETE FROM ` + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
 		return err
 	}

@@ -23,6 +23,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	}
 	return insertOne(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.pk,
 		tb.driver,
@@ -33,7 +34,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	)
 }
 
-func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -66,7 +67,7 @@ func insertOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, 
 	}
 	values[0] = rows
 
-	stmt := dialect.InsertInto(tbName, pk, columns, values, &opt.InsertOptions)
+	stmt := dialect.InsertInto(dbName, tbName, pk, columns, values, &opt.InsertOptions)
 	return sqldriver.Execute(
 		ctx,
 		driver,
@@ -83,6 +84,7 @@ func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Re
 	}
 	return insertMany(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.pk,
 		tb.driver,
@@ -93,7 +95,7 @@ func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Re
 	)
 }
 
-func insertMany(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
+func insertMany(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
 	v := reflext.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -137,7 +139,7 @@ func insertMany(ctx context.Context, tbName, pk string, driver sqldriver.Driver,
 		}
 		values = append(values, rows)
 	}
-	stmt := dialect.InsertInto(tbName, pk, columns, values, opt)
+	stmt := dialect.InsertInto(dbName, tbName, pk, columns, values, opt)
 	return sqldriver.Execute(
 		context.Background(),
 		driver,

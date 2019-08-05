@@ -31,6 +31,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 	x.Limit(1)
 	csr := find(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -65,6 +66,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	}
 	csr := find(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -79,7 +81,10 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	return csr, nil
 }
 
-func find(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
+func find(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
+	if act.Database == "" {
+		act.Database = dbName
+	}
 	if act.Table == "" {
 		act.Table = tbName
 	}

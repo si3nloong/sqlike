@@ -2,7 +2,7 @@
 
 - [ ] Prevent toxic query.
 - [ ] Escape wildcard `%` and `_` on `LIKE` condition. 
-- [ ] Add database name as `table` prefix.
+- [x] Add `Database` name as `table` prefix.
 - [ ] Change `DataType` api.
 - [x] Allow nil on where conditions, skip it if `nil` or invalid 
 - [x] Support auto build index
@@ -22,14 +22,14 @@
 - [x] Drop selected `Database`
 - [x] Support omit options on `ModifyOne`
 - [x] List all `Database`
-- [x] Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, - `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
+- [x] Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
 - [x] [Feature] Truncate selected `Table`
 - [x] [Feature] List all column for selected `Table`
 - [x] Add index using `CreateOne` and `CreateMany`
 - [x] [Feature] Drop selected `Table`
 - [x] [Feature] Rename `Table`
 - [x] [Feature] Check `Table` exists
-- [x] [Feature] Create single `Index` (support `unique`, `fulltext` and - `spatial`)
+- [x] [Feature] Create single `Index` (support `unique`, `fulltext` and `spatial`)
 - [x] [Feature] Support primary key on `Migration`
 - [x] [Feature] Create multiple `Index`
 - [x] [Feature] List all `Index`

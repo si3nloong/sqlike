@@ -26,8 +26,7 @@ func TestExamples(t *testing.T) {
 	client, err := sqlike.Connect("mysql",
 		options.Connect().
 			SetUsername(`root`).
-			SetPassword(`abcd1234`).
-			SetDatabase(`sqlike`),
+			SetPassword(`abcd1234`),
 	)
 	require.NoError(t, err)
 

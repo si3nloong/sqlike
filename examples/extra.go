@@ -24,7 +24,7 @@ func ExtraExamples(t *testing.T, db *sqlike.Database) {
 			"$Key", "SID", "Emoji", "LongStr",
 			"TinyInt", "Float64", "EmptyStruct", "Struct",
 		}, actions.Copy().
-			From("NormalStruct").
+			From("sqlike", "NormalStruct").
 			Select(
 				"$Key", "SID", "Emoji", "LongStr",
 				"TinyInt", "Float32", "EmptyStruct", "Struct",

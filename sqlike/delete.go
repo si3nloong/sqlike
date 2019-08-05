@@ -20,6 +20,7 @@ import (
 func (tb *Table) DestroyOne(delete interface{}) error {
 	return destroyOne(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.pk,
 		tb.driver,
@@ -29,7 +30,7 @@ func (tb *Table) DestroyOne(delete interface{}) error {
 	)
 }
 
-func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -50,6 +51,7 @@ func destroyOne(ctx context.Context, tbName, pk string, driver sqldriver.Driver,
 	}
 
 	x := new(actions.DeleteActions)
+	x.Database = dbName
 	x.Table = tbName
 	fv := mapper.FieldByIndexesReadOnly(v, f.Index)
 	x.Where(expr.Equal(f.Path, fv.Interface()))
@@ -86,6 +88,7 @@ func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.Dele
 	x.Limit(1)
 	return deleteMany(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -107,6 +110,7 @@ func (tb *Table) Delete(act actions.DeleteStatement, opts ...*options.DeleteOpti
 	}
 	return deleteMany(
 		context.Background(),
+		tb.dbName,
 		tb.name,
 		tb.driver,
 		tb.dialect,
@@ -116,7 +120,10 @@ func (tb *Table) Delete(act actions.DeleteStatement, opts ...*options.DeleteOpti
 	)
 }
 
-func deleteMany(ctx context.Context, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteOptions) (int64, error) {
+func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteOptions) (int64, error) {
+	if act.Database == "" {
+		act.Database = dbName
+	}
 	if act.Table == "" {
 		act.Table = tbName
 	}

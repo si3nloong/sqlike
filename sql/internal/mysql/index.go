@@ -21,9 +21,9 @@ func (ms MySQL) GetIndexes(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateIndexes :
-func (ms MySQL) CreateIndexes(table string, idxs []indexes.Index, supportDesc bool) (stmt *sqlstmt.Statement) {
+func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDesc bool) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`ALTER TABLE ` + ms.Quote(table))
+	stmt.WriteString(`ALTER TABLE ` + ms.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
 			stmt.WriteRune(',')
@@ -51,11 +51,11 @@ func (ms MySQL) CreateIndexes(table string, idxs []indexes.Index, supportDesc bo
 }
 
 // DropIndex :
-func (ms MySQL) DropIndex(table, idxName string) (stmt *sqlstmt.Statement) {
+func (ms MySQL) DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`DROP INDEX`)
 	stmt.WriteString(` ` + ms.Quote(idxName))
-	stmt.WriteString(` ON ` + ms.Quote(table))
+	stmt.WriteString(` ON ` + ms.TableName(db, table))
 	stmt.WriteRune(';')
 	return
 }

@@ -11,7 +11,7 @@ import (
 type SelectStatement interface {
 	Distinct() SelectStatement
 	Select(fields ...interface{}) SelectStatement
-	From(table string) SelectStatement
+	From(values ...string) SelectStatement
 	Where(fields ...interface{}) SelectStatement
 	Having(fields ...interface{}) SelectStatement
 	GroupBy(fields ...interface{}) SelectStatement
@@ -22,6 +22,7 @@ type SelectStatement interface {
 
 // FindActions :
 type FindActions struct {
+	Database    string
 	Table       string
 	DistinctOn  bool
 	Projections []interface{}
@@ -46,10 +47,17 @@ func (f *FindActions) Distinct() SelectStatement {
 }
 
 // From :
-func (f *FindActions) From(table string) SelectStatement {
-	table = strings.TrimSpace(table)
-	if table != "" {
-		f.Table = table
+func (f *FindActions) From(values ...string) SelectStatement {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	if length > 0 {
+		f.Table = strings.TrimSpace(values[0])
+	}
+	if length > 1 {
+		f.Database = strings.TrimSpace(values[0])
+		f.Table = strings.TrimSpace(values[1])
 	}
 	return f
 }

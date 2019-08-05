@@ -11,7 +11,7 @@ import (
 type PaginateStatement interface {
 	Distinct() PaginateStatement
 	Select(fields ...interface{}) PaginateStatement
-	From(table string) PaginateStatement
+	From(values ...string) PaginateStatement
 	Where(fields ...interface{}) PaginateStatement
 	Having(fields ...interface{}) PaginateStatement
 	GroupBy(fields ...interface{}) PaginateStatement
@@ -38,10 +38,17 @@ func (f *PaginateActions) Distinct() PaginateStatement {
 }
 
 // From :
-func (f *PaginateActions) From(table string) PaginateStatement {
-	table = strings.TrimSpace(table)
-	if table != "" {
-		f.Table = table
+func (f *PaginateActions) From(values ...string) PaginateStatement {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	if length > 0 {
+		f.Table = strings.TrimSpace(values[0])
+	}
+	if length > 1 {
+		f.Database = strings.TrimSpace(values[0])
+		f.Table = strings.TrimSpace(values[1])
 	}
 	return f
 }

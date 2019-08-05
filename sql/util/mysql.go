@@ -6,6 +6,11 @@ import "strings"
 type MySQLUtil struct{}
 
 // Quote :
+func (util MySQLUtil) TableName(db, table string) string {
+	return "`" + db + "`.`" + table + "`"
+}
+
+// Quote :
 func (util MySQLUtil) Quote(n string) string {
 	return "`" + n + "`"
 }

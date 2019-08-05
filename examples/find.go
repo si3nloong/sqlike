@@ -149,7 +149,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 				Where(
 					expr.In("$Key", actions.Find().
 						Select("$Key").
-						From("NormalStruct").
+						From("sqlike", "NormalStruct").
 						Where(
 							expr.Between("Tinyint", 1, 100),
 						).

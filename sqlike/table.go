@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"strings"
 
@@ -47,7 +48,7 @@ func (tb *Table) Rename(name string) error {
 	_, err := sqldriver.Execute(
 		context.Background(),
 		tb.driver,
-		tb.dialect.RenameTable(tb.name, name),
+		tb.dialect.RenameTable(tb.dbName, tb.name, name),
 		tb.logger,
 	)
 	return err
@@ -167,7 +168,7 @@ func (tb *Table) Truncate() (err error) {
 	_, err = sqldriver.Execute(
 		context.Background(),
 		tb.driver,
-		tb.dialect.TruncateTable(tb.name),
+		tb.dialect.TruncateTable(tb.dbName, tb.name),
 		tb.logger,
 	)
 	return
@@ -178,7 +179,7 @@ func (tb Table) DropIfExits() (err error) {
 	_, err = sqldriver.Execute(
 		context.Background(),
 		tb.driver,
-		tb.dialect.DropTable(tb.name, true),
+		tb.dialect.DropTable(tb.dbName, tb.name, true),
 		tb.logger,
 	)
 	return
@@ -189,7 +190,7 @@ func (tb Table) Drop() (err error) {
 	_, err = sqldriver.Execute(
 		context.Background(),
 		tb.driver,
-		tb.dialect.DropTable(tb.name, false),
+		tb.dialect.DropTable(tb.dbName, tb.name, false),
 		tb.logger,
 	)
 	return
@@ -202,9 +203,9 @@ func (tb *Table) Copy(fields []string, act actions.CopyStatement) error {
 		*x = *(act.(*actions.CopyActions))
 	}
 	if x.Table == "" {
-		return xerrors.New("empty table name")
+		return errors.New("sqlike: empty table name")
 	}
-	stmt, err := tb.dialect.Copy(tb.name, fields, x)
+	stmt, err := tb.dialect.Copy(tb.dbName, tb.name, fields, x)
 	if err != nil {
 		return err
 	}
@@ -251,7 +252,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.name, tb.pk, fields)
+	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.pk, fields)
 	if err != nil {
 		return err
 	}
@@ -275,7 +276,7 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}
-	stmt, err := tb.dialect.AlterTable(tb.name, tb.pk, fields, cols, idxs, unsafe)
+	stmt, err := tb.dialect.AlterTable(tb.dbName, tb.name, tb.pk, fields, cols, idxs, unsafe)
 	if err != nil {
 		return err
 	}

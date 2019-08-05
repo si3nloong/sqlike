@@ -3,18 +3,18 @@ package mysql
 import (
 	"strings"
 
-	"github.com/si3nloong/sqlike/sqlike/options"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(table, pk string, columns []string, values [][]interface{}, opt *options.InsertOptions) (stmt *sqlstmt.Statement) {
+func (ms MySQL) InsertInto(db, table, pk string, columns []string, values [][]interface{}, opt *options.InsertOptions) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`INSERT`)
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(` IGNORE`)
 	}
-	stmt.WriteString(` INTO ` + ms.Quote(table) + ` (`)
+	stmt.WriteString(` INTO ` + ms.TableName(db, table) + ` (`)
 	for i, col := range columns {
 		if i > 0 {
 			stmt.WriteRune(',')

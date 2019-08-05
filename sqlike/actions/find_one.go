@@ -3,15 +3,15 @@ package actions
 import (
 	"strings"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // SelectOneStatement :
 type SelectOneStatement interface {
 	Distinct() SelectOneStatement
 	Select(fields ...interface{}) SelectOneStatement
-	From(table string) SelectOneStatement
+	From(values ...string) SelectOneStatement
 	Where(fields ...interface{}) SelectOneStatement
 	Having(fields ...interface{}) SelectOneStatement
 	GroupBy(fields ...interface{}) SelectOneStatement
@@ -36,10 +36,17 @@ func (f *FindOneActions) Distinct() SelectOneStatement {
 }
 
 // From :
-func (f *FindOneActions) From(table string) SelectOneStatement {
-	table = strings.TrimSpace(table)
-	if table != "" {
-		f.Table = table
+func (f *FindOneActions) From(values ...string) SelectOneStatement {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	if length > 0 {
+		f.Table = strings.TrimSpace(values[0])
+	}
+	if length > 1 {
+		f.Database = strings.TrimSpace(values[0])
+		f.Table = strings.TrimSpace(values[1])
 	}
 	return f
 }

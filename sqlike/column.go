@@ -35,7 +35,7 @@ func (cv *ColumnView) DropOne(name string) error {
 	_, err := sqldriver.Execute(
 		context.Background(),
 		cv.tb.driver,
-		cv.tb.dialect.DropColumn(cv.tb.name, name),
+		cv.tb.dialect.DropColumn(cv.tb.dbName, cv.tb.name, name),
 		cv.tb.logger,
 	)
 	return err

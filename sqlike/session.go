@@ -14,9 +14,10 @@ type SessionContext interface {
 
 // Session :
 type Session struct {
-	table string
-	pk    string
-	tx    *Transaction
+	dbName string
+	table  string
+	pk     string
+	tx     *Transaction
 }
 
 // FindOne :
@@ -32,6 +33,7 @@ func (sess *Session) FindOne(act actions.SelectOneStatement, lock options.LockMo
 	x.Limit(1)
 	csr := find(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
@@ -62,6 +64,7 @@ func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, op
 	}
 	csr := find(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
@@ -84,6 +87,7 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 	}
 	return insertOne(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.pk,
 		sess.tx.driver,
@@ -102,6 +106,7 @@ func (sess *Session) Insert(src interface{}, opts ...*options.InsertOptions) (sq
 	}
 	return insertMany(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.pk,
 		sess.tx.driver,
@@ -116,6 +121,7 @@ func (sess *Session) Insert(src interface{}, opts ...*options.InsertOptions) (sq
 func (sess *Session) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
 	return modifyOne(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.pk,
 		sess.tx.dialect,
@@ -137,6 +143,8 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 	}
 	return update(
 		sess.tx.context,
+		sess.table,
+		sess.dbName,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -150,11 +158,10 @@ func (sess *Session) Update(act actions.UpdateStatement) (int64, error) {
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
 	}
-	if x.Table == "" {
-		x.Table = sess.table
-	}
 	return update(
 		sess.tx.context,
+		sess.dbName,
+		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -166,6 +173,7 @@ func (sess *Session) Update(act actions.UpdateStatement) (int64, error) {
 func (sess *Session) DestroyOne(delete interface{}) error {
 	return destroyOne(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.pk,
 		sess.tx.driver,
@@ -187,6 +195,7 @@ func (sess *Session) Delete(act actions.DeleteStatement, opts ...*options.Delete
 	}
 	return deleteMany(
 		sess.tx.context,
+		sess.dbName,
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,

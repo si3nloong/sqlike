@@ -12,8 +12,8 @@ type ConnectOptions struct {
 	Password string
 	Host     string
 	Port     string
-	Database string
-	Logger   logs.Logger
+	// Database string
+	Logger logs.Logger
 }
 
 // Connect :
@@ -30,12 +30,6 @@ func (opt *ConnectOptions) SetUsername(username string) *ConnectOptions {
 // SetPassword :
 func (opt *ConnectOptions) SetPassword(password string) *ConnectOptions {
 	opt.Password = password
-	return opt
-}
-
-// SetDatabase :
-func (opt *ConnectOptions) SetDatabase(db string) *ConnectOptions {
-	opt.Database = strings.TrimSpace(db)
 	return opt
 }
 

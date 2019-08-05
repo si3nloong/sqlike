@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // DeleteStatement :
@@ -14,6 +14,7 @@ type DeleteStatement interface {
 
 // DeleteActions :
 type DeleteActions struct {
+	Database   string
 	Table      string
 	Conditions []interface{}
 	Sorts      []primitive.Sort

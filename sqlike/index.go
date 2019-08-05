@@ -45,7 +45,7 @@ func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 	_, err := sqldriver.Execute(
 		context.Background(),
 		idv.tb.driver,
-		idv.tb.dialect.CreateIndexes(idv.tb.name, idxs, idv.isSupportDesc()),
+		idv.tb.dialect.CreateIndexes(idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc()),
 		idv.tb.logger,
 	)
 	return err
@@ -56,7 +56,7 @@ func (idv IndexView) DropOne(name string) error {
 	_, err := sqldriver.Execute(
 		context.Background(),
 		idv.tb.driver,
-		idv.tb.dialect.DropIndex(idv.tb.name, name),
+		idv.tb.dialect.DropIndex(idv.tb.dbName, idv.tb.name, name),
 		idv.tb.logger,
 	)
 	return err

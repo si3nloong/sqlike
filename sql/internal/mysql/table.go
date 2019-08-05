@@ -12,31 +12,32 @@ import (
 )
 
 // RenameTable :
-func (ms MySQL) RenameTable(oldName, newName string) (stmt *sqlstmt.Statement) {
+func (ms MySQL) RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`RENAME TABLE `)
-	stmt.WriteString(ms.Quote(oldName))
+	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(` TO `)
-	stmt.WriteString(ms.Quote(newName))
+	stmt.WriteString(ms.TableName(db, newName))
 	stmt.WriteByte(';')
 	return
 }
 
 // DropTable :
-func (ms MySQL) DropTable(table string, exists bool) (stmt *sqlstmt.Statement) {
+func (ms MySQL) DropTable(db, table string, exists bool) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`DROP TABLE`)
+	stmt.WriteString("DROP TABLE")
 	if exists {
-		stmt.WriteString(` IF EXISTS`)
+		stmt.WriteString(" IF EXISTS")
 	}
-	stmt.WriteString(` ` + ms.Quote(table) + `;`)
+	stmt.WriteByte(' ')
+	stmt.WriteString(ms.TableName(db, table) + ";")
 	return
 }
 
 // TruncateTable :
-func (ms MySQL) TruncateTable(table string) (stmt *sqlstmt.Statement) {
+func (ms MySQL) TruncateTable(db, table string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`TRUNCATE TABLE ` + ms.Quote(table) + `;`)
+	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
 	return
 }
 
@@ -49,7 +50,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(db, table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		virtual bool
@@ -57,7 +58,7 @@ func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (st
 	)
 
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`CREATE TABLE ` + ms.Quote(table) + ` `)
+	stmt.WriteString(`CREATE TABLE ` + ms.TableName(db, table) + ` `)
 	stmt.WriteRune('(')
 
 	// Main columns :
@@ -124,7 +125,7 @@ func (ms MySQL) CreateTable(table, pk string, fields []*reflext.StructField) (st
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		idx     int
@@ -134,7 +135,7 @@ func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, col
 
 	suffix := `FIRST`
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`ALTER TABLE ` + ms.Quote(table) + ` `)
+	stmt.WriteString(`ALTER TABLE ` + ms.TableName(db, table) + ` `)
 
 	// TODO: add primary key when missing
 
@@ -221,10 +222,10 @@ func (ms *MySQL) AlterTable(table, pk string, fields []*reflext.StructField, col
 }
 
 // Copy :
-func (ms MySQL) Copy(table string, columns []string, act *actions.CopyActions) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyActions) (stmt *sqlstmt.Statement, err error) {
 	stmt = new(sqlstmt.Statement)
 	stmt.WriteString("REPLACE INTO ")
-	stmt.WriteString(ms.Quote(table) + " ")
+	stmt.WriteString(ms.TableName(db, table) + " ")
 	if len(columns) > 0 {
 		stmt.WriteByte('(')
 		for i, col := range columns {
@@ -242,20 +243,20 @@ func (ms MySQL) Copy(table string, columns []string, act *actions.CopyActions) (
 
 func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
-	stmt.WriteString(` ` + col.Type)
+	stmt.WriteString(" " + col.Type)
 	if col.CharSet != nil {
-		stmt.WriteString(` CHARACTER SET ` + *col.CharSet)
+		stmt.WriteString(" CHARACTER SET " + *col.CharSet)
 	}
 	if col.Collation != nil {
-		stmt.WriteString(` COLLATE ` + *col.Collation)
+		stmt.WriteString(" COLLATE " + *col.Collation)
 	}
 	if col.Extra != "" {
-		stmt.WriteString(` ` + col.Extra)
+		stmt.WriteString(" " + col.Extra)
 	}
 	if !col.Nullable {
-		stmt.WriteString(` NOT NULL`)
+		stmt.WriteString(" NOT NULL")
 		if col.DefaultValue != nil {
-			stmt.WriteString(` DEFAULT ` + ms.WrapOnlyValue(*col.DefaultValue))
+			stmt.WriteString(" DEFAULT " + ms.WrapOnlyValue(*col.DefaultValue))
 		}
 	}
 }

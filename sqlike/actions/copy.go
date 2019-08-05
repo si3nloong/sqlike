@@ -11,7 +11,7 @@ import (
 type CopyStatement interface {
 	Distinct() CopyStatement
 	Select(fields ...interface{}) CopyStatement
-	From(table string) CopyStatement
+	From(values ...string) CopyStatement
 	Where(fields ...interface{}) CopyStatement
 	Having(fields ...interface{}) CopyStatement
 	GroupBy(fields ...interface{}) CopyStatement
@@ -38,10 +38,17 @@ func (f *CopyActions) Distinct() CopyStatement {
 }
 
 // From :
-func (f *CopyActions) From(table string) CopyStatement {
-	table = strings.TrimSpace(table)
-	if table != "" {
-		f.Table = table
+func (f *CopyActions) From(values ...string) CopyStatement {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	if length > 0 {
+		f.Table = strings.TrimSpace(values[0])
+	}
+	if length > 1 {
+		f.Database = strings.TrimSpace(values[0])
+		f.Table = strings.TrimSpace(values[1])
 	}
 	return f
 }

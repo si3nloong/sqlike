@@ -70,6 +70,7 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 	fa.Limit(1)
 	result := find(
 		context.Background(),
+		pg.table.dbName,
 		pg.table.name,
 		pg.table.driver,
 		pg.table.dialect,
@@ -89,6 +90,7 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 func (pg *Paginator) All(results interface{}) error {
 	result := find(
 		context.Background(),
+		pg.table.dbName,
 		pg.table.name,
 		pg.table.driver,
 		pg.table.dialect,
