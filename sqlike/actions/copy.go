@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // CopyStatement :
@@ -15,7 +14,7 @@ type CopyStatement interface {
 	Where(fields ...interface{}) CopyStatement
 	Having(fields ...interface{}) CopyStatement
 	GroupBy(fields ...interface{}) CopyStatement
-	OrderBy(fields ...primitive.Sort) CopyStatement
+	OrderBy(fields ...interface{}) CopyStatement
 	Limit(num uint) CopyStatement
 	Offset(num uint) CopyStatement
 }
@@ -66,7 +65,7 @@ func (f *CopyActions) Having(fields ...interface{}) CopyStatement {
 }
 
 // OrderBy :
-func (f *CopyActions) OrderBy(fields ...primitive.Sort) CopyStatement {
+func (f *CopyActions) OrderBy(fields ...interface{}) CopyStatement {
 	f.Sorts = fields
 	return f
 }

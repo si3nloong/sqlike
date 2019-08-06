@@ -2,13 +2,12 @@ package actions
 
 import (
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // DeleteStatement :
 type DeleteStatement interface {
 	Where(fields ...interface{}) DeleteStatement
-	OrderBy(fields ...primitive.Sort) DeleteStatement
+	OrderBy(fields ...interface{}) DeleteStatement
 	Limit(num uint) DeleteStatement
 }
 
@@ -17,7 +16,7 @@ type DeleteActions struct {
 	Database   string
 	Table      string
 	Conditions []interface{}
-	Sorts      []primitive.Sort
+	Sorts      []interface{}
 	Record     uint
 }
 
@@ -28,7 +27,7 @@ func (f *DeleteActions) Where(fields ...interface{}) DeleteStatement {
 }
 
 // OrderBy :
-func (f *DeleteActions) OrderBy(fields ...primitive.Sort) DeleteStatement {
+func (f *DeleteActions) OrderBy(fields ...interface{}) DeleteStatement {
 	f.Sorts = fields
 	return f
 }

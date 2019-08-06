@@ -146,8 +146,8 @@ func main() {
             actions.UpdateOne().Where(
                 expr.Equal("ID", 100),
             ).Set(
-                expr.Field("Name", "SianLoong"),
-                expr.Field("Email", "test@gmail.com"),
+                expr.ColumnValue("Name", "SianLoong"),
+                expr.ColumnValue("Email", "test@gmail.com"),
             ),
             options.UpdateOne().SetDebug(true), // debug the query
         )

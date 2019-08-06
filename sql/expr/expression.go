@@ -154,8 +154,8 @@ func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.G) {
 	return
 }
 
-// Field :
-func Field(field string, value interface{}) (kv primitive.KV) {
+// ColumnValue :
+func ColumnValue(field string, value interface{}) (kv primitive.KV) {
 	kv.Field = field
 	kv.Value = value
 	return

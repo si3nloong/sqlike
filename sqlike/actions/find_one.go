@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // SelectOneStatement :
@@ -15,7 +14,7 @@ type SelectOneStatement interface {
 	Where(fields ...interface{}) SelectOneStatement
 	Having(fields ...interface{}) SelectOneStatement
 	GroupBy(fields ...interface{}) SelectOneStatement
-	OrderBy(fields ...primitive.Sort) SelectOneStatement
+	OrderBy(fields ...interface{}) SelectOneStatement
 }
 
 // FindOneActions :
@@ -64,7 +63,7 @@ func (f *FindOneActions) Having(fields ...interface{}) SelectOneStatement {
 }
 
 // OrderBy :
-func (f *FindOneActions) OrderBy(fields ...primitive.Sort) SelectOneStatement {
+func (f *FindOneActions) OrderBy(fields ...interface{}) SelectOneStatement {
 	f.Sorts = fields
 	return f
 }

@@ -43,8 +43,8 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 			actions.UpdateOne().
 				Where(expr.Equal("$Key", uid)).
 				Set(
-					expr.Field("LongStr", "1234abcd"),
-					expr.Field("Emoji", "<😗>"),
+					expr.ColumnValue("LongStr", "1234abcd"),
+					expr.ColumnValue("Emoji", "<😗>"),
 				),
 			options.UpdateOne().SetDebug(true),
 		)
@@ -59,10 +59,10 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 			actions.UpdateOne().
 				Where(expr.Equal("$Key", uid)).
 				Set(
-					expr.Field("Emoji", "<😗>"),
-					expr.Field("SID", expr.Column("LongStr")),
-					expr.Field("Int", expr.Increment("Int", 100)),
-					expr.Field("Tinyint", expr.Raw("80")),
+					expr.ColumnValue("Emoji", "<😗>"),
+					expr.ColumnValue("SID", expr.Column("LongStr")),
+					expr.ColumnValue("Int", expr.Increment("Int", 100)),
+					expr.ColumnValue("Tinyint", expr.Raw("80")),
 				),
 			options.UpdateOne().SetDebug(true),
 		)

@@ -157,9 +157,20 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 							expr.Desc("Timestamp"),
 						),
 					),
+				).
+				OrderBy(
+					expr.Field("Enum", []Enum{
+						Success,
+						Failed,
+						Unknown,
+					}),
 				),
 			options.Find().SetDebug(true),
 		)
+		require.NoError(t, err)
+		nss := []normalStruct{}
+
+		err = result.All(&nss)
 		require.NoError(t, err)
 	}
 

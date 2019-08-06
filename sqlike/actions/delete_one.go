@@ -2,13 +2,12 @@ package actions
 
 import (
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // DeleteOneStatement :
 type DeleteOneStatement interface {
 	Where(fields ...interface{}) DeleteOneStatement
-	OrderBy(fields ...primitive.Sort) DeleteOneStatement
+	OrderBy(fields ...interface{}) DeleteOneStatement
 }
 
 // DeleteOneActions :
@@ -23,7 +22,7 @@ func (f *DeleteOneActions) Where(fields ...interface{}) DeleteOneStatement {
 }
 
 // OrderBy :
-func (f *DeleteOneActions) OrderBy(fields ...primitive.Sort) DeleteOneStatement {
+func (f *DeleteOneActions) OrderBy(fields ...interface{}) DeleteOneStatement {
 	f.Sorts = fields
 	return f
 }

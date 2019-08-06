@@ -29,17 +29,18 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	}
 	// sort by primary key
 	length := len(x.Sorts)
+	fields := make([]interface{}, length+1, length+1)
 	sort := expr.Asc(tb.pk)
 	if length > 0 {
-		if x.Sorts[length-1].Order == primitive.Descending {
+		x := x.Sorts[length-1].(primitive.Sort)
+		if x.Order == primitive.Descending {
 			sort = expr.Desc(tb.pk)
 		}
 	}
 	x.Sorts = append(x.Sorts, sort)
 	length++
-	fields := make([]interface{}, length, length)
 	for i, sf := range x.Sorts {
-		fields[i] = sf.Field
+		fields[i] = sf.(primitive.Sort).Field
 	}
 	return &Paginator{
 		table:  tb,
@@ -113,16 +114,17 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 	for i, sf := range action.Sorts {
 		v := primitive.C{}
 		val := toString(pg.values[i])
-		if sf.Order == primitive.Ascending {
-			if sf.Field != pg.table.pk {
-				filters = append(filters, expr.GreaterOrEqual(sf.Field, val))
+		x := sf.(primitive.Sort)
+		if x.Order == primitive.Ascending {
+			if x.Field != pg.table.pk {
+				filters = append(filters, expr.GreaterOrEqual(x.Field, val))
 			}
-			v = expr.GreaterThan(sf.Field, val)
+			v = expr.GreaterThan(x.Field, val)
 		} else {
-			if sf.Field != pg.table.pk {
-				filters = append(filters, expr.LesserOrEqual(sf.Field, val))
+			if x.Field != pg.table.pk {
+				filters = append(filters, expr.LesserOrEqual(x.Field, val))
 			}
-			v = expr.LesserThan(sf.Field, val)
+			v = expr.LesserThan(x.Field, val)
 		}
 		fields[i] = v
 	}

@@ -38,6 +38,12 @@ type R struct {
 	To   interface{}
 }
 
+// Field :
+type Field struct {
+	Name   string
+	Values []interface{}
+}
+
 // C :
 type C struct {
 	Field    interface{}

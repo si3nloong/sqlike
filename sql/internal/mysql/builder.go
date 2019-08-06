@@ -47,6 +47,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 		panic("missing required parser")
 	}
 	blr.SetBuilder(reflect.TypeOf(primitive.L("")), b.ParseString)
+	blr.SetBuilder(reflect.TypeOf(primitive.Field{}), b.ParseField)
 	blr.SetBuilder(reflect.TypeOf(primitive.As{}), b.BuildAs)
 	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.BuildRaw)
 	blr.SetBuilder(reflect.TypeOf(primitive.Aggregate{}), b.BuildAggregate)
@@ -72,6 +73,21 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 func (b *mySQLBuilder) ParseString(stmt *sqlstmt.Statement, it interface{}) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(b.Quote(v.String()))
+	return nil
+}
+
+func (b *mySQLBuilder) ParseField(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(primitive.Field)
+	stmt.WriteString("FIELD")
+	stmt.WriteByte('(')
+	stmt.WriteString(b.Quote(x.Name))
+	for _, v := range x.Values {
+		stmt.WriteByte(',')
+		if err := b.getValue(stmt, v); err != nil {
+			return err
+		}
+	}
+	stmt.WriteByte(')')
 	return nil
 }
 
@@ -517,17 +533,18 @@ func (b *mySQLBuilder) appendGroupBy(stmt *sqlstmt.Statement, fields []interface
 	return nil
 }
 
-func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []primitive.Sort) error {
+func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{}) error {
 	length := len(sorts)
-	if length > 0 {
-		stmt.WriteString(` ORDER BY `)
-		for i := 0; i < length; i++ {
-			if i > 0 {
-				stmt.WriteRune(',')
-			}
-			if err := b.builder.BuildStatement(stmt, sorts[i]); err != nil {
-				return err
-			}
+	if length < 1 {
+		return nil
+	}
+	stmt.WriteString(` ORDER BY `)
+	for i := 0; i < length; i++ {
+		if i > 0 {
+			stmt.WriteRune(',')
+		}
+		if err := b.builder.BuildStatement(stmt, sorts[i]); err != nil {
+			return err
 		}
 	}
 	return nil

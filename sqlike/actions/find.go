@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // SelectStatement :
@@ -15,7 +14,7 @@ type SelectStatement interface {
 	Where(fields ...interface{}) SelectStatement
 	Having(fields ...interface{}) SelectStatement
 	GroupBy(fields ...interface{}) SelectStatement
-	OrderBy(fields ...primitive.Sort) SelectStatement
+	OrderBy(fields ...interface{}) SelectStatement
 	Limit(num uint) SelectStatement
 	Offset(num uint) SelectStatement
 }
@@ -29,7 +28,7 @@ type FindActions struct {
 	Conditions  []interface{}
 	Havings     []interface{}
 	GroupBys    []interface{}
-	Sorts       []primitive.Sort
+	Sorts       []interface{}
 	Skip        uint
 	Record      uint
 }
@@ -75,7 +74,7 @@ func (f *FindActions) Having(fields ...interface{}) SelectStatement {
 }
 
 // OrderBy :
-func (f *FindActions) OrderBy(fields ...primitive.Sort) SelectStatement {
+func (f *FindActions) OrderBy(fields ...interface{}) SelectStatement {
 	f.Sorts = fields
 	return f
 }

@@ -9,7 +9,7 @@ import (
 type UpdateStatement interface {
 	Where(fields ...interface{}) UpdateStatement
 	Set(values ...primitive.KV) UpdateStatement
-	OrderBy(fields ...primitive.Sort) UpdateStatement
+	OrderBy(fields ...interface{}) UpdateStatement
 	Limit(num uint) UpdateStatement
 }
 
@@ -19,7 +19,7 @@ type UpdateActions struct {
 	Table      string
 	Conditions []interface{}
 	Values     []primitive.KV
-	Sorts      []primitive.Sort
+	Sorts      []interface{}
 	Record     uint
 }
 
@@ -36,7 +36,7 @@ func (f *UpdateActions) Set(values ...primitive.KV) UpdateStatement {
 }
 
 // OrderBy :
-func (f *UpdateActions) OrderBy(fields ...primitive.Sort) UpdateStatement {
+func (f *UpdateActions) OrderBy(fields ...interface{}) UpdateStatement {
 	f.Sorts = fields
 	return f
 }

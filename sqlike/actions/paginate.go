@@ -26,69 +26,71 @@ type PaginateActions struct {
 }
 
 // Select :
-func (f *PaginateActions) Select(fields ...interface{}) PaginateStatement {
-	f.Projections = fields
-	return f
+func (act *PaginateActions) Select(fields ...interface{}) PaginateStatement {
+	act.Projections = fields
+	return act
 }
 
 // Distinct :
-func (f *PaginateActions) Distinct() PaginateStatement {
-	f.DistinctOn = true
-	return f
+func (act *PaginateActions) Distinct() PaginateStatement {
+	act.DistinctOn = true
+	return act
 }
 
 // From :
-func (f *PaginateActions) From(values ...string) PaginateStatement {
+func (act *PaginateActions) From(values ...string) PaginateStatement {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
 	}
 	if length > 0 {
-		f.Table = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[0])
 	}
 	if length > 1 {
-		f.Database = strings.TrimSpace(values[0])
-		f.Table = strings.TrimSpace(values[1])
+		act.Database = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[1])
 	}
-	return f
+	return act
 }
 
 // Where :
-func (f *PaginateActions) Where(fields ...interface{}) PaginateStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *PaginateActions) Where(fields ...interface{}) PaginateStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Having :
-func (f *PaginateActions) Having(fields ...interface{}) PaginateStatement {
-	f.Havings = expr.And(fields...)
-	return f
+func (act *PaginateActions) Having(fields ...interface{}) PaginateStatement {
+	act.Havings = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *PaginateActions) OrderBy(fields ...primitive.Sort) PaginateStatement {
-	f.Sorts = fields
-	return f
+func (act *PaginateActions) OrderBy(fields ...primitive.Sort) PaginateStatement {
+	for _, f := range fields {
+		act.Sorts = append(act.Sorts, f)
+	}
+	return act
 }
 
 // GroupBy :
-func (f *PaginateActions) GroupBy(fields ...interface{}) PaginateStatement {
-	f.GroupBys = fields
-	return f
+func (act *PaginateActions) GroupBy(fields ...interface{}) PaginateStatement {
+	act.GroupBys = fields
+	return act
 }
 
 // Limit :
-func (f *PaginateActions) Limit(num uint) PaginateStatement {
+func (act *PaginateActions) Limit(num uint) PaginateStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }
 
 // Offset :
-func (f *PaginateActions) Offset(num uint) PaginateStatement {
+func (act *PaginateActions) Offset(num uint) PaginateStatement {
 	if num > 0 {
-		f.Skip = num
+		act.Skip = num
 	}
-	return f
+	return act
 }

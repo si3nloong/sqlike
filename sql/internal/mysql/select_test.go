@@ -38,7 +38,7 @@ func TestSelect(t *testing.T) {
 	// Complex select statement
 	{
 		stmt, err = New().Select(
-			actions.Find().From("Test").
+			actions.Find().From("A", "Test").
 				Where(
 					expr.And(filters...),
 					expr.Or(filters...),
@@ -47,6 +47,6 @@ func TestSelect(t *testing.T) {
 				).(*actions.FindActions), 0,
 		)
 		require.NoError(t, err)
-		require.Equal(t, "SELECT * FROM `Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())
+		require.Equal(t, "SELECT * FROM `A`.`Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())
 	}
 }

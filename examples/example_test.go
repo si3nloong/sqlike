@@ -39,9 +39,12 @@ func TestExamples(t *testing.T) {
 	// client.SetLogger()
 	log.Println(dbs)
 
-	MigrateErrorExamples(t, db)
-	InsertErrorExamples(t, db)
-	FindErrorExamples(t, db)
+	// Errors
+	{
+		MigrateErrorExamples(t, db)
+		InsertErrorExamples(t, db)
+		FindErrorExamples(t, db)
+	}
 
 	MigrateExamples(t, db)
 	IndexExamples(t, db)
