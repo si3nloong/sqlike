@@ -6,5 +6,5 @@ import (
 
 // Logger :
 type Logger interface {
-	Format(stmt *sqlstmt.Statement)
+	Debug(stmt *sqlstmt.Statement)
 }

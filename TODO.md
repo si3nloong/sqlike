@@ -4,6 +4,7 @@
 - [ ] Escape wildcard `%` and `_` on `LIKE` condition. 
 - [x] Add `Database` name as `table` prefix.
 - [ ] Change `DataType` api.
+- [x] Add `Field` api.
 - [x] Allow nil on where conditions, skip it if `nil` or invalid 
 - [x] Support auto build index
 - [x] `In` and `NotIn`

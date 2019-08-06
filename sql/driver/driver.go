@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/sqlike/logs"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
 // Driver :
@@ -21,7 +21,7 @@ func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger
 		stmt.StartTimer()
 		defer func() {
 			stmt.StopTimer()
-			logger.Format(stmt)
+			logger.Debug(stmt)
 		}()
 	}
 	result, err = driver.ExecContext(ctx, stmt.String(), stmt.Args()...)
@@ -34,7 +34,7 @@ func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger l
 		stmt.StartTimer()
 		defer func() {
 			stmt.StopTimer()
-			logger.Format(stmt)
+			logger.Debug(stmt)
 		}()
 	}
 	rows, err = driver.QueryContext(ctx, stmt.String(), stmt.Args()...)
@@ -47,7 +47,7 @@ func QueryRowContext(ctx context.Context, driver Driver, stmt *sqlstmt.Statement
 		stmt.StartTimer()
 		defer func() {
 			stmt.StopTimer()
-			logger.Format(stmt)
+			logger.Debug(stmt)
 		}()
 	}
 	row = driver.QueryRowContext(ctx, stmt.String(), stmt.Args()...)

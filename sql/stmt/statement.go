@@ -53,6 +53,8 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 		state.Write([]byte(str))
 		return
 	}
+	// TODO: change variable
+	i := 1
 	args := stmt.Args()
 	for {
 		idx := strings.Index(str, "?")
@@ -64,6 +66,7 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 		state.Write([]byte(stmt.fmt.Format(args[0])))
 		str = str[idx+1:]
 		args = args[1:]
+		i++
 	}
 	return
 }

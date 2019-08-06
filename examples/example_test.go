@@ -14,8 +14,7 @@ import (
 type Logger struct {
 }
 
-func (l Logger) Format(stmt *sqlstmt.Statement) {
-	// log.Println("Debug here ======================>")
+func (l Logger) Debug(stmt *sqlstmt.Statement) {
 	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
 	return
