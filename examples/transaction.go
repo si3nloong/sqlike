@@ -85,6 +85,17 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 				return err
 			}
 
+			ns.Int = 888
+			if _, err := ctx.Table("NormalStruct").UpdateOne(
+				actions.UpdateOne().Where(
+					expr.Equal("$Key", ns.ID),
+				).Set(
+					expr.ColumnValue("Int", ns.Int),
+				),
+			); err != nil {
+				return err
+			}
+
 			affected, err := result.RowsAffected()
 			if err != nil {
 				return err

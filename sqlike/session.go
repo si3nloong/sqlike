@@ -143,8 +143,8 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 	}
 	return update(
 		sess.tx.context,
-		sess.table,
 		sess.dbName,
+		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
