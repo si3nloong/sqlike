@@ -108,6 +108,34 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Timeout transaction
+	{
+		uid, _ = uuid.FromString(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
+		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
+			ns = normalStruct{}
+			ns.ID = uid
+			ns.Timestamp = time.Now()
+			_, err := sessCtx.Table("NormalStruct").
+				InsertOne(&ns, options.InsertOne().SetDebug(true))
+			if err != nil {
+				return err
+			}
+			time.Sleep(5 * time.Second)
+			return nil
+		}, options.Transaction().SetTimeOut(3*time.Second))
+		require.Equal(t, sql.ErrTxDone, err)
+
+		rslt := normalStruct{}
+		err = db.Table("NormalStruct").FindOne(actions.FindOne().
+			Where(
+				expr.Equal("$Key", uid),
+			),
+			options.FindOne().SetDebug(true),
+		).Decode(&rslt)
+		require.Error(t, err)
+		require.Equal(t, normalStruct{}, rslt)
+	}
+
 	{
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			nss := []normalStruct{}

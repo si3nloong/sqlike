@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit"
+	"github.com/si3nloong/sqlike/types"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -39,6 +40,7 @@ type normalStruct struct {
 	Float64       float64
 	UFloat32      float32 `sqlike:",unsigned"`
 	EmptyStruct   struct{}
+	GeoPoint      types.GeoPoint
 	Struct        struct {
 		VirtualStr string `sqlike:",virtual_column"`
 		StoredStr  string `sqlike:",stored_column"`
@@ -149,6 +151,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 			"message": "please contact our support"
 		}
 	}`)
+	ns.GeoPoint = [2]float64{0.11, 0.12312}
 	ns.Struct.VirtualStr = gofakeit.Sentence(10)
 	ns.Struct.StoredStr = `hello world!`
 	ns.Struct.NestedBool = true
