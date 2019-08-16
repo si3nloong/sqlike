@@ -4,8 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
-	"log"
-	"reflect"
 	"testing"
 	"time"
 
@@ -475,10 +473,6 @@ func TestUnmarshal(t *testing.T) {
 			var nilByte *[]byte
 			require.Equal(t, nilByte, initPtr.PtrByte)
 		}
-
-		{
-			log.Println(initPtr.PtrJSONRaw)
-		}
 		// 	test(&ptr)
 		// 	// nptr := new(ptrStruct)
 		// 	// if v.IsNil() {
@@ -493,16 +487,6 @@ func TestUnmarshal(t *testing.T) {
 		// 	// var nilPtr *ptrStruct
 		// 	// require.Equal(t, nilPtr, ptr)
 	})
-}
-
-func test(it interface{}) {
-	va := reflect.ValueOf(it).Elem()
-	// log.Println(v, v.Type(), v.CanSet())
-	vv := reflect.New(va.Type().Elem())
-	log.Println(vv.CanSet(), vv)
-	va.Set(vv)
-	log.Println(va)
-	// v.Set(vv)
 }
 
 func BenchmarkJSONUnmarshal(b *testing.B) {

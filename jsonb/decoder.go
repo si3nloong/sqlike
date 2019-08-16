@@ -288,18 +288,27 @@ func (dec *Decoder) DecodeMap(r *Reader, v reflect.Value) error {
 	if t.Key().Kind() != reflect.String {
 		return fmt.Errorf("jsonb: unsupported data type of map key, %q", t.Key().Kind())
 	}
-	decoder, err := dec.registry.LookupDecoder(t.Elem())
+	decodeKey, err := dec.registry.LookupDecoder(t.Key())
+	if err != nil {
+		return err
+	}
+	decodeValue, err := dec.registry.LookupDecoder(t.Elem())
 	if err != nil {
 		return err
 	}
 	x := reflect.MakeMap(t)
 	if err := r.ReadObject(func(it *Reader, k string) error {
-		vi := reflext.Zero(t.Elem())
-		err = decoder(it, vi)
+		ki := reflext.Zero(t.Key())
+		err = decodeKey(NewReader([]byte(strconv.Quote(k))), ki)
 		if err != nil {
 			return err
 		}
-		x.SetMapIndex(reflect.ValueOf(k), vi)
+		vi := reflext.Zero(t.Elem())
+		err = decodeValue(it, vi)
+		if err != nil {
+			return err
+		}
+		x.SetMapIndex(ki, vi)
 		return nil
 	}); err != nil {
 		return err

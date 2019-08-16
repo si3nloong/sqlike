@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type CustomString string
+
 func TestDecodeByte(t *testing.T) {
 	var (
 		dec = Decoder{}
@@ -112,6 +114,7 @@ func TestDecodeMap(t *testing.T) {
 			"d": `alSLKaj28173-021@#$%^&*"`,
 			"e": float64(0.3127123),
 		}, x)
+
 	})
 
 	t.Run("Decode to map<string,string>", func(ti *testing.T) {
@@ -276,6 +279,43 @@ func TestDecodeMap(t *testing.T) {
 				},
 			},
 		}, m)
+	})
+
+	t.Run("Decode to map[CustomString]*string", func(ti *testing.T) {
+		var m map[CustomString]*string
+
+		r = NewReader([]byte(`
+		{
+			"0": "zero",
+			"1": "one",
+			"2": "two",
+			"3": "three"
+		}`))
+
+		v := reflect.ValueOf(&m)
+		err = dec.DecodeMap(r, v.Elem())
+		require.NoError(ti, err)
+		zero, one, two, three := "zero", "one", "two", "three"
+		require.Equal(t, map[CustomString]*string{
+			CustomString("0"): &zero,
+			CustomString("1"): &one,
+			CustomString("2"): &two,
+			CustomString("3"): &three,
+		}, m)
+	})
+
+	t.Run("Decode with unsupported data type", func(ti *testing.T) {
+		var mx map[*CustomString]string
+		r = NewReader([]byte(`
+		{
+			"0": "zero",
+			"1": "one",
+			"2": "two",
+			"3": "three"
+		}`))
+		v = reflect.ValueOf(&mx)
+		err = dec.DecodeMap(r, v.Elem())
+		require.Error(ti, err)
 	})
 }
 

@@ -1,7 +1,7 @@
 package jsonb
 
 import (
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 var whiteSpaceMap = map[byte]bool{
@@ -198,7 +198,7 @@ func (r *Reader) ReadValue() (interface{}, error) {
 		}
 		return v, nil
 	default:
-		return nil, xerrors.New("invalid json format")
+		return nil, errors.New("invalid json format")
 	}
 }
 
@@ -225,7 +225,7 @@ func (r *Reader) ReadBoolean() (bool, error) {
 		r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'})
 		return false, nil
 	}
-	return false, xerrors.New("invalid boolean value")
+	return false, errors.New("invalid boolean value")
 }
 
 // ReadNull :

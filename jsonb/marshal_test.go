@@ -2,7 +2,6 @@ package jsonb
 
 import (
 	"encoding/json"
-	"log"
 	"testing"
 	"time"
 
@@ -50,29 +49,21 @@ func TestMarshal(t *testing.T) {
 		err error
 	)
 
-	b, err = json.Marshal(nsPtr)
-	log.Println(string(b))
-	require.NoError(t, err)
-
-	b, err = json.Marshal(nsInit)
-	log.Println(string(b))
-	require.NoError(t, err)
-
-	b, err = json.Marshal(nsPtr)
-	log.Println(string(b))
-	require.NoError(t, err)
-
 	b, err = Marshal(nsPtr)
-	log.Println(string(b))
 	require.NoError(t, err)
+	require.Equal(t, []byte(`null`), b)
 
 	b, err = Marshal(nsInit)
-	log.Println(string(b))
 	require.NoError(t, err)
+	require.Equal(t, []byte(`{"Str":"","LongStr":"","CustomStrType":"","EmptyByte":null,"Byte":null,"Bool":false,"Skip":null,"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z"}`), b)
 
-	b, err = Marshal(nsPtr)
-	log.Println(string(b))
-	require.NoError(t, err)
+	// b, err = Marshal(nsInit)
+	// log.Println(string(b))
+	// require.NoError(t, err)
+
+	// b, err = Marshal(nsPtr)
+	// log.Println(string(b))
+	// require.NoError(t, err)
 
 	symbolStr := `'ajhdjasd12380912$%^&*()_\\"asdasd123910293"""\\\\123210312930-\\`
 	result := []byte(`{"Str":"","LongStr":"'ajhdjasd12380912$%^&*()_\\\\\"asdasd123910293\"\"\"\\\\\\\\123210312930-\\\\","CustomStrType":"","EmptyByte":"YWJjZDEyMzQ=","Byte":null,"Bool":false,"Skip":null,"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z"}`)
