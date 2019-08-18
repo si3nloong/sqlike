@@ -10,7 +10,7 @@ import (
 
 func TestExpression(t *testing.T) {
 	var (
-		grp primitive.G
+		grp primitive.Group
 		str *string
 	)
 
@@ -36,15 +36,15 @@ func TestExpression(t *testing.T) {
 
 	t.Run("Empty And", func(ti *testing.T) {
 		grp = And()
-		require.ElementsMatch(ti, primitive.G{}, grp)
+		require.ElementsMatch(ti, primitive.Group{}, grp)
 
 		grp = And(invalids...)
-		require.ElementsMatch(ti, primitive.G{}, grp)
+		require.ElementsMatch(ti, primitive.Group{}, grp)
 	})
 
 	t.Run("And", func(ti *testing.T) {
 		grp = And(filters...)
-		require.ElementsMatch(ti, primitive.G{
+		require.ElementsMatch(ti, primitive.Group{
 			Raw("("),
 			Equal("A", 1),
 			primitive.And,
@@ -57,7 +57,7 @@ func TestExpression(t *testing.T) {
 
 	t.Run("Or", func(ti *testing.T) {
 		grp = Or(filters...)
-		require.ElementsMatch(ti, primitive.G{
+		require.ElementsMatch(ti, primitive.Group{
 			Raw("("),
 			Equal("A", 1),
 			primitive.Or,

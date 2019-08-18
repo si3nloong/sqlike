@@ -54,6 +54,19 @@ type normalStruct struct {
 	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 
+type jsonStruct struct {
+	ID     int64 `sqlike:"$Key,auto_increment"`
+	Text   string
+	Raw    json.RawMessage
+	StrArr []string
+	IntArr []int
+	Map    map[string]int
+	Struct struct {
+	}
+	NullableFloat *float64
+	GeoPoint      types.GeoPoint
+}
+
 // LongStr :
 type LongStr string
 
@@ -76,6 +89,7 @@ type Address struct {
 // Enum :
 type Enum string
 
+// enum :
 const (
 	Success Enum = "SUCCESS"
 	Failed  Enum = "FAILED"

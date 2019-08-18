@@ -17,17 +17,22 @@ type Alias struct {
 	Alias string
 }
 
+// CastAs :
+type CastAs struct {
+	Value    interface{}
+	DataType DataType
+}
+
 // L :
-type L string
 
 // Func :
 type Func struct {
-	Name  string
-	Value interface{}
+	Type      Function
+	Arguments []interface{}
 }
 
-// G :
-type G []interface{}
+// Group :
+type Group []interface{}
 
 // Col :
 type Col string
@@ -79,6 +84,12 @@ const (
 	Descending
 )
 
+// Nil :
+type Nil struct {
+	Field interface{}
+	Yes   bool
+}
+
 // Sort :
 type Sort struct {
 	Field string
@@ -88,11 +99,16 @@ type Sort struct {
 // JQ :
 type JQ string
 
+// Value :
+type Value struct {
+	Raw interface{}
+}
+
 // JC :
 type JC struct {
-	Field interface{}
-	Value interface{}
-	Path  string
+	Target    interface{}
+	Candidate interface{}
+	Path      *string
 }
 
 type aggregate int

@@ -54,5 +54,6 @@ func TestExamples(t *testing.T) {
 	UpdateExamples(t, db)
 	DeleteExamples(t, db)
 	ExtraExamples(t, db)
+	JSONExamples(t, db)
 
 }

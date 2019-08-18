@@ -12,7 +12,7 @@ func Increment(field string, inc uint) primitive.Math {
 }
 
 // Multiply :
-func Multiply(fields ...interface{}) (grp primitive.G) {
+func Multiply(fields ...interface{}) (grp primitive.Group) {
 	for i, f := range fields {
 		if i > 0 {
 			grp = append(grp, Raw("*"))

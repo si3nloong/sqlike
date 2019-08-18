@@ -20,16 +20,15 @@ func NotEqual(field, value interface{}) (c primitive.C) {
 }
 
 // IsNull :
-func IsNull(field string) (c primitive.C) {
-	c.Field = primitive.L(field)
-	c.Operator = primitive.IsNull
+func IsNull(field string) (c primitive.Nil) {
+	c.Field = wrapColumn(field)
+	c.Yes = true
 	return
 }
 
 // NotNull :
-func NotNull(field string) (c primitive.C) {
-	c.Field = primitive.L(field)
-	c.Operator = primitive.NotNull
+func NotNull(field string) (c primitive.Nil) {
+	c.Field = wrapColumn(field)
 	return
 }
 
@@ -50,7 +49,7 @@ func inGroup(field interface{}, op primitive.Operator, values interface{}) (c pr
 	k := v.Kind()
 	c.Field = wrapColumn(field)
 	c.Operator = primitive.In
-	grp := primitive.G{}
+	grp := primitive.Group{}
 	grp = append(grp, Raw("("))
 	if k == reflect.Array || k == reflect.Slice {
 		for i := 0; i < v.Len(); i++ {
@@ -116,18 +115,18 @@ func NotBetween(field, from, to interface{}) (c primitive.C) {
 }
 
 // And :
-func And(conds ...interface{}) (g primitive.G) {
+func And(conds ...interface{}) (g primitive.Group) {
 	g = buildGroup(primitive.And, conds)
 	return
 }
 
 // Or :
-func Or(conds ...interface{}) (g primitive.G) {
+func Or(conds ...interface{}) (g primitive.Group) {
 	g = buildGroup(primitive.Or, conds)
 	return
 }
 
-func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.G) {
+func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.Group) {
 	length := len(conds)
 	if length > 0 {
 		sg := make([]interface{}, 0, length)
@@ -163,6 +162,13 @@ func ColumnValue(field string, value interface{}) (kv primitive.KV) {
 
 // Date :
 func Date(field string) (d primitive.Func) {
+	return
+}
+
+// CastAs :
+func CastAs(value interface{}, datatype primitive.DataType) (cast primitive.CastAs) {
+	cast.Value = value
+	cast.DataType = datatype
 	return
 }
 
