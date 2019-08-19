@@ -37,6 +37,8 @@ func wrapJSONColumn(it interface{}) interface{} {
 			Value:    vi,
 			DataType: primitive.JSON,
 		}
+	case primitive.Func:
+		return vi
 	default:
 		return primitive.Value{Raw: vi}
 	}

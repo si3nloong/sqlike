@@ -64,6 +64,7 @@ type KV struct {
 
 type operator int
 
+// operators :
 const (
 	Add operator = iota
 	Deduct
@@ -113,6 +114,7 @@ type JC struct {
 
 type aggregate int
 
+// aggregation :
 const (
 	Sum aggregate = iota + 1
 	Count
