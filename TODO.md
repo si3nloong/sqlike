@@ -1,7 +1,8 @@
 #### TODO
 
 - [ ] Prevent toxic query.
-- [ ] Escape wildcard `%` and `_` on `LIKE` condition. 
+- [x] Escape wildcard `%` on `LIKE` condition. 
+- [ ] Escape wildcard `_` on `LIKE` condition. 
 - [x] Add `Database` name as `table` prefix.
 - [ ] Change `DataType` api.
 - [x] Add `Field` api.
@@ -46,7 +47,8 @@
 - [x] [Bug] `UnmarshalJSONB` into `[]byte`
 - [x] [Feature] Single database `Migration`
 - [x] [Feature] Support generated column for `Migration` (`virtual_column` - or `stored_column`)
-- [x] Support `UnsafeMigration`
+- [ ] Support `UnsafeMigrate`
+- [ ] Support `MustUnsafeMigrate`
 - [x] [Feature] `InsertIgnore` & `Upsert`
 - [x] Set omit or setter fields on `Upsert`
 - [x] Insert single record into `Table`

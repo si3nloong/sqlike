@@ -177,6 +177,21 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// query with Like
+	{
+		symbol := "Hal%o%()#$%^&_"
+		ns = normalStruct{}
+		err = table.FindOne(
+			actions.FindOne().
+				Where(
+					expr.Like("FullText", symbol+"%"),
+				),
+			options.FindOne().SetDebug(true),
+		).Decode(&ns)
+		require.NoError(t, err)
+		require.Equal(t, symbol, ns.FullText)
+	}
+
 	// Aggregation
 	{
 		ns = normalStruct{}

@@ -19,8 +19,9 @@ type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
 	SID           string    `sqlike:",charset:latin1"`
 	Emoji         string    `sqlike:""`
-	LongStr       string    `sqlike:",longtext"`
-	CustomStrType LongStr   `sqlike:",size:300"`
+	FullText      string
+	LongStr       string  `sqlike:",longtext"`
+	CustomStrType LongStr `sqlike:",size:300"`
 	EmptyByte     []byte
 	Byte          []byte
 	Bool          bool
@@ -144,6 +145,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	}))
 	ns.LongStr = gofakeit.Sentence(50)
 	ns.Bool = true
+	ns.FullText = "Hal%o%()#$%^&_"
 	ns.Int = gofakeit.Number(100, 99999999)
 	ns.TinyInt = 99
 	ns.SmallInt = gofakeit.Int16()

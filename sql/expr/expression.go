@@ -22,7 +22,7 @@ func NotEqual(field, value interface{}) (c primitive.C) {
 // IsNull :
 func IsNull(field string) (c primitive.Nil) {
 	c.Field = wrapColumn(field)
-	c.Yes = true
+	c.IsNot = true
 	return
 }
 
@@ -67,14 +67,17 @@ func inGroup(field interface{}, op primitive.Operator, values interface{}) (c pr
 }
 
 // Like :
-func Like(field, value interface{}) (c primitive.C) {
-	c = clause(field, primitive.Like, value)
+func Like(field, value interface{}) (p primitive.L) {
+	p.Field = wrapColumn(field)
+	p.Value = value
 	return
 }
 
 // NotLike :
-func NotLike(field, value interface{}) (c primitive.C) {
-	c = clause(field, primitive.NotLike, value)
+func NotLike(field, value interface{}) (p primitive.L) {
+	p.Field = wrapColumn(field)
+	p.IsNot = true
+	p.Value = value
 	return
 }
 

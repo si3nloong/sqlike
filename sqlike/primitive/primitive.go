@@ -23,8 +23,6 @@ type CastAs struct {
 	DataType DataType
 }
 
-// L :
-
 // Func :
 type Func struct {
 	Type      Function
@@ -47,6 +45,13 @@ type R struct {
 type Field struct {
 	Name   string
 	Values []interface{}
+}
+
+// L :
+type L struct {
+	Field interface{}
+	IsNot bool
+	Value interface{}
 }
 
 // C :
@@ -88,7 +93,7 @@ const (
 // Nil :
 type Nil struct {
 	Field interface{}
-	Yes   bool
+	IsNot bool
 }
 
 // Sort :
@@ -96,9 +101,6 @@ type Sort struct {
 	Field string
 	Order order
 }
-
-// JQ :
-type JQ string
 
 // Value :
 type Value struct {

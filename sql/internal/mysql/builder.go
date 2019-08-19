@@ -12,14 +12,13 @@ import (
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
 
 var operatorMap = map[primitive.Operator]string{
 	primitive.Equal:          "=",
 	primitive.NotEqual:       "<>",
-	primitive.Like:           "LIKE",
-	primitive.NotLike:        "NOT LIKE",
 	primitive.In:             "IN",
 	primitive.NotIn:          "NOT IN",
 	primitive.Between:        "BETWEEN",
@@ -49,27 +48,26 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	}
 	blr.SetBuilder(reflect.TypeOf(primitive.CastAs{}), b.BuildCastAs)
 	blr.SetBuilder(reflect.TypeOf(primitive.Func{}), b.BuildFunction)
-	blr.SetBuilder(reflect.TypeOf(primitive.Field{}), b.ParseField)
+	blr.SetBuilder(reflect.TypeOf(primitive.Field{}), b.BuildField)
 	blr.SetBuilder(reflect.TypeOf(primitive.Value{}), b.BuildValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.As{}), b.BuildAs)
 	blr.SetBuilder(reflect.TypeOf(primitive.Nil{}), b.BuildNil)
 	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.BuildRaw)
 	blr.SetBuilder(reflect.TypeOf(primitive.Aggregate{}), b.BuildAggregate)
 	blr.SetBuilder(reflect.TypeOf(primitive.Column{}), b.BuildColumn)
-	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.ParseClause)
-	blr.SetBuilder(reflect.TypeOf(primitive.Col("")), b.ParseString)
-	blr.SetBuilder(reflect.TypeOf(primitive.Operator(0)), b.ParseOperator)
+	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.BuildClause)
+	blr.SetBuilder(reflect.TypeOf(primitive.L{}), b.BuildLike)
+	blr.SetBuilder(reflect.TypeOf(primitive.Operator(0)), b.BuildOperator)
 	blr.SetBuilder(reflect.TypeOf(primitive.Group{}), b.BuildGroup)
-	blr.SetBuilder(reflect.TypeOf(primitive.R{}), b.ParseRange)
+	blr.SetBuilder(reflect.TypeOf(primitive.R{}), b.BuildRange)
 	blr.SetBuilder(reflect.TypeOf(primitive.Sort{}), b.BuildSort)
-	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.ParseKeyValue)
-	blr.SetBuilder(reflect.TypeOf(primitive.JC{}), b.ParseJSONContains)
-	blr.SetBuilder(reflect.TypeOf(primitive.JQ("")), b.ParseJSONQuote)
-	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.ParseMath)
-	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.ParseFindActions)
-	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.ParseUpdateActions)
-	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.ParseDeleteActions)
-	blr.SetBuilder(reflect.String, b.ParseString)
+	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
+	blr.SetBuilder(reflect.TypeOf(primitive.JC{}), b.BuildJSONContains)
+	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
+	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
+	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
+	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
+	blr.SetBuilder(reflect.String, b.BuildString)
 	b.registry = rg
 	b.builder = blr
 }
@@ -110,13 +108,74 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 	return nil
 }
 
-func (b *mySQLBuilder) ParseString(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildString(stmt *sqlstmt.Statement, it interface{}) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(b.Quote(v.String()))
 	return nil
 }
 
-func (b *mySQLBuilder) ParseField(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(primitive.L)
+	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
+		return err
+	}
+	stmt.WriteByte(' ')
+	if x.IsNot {
+		stmt.WriteString("NOT LIKE")
+	} else {
+		stmt.WriteString("LIKE")
+	}
+	stmt.WriteByte(' ')
+	v := reflext.ValueOf(x.Value)
+	if !v.IsValid() {
+		stmt.WriteByte('?')
+		stmt.AppendArg(nil)
+		return nil
+	}
+
+	t := v.Type()
+	if builder, isOk := b.builder.LookupBuilder(t); isOk {
+		if err := builder(stmt, it); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	stmt.WriteByte('?')
+	encoder, err := b.registry.LookupEncoder(t)
+	if err != nil {
+		return err
+	}
+	vv, err := encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	ch := `\%`
+	switch vi := vv.(type) {
+	case string:
+		vv = escapePercent(vi, ch)
+	case []byte:
+		vv = escapePercent(string(vi), ch)
+	}
+	stmt.AppendArg(vv)
+	return nil
+}
+
+func escapePercent(n string, char string) string {
+	length := len(n)
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+	for i := 0; i < length-1; i++ {
+		if n[i] == '%' {
+			blr.WriteString(char)
+			continue
+		}
+		blr.WriteByte(n[i])
+	}
+	return blr.String()
+}
+
+func (b *mySQLBuilder) BuildField(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Field)
 	stmt.WriteString("FIELD")
 	stmt.WriteByte('(')
@@ -166,7 +225,7 @@ func (b *mySQLBuilder) BuildNil(stmt *sqlstmt.Statement, it interface{}) error {
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
 	}
-	if x.Yes {
+	if x.IsNot {
 		stmt.WriteString(" IS NULL")
 	} else {
 		stmt.WriteString(" IS NOT NULL")
@@ -221,7 +280,7 @@ func (b *mySQLBuilder) BuildAggregate(stmt *sqlstmt.Statement, it interface{}) e
 	return nil
 }
 
-func (b *mySQLBuilder) ParseOperator(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildOperator(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Operator)
 	stmt.WriteRune(' ')
 	stmt.WriteString(operatorMap[x])
@@ -229,7 +288,7 @@ func (b *mySQLBuilder) ParseOperator(stmt *sqlstmt.Statement, it interface{}) er
 	return nil
 }
 
-func (b *mySQLBuilder) ParseClause(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildClause(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.C)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -257,14 +316,14 @@ func (b *mySQLBuilder) BuildSort(stmt *sqlstmt.Statement, it interface{}) error 
 	return nil
 }
 
-func (b *mySQLBuilder) ParseKeyValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildKeyValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(primitive.KV)
 	stmt.WriteString(b.Quote(string(x.Field)))
 	stmt.WriteString(` = `)
 	return b.getValue(stmt, x.Value)
 }
 
-func (b *mySQLBuilder) ParseJSONContains(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildJSONContains(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.JC)
 	stmt.WriteString("JSON_CONTAINS")
 	stmt.WriteByte('(')
@@ -283,16 +342,7 @@ func (b *mySQLBuilder) ParseJSONContains(stmt *sqlstmt.Statement, it interface{}
 	return nil
 }
 
-func (b *mySQLBuilder) ParseJSONQuote(stmt *sqlstmt.Statement, it interface{}) error {
-	x := it.(primitive.JQ)
-	stmt.WriteString("JSON_QUOTE")
-	stmt.WriteByte('(')
-	stmt.WriteString(string(x))
-	stmt.WriteByte(')')
-	return nil
-}
-
-func (b *mySQLBuilder) ParseMath(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(primitive.Math)
 	stmt.WriteString(b.Quote(string(x.Field)) + ` `)
 	if x.Mode == primitive.Add {
@@ -356,7 +406,7 @@ func (b *mySQLBuilder) encodeValue(it interface{}) (interface{}, error) {
 	return encoder(nil, v)
 }
 
-func (b *mySQLBuilder) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x, isOk := it.(primitive.R)
 	if !isOk {
 		return xerrors.New("expected data type primitive.GV")
@@ -389,7 +439,7 @@ func (b *mySQLBuilder) ParseRange(stmt *sqlstmt.Statement, it interface{}) (err 
 	return
 }
 
-func (b *mySQLBuilder) ParseFindActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.FindActions)
 	if !isOk {
 		return xerrors.New("data type not match")
@@ -421,7 +471,7 @@ func (b *mySQLBuilder) ParseFindActions(stmt *sqlstmt.Statement, it interface{})
 	return nil
 }
 
-func (b *mySQLBuilder) ParseUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.UpdateActions)
 	if !isOk {
 		return xerrors.New("data type not match")
@@ -440,7 +490,7 @@ func (b *mySQLBuilder) ParseUpdateActions(stmt *sqlstmt.Statement, it interface{
 	return nil
 }
 
-func (b *mySQLBuilder) ParseDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.DeleteActions)
 	if !isOk {
 		return xerrors.New("data type not match")
