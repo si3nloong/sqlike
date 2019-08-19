@@ -150,29 +150,14 @@ func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error 
 	if err != nil {
 		return err
 	}
-	ch := `\%`
 	switch vi := vv.(type) {
 	case string:
-		vv = escapePercent(vi, ch)
+		vv = escapePercent(vi)
 	case []byte:
-		vv = escapePercent(string(vi), ch)
+		vv = escapePercent(string(vi))
 	}
 	stmt.AppendArg(vv)
 	return nil
-}
-
-func escapePercent(n string, char string) string {
-	length := len(n)
-	blr := util.AcquireString()
-	defer util.ReleaseString(blr)
-	for i := 0; i < length-1; i++ {
-		if n[i] == '%' {
-			blr.WriteString(char)
-			continue
-		}
-		blr.WriteByte(n[i])
-	}
-	return blr.String()
 }
 
 func (b *mySQLBuilder) BuildField(stmt *sqlstmt.Statement, it interface{}) error {
@@ -593,4 +578,22 @@ func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV)
 		}
 	}
 	return nil
+}
+
+func escapePercent(n string) string {
+	length := len(n)
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+	for i := 0; i < length-1; i++ {
+		switch n[i] {
+		case '%':
+			blr.WriteString(`\%`)
+		case '\\':
+			blr.WriteString(`\\`)
+		default:
+			blr.WriteByte(n[i])
+		}
+	}
+	blr.WriteByte(n[length-1])
+	return blr.String()
 }

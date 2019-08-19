@@ -145,7 +145,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	}))
 	ns.LongStr = gofakeit.Sentence(50)
 	ns.Bool = true
-	ns.FullText = "Hal%o%()#$%^&_"
+	ns.FullText = "Hal%o%()#$\\%^&_"
 	ns.Int = gofakeit.Number(100, 99999999)
 	ns.TinyInt = 99
 	ns.SmallInt = gofakeit.Int16()

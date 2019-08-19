@@ -179,7 +179,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 	// query with Like
 	{
-		symbol := "Hal%o%()#$%^&_"
+		symbol := "Hal%o%()#$\\%^&_"
 		ns = normalStruct{}
 		err = table.FindOne(
 			actions.FindOne().
