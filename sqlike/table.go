@@ -163,6 +163,14 @@ func (tb Table) UnsafeMigrate(entity interface{}) error {
 	return tb.migrateOne(entity, true)
 }
 
+// MustUnsafeMigrate :
+func (tb Table) MustUnsafeMigrate(entity interface{}) {
+	err := tb.migrateOne(entity, true)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // Truncate :
 func (tb *Table) Truncate() (err error) {
 	_, err = sqldriver.Execute(

@@ -133,7 +133,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 		stored  bool
 	)
 
-	suffix := `FIRST`
+	suffix := "FIRST"
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`ALTER TABLE ` + ms.TableName(db, table) + ` `)
 
@@ -144,24 +144,24 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 			stmt.WriteRune(',')
 		}
 
-		action := `ADD`
+		action := "ADD"
 		idx = cols.IndexOf(sf.Path)
 		if idx > -1 {
-			action = `MODIFY`
+			action = "MODIFY"
 			cols.Splice(idx)
 		}
-		if action == `ADD` && sf.Path == pk {
+		if action == "ADD" && sf.Path == pk {
 			stmt.WriteString("ADD PRIMARY KEY (`" + pk + "`)")
 			stmt.WriteRune(',')
 		}
-		stmt.WriteString(action + ` `)
+		stmt.WriteString(action + " ")
 		col, err = ms.schema.GetColumn(sf)
 		if err != nil {
 			return
 		}
 		ms.buildSchemaByColumn(stmt, col)
-		stmt.WriteString(` ` + suffix)
-		suffix = `AFTER ` + ms.Quote(sf.Path)
+		stmt.WriteString(" " + suffix)
+		suffix = "AFTER " + ms.Quote(sf.Path)
 
 		// Generated columns :
 		t := reflext.Deref(sf.Zero.Type())
@@ -181,26 +181,26 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 					return
 				}
 
-				action = `ADD`
+				action = "ADD"
 				idx = cols.IndexOf(child.Path)
 				if idx > -1 {
-					action = `MODIFY`
+					action = "MODIFY"
 					cols.Splice(idx)
 				}
 
-				stmt.WriteString(action + ` `)
+				stmt.WriteString(action + " ")
 				stmt.WriteString(ms.Quote(col.Name))
-				stmt.WriteString(` ` + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
-				stmt.WriteString(` AS `)
-				stmt.WriteString(`(` + ms.Quote(sf.Path) + `->>'$.` + path + `')`)
+				stmt.WriteString(" " + col.Type)
+				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
+				stmt.WriteString(" AS ")
+				stmt.WriteString("(" + ms.Quote(sf.Path) + "->>'$." + path + "')")
 				if stored {
-					stmt.WriteString(` STORED`)
+					stmt.WriteString(" STORED")
 				}
 				if !col.Nullable {
-					stmt.WriteString(` NOT NULL`)
+					stmt.WriteString(" NOT NULL")
 				}
-				suffix = `AFTER ` + ms.Quote(child.Path)
+				suffix = "AFTER " + ms.Quote(child.Path)
 			}
 			children = children[1:]
 			children = append(children, child.Children...)
@@ -209,9 +209,9 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 
 	if unsafe {
 		for _, col := range cols {
-			stmt.WriteString(` DROP COLUMN `)
-			stmt.WriteString(ms.Quote(col))
 			stmt.WriteByte(',')
+			stmt.WriteString("DROP COLUMN ")
+			stmt.WriteString(ms.Quote(col))
 		}
 	}
 	// stmt.WriteRune(',')

@@ -1,10 +1,10 @@
 #### TODO
 
 - [ ] Prevent toxic query.
-- [x] Escape wildcard `%` on `LIKE` condition. 
-- [ ] Escape wildcard `_` on `LIKE` condition. 
-- [x] Add `Database` name as `table` prefix.
 - [ ] Change `DataType` api.
+- [x] Escape wildcard `%` on `LIKE` condition. 
+- [x] Escape wildcard `_` on `LIKE` condition. 
+- [x] Add `Database` name as `table` prefix.
 - [x] Add `Field` api.
 - [x] Allow nil on where conditions, skip it if `nil` or invalid 
 - [x] Support auto build index
@@ -16,9 +16,8 @@
 - [x] Support option tag `unique_index` and `index` on create table
 - [ ] Support option tag `unique_index` and `index` on alter table
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
-- [ ] Support custom type `GeoPoint`
+- [x] Support custom type `GeoPoint`
 - [x] Allow custom name of primary key with `SetPrimaryKey`
-<!-- - [ ] Eager loading with foreign key -->
 - [x] Support extra options like `charset` and `collation` in connection
 - [x] Get `MySQL` server version
 - [x] Drop selected `Database`
@@ -46,7 +45,7 @@
 - [x] Custom `JSON` decoder
 - [x] [Bug] `UnmarshalJSONB` into `[]byte`
 - [x] [Feature] Single database `Migration`
-- [x] [Feature] Support generated column for `Migration` (`virtual_column` - or `stored_column`)
+- [x] [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
 - [ ] Support `UnsafeMigrate`
 - [ ] Support `MustUnsafeMigrate`
 - [x] [Feature] `InsertIgnore` & `Upsert`
