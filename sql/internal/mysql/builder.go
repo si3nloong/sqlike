@@ -152,9 +152,9 @@ func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error 
 	}
 	switch vi := vv.(type) {
 	case string:
-		vv = escapePercent(vi)
+		vv = escapeWildCard(vi)
 	case []byte:
-		vv = escapePercent(string(vi))
+		vv = escapeWildCard(string(vi))
 	}
 	stmt.AppendArg(vv)
 	return nil
@@ -580,7 +580,7 @@ func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV)
 	return nil
 }
 
-func escapePercent(n string) string {
+func escapeWildCard(n string) string {
 	length := len(n)
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
@@ -588,6 +588,8 @@ func escapePercent(n string) string {
 		switch n[i] {
 		case '%':
 			blr.WriteString(`\%`)
+		case '_':
+			blr.WriteString(`\_`)
 		case '\\':
 			blr.WriteString(`\\`)
 		default:
