@@ -13,9 +13,6 @@
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
 - [x] Connect to `MySQL` server with `options.Connect`
 - [x] Support omit options on `InsertOne` and `Insert`
-- [x] Support option tag `unique_index` and `index` on create table
-- [ ] Support option tag `unique_index` and `index` on alter table
-- [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [x] Support custom type `GeoPoint`
 - [x] Allow custom name of primary key with `SetPrimaryKey`
 - [x] Support extra options like `charset` and `collation` in connection
@@ -46,8 +43,8 @@
 - [x] [Bug] `UnmarshalJSONB` into `[]byte`
 - [x] [Feature] Single database `Migration`
 - [x] [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
-- [ ] Support `UnsafeMigrate`
-- [ ] Support `MustUnsafeMigrate`
+- [x] Support `UnsafeMigrate`
+- [x] Support `MustUnsafeMigrate`
 - [x] [Feature] `InsertIgnore` & `Upsert`
 - [x] Set omit or setter fields on `Upsert`
 - [x] Insert single record into `Table`
@@ -61,5 +58,8 @@
 - [x] Delete multiple record
 - [x] Delete single record
 - [x] Replace into (replace with `Copy` API)
+- [x] Support option tag `unique_index` and `index` on create table
+- [ ] Support option tag `unique_index` and `index` on alter table
+- [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [ ] Write testcases (50%)
 - [ ] Support `Postgres`

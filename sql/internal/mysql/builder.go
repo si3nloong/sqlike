@@ -12,7 +12,6 @@ import (
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
-	"github.com/si3nloong/sqlike/util"
 	"golang.org/x/xerrors"
 )
 
@@ -582,8 +581,7 @@ func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV)
 
 func escapeWildCard(n string) string {
 	length := len(n)
-	blr := util.AcquireString()
-	defer util.ReleaseString(blr)
+	blr := new(strings.Builder)
 	for i := 0; i < length-1; i++ {
 		switch n[i] {
 		case '%':
