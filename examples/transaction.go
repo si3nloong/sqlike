@@ -29,10 +29,12 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	// Commit Transaction
 	{
 		uid, _ = uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
+		now := time.Now()
 
 		ns = normalStruct{}
 		ns.ID = uid
-		ns.Timestamp = time.Now()
+		ns.DateTime = now
+		ns.Timestamp = now
 		tx, err = db.BeginTransaction()
 		require.NoError(t, err)
 		result, err = tx.Table("NormalStruct").InsertOne(&ns)
@@ -48,10 +50,12 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	// Abort Transaction
 	{
 		uid, _ = uuid.FromString(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
+		now := time.Now()
 
 		ns = normalStruct{}
 		ns.ID = uid
-		ns.Timestamp = time.Now()
+		ns.DateTime = now
+		ns.Timestamp = now
 		tx, err = db.BeginTransaction()
 		require.NoError(t, err)
 		result, err = tx.Table("NormalStruct").InsertOne(&ns)
@@ -76,10 +80,12 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	{
 		err = db.RunInTransaction(func(ctx sqlike.SessionContext) error {
 			uid, _ = uuid.FromString(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
+			now := time.Now()
 
 			ns = normalStruct{}
 			ns.ID = uid
-			ns.Timestamp = time.Now()
+			ns.DateTime = now
+			ns.Timestamp = now
 			result, err := ctx.Table("NormalStruct").InsertOne(&ns)
 			if err != nil {
 				return err
@@ -111,10 +117,12 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	// Timeout transaction
 	{
 		uid, _ = uuid.FromString(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
+		now := time.Now()
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			ns = normalStruct{}
 			ns.ID = uid
-			ns.Timestamp = time.Now()
+			ns.DateTime = now
+			ns.Timestamp = now
 			_, err := sessCtx.Table("NormalStruct").
 				InsertOne(&ns, options.InsertOne().SetDebug(true))
 			if err != nil {

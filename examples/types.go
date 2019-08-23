@@ -51,6 +51,7 @@ type normalStruct struct {
 	JSONRaw json.RawMessage
 	Map     map[string]int
 	// GeoPoint  types.GeoPoint
+	DateTime  time.Time `sqlike:",size:0"`
 	Timestamp time.Time
 	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
@@ -127,6 +128,7 @@ type ptrStruct struct {
 }
 
 func newNormalStruct() normalStruct {
+	now := time.Now()
 	ns := normalStruct{}
 	// ns.Key = types.IDKey("NormalStruct", id, nil)
 	ns.ID = uuid.NewV1()
@@ -171,7 +173,8 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.Struct.VirtualStr = gofakeit.Sentence(10)
 	ns.Struct.StoredStr = `hello world!`
 	ns.Struct.NestedBool = true
-	ns.Timestamp = time.Now()
+	ns.DateTime = now
+	ns.Timestamp = now
 	ns.Enum = Enum(gofakeit.RandString([]string{
 		"SUCCESS",
 		"FAILED",

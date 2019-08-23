@@ -8,8 +8,8 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/schema"
 	sqltype "github.com/si3nloong/sqlike/sql/types"
-	"github.com/si3nloong/sqlike/sqlike/columns"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
 )
 
@@ -69,10 +69,17 @@ func (s mySQLSchema) DateDataType(sf *reflext.StructField) (col columns.Column) 
 }
 
 func (s mySQLSchema) TimeDataType(sf *reflext.StructField) (col columns.Column) {
-	dflt := `CURRENT_TIMESTAMP(6)`
+	size := "6"
+	if v, exists := sf.Tag.LookUp("size"); exists {
+		if _, err := strconv.Atoi(v); err == nil {
+			size = v
+		}
+	}
+
+	dflt := "CURRENT_TIMESTAMP(" + size + ")"
 	col.Name = sf.Path
-	col.DataType = `DATETIME(6)`
-	col.Type = `DATETIME(6)`
+	col.DataType = "DATETIME"
+	col.Type = "DATETIME(" + size + ")"
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
 	return
@@ -80,8 +87,8 @@ func (s mySQLSchema) TimeDataType(sf *reflext.StructField) (col columns.Column) 
 
 func (s mySQLSchema) JSONDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
-	col.DataType = `JSON`
-	col.Type = `JSON`
+	col.DataType = "JSON"
+	col.Type = "JSON"
 	col.Nullable = sf.IsNullable
 	return
 }
@@ -90,7 +97,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 
-	charset := `utf8mb4`
+	charset := "utf8mb4"
 	collation := charsetMap[charset]
 	dflt := ""
 	if cs, isOk := sf.Tag.LookUp("charset"); isOk {
@@ -129,12 +136,12 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		if _, err := strconv.Atoi(char); err != nil {
 			panic("invalid value for char data type")
 		}
-		col.DataType = `CHAR(` + char + `)`
-		col.Type = `CHAR(` + char + `)`
+		col.DataType = "CHAR(" + char + ")"
+		col.Type = "CHAR(" + char + ")"
 		return
 	} else if _, isOk := sf.Tag.LookUp("longtext"); isOk {
-		col.DataType = `TEXT`
-		col.Type = `TEXT`
+		col.DataType = "TEXT"
+		col.Type = "TEXT"
 		col.DefaultValue = nil
 		col.CharSet = nil
 		col.Collation = nil
@@ -147,16 +154,16 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		charLen = 191
 	}
 
-	col.DataType = `VARCHAR`
-	col.Type = `VARCHAR(` + strconv.Itoa(charLen) + `)`
+	col.DataType = "VARCHAR"
+	col.Type = "VARCHAR(" + strconv.Itoa(charLen) + ")"
 	return
 }
 
 func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col columns.Column) {
-	dflt := `0`
+	dflt := "0"
 	col.Name = sf.Path
-	col.DataType = `TINYINT`
-	col.Type = `TINYINT(1)`
+	col.DataType = "TINYINT"
+	col.Type = "TINYINT(1)"
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
 	return

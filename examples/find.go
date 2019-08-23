@@ -57,6 +57,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.Map["one"] = 1
 		ns.Map["three"] = 3
 		ns.Map["eleven"] = 11
+		ns.DateTime = ts
 		ns.Timestamp = ts
 
 		_, err = table.InsertOne(&ns)
