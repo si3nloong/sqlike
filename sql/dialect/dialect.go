@@ -17,6 +17,8 @@ type Dialect interface {
 	Connect(opt *options.ConnectOptions) (connStr string)
 	GetVersion() (stmt *sqlstmt.Statement)
 	GetDatabases() (stmt *sqlstmt.Statement)
+	CreateDatabase(db string, exists bool) (stmt *sqlstmt.Statement)
+	DropDatabase(db string, exists bool) (stmt *sqlstmt.Statement)
 	Format(v interface{}) (val string)
 	HasTable(db, table string) (stmt *sqlstmt.Statement)
 	RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement)

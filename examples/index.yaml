@@ -1,6 +1,6 @@
 indexes:
 
-- table: A
+- table: NormalStruct
   columns:
   - name: SID
     direction: asc
@@ -9,7 +9,7 @@ indexes:
   - name: Bool
     direction: desc
 
-- table: A
+- table: NormalStruct
   name: test_idx
   columns:
   - name: TinyUint

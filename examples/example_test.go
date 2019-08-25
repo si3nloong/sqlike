@@ -24,8 +24,8 @@ func (l Logger) Debug(stmt *sqlstmt.Statement) {
 func TestExamples(t *testing.T) {
 	client, err := sqlike.Connect("mysql",
 		options.Connect().
-			SetUsername(`root`).
-			SetPassword(`abcd1234`),
+			SetUsername("root").
+			SetPassword("abcd1234"),
 	)
 	require.NoError(t, err)
 
@@ -35,8 +35,19 @@ func TestExamples(t *testing.T) {
 	dbs, err := client.ListDatabases()
 	require.True(t, len(dbs) > 0)
 	require.NoError(t, err)
-	// client.SetLogger()
-	log.Println(dbs)
+
+	{
+		MigrateExamples(t, db)
+		IndexExamples(t, db)
+		InsertExamples(t, db)
+		FindExamples(t, db)
+		TransactionExamples(t, db)
+		PaginationExamples(t, client)
+		UpdateExamples(t, db)
+		DeleteExamples(t, db)
+		ExtraExamples(t, db)
+		JSONExamples(t, db)
+	}
 
 	// Errors
 	{
@@ -44,16 +55,5 @@ func TestExamples(t *testing.T) {
 		InsertErrorExamples(t, db)
 		FindErrorExamples(t, db)
 	}
-
-	MigrateExamples(t, db)
-	IndexExamples(t, db)
-	InsertExamples(t, db)
-	FindExamples(t, db)
-	TransactionExamples(t, db)
-	PaginationExamples(t, client)
-	UpdateExamples(t, db)
-	DeleteExamples(t, db)
-	ExtraExamples(t, db)
-	JSONExamples(t, db)
 
 }

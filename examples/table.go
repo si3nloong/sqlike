@@ -14,7 +14,22 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		err error
 	)
 
+	{
+		err = db.DropIfExists()
+		require.NoError(t, err)
+
+		err = db.Drop()
+		require.Error(t, err)
+
+		err = db.CreateIfNotExists()
+		require.NoError(t, err)
+
+		err = db.Create()
+		require.Error(t, err)
+	}
+
 	table := db.Table("normal_struct")
+
 	{
 		err = db.Table("NormalStruct").DropIfExits()
 		require.NoError(t, err)

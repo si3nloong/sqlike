@@ -2,6 +2,7 @@
 
 - [ ] Prevent toxic query.
 - [ ] Change `DataType` api.
+- [x] `CreateDatabase` api. 
 - [x] Escape wildcard `%` on `LIKE` condition. 
 - [x] Escape wildcard `_` on `LIKE` condition. 
 - [x] Add `Database` name as `table` prefix.
@@ -60,6 +61,7 @@
 - [x] Replace into (replace with `Copy` API)
 - [x] Support option tag `unique_index` and `index` on create table
 - [ ] Support option tag `unique_index` and `index` on alter table
+- [ ] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [ ] Write testcases (50%)
 - [ ] Support `Postgres`
