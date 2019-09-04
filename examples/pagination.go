@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type Status string
+type status string
 
 const (
-	StatusActive  = "ACTIVE"
-	StatusSuspend = "SUSPEND"
+	statusActive  status = "ACTIVE"
+	statusSuspend status = "SUSPEND"
 )
 
 // User :
@@ -24,7 +24,7 @@ type User struct {
 	ID        int64
 	Name      string
 	Age       int
-	Status    Status `sqlike:",enum:ACTIVE|SUSPEND"`
+	Status    status `sqlike:",enum:ACTIVE|SUSPEND"`
 	CreatedAt time.Time
 }
 
@@ -61,15 +61,15 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	}
 
 	data := []User{
-		User{10, "User A", 18, StatusActive, time.Now().UTC()},
-		User{88, "User B", 12, StatusActive, time.Now().UTC()},
-		User{8, "User F", 20, StatusActive, time.Now().UTC()},
-		User{27, "User C", 16, StatusSuspend, time.Now().UTC()},
-		User{20, "User C", 16, StatusActive, time.Now().UTC()},
-		User{100, "User G", 10, StatusSuspend, time.Now().UTC()},
-		User{21, "User C", 16, StatusActive, time.Now().UTC()},
-		User{50, "User D", 23, StatusActive, time.Now().UTC()},
-		User{5, "User E", 30, StatusSuspend, time.Now().UTC()},
+		User{10, "User A", 18, statusActive, time.Now().UTC()},
+		User{88, "User B", 12, statusActive, time.Now().UTC()},
+		User{8, "User F", 20, statusActive, time.Now().UTC()},
+		User{27, "User C", 16, statusSuspend, time.Now().UTC()},
+		User{20, "User C", 16, statusActive, time.Now().UTC()},
+		User{100, "User G", 10, statusSuspend, time.Now().UTC()},
+		User{21, "User C", 16, statusActive, time.Now().UTC()},
+		User{50, "User D", 23, statusActive, time.Now().UTC()},
+		User{5, "User E", 30, statusSuspend, time.Now().UTC()},
 	}
 
 	{
