@@ -8,7 +8,7 @@ import (
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 // ErrNoRows :
@@ -77,7 +77,7 @@ func (r *Result) Decode(dst interface{}) error {
 	v = reflext.Indirect(v)
 	t = reflext.Deref(t)
 	if !reflext.IsKind(t, reflect.Struct) {
-		return xerrors.New("it must be struct to decode")
+		return errors.New("it must be struct to decode")
 	}
 
 	mapper := core.DefaultMapper
@@ -121,7 +121,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Slice) {
-		return xerrors.New("it must be a slice of entity")
+		return errors.New("it must be a slice of entity")
 	}
 
 	slice := reflect.MakeSlice(t, 0, 0)
@@ -166,7 +166,7 @@ func (r *Result) All(results interface{}) error {
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Slice) {
-		return xerrors.New("it must be a slice of entity")
+		return errors.New("it must be a slice of entity")
 	}
 
 	length := len(r.columns)

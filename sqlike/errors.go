@@ -1,14 +1,14 @@
 package sqlike
 
-import "golang.org/x/xerrors"
+import "errors"
 
 // errors :
 var (
-	ErrNoValueUpdate = xerrors.New("sqlike: no value to update")
+	ErrNoValueUpdate = errors.New("sqlike: no value to update")
 	// ErrInvalidInput :
-	ErrInvalidInput = xerrors.New("sqlike: invalid input <nil>")
+	ErrInvalidInput = errors.New("sqlike: invalid input <nil>")
 	// ErrUnaddressableEntity :
-	ErrUnaddressableEntity = xerrors.New("sqlike: unaddressable entity")
+	ErrUnaddressableEntity = errors.New("sqlike: unaddressable entity")
 	// ErrNilEntity :
-	ErrNilEntity = xerrors.New("sqlike: entity is <nil>")
+	ErrNilEntity = errors.New("sqlike: entity is <nil>")
 )

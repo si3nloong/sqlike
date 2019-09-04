@@ -5,16 +5,30 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
 
 func TestKey(t *testing.T) {
-	t.Run("MarshalJSONB", func(it *testing.T) {
-		var (
-			k   *Key
-			b   []byte
-			err error
-		)
+	var (
+		k   *Key
+		a   bsontype.Type
+		b   []byte
+		err error
+	)
 
+	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
+		pk := IDKey("Parent", 1288888, nil)
+		require.Equal(it, "1288888", pk.ID())
+
+		a, b, err = pk.MarshalBSONValue()
+		require.NoError(it, err)
+		require.Equal(it, bsontype.String, a)
+
+		err = pk.UnmarshalBSONValue(a, b)
+		require.NoError(it, err)
+	})
+
+	t.Run("MarshalJSONB & UnmarshalJSONB", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())
 

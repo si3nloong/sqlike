@@ -15,17 +15,16 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"golang.org/x/xerrors"
 )
 
 // ErrNoRecordAffected :
-var ErrNoRecordAffected = xerrors.New("no record affected")
+var ErrNoRecordAffected = errors.New("no record affected")
 
 // ErrExpectedStruct :
-var ErrExpectedStruct = xerrors.New("expected struct as a source")
+var ErrExpectedStruct = errors.New("expected struct as a source")
 
 // ErrEmptyFields :
-var ErrEmptyFields = xerrors.New("empty fields")
+var ErrEmptyFields = errors.New("empty fields")
 
 // INSERT INTO Table (X1, X2) VALUES (?,?)
 // - required >> table: string, columns: []string, arguments :[][]interface{}

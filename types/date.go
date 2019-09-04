@@ -12,13 +12,12 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
-	"golang.org/x/xerrors"
 )
 
 const dateRegex = `\d{4}\-\d{2}\-\d{2}`
 
 // ErrDateFormat :
-var ErrDateFormat = xerrors.New(`invalid date format, it should be "YYYY-MM-DD"`)
+var ErrDateFormat = errors.New(`invalid date format, it should be "YYYY-MM-DD"`)
 
 // Date :
 type Date struct {
@@ -66,7 +65,7 @@ func (d *Date) Scan(it interface{}) error {
 		return nil
 
 	default:
-		return xerrors.New("invalid date format")
+		return errors.New("invalid date format")
 	}
 }
 

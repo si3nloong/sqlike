@@ -29,6 +29,8 @@ func TestExamples(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	mg := connectMongoDB()
+
 	db := client.SetLogger(Logger{}).
 		Database("sqlike")
 
@@ -45,7 +47,7 @@ func TestExamples(t *testing.T) {
 		PaginationExamples(t, client)
 		UpdateExamples(t, db)
 		DeleteExamples(t, db)
-		ExtraExamples(t, db)
+		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
 	}
 

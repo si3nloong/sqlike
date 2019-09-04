@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 func (r *Reader) skip() (err error) {
@@ -29,7 +29,7 @@ func (r *Reader) skip() (err error) {
 func (r *Reader) skipBytes(b []byte) error {
 	offset := r.pos + len(b)
 	if offset > r.len {
-		return xerrors.New("unexpected json length")
+		return errors.New("unexpected json length")
 	}
 	cutset := r.b[r.pos:offset]
 	if !bytes.Equal(b, cutset) {
