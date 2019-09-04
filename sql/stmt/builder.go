@@ -1,12 +1,12 @@
 package sqlstmt
 
 import (
+	"fmt"
 	"sync"
 
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"golang.org/x/xerrors"
 )
 
 // BuildStatementFunc :
@@ -48,5 +48,5 @@ func (sb *StatementBuilder) BuildStatement(stmt *Statement, it interface{}) erro
 		return x(stmt, it)
 	}
 
-	return xerrors.Errorf("invalid data type support %v", v.Type())
+	return fmt.Errorf("invalid data type support %v", v.Type())
 }

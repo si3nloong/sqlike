@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
@@ -13,7 +14,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"golang.org/x/xerrors"
 )
 
 // DestroyOne :
@@ -47,7 +47,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 	cdc := mapper.CodecByType(t)
 	f, exists := cdc.Names[pk]
 	if !exists {
-		return xerrors.Errorf("missing primary key field %q", pk)
+		return fmt.Errorf("missing primary key field %q", pk)
 	}
 
 	x := new(actions.DeleteActions)
@@ -128,7 +128,7 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 		act.Table = tbName
 	}
 	if len(act.Conditions) < 1 {
-		return 0, xerrors.New("sqlike: no condition is not allow for delete")
+		return 0, errors.New("sqlike: no condition is not allow for delete")
 	}
 	stmt, err := dialect.Delete(act)
 	if err != nil {

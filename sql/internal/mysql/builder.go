@@ -12,7 +12,6 @@ import (
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
-	"golang.org/x/xerrors"
 )
 
 var operatorMap = map[primitive.Operator]string{
@@ -218,7 +217,7 @@ func (b *mySQLBuilder) BuildNil(stmt *sqlstmt.Statement, it interface{}) error {
 }
 
 func unmatchedDataType(callback string) error {
-	return xerrors.New("invalid data type")
+	return errors.New("invalid data type")
 }
 
 func (b *mySQLBuilder) BuildRaw(stmt *sqlstmt.Statement, it interface{}) error {
@@ -393,7 +392,7 @@ func (b *mySQLBuilder) encodeValue(it interface{}) (interface{}, error) {
 func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x, isOk := it.(primitive.R)
 	if !isOk {
-		return xerrors.New("expected data type primitive.GV")
+		return errors.New("expected data type primitive.GV")
 	}
 
 	v := reflext.ValueOf(x.From)
@@ -426,12 +425,12 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.FindActions)
 	if !isOk {
-		return xerrors.New("data type not match")
+		return errors.New("data type not match")
 	}
 
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
-		return xerrors.New("empty table name")
+		return errors.New("empty table name")
 	}
 	stmt.WriteString(`SELECT `)
 	if x.DistinctOn {
@@ -458,7 +457,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.UpdateActions)
 	if !isOk {
-		return xerrors.New("data type not match")
+		return errors.New("data type not match")
 	}
 	stmt.WriteString(`UPDATE ` + b.TableName(x.Database, x.Table) + ` `)
 	if err := b.appendSet(stmt, x.Values); err != nil {
@@ -477,7 +476,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{
 func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, isOk := it.(*actions.DeleteActions)
 	if !isOk {
-		return xerrors.New("data type not match")
+		return errors.New("data type not match")
 	}
 	stmt.WriteString(`DELETE FROM ` + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {

@@ -9,7 +9,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/types"
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 // Index :
@@ -39,7 +39,7 @@ func (idv *IndexView) CreateOne(idx indexes.Index) error {
 func (idv *IndexView) CreateMany(idxs []indexes.Index) error {
 	for _, idx := range idxs {
 		if len(idx.Columns) < 1 {
-			return xerrors.New("sqlike: empty columns to create index")
+			return errors.New("sqlike: empty columns to create index")
 		}
 	}
 	_, err := sqldriver.Execute(

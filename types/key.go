@@ -12,11 +12,14 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+
 	uuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
-	"golang.org/x/xerrors"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 )
 
 // Writer :
@@ -122,13 +125,13 @@ func (k *Key) unmarshal(str string) error {
 		}
 		paths = strings.Split(path, ",")
 		if len(paths) != 2 {
-			return xerrors.New("invalid key path")
+			return errors.New("invalid key path")
 		}
 		k.Kind = paths[0]
 		value = paths[1]
 		length = len(value)
 		if length < 1 {
-			return xerrors.New("invalid key string")
+			return errors.New("invalid key string")
 		}
 		if length > 2 && value[0] == '\'' && value[length-1] == '\'' {
 			value = value[1 : length-1]
@@ -266,7 +269,7 @@ func (k *Key) UnmarshalBinary(b []byte) error {
 func (k *Key) UnmarshalJSONB(b []byte) error {
 	length := len(b)
 	if length < 2 {
-		return xerrors.New("types.UnmarshalJSONB: invalid key json value")
+		return errors.New("types.UnmarshalJSONB: invalid key json value")
 	}
 	str := string(b)
 	if str == "null" {
@@ -275,6 +278,23 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 	}
 	str = string(b[1 : length-1])
 	return k.unmarshal(str)
+}
+
+// MarshalBSONValue :
+func (k *Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
+}
+
+// UnmarshalBSONValue :
+func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
+	if k == nil {
+		return errors.New("invalid key value <nil>")
+	}
+	v, _, isOk := bsoncore.ReadString(b)
+	if !isOk {
+		return errors.New("invalid bson string value")
+	}
+	return k.unmarshal(v)
 }
 
 type gobKey struct {

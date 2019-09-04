@@ -12,7 +12,6 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
-	"golang.org/x/xerrors"
 )
 
 // Decoder :
@@ -149,7 +148,7 @@ func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
 		return err
 	}
 	if v.OverflowInt(x) {
-		return xerrors.New("integer overflow")
+		return errors.New("integer overflow")
 	}
 	v.SetInt(x)
 	return nil
@@ -166,7 +165,7 @@ func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
 		return err
 	}
 	if v.OverflowUint(x) {
-		return xerrors.New("unsigned integer overflow")
+		return errors.New("unsigned integer overflow")
 	}
 	v.SetUint(x)
 	return nil
@@ -183,7 +182,7 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 		return err
 	}
 	if v.OverflowFloat(x) {
-		return xerrors.New("float overflow")
+		return errors.New("float overflow")
 	}
 	v.SetFloat(x)
 	return nil

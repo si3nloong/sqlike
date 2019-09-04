@@ -2,6 +2,7 @@ package schema
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"sync"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	sqltype "github.com/si3nloong/sqlike/sql/types"
 	"github.com/si3nloong/sqlike/sqlike/columns"
-	"golang.org/x/xerrors"
 )
 
 // ColumnTyper :
@@ -75,7 +75,7 @@ func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, err
 		return sb.builders[x](sf), nil
 	}
 
-	return columns.Column{}, xerrors.Errorf("invalid data type support %v", t)
+	return columns.Column{}, fmt.Errorf("invalid data type support %v", t)
 }
 
 // SetDefaultTypes :
