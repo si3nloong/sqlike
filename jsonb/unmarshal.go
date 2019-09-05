@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 // Unmarshaller :
@@ -17,17 +17,17 @@ type Unmarshaller interface {
 func Unmarshal(data []byte, dst interface{}) error {
 	v := reflext.ValueOf(dst)
 	if !v.IsValid() {
-		return xerrors.New("invalid value for jsonb.Unmarshal")
+		return errors.New("invalid value for jsonb.Unmarshal")
 	}
 
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
-		return xerrors.New("unaddressable destination")
+		return errors.New("unaddressable destination")
 	}
 
 	v = v.Elem()
 	if !v.CanSet() {
-		return xerrors.New("unaddressable destination")
+		return errors.New("unaddressable destination")
 	}
 
 	t = t.Elem()

@@ -11,7 +11,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 We don't really care about legacy support, we want latest feature that mysql and golang offer us :
 
 1. **mysql 5.7** and above
-2. **Golang 1.2** and above
+2. **Golang 1.3** and above
 
 ### What we provide apart from native package (database/sql)?
 

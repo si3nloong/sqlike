@@ -127,6 +127,11 @@ type ptrStruct struct {
 	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 
+type mongoStruct struct {
+	Key  *types.Key
+	Name string
+}
+
 func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}
@@ -142,8 +147,8 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.CustomStrType = LongStr(gofakeit.RandString([]string{
 		`覚えられなくて使うたびにググってしまうので、以後楽をするためにスニペットを記す。`,
 		`このパッケージができた背景は`,
-		`この記事ではxerrorsパッケージの仕様を紹介します。`,
-		`xerrors.Newで作成したエラーは、%+v のときにファイル名やメソッド名を表示します。`,
+		`この記事ではerrorsパッケージの仕様を紹介します。`,
+		`errors.Newで作成したエラーは、%+v のときにファイル名やメソッド名を表示します。`,
 	}))
 	ns.LongStr = gofakeit.Sentence(50)
 	ns.Bool = true

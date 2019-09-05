@@ -10,7 +10,7 @@ import (
 
 	"github.com/si3nloong/sqlike/jsonb"
 
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 // DefaultDecoders :
@@ -188,7 +188,7 @@ func (dec DefaultDecoders) DecodeInt(it interface{}, v reflect.Value) error {
 	case nil:
 	}
 	if v.OverflowInt(x) {
-		return xerrors.New("integer overflow")
+		return errors.New("integer overflow")
 	}
 	v.SetInt(x)
 	return nil
@@ -218,7 +218,7 @@ func (dec DefaultDecoders) DecodeUint(it interface{}, v reflect.Value) error {
 	case nil:
 	}
 	if v.OverflowUint(x) {
-		return xerrors.New("unsigned integer overflow")
+		return errors.New("unsigned integer overflow")
 	}
 	v.SetUint(x)
 	return nil
@@ -251,7 +251,7 @@ func (dec DefaultDecoders) DecodeFloat(it interface{}, v reflect.Value) error {
 
 	}
 	if v.OverflowFloat(x) {
-		return xerrors.New("float overflow")
+		return errors.New("float overflow")
 	}
 	v.SetFloat(x)
 	return nil

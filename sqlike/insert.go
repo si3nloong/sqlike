@@ -12,7 +12,7 @@ import (
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"golang.org/x/xerrors"
+	"errors"
 )
 
 // InsertOne :
@@ -104,7 +104,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Array) && !reflext.IsKind(t, reflect.Slice) {
-		return nil, xerrors.New("sqlike.Insert only support array or slice of entity")
+		return nil, errors.New("sqlike.Insert only support array or slice of entity")
 	}
 
 	if v.Len() < 1 {

@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/core"
@@ -12,7 +13,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"golang.org/x/xerrors"
 )
 
 // ModifyOne :
@@ -48,7 +48,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 	mapper := core.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	if _, exists := cdc.Names[pk]; !exists {
-		return xerrors.Errorf("sqlike: missing primary key field %q", pk)
+		return fmt.Errorf("sqlike: missing primary key field %q", pk)
 	}
 
 	opt := new(options.ModifyOneOptions)
@@ -86,7 +86,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		return err
 	}
 	// if affected, _ := result.RowsAffected(); affected <= 0 {
-	// 	return xerrors.New("unable to modify entity")
+	// 	return errors.New("unable to modify entity")
 	// }
 	return err
 }
