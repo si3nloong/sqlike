@@ -12,6 +12,7 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/language"
 )
 
 // Decoder :
@@ -22,6 +23,7 @@ type Decoder struct {
 // SetDecoders :
 func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
+	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
 	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetTypeDecoder(reflect.TypeOf(json.Number("")), dec.DecodeJSONNumber)
@@ -67,6 +69,20 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 		return err
 	}
 	v.SetBytes(b)
+	return nil
+}
+
+// DecodeLanguage :
+func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
+	x, err := r.ReadString()
+	if err != nil {
+		return err
+	}
+	l, err := language.Parse(x)
+	if err != nil {
+		return err
+	}
+	v.Set(reflect.ValueOf(l))
 	return nil
 }
 
