@@ -12,6 +12,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/language"
 )
 
 // FindExamples :
@@ -32,6 +33,15 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	uid, _ := uuid.FromString("e7977246-910a-11e9-844d-6c96cfd87a51")
 	ts, _ := time.Parse("2006-01-02 15:04:05", "2008-01-28 10:25:33")
 	b := []byte(`abcd1234`)
+	lang := language.Japanese
+	langs := []language.Tag{
+		language.AmericanEnglish,
+		language.BrazilianPortuguese,
+		language.Malay,
+		language.ModernStandardArabic,
+		language.Korean,
+		language.Japanese,
+	}
 
 	table := db.Table("NormalStruct")
 
@@ -59,6 +69,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.Map["eleven"] = 11
 		ns.DateTime = ts
 		ns.Timestamp = ts
+		ns.Language = lang
+		ns.Languages = langs
 
 		_, err = table.InsertOne(&ns)
 		require.NoError(t, err)
@@ -96,6 +108,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			"three":  3,
 			"eleven": 11,
 		}, ns.Map)
+		require.Equal(t, lang, ns.Language)
+		require.Equal(t, langs, ns.Languages)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 	}
 

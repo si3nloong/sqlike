@@ -10,6 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	sqltype "github.com/si3nloong/sqlike/sql/types"
 	"github.com/si3nloong/sqlike/sqlike/columns"
+	"golang.org/x/text/language"
 )
 
 // ColumnTyper :
@@ -81,6 +82,7 @@ func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, err
 // SetDefaultTypes :
 func (sb *SchemaBuilder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf([]byte{}), sqltype.Byte)
+	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)
 	sb.SetType(reflect.TypeOf(json.RawMessage{}), sqltype.JSON)
 	sb.SetType(reflect.String, sqltype.String)

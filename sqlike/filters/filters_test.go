@@ -1,33 +1,88 @@
-package filters_test
+package filters
 
 import (
 	"log"
-	"regexp"
 	"testing"
+	"time"
+
+	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/stretchr/testify/require"
 )
 
+// Draft
+// == | equal
+// != | not equal
+// !@ |
+
 func TestFilter(t *testing.T) {
-	query := "user.id==133,category==;asdas,asdas"
-	reg := regexp.MustCompile(`(\,|\;)`)
-	log.Println(reg.FindAllString(query, -1))
-	idxs := reg.FindAllStringIndex(query, -1)
-	for i, pos := range idxs {
-		a := 0
-		if i > 0 {
-			a = idxs[i-1][1]
-		}
-		log.Println(i, pos, query[pos[0]:pos[1]], query[a:pos[0]])
+
+	var (
+		query  string
+		params *Params
+		err    error
+	)
+	// query := `$filter=id%3D%3D%3D133|category%3D%3D|c1=sss|d1=&$select=id,name,addressName&$limit=10&$sort=id,b1,c1,-d4`
+
+	p := MustNewParser("fql", struct {
+		ID          uint   `fql:"id,select,filter,sort,column:ID"`
+		Name        string `fql:",select,filter,sort,column:FullName"`
+		AddressName string `fql:",filter"`
+		Skip        uint   `fql:"-"`
+		Active      bool
+		CreatedAt   time.Time `fql:"created,select,filter,sort"`
+		// Nested      struct {
+		// 	ID string `fql:"id"`
+		// }
+	}{})
+
+	// params, _ := p.ParseQuery(query)
+
+	// Selects (valid)
+	{
+		query = `$select=id,name,created`
+		params, err = p.ParseQuery(query)
+		require.NotNil(t, params)
+		// require.NoError(t, err)
+		log.Println(err)
+		require.ElementsMatch(t, []interface{}{
+			expr.Column("ID"),
+			expr.Column("FullName"),
+			expr.Column("createdAt"),
+		}, params.Selects)
 	}
-	log.Println(reg.FindAllStringSubmatch(query, -1))
-	paths := reg.Split(query, -1)
-	log.Println(paths, len(paths))
-	for i, p := range paths {
-		log.Println(i+1, ":", p)
+
+	// Selects (invalid)
+	{
+		// query = `$select=id,skip,createdAt`
+		// params, err = p.ParseQuery(query)
+		// log.Println("Error :", err)
+		// require.Error(t, err)
 	}
-	// query = `user.id%3D%3D133,;`
-	// // query = `admin.id==133`
-	// url.Parse(``)
-	// v, err := url.ParseQuery(query)
-	// log.Println(v, err)
-	// url.ParseRequestURI(``)
+
+	{
+
+	}
+
+	// Sorts (valid)
+	{
+		query = `$sort=id,name,-created`
+		params, err = p.ParseQuery(query)
+		require.NotNil(t, params)
+		// require.NoError(t, err)
+		require.ElementsMatch(t, []interface{}{
+			expr.Asc("ID"),
+			expr.Asc("FullName"),
+			expr.Desc("createdAt"),
+		}, params.Sorts)
+	}
+
+	// Sorts (invalid)
+	{
+		query = `$sort=a1,b2,-skip`
+		params, err = p.ParseQuery(query)
+		log.Println(params, err)
+		require.Error(t, err)
+		// require.NotNil(t, params)
+	}
+
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/jsonb"
+	"golang.org/x/text/language"
 
 	"errors"
 )
@@ -21,6 +22,7 @@ type DefaultDecoders struct {
 // SetDecoders :
 func (dec DefaultDecoders) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
+	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
 	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetKindDecoder(reflect.String, dec.DecodeString)
@@ -66,6 +68,29 @@ func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 		x = make([]byte, 0, 0)
 	}
 	v.SetBytes(x)
+	return nil
+}
+
+// DecodeLanguage :
+func (dec DefaultDecoders) DecodeLanguage(it interface{}, v reflect.Value) error {
+	var (
+		x   language.Tag
+		err error
+	)
+	switch vi := it.(type) {
+	case string:
+		x, err = language.Parse(vi)
+		if err != nil {
+			return err
+		}
+	case []byte:
+		x, err = language.Parse(string(vi))
+		if err != nil {
+			return err
+		}
+	case nil:
+	}
+	v.Set(reflect.ValueOf(x))
 	return nil
 }
 
@@ -296,6 +321,7 @@ func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
 	return jsonb.UnmarshalValue(b, v)
 }
 
+// DecodeMap :
 func (dec DefaultDecoders) DecodeMap(it interface{}, v reflect.Value) error {
 	var b []byte
 	switch vi := it.(type) {

@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// FormatFunc :
+type FormatFunc func(string) string
+
 // StructTag :
 type StructTag struct {
 	name string
@@ -100,7 +103,7 @@ type typeQueue struct {
 	pp string // parent path
 }
 
-func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
+func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFunc) *Struct {
 	fields := make([]*StructField, 0)
 
 	root := &StructField{}
@@ -137,6 +140,10 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 
 			if len(q.sf.Index) > 0 {
 				sf.Parent = q.sf
+			}
+
+			if fmtFunc != nil {
+				sf.Name = fmtFunc(sf.Name)
 			}
 
 			if sf.Path == "" {

@@ -28,6 +28,7 @@ type User struct {
 	CreatedAt time.Time
 }
 
+// Users :
 type Users []User
 
 // Len is part of sort.Interface.

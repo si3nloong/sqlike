@@ -22,6 +22,7 @@ We don't really care about legacy support, we want latest feature that mysql and
 5. Extra type such as `Date`, `Key`
 6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne` and `Paginate` apis
 7. Prevent toxic query with `Strict Mode`
+8. Support `language.Tag`
 
 ### Missing DOC?
 You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis

@@ -12,6 +12,7 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/language"
 )
 
 // Encoder :
@@ -22,6 +23,7 @@ type Encoder struct {
 // SetEncoders :
 func (enc Encoder) SetEncoders(rg *Registry) {
 	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
+	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeLanguage)
 	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
 	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
 	rg.SetKindEncoder(reflect.String, enc.EncodeString)
@@ -55,6 +57,15 @@ func (enc Encoder) EncodeByte(w *Writer, v reflect.Value) error {
 	}
 	w.WriteRune('"')
 	w.WriteString(base64.StdEncoding.EncodeToString(v.Bytes()))
+	w.WriteRune('"')
+	return nil
+}
+
+// EncodeLanguage :
+func (enc Encoder) EncodeLanguage(w *Writer, v reflect.Value) error {
+	x := v.Interface().(language.Tag)
+	w.WriteRune('"')
+	w.WriteString(x.String())
 	w.WriteRune('"')
 	return nil
 }

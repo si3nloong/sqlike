@@ -63,6 +63,7 @@
 - [x] Support option tag `unique_index` and `index` on create table
 - [ ] Support option tag `unique_index` and `index` on alter table
 - [ ] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
+- [ ] Extra func before value `driver.Valuer`
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [ ] Write testcases (50%)
 - [ ] Support `map` key implement `fmt.Stringer`

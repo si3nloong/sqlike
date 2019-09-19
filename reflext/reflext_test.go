@@ -107,9 +107,12 @@ func TestCodec(t *testing.T) {
 		embeddedStruct
 	}
 
-	codec := getCodec(reflect.TypeOf(i), "sqlike", func(sf *StructField) bool {
-		return false
-	})
+	codec := getCodec(
+		reflect.TypeOf(i),
+		"sqlike",
+		func(sf *StructField) bool {
+			return false
+		}, nil)
 
 	require.Equal(t, len(codec.Fields), 13)
 	require.Equal(t, len(codec.Properties), 4)
