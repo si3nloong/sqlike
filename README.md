@@ -25,6 +25,7 @@ We don't really care about legacy support, we want latest feature that mysql and
 8. Support `language.Tag`
 
 ### Missing DOC?
+
 You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
 
 ```go
@@ -34,7 +35,7 @@ import (
     "github.com/si3nloong/sqlike/sqlike"
     "github.com/si3nloong/sqlike/sqlike/options"
     "github.com/si3nloong/sqlike/sql/expr"
-    uuid "github.com/satori/go.uuid"
+    uuid "github.com/google/uuid"
 )
 
 // UserStatus :
@@ -160,7 +161,7 @@ func main() {
                 OrderBy(
                     expr.Desc("CreatedAt"),
                 ),
-             options.Paginate().SetDebug(true), 
+             options.Paginate().SetDebug(true),
         )
         if err != nil {
             panic(err)
@@ -182,7 +183,7 @@ func main() {
                 panic(err)
             }
         }
-      
+
     }
 }
 ```
