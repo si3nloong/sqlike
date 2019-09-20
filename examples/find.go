@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -30,7 +30,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	悩んでいるなら、Progateでやってみよう。
 	無料で始められる、初心者向け学習サイト。
 	`
-	uid, _ := uuid.FromString("e7977246-910a-11e9-844d-6c96cfd87a51")
+
+	uid, _ := uuid.Parse("e7977246-910a-11e9-844d-6c96cfd87a51")
 	ts, _ := time.Parse("2006-01-02 15:04:05", "2008-01-28 10:25:33")
 	b := []byte(`abcd1234`)
 	lang := language.Japanese

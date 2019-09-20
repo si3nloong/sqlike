@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -23,7 +23,7 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("NormalStruct")
-	uid, _ := uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
+	uid, _ := uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
 
 	{
 		ns = normalStruct{}

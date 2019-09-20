@@ -8,7 +8,7 @@ import (
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/language"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 )
 
 type indexStruct struct {
@@ -139,7 +139,7 @@ func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}
 	// ns.Key = types.IDKey("NormalStruct", id, nil)
-	ns.ID = uuid.NewV1()
+	ns.ID = uuid.New()
 	ns.Emoji = `😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`
 	ns.Byte = []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCklQio4TeIZo63S0FvNonY2/nA

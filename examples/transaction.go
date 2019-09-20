@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
@@ -28,7 +28,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 
 	// Commit Transaction
 	{
-		uid, _ = uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
+		uid, _ = uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
 		ns = normalStruct{}
@@ -49,7 +49,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 
 	// Abort Transaction
 	{
-		uid, _ = uuid.FromString(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
+		uid, _ = uuid.Parse(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
 		ns = normalStruct{}
@@ -79,7 +79,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	// RunInTransaction
 	{
 		err = db.RunInTransaction(func(ctx sqlike.SessionContext) error {
-			uid, _ = uuid.FromString(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
+			uid, _ = uuid.Parse(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
 			now := time.Now()
 
 			ns = normalStruct{}
@@ -116,7 +116,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 
 	// Timeout transaction
 	{
-		uid, _ = uuid.FromString(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
+		uid, _ = uuid.Parse(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
 		now := time.Now()
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			ns = normalStruct{}

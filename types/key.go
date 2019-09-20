@@ -14,7 +14,7 @@ import (
 
 	"errors"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
@@ -442,7 +442,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 func NewNameKey(kind string, parent *Key) *Key {
 	return &Key{
 		Kind:   kind,
-		NameID: uuid.NewV1().String(),
+		NameID: uuid.New().String(),
 		Parent: parent,
 	}
 }
