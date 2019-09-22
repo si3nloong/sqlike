@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // PaginateStatement :
@@ -15,7 +14,7 @@ type PaginateStatement interface {
 	Where(fields ...interface{}) PaginateStatement
 	Having(fields ...interface{}) PaginateStatement
 	GroupBy(fields ...interface{}) PaginateStatement
-	OrderBy(fields ...primitive.Sort) PaginateStatement
+	OrderBy(fields ...interface{}) PaginateStatement
 	Limit(num uint) PaginateStatement
 	Offset(num uint) PaginateStatement
 }
@@ -66,10 +65,8 @@ func (act *PaginateActions) Having(fields ...interface{}) PaginateStatement {
 }
 
 // OrderBy :
-func (act *PaginateActions) OrderBy(fields ...primitive.Sort) PaginateStatement {
-	for _, f := range fields {
-		act.Sorts = append(act.Sorts, f)
-	}
+func (act *PaginateActions) OrderBy(fields ...interface{}) PaginateStatement {
+	act.Sorts = fields
 	return act
 }
 

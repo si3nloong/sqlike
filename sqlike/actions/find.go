@@ -34,69 +34,69 @@ type FindActions struct {
 }
 
 // Select :
-func (f *FindActions) Select(fields ...interface{}) SelectStatement {
-	f.Projections = fields
-	return f
+func (act *FindActions) Select(fields ...interface{}) SelectStatement {
+	act.Projections = fields
+	return act
 }
 
 // Distinct :
-func (f *FindActions) Distinct() SelectStatement {
-	f.DistinctOn = true
-	return f
+func (act *FindActions) Distinct() SelectStatement {
+	act.DistinctOn = true
+	return act
 }
 
 // From :
-func (f *FindActions) From(values ...string) SelectStatement {
+func (act *FindActions) From(values ...string) SelectStatement {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
 	}
 	if length > 0 {
-		f.Table = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[0])
 	}
 	if length > 1 {
-		f.Database = strings.TrimSpace(values[0])
-		f.Table = strings.TrimSpace(values[1])
+		act.Database = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[1])
 	}
-	return f
+	return act
 }
 
 // Where :
-func (f *FindActions) Where(fields ...interface{}) SelectStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *FindActions) Where(fields ...interface{}) SelectStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Having :
-func (f *FindActions) Having(fields ...interface{}) SelectStatement {
-	f.Havings = expr.And(fields...)
-	return f
+func (act *FindActions) Having(fields ...interface{}) SelectStatement {
+	act.Havings = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *FindActions) OrderBy(fields ...interface{}) SelectStatement {
-	f.Sorts = fields
-	return f
+func (act *FindActions) OrderBy(fields ...interface{}) SelectStatement {
+	act.Sorts = fields
+	return act
 }
 
 // GroupBy :
-func (f *FindActions) GroupBy(fields ...interface{}) SelectStatement {
-	f.GroupBys = fields
-	return f
+func (act *FindActions) GroupBy(fields ...interface{}) SelectStatement {
+	act.GroupBys = fields
+	return act
 }
 
 // Limit :
-func (f *FindActions) Limit(num uint) SelectStatement {
+func (act *FindActions) Limit(num uint) SelectStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }
 
 // Offset :
-func (f *FindActions) Offset(num uint) SelectStatement {
+func (act *FindActions) Offset(num uint) SelectStatement {
 	if num > 0 {
-		f.Skip = num
+		act.Skip = num
 	}
-	return f
+	return act
 }

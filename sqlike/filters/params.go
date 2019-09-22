@@ -7,3 +7,9 @@ type Params struct {
 	Sorts   []interface{}
 	Limit   uint
 }
+
+// FindOne :
+// func (p *Params) FindOne() *actions.FindOneActions {
+// 	act := &actions.FindOneActions{}
+// 	return act
+// }

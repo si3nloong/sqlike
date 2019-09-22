@@ -18,19 +18,19 @@ type UpdateOneActions struct {
 }
 
 // Where :
-func (f *UpdateOneActions) Where(fields ...interface{}) UpdateOneStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *UpdateOneActions) Where(fields ...interface{}) UpdateOneStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Set :
-func (f *UpdateOneActions) Set(values ...primitive.KV) UpdateOneStatement {
-	f.Values = append(f.Values, values...)
-	return f
+func (act *UpdateOneActions) Set(values ...primitive.KV) UpdateOneStatement {
+	act.Values = append(act.Values, values...)
+	return act
 }
 
 // OrderBy :
-func (f *UpdateOneActions) OrderBy(fields ...interface{}) UpdateOneStatement {
-	f.Sorts = fields
-	return f
+func (act *UpdateOneActions) OrderBy(fields ...interface{}) UpdateOneStatement {
+	act.Sorts = fields
+	return act
 }

@@ -127,6 +127,8 @@ type ptrStruct struct {
 	NullStruct    *struct{}
 	NullJSONRaw   *json.RawMessage
 	NullTimestamp *time.Time
+	NullKey       *types.Key
+	NullDate      *types.Date
 	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 

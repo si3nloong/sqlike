@@ -16,6 +16,11 @@ type StructTag struct {
 	opts map[string]string
 }
 
+// Name :
+func (st StructTag) Name() string {
+	return st.name
+}
+
 // Get :
 func (st StructTag) Get(key string) string {
 	return st.opts[key]
@@ -123,7 +128,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 				continue
 			}
 
-			tag := parseTag(f.Tag, tagName)
+			tag := parseTag(f, tagName, fmtFunc)
 			if tag.name == "-" {
 				continue
 			}
@@ -142,12 +147,8 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 				sf.Parent = q.sf
 			}
 
-			if fmtFunc != nil {
-				sf.Name = fmtFunc(sf.Name)
-			}
-
 			if sf.Path == "" {
-				sf.Path = sf.Name
+				sf.Path = sf.Tag.name
 			}
 
 			if q.pp != "" {
@@ -220,9 +221,16 @@ func appendSlice(s []int, i int) []int {
 	return x
 }
 
-func parseTag(tag reflect.StructTag, tagName string) (st StructTag) {
-	parts := strings.Split(tag.Get(tagName), ",")
-	st.name = strings.TrimSpace(parts[0])
+func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
+	parts := strings.Split(f.Tag.Get(tagName), ",")
+	name := strings.TrimSpace(parts[0])
+	if name == "" {
+		name = f.Name
+		if fmtFunc != nil {
+			name = fmtFunc(name)
+		}
+	}
+	st.name = name
 	st.opts = make(map[string]string)
 	if len(parts) > 1 {
 		for _, opt := range parts[1:] {

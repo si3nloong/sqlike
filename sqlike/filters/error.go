@@ -9,6 +9,7 @@ import (
 // FieldError :
 type FieldError struct {
 	Name   string
+	Value  string
 	Module string
 }
 

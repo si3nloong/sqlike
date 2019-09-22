@@ -21,21 +21,21 @@ type DeleteActions struct {
 }
 
 // Where :
-func (f *DeleteActions) Where(fields ...interface{}) DeleteStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *DeleteActions) Where(fields ...interface{}) DeleteStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *DeleteActions) OrderBy(fields ...interface{}) DeleteStatement {
-	f.Sorts = fields
-	return f
+func (act *DeleteActions) OrderBy(fields ...interface{}) DeleteStatement {
+	act.Sorts = fields
+	return act
 }
 
 // Limit :
-func (f *DeleteActions) Limit(num uint) DeleteStatement {
+func (act *DeleteActions) Limit(num uint) DeleteStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }
