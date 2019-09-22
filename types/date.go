@@ -43,6 +43,9 @@ func (d *Date) IsZero() bool {
 
 // Value :
 func (d *Date) Value() (driver.Value, error) {
+	if d == nil {
+		return nil, nil
+	}
 	return d.String(), nil
 }
 
