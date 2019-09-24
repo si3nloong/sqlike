@@ -23,6 +23,7 @@ We don't really care about legacy support, we want latest feature that mysql and
 6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne` and `Paginate` apis
 7. Prevent toxic query with `Strict Mode`
 8. Support `language.Tag`
+9. Support [Casbin](https://github.com/casbin/casbin)
 
 ### Missing DOC?
 
