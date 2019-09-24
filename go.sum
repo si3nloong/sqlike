@@ -1,7 +1,11 @@
+github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1:1G1pk05UrOh0NlF1oeaaix1x8XzrfjIDK47TY0Zehcw=
+github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/blang/semver v0.0.0-20190414182527-1a9109f8c4a1 h1:J50TZ8HB8AZI2nOQkRhoCprLJnjiWNhxonSWcrscUUw=
 github.com/blang/semver v0.0.0-20190414182527-1a9109f8c4a1/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
 github.com/brianvoe/gofakeit v0.0.0-20190801214117-a7bd2de3740b h1:7V3aJDF0cS4ze7uG8nIjdqf6i4JeAjNijpdlNdv6Ztk=
 github.com/brianvoe/gofakeit v0.0.0-20190801214117-a7bd2de3740b/go.mod h1:8WhrFWLx5svQrZpAq+kYvjRWdRcLj12T1jqy1AHAKZ0=
+github.com/casbin/casbin/v2 v2.0.2 h1:TDRkBDCnsh3yWrdVHnIh8TL0I50u5kW3eRHBrw2ctME=
+github.com/casbin/casbin/v2 v2.0.2/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-sql-driver/mysql v1.4.1-0.20190917093145-6c79a37b2e06 h1:zRBfLcMuItiDGHVrPbeqmKdjJs/SR4LdEeayoyMcPRQ=
