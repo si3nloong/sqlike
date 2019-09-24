@@ -49,6 +49,7 @@ func TestExamples(t *testing.T) {
 		DeleteExamples(t, db)
 		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
+		CasbinExamples(t, db)
 	}
 
 	// Errors
