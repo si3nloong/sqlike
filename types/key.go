@@ -290,8 +290,8 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	if k == nil {
 		return errors.New("types: invalid key value <nil>")
 	}
-	v, _, isOk := bsoncore.ReadString(b)
-	if !isOk {
+	v, _, ok := bsoncore.ReadString(b)
+	if !ok {
 		return errors.New("types: invalid bson string value")
 	}
 	return k.unmarshal(v)

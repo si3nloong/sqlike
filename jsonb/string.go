@@ -210,7 +210,7 @@ func escapeString(w *Writer, str string) {
 	for i := 0; i < length; i++ {
 		b := str[0]
 		str = str[1:]
-		if x, isOk := escapeCharMap[b]; isOk {
+		if x, ok := escapeCharMap[b]; ok {
 			w.Write(x)
 			continue
 		}

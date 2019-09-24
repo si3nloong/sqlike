@@ -108,6 +108,7 @@ type model struct {
 }
 
 type ptrStruct struct {
+	ID            int64   `sqlike:"$Key,auto_increment"`
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool
 	NullByte      *[]byte
@@ -192,4 +193,34 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 		"UNKNOWN",
 	}))
 	return ns
+}
+
+func newPtrStruct() ptrStruct {
+	now := time.Now()
+	str := `hello world`
+	flag := true
+	b := []byte(`hello world`)
+	date, _ := types.ParseDate("2019-01-02")
+	jsonByte := json.RawMessage(`{"message":"hello world"}`)
+	i := 124
+	i32 := int32(-603883)
+	i64 := int64(-3712897389712688393)
+	u8 := uint8(88)
+	u64 := uint64(37128973897126)
+	enum := Success
+
+	ps := ptrStruct{}
+	ps.NullStr = &str
+	ps.NullByte = &b
+	ps.NullBool = &flag
+	ps.NullInt = &i
+	ps.NullInt32 = &i32
+	ps.NullInt64 = &i64
+	ps.NullDate = date
+	ps.NullUint8 = &u8
+	ps.NullUint64 = &u64
+	ps.NullJSONRaw = &jsonByte
+	ps.NullTimestamp = &now
+	ps.NullEnum = &enum
+	return ps
 }

@@ -32,14 +32,19 @@ func (p *Parser) ParseQuery(query string) (*Params, error) {
 	// Select fields
 	{
 		val, ok = values[p.SelectTag]
-		length = len(val)
-		if !ok || length < 1 {
+		if !ok || len(val) < 1 {
 			goto Filter
 		}
 
-		for _, v := range strings.Split(val, ",") {
+		paths = strings.Split(val, ",")
+		for _, v := range paths {
 			v = strings.TrimSpace(v)
 			if len(v) == 0 {
+				continue
+			}
+			v, err = url.QueryUnescape(v)
+			if err != nil {
+				errs = append(errs, &FieldError{})
 				continue
 			}
 			f, ok := p.mapper.Names[v]
@@ -59,19 +64,11 @@ func (p *Parser) ParseQuery(query string) (*Params, error) {
 Filter:
 	{
 		val, ok = values[p.FilterTag]
-		length = len(val)
-		if !ok || length < 1 {
+		if !ok || len(val) < 1 {
 			goto Sort
 		}
 
-		// 	query = strings.TrimSpace(vals[length-1])
-
-		// 	log.Println("Query ::", query)
-		// 	for len(query) > 0 {
-		// 		break
-		// 	}
-
-		// 	// log.Println(values)
+		p.Filter.ParseFilter(param, val)
 	}
 
 	// Sort fields
@@ -87,6 +84,11 @@ Sort:
 		for _, v := range paths {
 			v = strings.TrimSpace(v)
 			if len(v) == 0 {
+				continue
+			}
+			v, err = url.QueryUnescape(v)
+			if err != nil {
+				errs = append(errs, &FieldError{Module: p.SortTag})
 				continue
 			}
 			desc := v[0] == '-'
@@ -114,8 +116,7 @@ Sort:
 Limit:
 	{
 		val, ok = values[p.LimitTag]
-		length = len(val)
-		if !ok || length < 1 {
+		if !ok || len(val) < 1 {
 			goto End
 		}
 
@@ -144,7 +145,10 @@ End:
 	log.Println("Sort :", param.Sorts)
 	log.Println("Limit :", param.Limit)
 
-	return param, errs
+	if len(errs) > 0 {
+		return param, errs
+	}
+	return param, nil
 }
 
 func (p *Parser) columnName(f *reflext.StructField) string {
@@ -181,13 +185,6 @@ func parseRawQuery(m map[string]string, query string) (err error) {
 			}
 			continue
 		}
-		// value, err1 = QueryUnescape(value)
-		// if err1 != nil {
-		// 	if err == nil {
-		// 		err = err1
-		// 	}
-		// 	continue
-		// }
 		m[key] = value
 	}
 	return err

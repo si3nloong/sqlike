@@ -75,6 +75,20 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Pointer insertion
+	{
+		ps := []ptrStruct{
+			newPtrStruct(),
+			newPtrStruct(),
+			newPtrStruct(),
+			newPtrStruct(),
+			newPtrStruct(),
+		}
+		_, err = table2.Insert(&ps,
+			options.Insert().SetDebug(true))
+		require.NoError(t, err)
+	}
+
 	// Error insertion
 	{
 		_, err = table.InsertOne(&struct {

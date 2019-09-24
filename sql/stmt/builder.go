@@ -33,18 +33,18 @@ func (sb *StatementBuilder) SetBuilder(it interface{}, p BuildStatementFunc) {
 }
 
 // LookupBuilder :
-func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFunc, isOk bool) {
-	blr, isOk = sb.builders[t]
+func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFunc, ok bool) {
+	blr, ok = sb.builders[t]
 	return
 }
 
 // BuildStatement :
 func (sb *StatementBuilder) BuildStatement(stmt *Statement, it interface{}) error {
 	v := reflext.ValueOf(it)
-	if x, isOk := sb.builders[v.Type()]; isOk {
+	if x, ok := sb.builders[v.Type()]; ok {
 		return x(stmt, it)
 	}
-	if x, isOk := sb.builders[v.Kind()]; isOk {
+	if x, ok := sb.builders[v.Kind()]; ok {
 		return x(stmt, it)
 	}
 

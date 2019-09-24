@@ -72,7 +72,7 @@ func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
 func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 	var (
 		enc  ValueEncoder
-		isOk bool
+		ok bool
 	)
 
 	it := reflect.TypeOf((*driver.Valuer)(nil)).Elem()
@@ -82,13 +82,13 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 		}, nil
 	}
 
-	enc, isOk = r.typeEncoders[t]
-	if isOk {
+	enc, ok = r.typeEncoders[t]
+	if ok {
 		return enc, nil
 	}
 
-	enc, isOk = r.kindEncoders[t.Kind()]
-	if isOk {
+	enc, ok = r.kindEncoders[t.Kind()]
+	if ok {
 		return enc, nil
 	}
 	return nil, ErrNoEncoder{Type: t}
@@ -98,23 +98,23 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
 		dec  ValueDecoder
-		isOk bool
+		ok bool
 	)
 
 	v := reflext.Zero(t)
-	if _, isOk := v.Addr().Interface().(sql.Scanner); isOk {
+	if _, ok := v.Addr().Interface().(sql.Scanner); ok {
 		return func(it interface{}, v reflect.Value) error {
 			return v.Addr().Interface().(sql.Scanner).Scan(it)
 		}, nil
 	}
 
-	dec, isOk = r.typeDecoders[t]
-	if isOk {
+	dec, ok = r.typeDecoders[t]
+	if ok {
 		return dec, nil
 	}
 
-	dec, isOk = r.kindDecoders[t.Kind()]
-	if isOk {
+	dec, ok = r.kindDecoders[t.Kind()]
+	if ok {
 		return dec, nil
 	}
 	return nil, ErrNoDecoder{Type: t}

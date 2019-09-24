@@ -6,14 +6,20 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/stretchr/testify/require"
 )
 
-// Draft
-// == | equal
-// != | not equal
-// !@ |
+// Draft :
+// ==  | equal	           | %3D%3D
+// !=  | not equal         | %21%3D
+// >   | greater           | %3E
+// >=  | greater and equal | %3E%3D
+// <   | lesser            | %3C
+// <=  | lesser and equal  | %3C%3D
+// =?  | in                | %3D%3F
+// !?  | not in            | %21%3F
+// =@  | like              | %3D%40
+// !@  | not like          | %21%40
 
 type flatStruct struct {
 	ID          uint   `fql:"id,select,filter,sort"`
@@ -25,10 +31,8 @@ type flatStruct struct {
 }
 
 func TestFilter(t *testing.T) {
+	p := MustNewParser(flatStruct{})
 
-	p := MustNewParser("fql", flatStruct{})
-
-	log.Println(maxUint)
 	testSelects(t, p)
 	testFilters(t, p)
 	// testSorts(t, p)
@@ -69,36 +73,33 @@ func testFilters(t *testing.T, p *Parser) {
 		err    error
 	)
 
-	// Sorts (valid)
+	// Filters (valid)
 	{
-		query = p.FilterTag + `=id%3D%3D%3D133|category%3D%3D|c1%3D%3Dtesting`
+		query = p.FilterTag + `=_id%3D%3D%3D133,category%3E%3D10|c1%3D%3Dtesting,d1%3E10833,d2%3D%3FCOMPLETED%2CFAILED`
 		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
-		require.NoError(t, err)
+		// require.NotNil(t, params)
+		// require.NoError(t, err)
+		log.Println(params, err)
 	}
 }
 
 func testSorts(t *testing.T, p *Parser) {
 	var (
-		query  string
-		params *Params
-		err    error
+		query string
+		param *Params
+		err   error
 	)
 
 	// Sorts (valid)
 	{
 		query = p.SortTag + `=id,name,-created`
-		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
+		param, err = p.ParseQuery(query)
+		require.NotNil(t, param)
 		require.ElementsMatch(t, []interface{}{
 			expr.Asc("ID"),
 			expr.Asc("FullName"),
 			expr.Desc("CreatedAt"),
-		}, params.Sorts)
-
-		actions.Paginate().
-			OrderBy(params.Sorts)
-
+		}, param.Sorts)
 	}
 
 	// Sorts (invalid)
@@ -111,41 +112,42 @@ func testSorts(t *testing.T, p *Parser) {
 
 func testLimit(t *testing.T, p *Parser) {
 	var (
-		query  string
-		params *Params
-		err    error
+		query string
+		param *Params
+		err   error
 	)
 
 	// Limit (valid)
 	{
 		query = p.LimitTag + `=100`
-		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
+		log.Println(query)
+		param, err = p.ParseQuery(query)
+		require.NotNil(t, param)
 		require.NoError(t, err)
-		require.Equal(t, uint(100), params.Limit)
+		require.Equal(t, uint(100), param.Limit)
 	}
 
 	// non-numeric value
 	{
 		query = p.LimitTag + `=abc@#$%^&*`
-		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
+		param, err = p.ParseQuery(query)
+		require.NotNil(t, param)
 		require.Error(t, err)
 	}
 
 	// negative value
 	{
 		query = p.LimitTag + `=-101`
-		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
+		param, err = p.ParseQuery(query)
+		require.NotNil(t, param)
 		require.Error(t, err)
 	}
 
 	// overflow value
 	{
 		query = p.LimitTag + `=19812739871273127308128389081208308120`
-		params, err = p.ParseQuery(query)
-		require.NotNil(t, params)
+		param, err = p.ParseQuery(query)
+		require.NotNil(t, param)
 		require.Error(t, err)
 	}
 

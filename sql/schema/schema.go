@@ -68,11 +68,11 @@ func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, err
 	}
 
 	t := reflext.Deref(v.Type())
-	if x, isOk := sb.typeMap[t]; isOk {
+	if x, ok := sb.typeMap[t]; ok {
 		return sb.builders[x](sf), nil
 	}
 
-	if x, isOk := sb.typeMap[t.Kind()]; isOk {
+	if x, ok := sb.typeMap[t.Kind()]; ok {
 		return sb.builders[x](sf), nil
 	}
 

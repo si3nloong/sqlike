@@ -6,7 +6,7 @@ import (
 
 // ValueOf : this is the replacement for reflect.ValueOf()
 func ValueOf(i interface{}) reflect.Value {
-	if x, isOk := i.(reflect.Value); isOk {
+	if x, ok := i.(reflect.Value); ok {
 		return x
 	}
 	return reflect.ValueOf(i)

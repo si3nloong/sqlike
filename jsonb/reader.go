@@ -46,7 +46,7 @@ func (r *Reader) nextToken() byte {
 	var c byte
 	for i := r.pos; i < r.len; i++ {
 		c = r.b[i]
-		if _, isOk := whiteSpaceMap[c]; isOk {
+		if _, ok := whiteSpaceMap[c]; ok {
 			r.b = append(r.b[:i], r.b[i+1:]...)
 			r.len = r.len - 1
 			i--

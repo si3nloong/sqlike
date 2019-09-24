@@ -14,6 +14,11 @@ const (
 	maxUint         = ^uint(0)
 )
 
+// Filtor :
+type Filtor interface {
+	ParseFilter(*Params, string)
+}
+
 // FormatFunc :
 type FormatFunc func(string) string
 
@@ -26,24 +31,23 @@ type Parser struct {
 	Strict        bool
 	mapper        *reflext.Struct
 	v             reflect.Value
+	Filter        Filtor
 	FormatInput   FormatFunc
 	FormatColumn  FormatFunc
-	MultiplexSort bool
 	DefaultLimit  uint
 	MaxLimit      uint
-	// IgnoreError   bool
+	MultiplexSort bool
 }
 
 // NewParser :
-func NewParser(tagName string, it interface{}) (*Parser, error) {
+func NewParser(it interface{}) (*Parser, error) {
 	t := reflext.Deref(reflect.TypeOf(it))
 	if t.Kind() != reflect.Struct {
 		return nil, errors.New("invalid model expected, it must be struct")
 	}
-
 	toLower := strcase.ToLowerCamel
-	mapper := reflext.NewMapperFunc(tagName, nil, toLower)
-	return &Parser{
+	mapper := reflext.NewMapperFunc("fql", nil, toLower)
+	p := &Parser{
 		SelectTag:    "$select",
 		FilterTag:    "$filter",
 		SortTag:      "$sort",
@@ -54,12 +58,14 @@ func NewParser(tagName string, it interface{}) (*Parser, error) {
 		FormatColumn: nil,
 		DefaultLimit: defaultLimit,
 		MaxLimit:     defaultMaxLimit,
-	}, nil
+	}
+	p.Filter = &defaultFilterParser{parser: p}
+	return p, nil
 }
 
 // MustNewParser :
-func MustNewParser(tagName string, it interface{}) *Parser {
-	p, err := NewParser(tagName, it)
+func MustNewParser(it interface{}) *Parser {
+	p, err := NewParser(it)
 	if err != nil {
 		panic(err)
 	}
