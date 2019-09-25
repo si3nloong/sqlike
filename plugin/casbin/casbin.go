@@ -19,27 +19,40 @@ type Adapter struct {
 	filtered bool
 }
 
+// MustNew :
+func MustNew(table *sqlike.Table) persist.FilteredAdapter {
+	a, err := New(table)
+	if err != nil {
+		panic(err)
+	}
+	return a
+}
+
 // New :
 func New(table *sqlike.Table) (persist.FilteredAdapter, error) {
+	if table == nil {
+		return nil, errors.New("invalid <nil> table")
+	}
 	a := &Adapter{
 		table: table,
 	}
 	if err := a.createTable(); err != nil {
 		return nil, err
 	}
-	if err := a.table.Indexes().CreateOne(indexes.Index{
-		Name: "PrimaryKey",
-		Type: indexes.Unique,
-		Columns: []indexes.Column{
-			indexes.Column{Name: "PType"},
-			indexes.Column{Name: "V0"},
-			indexes.Column{Name: "V1"},
-			indexes.Column{Name: "V2"},
-			indexes.Column{Name: "V3"},
-			indexes.Column{Name: "V4"},
-			indexes.Column{Name: "V5"},
-		},
-	}); err != nil {
+	if err := a.table.Indexes().
+		CreateOneIfNotExists(indexes.Index{
+			Name: "PrimaryKey",
+			Type: indexes.Unique,
+			Columns: []indexes.Column{
+				indexes.Column{Name: "PType"},
+				indexes.Column{Name: "V0"},
+				indexes.Column{Name: "V1"},
+				indexes.Column{Name: "V2"},
+				indexes.Column{Name: "V3"},
+				indexes.Column{Name: "V4"},
+				indexes.Column{Name: "V5"},
+			},
+		}); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -116,7 +129,8 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 func (a *Adapter) AddPolicy(sec string, ptype string, rules []string) error {
 	if _, err := a.table.InsertOne(
 		toPermissionRule(ptype, rules),
-		options.InsertOne().SetMode(options.InsertIgnore),
+		options.InsertOne().
+			SetMode(options.InsertIgnore),
 	); err != nil {
 		return err
 	}

@@ -159,14 +159,16 @@ func (db *Database) BuildIndexes(filepath ...string) error {
 			Columns: columns,
 		}
 
-		if isIndexExists(
+		if exists, err := isIndexExists(
 			db.name,
 			idx.Table,
 			index.GetName(),
 			db.driver,
 			db.dialect,
 			db.logger,
-		) {
+		); err != nil {
+			return err
+		} else if exists {
 			continue
 		}
 

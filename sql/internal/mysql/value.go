@@ -35,6 +35,8 @@ func (ms MySQL) Format(it interface{}) (val string) {
 		val = "NULL"
 	case fmt.Stringer:
 		val = vi.String()
+	default:
+		val = fmt.Sprintf("%v", vi)
 	}
 	return
 }

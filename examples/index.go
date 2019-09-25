@@ -13,6 +13,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		err  error
 		idxs []sqlike.Index
+		ok   bool
 	)
 
 	table := db.Table("Index")
@@ -57,6 +58,39 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 			Type:      "BTREE",
 			IsVisible: true,
 		})
+	}
+
+	table = db.Table("NormalStruct")
+
+	{
+		idxs := []indexes.Index{
+			indexes.Index{
+				Name: "Bool_Int",
+				Type: indexes.BTree,
+				Columns: []indexes.Column{
+					indexes.Column{Name: "Bool"},
+					indexes.Column{Name: "Int"},
+				},
+			},
+			indexes.Index{
+				Name: "DateTime_Timestamp",
+				Type: indexes.BTree,
+				Columns: []indexes.Column{
+					indexes.Column{Name: "DateTime"},
+					indexes.Column{Name: "Timestamp"},
+				},
+			},
+		}
+
+		iv := table.Indexes()
+		err = iv.Create(idxs)
+		require.NoError(t, err)
+		ok, _ = table.HasIndexByName("Bool_Int")
+		require.True(t, ok)
+		ok, _ = table.HasIndexByName("DateTime_Timestamp")
+		require.True(t, ok)
+		err = iv.CreateIfNotExists(idxs)
+		require.NoError(t, err)
 	}
 
 }
