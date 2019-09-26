@@ -124,7 +124,9 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
 	} else {
 		stmt.WriteString(" CHARACTER SET " + string(code))
-		stmt.WriteString(" COLLATE " + collate)
+		if collate != "" {
+			stmt.WriteString(" COLLATE " + collate)
+		}
 	}
 	stmt.WriteRune(';')
 	return
