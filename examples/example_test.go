@@ -25,7 +25,8 @@ func TestExamples(t *testing.T) {
 	client, err := sqlike.Connect("mysql",
 		options.Connect().
 			SetUsername("root").
-			SetPassword("abcd1234"),
+			SetPassword("abcd1234").
+			SetCharset("utf8mb4"),
 	)
 	require.NoError(t, err)
 
@@ -49,6 +50,7 @@ func TestExamples(t *testing.T) {
 		DeleteExamples(t, db)
 		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
+		CasbinExamples(t, db)
 	}
 
 	// Errors

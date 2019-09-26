@@ -230,6 +230,18 @@ func (tb *Table) Indexes() *IndexView {
 	return &IndexView{tb: tb}
 }
 
+// HasIndexByName :
+func (tb *Table) HasIndexByName(name string) (bool, error) {
+	return isIndexExists(
+		tb.dbName,
+		tb.name,
+		name,
+		tb.driver,
+		tb.dialect,
+		tb.logger,
+	)
+}
+
 func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 	v := reflext.ValueOf(entity)
 	if !v.IsValid() {
@@ -259,7 +271,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.pk, fields)
+	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.client.charSet, tb.client.collate, tb.pk, fields)
 	if err != nil {
 		return err
 	}

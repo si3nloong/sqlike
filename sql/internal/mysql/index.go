@@ -5,10 +5,48 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 )
 
-func (ms MySQL) HasIndex(dbName, table, indexName string) (stmt *sqlstmt.Statement) {
+// HasIndexByName :
+func (ms MySQL) HasIndexByName(dbName, table, indexName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`)
 	stmt.AppendArgs([]interface{}{dbName, table, indexName})
+	return
+}
+
+// HasIndex :
+func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt.Statement) {
+	nonUnique, idxType := true, "BTREE"
+	switch idx.Type {
+	case indexes.Unique:
+		nonUnique = false
+	case indexes.FullText:
+		idxType = "FULLTEXT"
+	case indexes.Spatial:
+		idxType = "SPATIAL"
+	}
+	args := []interface{}{dbName, table, idxType, nonUnique}
+	stmt = sqlstmt.NewStatement(ms)
+	stmt.WriteString("SELECT COUNT(1) FROM (")
+	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c")
+	stmt.WriteString(" FROM INFORMATION_SCHEMA.STATISTICS")
+	stmt.WriteString(" WHERE TABLE_SCHEMA = ?")
+	stmt.WriteString(" AND TABLE_NAME = ?")
+	stmt.WriteString(" AND INDEX_TYPE = ?")
+	stmt.WriteString(" AND NON_UNIQUE = ?")
+	stmt.WriteString(" AND COLUMN_NAME IN ")
+	stmt.WriteByte('(')
+	for i, col := range idx.Columns {
+		if i > 0 {
+			stmt.WriteByte(',')
+		}
+		stmt.WriteByte('?')
+		args = append(args, col.Name)
+	}
+	stmt.WriteByte(')')
+	stmt.WriteString(" GROUP BY INDEX_NAME")
+	stmt.WriteString(") AS temp WHERE temp.c = ?")
+	stmt.WriteByte(';')
+	stmt.AppendArgs(append(args, int64(len(idx.Columns))))
 	return
 }
 
