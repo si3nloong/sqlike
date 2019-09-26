@@ -21,11 +21,18 @@ func (ms MySQL) Connect(opt *options.ConnectOptions) (connStr string) {
 		blr.WriteByte(')')
 	}
 	blr.WriteByte('/')
-	// blr.WriteString(opt.Database)
 	blr.WriteByte('?')
-	blr.WriteString(`parseTime=true`)
-	blr.WriteString(`&charset=utf8mb4`)
-	blr.WriteString(`&collation=utf8mb4_unicode_ci`)
+	blr.WriteString("parseTime=true")
+	if opt.Charset == "" {
+		blr.WriteString("&charset=utf8mb4")
+	} else {
+		blr.WriteString("&charset=" + string(opt.Charset))
+	}
+	if opt.Collate == "" {
+		blr.WriteString("&collation=utf8mb4_unicode_ci")
+	} else {
+		blr.WriteString("&collation=" + string(opt.Collate))
+	}
 	connStr = blr.String()
 	return
 }

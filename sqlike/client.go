@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -19,15 +20,19 @@ type Client struct {
 	*sql.DB
 	pk      string
 	logger  logs.Logger
+	charSet charset.Code
+	collate string
 	dialect sqldialect.Dialect
 }
 
-func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect) (*Client, error) {
+func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect, code charset.Code, collate string) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
 		driverName: driver,
 		DB:         db,
 		dialect:    dialect,
+		charSet:    code,
+		collate:    collate,
 	}
 	client.pk = "$Key"
 	client.version = client.getVersion()

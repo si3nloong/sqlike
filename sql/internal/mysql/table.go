@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/charset"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -50,7 +51,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(db, table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		virtual bool
@@ -117,9 +118,14 @@ func (ms MySQL) CreateTable(db, table, pk string, fields []*reflext.StructField)
 		}
 	}
 	stmt.WriteRune(')')
-	stmt.WriteString(` ENGINE=INNODB`)
-	stmt.WriteString(` CHARACTER SET utf8mb4`)
-	stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
+	stmt.WriteString(" ENGINE=INNODB")
+	if code == "" {
+		stmt.WriteString(" CHARACTER SET utf8mb4")
+		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
+	} else {
+		stmt.WriteString(" CHARACTER SET " + string(code))
+		stmt.WriteString(" COLLATE " + collate)
+	}
 	stmt.WriteRune(';')
 	return
 }

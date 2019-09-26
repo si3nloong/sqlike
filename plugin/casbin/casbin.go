@@ -116,9 +116,8 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 	}
 
 	if len(policies) > 0 {
-		if _, err := a.table.
-			Insert(&policies, options.Insert().
-				SetMode(options.InsertOnDuplicate)); err != nil {
+		if _, err := a.table.Insert(&policies, options.Insert().
+			SetMode(options.InsertOnDuplicate)); err != nil {
 			return err
 		}
 	}

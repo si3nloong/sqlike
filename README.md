@@ -11,19 +11,20 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 We don't really care about legacy support, we want latest feature that mysql and golang offer us :
 
 1. **mysql 5.7** and above
-2. **Golang 1.2** and above
+2. **Golang 1.3** and above
 
 ### What we provide apart from native package (database/sql)?
 
-1. Support `JSON`
-2. Support `Enum`
-3. Support `UUID`
-4. Support `stored column` and `virtual column`
-5. Extra type such as `Date`, `Key`
-6. Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne` and `Paginate` apis
-7. Prevent toxic query with `Strict Mode`
-8. Support `language.Tag`
-9. Support [Casbin](https://github.com/casbin/casbin)
+- Support `JSON`
+- Support `Enum`
+- Support `UUID`
+- Support `stored column` and `virtual column`
+- Extra type such as `Date`, `Key`
+- Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
+- Support `language.Tag`
+- Support third-party plugin [Casbin](https://github.com/casbin/casbin)
+- Prevent toxic query with `Strict Mode` (in progress)
+- Support query filtering (in progress)
 
 ### Missing DOC?
 

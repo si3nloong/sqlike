@@ -1,8 +1,10 @@
 package options
 
 import (
+	"regexp"
 	"strings"
 
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -12,8 +14,9 @@ type ConnectOptions struct {
 	Password string
 	Host     string
 	Port     string
-	// Database string
-	Logger logs.Logger
+	Charset  charset.Code
+	Collate  string
+	Logger   logs.Logger
 }
 
 // Connect :
@@ -41,6 +44,21 @@ func (opt *ConnectOptions) SetHost(host string) *ConnectOptions {
 
 // SetPort :
 func (opt *ConnectOptions) SetPort(port string) *ConnectOptions {
+	if !regexp.MustCompile("[0-9]+").MatchString(port) {
+		panic("invalid port format")
+	}
 	opt.Port = strings.TrimSpace(port)
+	return opt
+}
+
+// SetCharset :
+func (opt *ConnectOptions) SetCharset(code charset.Code) *ConnectOptions {
+	opt.Charset = code
+	return opt
+}
+
+// SetCollate :
+func (opt *ConnectOptions) SetCollate(collate string) *ConnectOptions {
+	opt.Collate = collate
 	return opt
 }

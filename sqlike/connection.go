@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/si3nloong/sqlike/sqlike/options"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
 // Open : connect to sql server with connection string
@@ -21,7 +21,7 @@ func Open(driver string, opt *options.ConnectOptions) (client *Client, err error
 	if err != nil {
 		return
 	}
-	client, err = newClient(driver, conn, dialect)
+	client, err = newClient(driver, conn, dialect, opt.Charset, opt.Collate)
 	return
 }
 

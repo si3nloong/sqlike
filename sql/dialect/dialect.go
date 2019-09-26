@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/internal/mysql"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
@@ -31,7 +32,7 @@ type Dialect interface {
 	GetIndexes(db, table string) (stmt *sqlstmt.Statement)
 	CreateIndexes(db, table string, idxs []indexes.Index, supportDesc bool) (stmt *sqlstmt.Statement)
 	DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement)
-	CreateTable(db, table, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error)
+	CreateTable(db, table string, code charset.Code, collate, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error)
 	AlterTable(db, table, pk string, fields []*reflext.StructField, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error)
 	InsertInto(db, table, pk string, columns []string, values [][]interface{}, opts *options.InsertOptions) (stmt *sqlstmt.Statement)
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)

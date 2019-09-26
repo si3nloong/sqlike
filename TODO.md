@@ -2,12 +2,12 @@
 
 - [ ] Prevent toxic query.
 - [ ] Change `DataType` api.
-- [x] `CreateDatabase` api. 
-- [x] Escape wildcard `%` on `LIKE` condition. 
-- [x] Escape wildcard `_` on `LIKE` condition. 
+- [x] `CreateDatabase` api.
+- [x] Escape wildcard `%` on `LIKE` condition.
+- [x] Escape wildcard `_` on `LIKE` condition.
 - [x] Add `Database` name as `table` prefix.
 - [x] Add `Field` api.
-- [x] Allow nil on where conditions, skip it if `nil` or invalid 
+- [x] Allow nil on where conditions, skip it if `nil` or invalid
 - [x] Support auto build index
 - [x] `In` and `NotIn`
 - [x] Cursor pagination using `Paginate` api
@@ -61,7 +61,7 @@
 - [x] Replace into (replace with `Copy` API)
 - [x] Support option tag `unique_index` and `index` on create table
 - [ ] Support option tag `unique_index` and `index` on alter table
-- [ ] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
+- [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
-- [ ] Write testcases (50%)
+- [ ] Write testcases (70%)
 - [ ] Support `Postgres`

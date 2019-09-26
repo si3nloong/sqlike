@@ -271,7 +271,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.pk, fields)
+	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.client.charSet, tb.client.collate, tb.pk, fields)
 	if err != nil {
 		return err
 	}
