@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/jsonb"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
 	"errors"
@@ -23,6 +24,7 @@ type DefaultDecoders struct {
 func (dec DefaultDecoders) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
 	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
+	rg.SetTypeDecoder(reflect.TypeOf(currency.Unit{}), dec.DecodeCurrency)
 	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetKindDecoder(reflect.String, dec.DecodeString)
@@ -68,6 +70,29 @@ func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 		x = make([]byte, 0, 0)
 	}
 	v.SetBytes(x)
+	return nil
+}
+
+// DecodeCurrency :
+func (dec DefaultDecoders) DecodeCurrency(it interface{}, v reflect.Value) error {
+	var (
+		x   currency.Unit
+		err error
+	)
+	switch vi := it.(type) {
+	case string:
+		x, err = currency.ParseISO(vi)
+		if err != nil {
+			return err
+		}
+	case []byte:
+		x, err = currency.ParseISO(string(vi))
+		if err != nil {
+			return err
+		}
+	case nil:
+	}
+	v.Set(reflect.ValueOf(x))
 	return nil
 }
 

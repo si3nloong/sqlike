@@ -6,6 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/si3nloong/sqlike/types"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
 	uuid "github.com/google/uuid"
@@ -52,11 +53,13 @@ type normalStruct struct {
 	JSONRaw json.RawMessage
 	Map     map[string]int
 	// GeoPoint  types.GeoPoint
-	DateTime  time.Time `sqlike:",size:0"`
-	Timestamp time.Time
-	Language  language.Tag
-	Languages []language.Tag
-	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	DateTime   time.Time `sqlike:",size:0"`
+	Timestamp  time.Time
+	Language   language.Tag
+	Languages  []language.Tag
+	Currency   currency.Unit
+	Currencies []currency.Unit
+	Enum       Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 
 type jsonStruct struct {
@@ -187,6 +190,10 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.DateTime = now
 	ns.Timestamp = now
 	ns.Language = language.English
+	ns.Currencies = []currency.Unit{
+		currency.AUD,
+		currency.EUR,
+	}
 	ns.Enum = Enum(gofakeit.RandString([]string{
 		"SUCCESS",
 		"FAILED",

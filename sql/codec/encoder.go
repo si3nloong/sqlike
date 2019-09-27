@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
 	"github.com/si3nloong/sqlike/jsonb"
@@ -25,7 +26,8 @@ type DefaultEncoders struct {
 // SetEncoders :
 func (enc DefaultEncoders) SetEncoders(rg *Registry) {
 	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
-	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeLanguage)
+	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer)
+	rg.SetTypeEncoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer)
 	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
 	rg.SetTypeEncoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes)
 	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
@@ -81,9 +83,9 @@ func (enc DefaultEncoders) EncodeJSONRaw(_ *reflext.StructField, v reflect.Value
 	return json.RawMessage(buf.Bytes()), nil
 }
 
-// EncodeLanguage :
-func (enc DefaultEncoders) EncodeLanguage(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
-	x := v.Interface().(language.Tag)
+// EncodeStringer :
+func (enc DefaultEncoders) EncodeStringer(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	x := v.Interface().(fmt.Stringer)
 	return x.String(), nil
 }
 

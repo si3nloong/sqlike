@@ -32,6 +32,15 @@ func ParseDate(str string) (*Date, error) {
 	}, nil
 }
 
+// DateFromTime :
+func DateFromTime(t time.Time) (*Date, error) {
+	return &Date{
+		Day:   t.Day(),
+		Month: int(t.Month()),
+		Year:  t.Year(),
+	}, nil
+}
+
 // Date :
 type Date struct {
 	Year, Month, Day int
