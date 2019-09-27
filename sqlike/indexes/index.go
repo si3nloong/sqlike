@@ -61,17 +61,17 @@ func (idx *Index) GetName() string {
 	}
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
+	switch idx.Type {
+	case Unique:
+		blr.WriteString("UX")
+	default:
+		blr.WriteString("IX")
+	}
+	blr.WriteByte('-')
 	for i, col := range idx.Columns {
 		if i > 0 {
 			blr.WriteByte('-')
 		}
-		switch idx.Type {
-		case Unique:
-			blr.WriteString("UX")
-		default:
-			blr.WriteString("IX")
-		}
-		blr.WriteByte('_')
 		blr.WriteString(col.Name)
 		blr.WriteByte('_')
 		if col.Direction == 0 {
