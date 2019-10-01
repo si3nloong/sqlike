@@ -22,12 +22,12 @@ import (
 // !@  | not like          | %21%40
 
 type flatStruct struct {
-	ID          uint   `fql:"id,select,filter,sort"`
-	Name        string `fql:",select,filter,sort,column:FullName"`
-	AddressName string `fql:",filter"`
-	Skip        uint   `fql:"-"`
+	ID          uint   `fiql:"id,select,filter,sort"`
+	Name        string `fiql:",select,filter,sort,column:FullName"`
+	AddressName string `fiql:",filter"`
+	Skip        uint   `fiql:"-"`
 	Active      bool
-	CreatedAt   time.Time `fql:"created,select,filter,sort"`
+	CreatedAt   time.Time `fiql:"created,select,filter,sort"`
 }
 
 func TestFilter(t *testing.T) {
@@ -75,7 +75,7 @@ func testFilters(t *testing.T, p *Parser) {
 
 	// Filters (valid)
 	{
-		query = p.FilterTag + `=_id%3D%3D%3D133,category%3E%3D10|c1%3D%3Dtesting,d1%3E10833,d2%3D%3FCOMPLETED%2CFAILED`
+		query = p.FilterTag + `=(_id%3D%3D%3D133,category%3E%3D10)|c1%3D%3Dtesting,d1%3E10833,d2%3D%3FCOMPLETED%2CFAILED`
 		params, err = p.ParseQuery(query)
 		// require.NotNil(t, params)
 		// require.NoError(t, err)

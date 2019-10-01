@@ -11,8 +11,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
-var re = regexp.MustCompile(`([A-Za-z0-9\.\$\_\@\-]+)(\=\=|\!\=|\>\=|\>|\<\=|\<|\=\?|\!\?|\=\@|\!\@)(.+)`)
-
 // defaultFilterParser :
 type defaultFilterParser struct {
 	parser   *Parser
@@ -20,9 +18,15 @@ type defaultFilterParser struct {
 }
 
 func (p *defaultFilterParser) ParseFilter(param *Params, val string) {
-	// log.Println("Filter ::", val)
+	// ([A-Za-z0-9\.\$\_\@\-]+)(\=\=|\!\=|\>\=|\>|\<\=|\<|\=\?|\!\?|\=\@|\!\@)(.+)
+	var re = regexp.MustCompile(`(?i)\(?[A-Z0-9\@\#\-\_\.]+`)
+	log.Println("Filter =>", val)
+	log.Println("000:", re.FindStringSubmatch(val))
+	return
+
 	for len(val) > 0 {
 		path := val
+		log.Println("000:", re.FindStringSubmatch(path))
 		// and := false
 		if i := strings.IndexAny(val, ",|"); i >= 0 {
 			// and = path[i] == ','
@@ -32,12 +36,13 @@ func (p *defaultFilterParser) ParseFilter(param *Params, val string) {
 		}
 		path, _ = url.QueryUnescape(path)
 		matches := re.FindStringSubmatch(path)
-		if len(matches) == 4 {
-			field, operator, value := matches[1], matches[2], matches[3]
-			// log.Println(field, operator, value)
-			it, _ := p.filterValue(field, operator, value)
-			param.Filters = append(param.Filters, it)
+		if len(matches) != 4 {
+			continue
 		}
+		field, operator, value := matches[1], matches[2], matches[3]
+		// log.Println(field, operator, value)
+		it, _ := p.filterValue(field, operator, value)
+		param.Filters = append(param.Filters, it)
 	}
 	// log.Println("Final :", param.Filters)
 }

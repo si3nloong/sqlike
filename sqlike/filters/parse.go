@@ -11,6 +11,12 @@ import (
 	"github.com/si3nloong/sqlike/sql/expr"
 )
 
+// expression  = [ "(" ]
+// ( constraint / expression )
+// [ operator ( constraint / expression ) ]
+// [ ")" ]
+// operator    = ";" / ","
+
 // ParseQuery :
 func (p *Parser) ParseQuery(query string) (*Params, error) {
 	var (
@@ -67,6 +73,8 @@ Filter:
 		if !ok || len(val) < 1 {
 			goto Sort
 		}
+
+		log.Println("Value :::", val)
 
 		p.Filter.ParseFilter(param, val)
 	}

@@ -49,7 +49,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		idxs, err = db.Table("NormalStruct").Indexes().List()
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
-			Name:      "IX_SID_ASC-IX_Emoji_ASC-IX_Bool_DESC",
+			Name:      "IX-SID_ASC-Emoji_ASC-Bool_DESC",
 			Type:      "BTREE",
 			IsVisible: true,
 		})

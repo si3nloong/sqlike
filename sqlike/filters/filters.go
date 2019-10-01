@@ -46,7 +46,7 @@ func NewParser(it interface{}) (*Parser, error) {
 		return nil, errors.New("invalid model expected, it must be struct")
 	}
 	toLower := strcase.ToLowerCamel
-	mapper := reflext.NewMapperFunc("fql", nil, toLower)
+	mapper := reflext.NewMapperFunc("fiql", nil, toLower)
 	p := &Parser{
 		SelectTag:    "$select",
 		FilterTag:    "$filter",
