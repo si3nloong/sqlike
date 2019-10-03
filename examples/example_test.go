@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/Masterminds/semver"
 	_ "github.com/go-sql-driver/mysql"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike"
@@ -34,6 +35,9 @@ func TestExamples(t *testing.T) {
 
 	db := client.SetLogger(Logger{}).
 		Database("sqlike")
+
+	v := client.Version()
+	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 
 	dbs, err := client.ListDatabases()
 	require.True(t, len(dbs) > 0)

@@ -5,10 +5,11 @@ import (
 	"io"
 	"reflect"
 
+	"errors"
+
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"errors"
 )
 
 // ErrNoRows :
@@ -216,8 +217,7 @@ func (r *Result) Next() bool {
 // Close :
 func (r *Result) Close() error {
 	if r.rows != nil {
-		defer r.rows.Close()
-		return nil
+		return r.rows.Close()
 	}
 	return nil
 }
