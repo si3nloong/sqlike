@@ -12,6 +12,7 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
@@ -24,6 +25,7 @@ type Decoder struct {
 func (dec Decoder) SetDecoders(rg *Registry) {
 	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
 	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
+	rg.SetTypeDecoder(reflect.TypeOf(currency.Unit{}), dec.DecodeCurrency)
 	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
 	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
 	rg.SetTypeDecoder(reflect.TypeOf(json.Number("")), dec.DecodeJSONNumber)
@@ -83,6 +85,20 @@ func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
 		return err
 	}
 	v.Set(reflect.ValueOf(l))
+	return nil
+}
+
+// DecodeCurrency :
+func (dec Decoder) DecodeCurrency(r *Reader, v reflect.Value) error {
+	x, err := r.ReadString()
+	if err != nil {
+		return err
+	}
+	cur, err := currency.ParseISO(x)
+	if err != nil {
+		return err
+	}
+	v.Set(reflect.ValueOf(cur))
 	return nil
 }
 

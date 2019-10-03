@@ -15,14 +15,16 @@ type Mapper struct {
 	tag     string
 	cache   map[reflect.Type]*Struct
 	mapFunc MapFunc
+	fmtFunc FormatFunc
 }
 
 // NewMapperFunc :
-func NewMapperFunc(tag string, mapFunc MapFunc) *Mapper {
+func NewMapperFunc(tag string, mapFunc MapFunc, fmtFunc FormatFunc) *Mapper {
 	return &Mapper{
 		cache:   make(map[reflect.Type]*Struct),
 		tag:     tag,
 		mapFunc: mapFunc,
+		fmtFunc: fmtFunc,
 	}
 }
 
@@ -30,9 +32,9 @@ func NewMapperFunc(tag string, mapFunc MapFunc) *Mapper {
 func (m *Mapper) CodecByType(t reflect.Type) *Struct {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	mapping, isOk := m.cache[t]
-	if !isOk {
-		mapping = getCodec(t, m.tag, m.mapFunc)
+	mapping, ok := m.cache[t]
+	if !ok {
+		mapping = getCodec(t, m.tag, m.mapFunc, m.fmtFunc)
 		m.cache[t] = mapping
 	}
 	return mapping
@@ -44,8 +46,8 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	mustBe(v, reflect.Struct)
 
 	tm := m.CodecByType(v.Type())
-	fi, isOk := tm.Names[name]
-	if !isOk {
+	fi, ok := tm.Names[name]
+	if !ok {
 		return v
 	}
 	return FieldByIndexes(v, fi.Index)
@@ -57,8 +59,8 @@ func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value,
 	mustBe(v, reflect.Struct)
 
 	tm := m.CodecByType(v.Type())
-	fi, isOk := tm.Names[name]
-	if !isOk {
+	fi, ok := tm.Names[name]
+	if !ok {
 		return v, false
 	}
 	return FieldByIndexes(v, fi.Index), true

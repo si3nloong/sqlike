@@ -105,13 +105,13 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 	var policies []*Policy
 	for ptype, ast := range model["p"] {
 		for _, r := range ast.Policy {
-			policies = append(policies, toPermissionRule(ptype, r))
+			policies = append(policies, toPolicy(ptype, r))
 		}
 	}
 
 	for ptype, ast := range model["g"] {
 		for _, r := range ast.Policy {
-			policies = append(policies, toPermissionRule(ptype, r))
+			policies = append(policies, toPolicy(ptype, r))
 		}
 	}
 
@@ -127,7 +127,7 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 // AddPolicy : adds a policy policy to the storage. This is part of the Auto-Save feature.
 func (a *Adapter) AddPolicy(sec string, ptype string, rules []string) error {
 	if _, err := a.table.InsertOne(
-		toPermissionRule(ptype, rules),
+		toPolicy(ptype, rules),
 		options.InsertOne().
 			SetMode(options.InsertIgnore),
 	); err != nil {
@@ -138,7 +138,7 @@ func (a *Adapter) AddPolicy(sec string, ptype string, rules []string) error {
 
 // RemovePolicy : removes a policy policy from the storage. This is part of the Auto-Save feature.
 func (a *Adapter) RemovePolicy(sec string, ptype string, rules []string) error {
-	policy := toPermissionRule(ptype, rules)
+	policy := toPolicy(ptype, rules)
 	if _, err := a.table.DeleteOne(
 		actions.DeleteOne().Where(
 			expr.Equal("PType", policy.PType),
@@ -219,7 +219,7 @@ func loadPolicy(policy *Policy, model model.Model) {
 	persist.LoadPolicyLine(sb.String(), model)
 }
 
-func toPermissionRule(ptype string, rules []string) *Policy {
+func toPolicy(ptype string, rules []string) *Policy {
 	policy := new(Policy)
 	policy.PType = ptype
 	length := len(rules)

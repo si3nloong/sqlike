@@ -16,21 +16,21 @@ type DeleteOneActions struct {
 }
 
 // Where :
-func (f *DeleteOneActions) Where(fields ...interface{}) DeleteOneStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *DeleteOneActions) Where(fields ...interface{}) DeleteOneStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *DeleteOneActions) OrderBy(fields ...interface{}) DeleteOneStatement {
-	f.Sorts = fields
-	return f
+func (act *DeleteOneActions) OrderBy(fields ...interface{}) DeleteOneStatement {
+	act.Sorts = fields
+	return act
 }
 
 // Limit :
-func (f *DeleteOneActions) Limit(num uint) DeleteOneStatement {
+func (act *DeleteOneActions) Limit(num uint) DeleteOneStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }

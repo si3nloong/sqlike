@@ -71,7 +71,7 @@ func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
 func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 	var (
 		enc  ValueEncoder
-		isOk bool
+		ok bool
 	)
 
 	it := reflect.TypeOf((*Marshaller)(nil)).Elem()
@@ -79,13 +79,13 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 		return marshallerEncoder(), nil
 	}
 
-	enc, isOk = r.typeEncoders[t]
-	if isOk {
+	enc, ok = r.typeEncoders[t]
+	if ok {
 		return enc, nil
 	}
 
-	enc, isOk = r.kindEncoders[t.Kind()]
-	if isOk {
+	enc, ok = r.kindEncoders[t.Kind()]
+	if ok {
 		return enc, nil
 	}
 	return nil, ErrNoEncoder{Type: t}
@@ -95,7 +95,7 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
 		dec  ValueDecoder
-		isOk bool
+		ok bool
 	)
 
 	it := reflect.TypeOf((*Unmarshaller)(nil)).Elem()
@@ -103,13 +103,13 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		return unmarshallerDecoder(), nil
 	}
 
-	dec, isOk = r.typeDecoders[t]
-	if isOk {
+	dec, ok = r.typeDecoders[t]
+	if ok {
 		return dec, nil
 	}
 
-	dec, isOk = r.kindDecoders[t.Kind()]
-	if isOk {
+	dec, ok = r.kindDecoders[t.Kind()]
+	if ok {
 		return dec, nil
 	}
 	return nil, ErrNoDecoder{Type: t}

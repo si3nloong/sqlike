@@ -2,6 +2,7 @@
 
 - [ ] Prevent toxic query.
 - [ ] Change `DataType` api.
+- [ ] Support `URL` filter.
 - [x] `CreateDatabase` api.
 - [x] Escape wildcard `%` on `LIKE` condition.
 - [x] Escape wildcard `_` on `LIKE` condition.
@@ -64,4 +65,6 @@
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [ ] [Bug] Support nested `json.RawMessage` unmarshal
 - [ ] Write testcases (70%)
+- [ ] Extra func before value `driver.Valuer`
+- [ ] Support `map` key implement `fmt.Stringer`
 - [ ] Support `Postgres`

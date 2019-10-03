@@ -315,7 +315,7 @@ func skipColumns(sfs []*reflext.StructField, omits util.StringSlice) (columns []
 	fields = make([]*reflext.StructField, 0, len(sfs))
 	length := len(omits)
 	for _, sf := range sfs {
-		if _, isOk := sf.Tag.LookUp("generated"); isOk {
+		if _, ok := sf.Tag.LookUp("generated"); ok {
 			continue
 		}
 		if length > 0 && omits.IndexOf(sf.Path) > -1 {

@@ -23,53 +23,53 @@ type FindOneActions struct {
 }
 
 // Select :
-func (f *FindOneActions) Select(fields ...interface{}) SelectOneStatement {
-	f.Projections = fields
-	return f
+func (act *FindOneActions) Select(fields ...interface{}) SelectOneStatement {
+	act.Projections = fields
+	return act
 }
 
 // Distinct :
-func (f *FindOneActions) Distinct() SelectOneStatement {
-	f.DistinctOn = true
-	return f
+func (act *FindOneActions) Distinct() SelectOneStatement {
+	act.DistinctOn = true
+	return act
 }
 
 // From :
-func (f *FindOneActions) From(values ...string) SelectOneStatement {
+func (act *FindOneActions) From(values ...string) SelectOneStatement {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
 	}
 	if length > 0 {
-		f.Table = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[0])
 	}
 	if length > 1 {
-		f.Database = strings.TrimSpace(values[0])
-		f.Table = strings.TrimSpace(values[1])
+		act.Database = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[1])
 	}
-	return f
+	return act
 }
 
 // Where :
-func (f *FindOneActions) Where(fields ...interface{}) SelectOneStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *FindOneActions) Where(fields ...interface{}) SelectOneStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Having :
-func (f *FindOneActions) Having(fields ...interface{}) SelectOneStatement {
-	f.Havings = expr.And(fields...)
-	return f
+func (act *FindOneActions) Having(fields ...interface{}) SelectOneStatement {
+	act.Havings = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *FindOneActions) OrderBy(fields ...interface{}) SelectOneStatement {
-	f.Sorts = fields
-	return f
+func (act *FindOneActions) OrderBy(fields ...interface{}) SelectOneStatement {
+	act.Sorts = fields
+	return act
 }
 
 // GroupBy :
-func (f *FindOneActions) GroupBy(fields ...interface{}) SelectOneStatement {
-	f.GroupBys = fields
-	return f
+func (act *FindOneActions) GroupBy(fields ...interface{}) SelectOneStatement {
+	act.GroupBys = fields
+	return act
 }

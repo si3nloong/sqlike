@@ -7,10 +7,18 @@ import (
 	"strings"
 )
 
+// FormatFunc :
+type FormatFunc func(string) string
+
 // StructTag :
 type StructTag struct {
 	name string
 	opts map[string]string
+}
+
+// Name :
+func (st StructTag) Name() string {
+	return st.name
 }
 
 // Get :
@@ -100,7 +108,7 @@ type typeQueue struct {
 	pp string // parent path
 }
 
-func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
+func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFunc) *Struct {
 	fields := make([]*StructField, 0)
 
 	root := &StructField{}
@@ -120,7 +128,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 				continue
 			}
 
-			tag := parseTag(f.Tag, tagName)
+			tag := parseTag(f, tagName, fmtFunc)
 			if tag.name == "-" {
 				continue
 			}
@@ -140,7 +148,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc) *Struct {
 			}
 
 			if sf.Path == "" {
-				sf.Path = sf.Name
+				sf.Path = sf.Tag.name
 			}
 
 			if q.pp != "" {
@@ -213,9 +221,16 @@ func appendSlice(s []int, i int) []int {
 	return x
 }
 
-func parseTag(tag reflect.StructTag, tagName string) (st StructTag) {
-	parts := strings.Split(tag.Get(tagName), ",")
-	st.name = strings.TrimSpace(parts[0])
+func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
+	parts := strings.Split(f.Tag.Get(tagName), ",")
+	name := strings.TrimSpace(parts[0])
+	if name == "" {
+		name = f.Name
+		if fmtFunc != nil {
+			name = fmtFunc(name)
+		}
+	}
+	st.name = name
 	st.opts = make(map[string]string)
 	if len(parts) > 1 {
 		for _, opt := range parts[1:] {

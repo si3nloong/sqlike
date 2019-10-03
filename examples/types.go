@@ -6,6 +6,7 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/si3nloong/sqlike/types"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
 	uuid "github.com/google/uuid"
@@ -52,11 +53,13 @@ type normalStruct struct {
 	JSONRaw json.RawMessage
 	Map     map[string]int
 	// GeoPoint  types.GeoPoint
-	DateTime  time.Time `sqlike:",size:0"`
-	Timestamp time.Time
-	Language  language.Tag
-	Languages []language.Tag
-	Enum      Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	DateTime   time.Time `sqlike:",size:0"`
+	Timestamp  time.Time
+	Language   language.Tag
+	Languages  []language.Tag
+	Currency   currency.Unit
+	Currencies []currency.Unit
+	Enum       Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 
 type jsonStruct struct {
@@ -108,6 +111,7 @@ type model struct {
 }
 
 type ptrStruct struct {
+	ID            int64   `sqlike:"$Key,auto_increment"`
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool
 	NullByte      *[]byte
@@ -127,6 +131,8 @@ type ptrStruct struct {
 	NullStruct    *struct{}
 	NullJSONRaw   *json.RawMessage
 	NullTimestamp *time.Time
+	NullKey       *types.Key
+	NullDate      *types.Date
 	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
 }
 
@@ -184,10 +190,44 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.DateTime = now
 	ns.Timestamp = now
 	ns.Language = language.English
+	ns.Currencies = []currency.Unit{
+		currency.AUD,
+		currency.EUR,
+	}
 	ns.Enum = Enum(gofakeit.RandString([]string{
 		"SUCCESS",
 		"FAILED",
 		"UNKNOWN",
 	}))
 	return ns
+}
+
+func newPtrStruct() ptrStruct {
+	now := time.Now()
+	str := `hello world`
+	flag := true
+	b := []byte(`hello world`)
+	date, _ := types.ParseDate("2019-01-02")
+	jsonByte := json.RawMessage(`{"message":"hello world"}`)
+	i := 124
+	i32 := int32(-603883)
+	i64 := int64(-3712897389712688393)
+	u8 := uint8(88)
+	u64 := uint64(37128973897126)
+	enum := Success
+
+	ps := ptrStruct{}
+	ps.NullStr = &str
+	ps.NullByte = &b
+	ps.NullBool = &flag
+	ps.NullInt = &i
+	ps.NullInt32 = &i32
+	ps.NullInt64 = &i64
+	ps.NullDate = date
+	ps.NullUint8 = &u8
+	ps.NullUint64 = &u64
+	ps.NullJSONRaw = &jsonByte
+	ps.NullTimestamp = &now
+	ps.NullEnum = &enum
+	return ps
 }

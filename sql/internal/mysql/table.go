@@ -73,11 +73,11 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 			return
 		}
 		if sf.Path == pk {
-			stmt.WriteString("PRIMARY KEY (`" + pk + "`)")
+			stmt.WriteString("PRIMARY KEY (" + ms.Quote(pk) + ")")
 			stmt.WriteRune(',')
 		}
-		if _, isOk := sf.Tag.LookUp("unique_index"); isOk {
-			stmt.WriteString("UNIQUE INDEX `UX_" + sf.Path + "`(`" + sf.Path + "`)")
+		if _, ok := sf.Tag.LookUp("unique_index"); ok {
+			stmt.WriteString("UNIQUE INDEX " + ms.Quote("UX_"+sf.Path) + " (" + ms.Quote(sf.Path) + ")")
 			stmt.WriteRune(',')
 		}
 
@@ -246,6 +246,10 @@ func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyAction
 		stmt.WriteByte(' ')
 	}
 	err = ms.parser.BuildStatement(stmt, &act.FindActions)
+	if err != nil {
+		return
+	}
+	stmt.WriteByte(';')
 	return
 }
 

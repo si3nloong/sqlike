@@ -8,13 +8,13 @@ import (
 )
 
 func connectMongoDB() *mongo.Database {
-	client, err := mongo.NewClient(options.
-		Client().
-		ApplyURI("mongodb://localhost:27017").
-		SetAuth(options.Credential{
-			Username: "root",
-			Password: "abcd1234",
-		}))
+	client, err := mongo.NewClient(
+		options.Client().
+			ApplyURI("mongodb://localhost:27017").
+			SetAuth(options.Credential{
+				Username: "root",
+				Password: "abcd1234",
+			}))
 	if err != nil {
 		panic(err)
 	}

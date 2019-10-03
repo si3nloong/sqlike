@@ -30,8 +30,8 @@ type writer interface {
 }
 
 var (
-	latin1    = `latin1`
-	latin1Bin = `latin1_bin`
+	latin1    = "latin1"
+	latin1Bin = "latin1_bin"
 )
 
 // Key :
@@ -269,7 +269,7 @@ func (k *Key) UnmarshalBinary(b []byte) error {
 func (k *Key) UnmarshalJSONB(b []byte) error {
 	length := len(b)
 	if length < 2 {
-		return errors.New("types.UnmarshalJSONB: invalid key json value")
+		return errors.New("types: invalid key json value")
 	}
 	str := string(b)
 	if str == "null" {
@@ -288,11 +288,11 @@ func (k *Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
 // UnmarshalBSONValue :
 func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	if k == nil {
-		return errors.New("invalid key value <nil>")
+		return errors.New("types: invalid key value <nil>")
 	}
-	v, _, isOk := bsoncore.ReadString(b)
-	if !isOk {
-		return errors.New("invalid bson string value")
+	v, _, ok := bsoncore.ReadString(b)
+	if !ok {
+		return errors.New("types: invalid bson string value")
 	}
 	return k.unmarshal(v)
 }
@@ -426,7 +426,10 @@ const (
 func NewIDKey(kind string, parent *Key) *Key {
 	rand.Seed(time.Now().UnixNano())
 	strID := strconv.FormatInt(time.Now().Unix(), 10) + strconv.FormatInt(rand.Int63n(maxSeed-minSeed)+minSeed, 10)
-	id, _ := strconv.ParseInt(strID, 10, 64)
+	id, err := strconv.ParseInt(strID, 10, 64)
+	if err != nil {
+		panic(err)
+	}
 
 	return &Key{
 		Kind:   kind,

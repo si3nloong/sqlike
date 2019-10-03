@@ -100,7 +100,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	charset := "utf8mb4"
 	collation := charsetMap[charset]
 	dflt := ""
-	if cs, isOk := sf.Tag.LookUp("charset"); isOk {
+	if cs, ok := sf.Tag.LookUp("charset"); ok {
 		charset = strings.ToLower(cs)
 		collation = charsetMap[charset]
 	}
@@ -109,7 +109,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	col.CharSet = &charset
 	col.Collation = &collation
 
-	if enum, isOk := sf.Tag.LookUp("enum"); isOk {
+	if enum, ok := sf.Tag.LookUp("enum"); ok {
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
 			panic("invalid enum formats")
@@ -132,14 +132,14 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		col.Type = blr.String()
 		col.DefaultValue = &dflt
 		return
-	} else if char, isOk := sf.Tag.LookUp("char"); isOk {
+	} else if char, ok := sf.Tag.LookUp("char"); ok {
 		if _, err := strconv.Atoi(char); err != nil {
 			panic("invalid value for char data type")
 		}
 		col.DataType = "CHAR(" + char + ")"
 		col.Type = "CHAR(" + char + ")"
 		return
-	} else if _, isOk := sf.Tag.LookUp("longtext"); isOk {
+	} else if _, ok := sf.Tag.LookUp("longtext"); ok {
 		col.DataType = "TEXT"
 		col.Type = "TEXT"
 		col.DefaultValue = nil
@@ -179,7 +179,7 @@ func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Type = dataType
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
-	if _, isOk := sf.Tag.LookUp("auto_increment"); isOk {
+	if _, ok := sf.Tag.LookUp("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
 	}
@@ -196,7 +196,7 @@ func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col columns.Column) 
 	col.Type = dataType + ` UNSIGNED`
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
-	if _, isOk := sf.Tag.LookUp("auto_increment"); isOk {
+	if _, ok := sf.Tag.LookUp("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
 	}
@@ -208,7 +208,7 @@ func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col columns.Column)
 	col.Name = sf.Path
 	col.DataType = `REAL`
 	col.Type = `REAL`
-	if _, isOk := sf.Tag.LookUp("unsigned"); isOk {
+	if _, ok := sf.Tag.LookUp("unsigned"); ok {
 		col.Type += ` UNSIGNED`
 	}
 	col.Nullable = sf.IsNullable

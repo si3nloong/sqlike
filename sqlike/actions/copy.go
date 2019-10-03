@@ -25,69 +25,69 @@ type CopyActions struct {
 }
 
 // Select :
-func (f *CopyActions) Select(fields ...interface{}) CopyStatement {
-	f.Projections = fields
-	return f
+func (act *CopyActions) Select(fields ...interface{}) CopyStatement {
+	act.Projections = fields
+	return act
 }
 
 // Distinct :
-func (f *CopyActions) Distinct() CopyStatement {
-	f.DistinctOn = true
-	return f
+func (act *CopyActions) Distinct() CopyStatement {
+	act.DistinctOn = true
+	return act
 }
 
 // From :
-func (f *CopyActions) From(values ...string) CopyStatement {
+func (act *CopyActions) From(values ...string) CopyStatement {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
 	}
 	if length > 0 {
-		f.Table = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[0])
 	}
 	if length > 1 {
-		f.Database = strings.TrimSpace(values[0])
-		f.Table = strings.TrimSpace(values[1])
+		act.Database = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[1])
 	}
-	return f
+	return act
 }
 
 // Where :
-func (f *CopyActions) Where(fields ...interface{}) CopyStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *CopyActions) Where(fields ...interface{}) CopyStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Having :
-func (f *CopyActions) Having(fields ...interface{}) CopyStatement {
-	f.Havings = expr.And(fields...)
-	return f
+func (act *CopyActions) Having(fields ...interface{}) CopyStatement {
+	act.Havings = expr.And(fields...)
+	return act
 }
 
 // OrderBy :
-func (f *CopyActions) OrderBy(fields ...interface{}) CopyStatement {
-	f.Sorts = fields
-	return f
+func (act *CopyActions) OrderBy(fields ...interface{}) CopyStatement {
+	act.Sorts = fields
+	return act
 }
 
 // GroupBy :
-func (f *CopyActions) GroupBy(fields ...interface{}) CopyStatement {
-	f.GroupBys = fields
-	return f
+func (act *CopyActions) GroupBy(fields ...interface{}) CopyStatement {
+	act.GroupBys = fields
+	return act
 }
 
 // Limit :
-func (f *CopyActions) Limit(num uint) CopyStatement {
+func (act *CopyActions) Limit(num uint) CopyStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }
 
 // Offset :
-func (f *CopyActions) Offset(num uint) CopyStatement {
+func (act *CopyActions) Offset(num uint) CopyStatement {
 	if num > 0 {
-		f.Skip = num
+		act.Skip = num
 	}
-	return f
+	return act
 }

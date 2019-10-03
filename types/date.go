@@ -19,6 +19,28 @@ const dateRegex = `\d{4}\-\d{2}\-\d{2}`
 // ErrDateFormat :
 var ErrDateFormat = errors.New(`invalid date format, it should be "YYYY-MM-DD"`)
 
+// ParseDate :
+func ParseDate(str string) (*Date, error) {
+	t, err := time.Parse("2006-01-02", str)
+	if err != nil {
+		return nil, ErrDateFormat
+	}
+	return &Date{
+		Day:   t.Day(),
+		Month: int(t.Month()),
+		Year:  t.Year(),
+	}, nil
+}
+
+// DateFromTime :
+func DateFromTime(t time.Time) (*Date, error) {
+	return &Date{
+		Day:   t.Day(),
+		Month: int(t.Month()),
+		Year:  t.Year(),
+	}, nil
+}
+
 // Date :
 type Date struct {
 	Year, Month, Day int
@@ -68,7 +90,7 @@ func (d *Date) Scan(it interface{}) error {
 		return nil
 
 	default:
-		return errors.New("invalid date format")
+		return ErrDateFormat
 	}
 }
 
@@ -143,7 +165,7 @@ func (d *Date) marshal(w writer) {
 
 func (d *Date) unmarshal(str string) (err error) {
 	if str == "" {
-		return errors.New("types: empty date string")
+		return errors.New("empty date string")
 	}
 	// TODO: verify date is valid date
 	paths := strings.SplitN(str, "-", 3)

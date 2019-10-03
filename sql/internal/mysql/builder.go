@@ -132,7 +132,7 @@ func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error 
 	}
 
 	t := v.Type()
-	if builder, isOk := b.builder.LookupBuilder(t); isOk {
+	if builder, ok := b.builder.LookupBuilder(t); ok {
 		if err := builder(stmt, it); err != nil {
 			return err
 		}
@@ -346,7 +346,7 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 	}
 
 	t := v.Type()
-	if builder, isOk := b.builder.LookupBuilder(t); isOk {
+	if builder, ok := b.builder.LookupBuilder(t); ok {
 		if err := builder(stmt, it); err != nil {
 			return err
 		}
@@ -367,8 +367,8 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 }
 
 func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err error) {
-	x, isOk := it.(primitive.Group)
-	if !isOk {
+	x, ok := it.(primitive.Group)
+	if !ok {
 		return unmatchedDataType("BuildGroup")
 	}
 	for len(x) > 0 {
@@ -390,8 +390,8 @@ func (b *mySQLBuilder) encodeValue(it interface{}) (interface{}, error) {
 }
 
 func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
-	x, isOk := it.(primitive.R)
-	if !isOk {
+	x, ok := it.(primitive.R)
+	if !ok {
 		return errors.New("expected data type primitive.GV")
 	}
 
@@ -423,8 +423,8 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 }
 
 func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
-	x, isOk := it.(*actions.FindActions)
-	if !isOk {
+	x, ok := it.(*actions.FindActions)
+	if !ok {
 		return errors.New("data type not match")
 	}
 
@@ -455,8 +455,8 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 }
 
 func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
-	x, isOk := it.(*actions.UpdateActions)
-	if !isOk {
+	x, ok := it.(*actions.UpdateActions)
+	if !ok {
 		return errors.New("data type not match")
 	}
 	stmt.WriteString(`UPDATE ` + b.TableName(x.Database, x.Table) + ` `)
@@ -474,8 +474,8 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{
 }
 
 func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
-	x, isOk := it.(*actions.DeleteActions)
-	if !isOk {
+	x, ok := it.(*actions.DeleteActions)
+	if !ok {
 		return errors.New("data type not match")
 	}
 	stmt.WriteString(`DELETE FROM ` + b.TableName(x.Database, x.Table))

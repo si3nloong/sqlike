@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/blang/semver"
+	"github.com/Masterminds/semver"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
@@ -16,7 +16,7 @@ import (
 // Client :
 type Client struct {
 	driverName string
-	version    semver.Version
+	version    *semver.Version
 	*sql.DB
 	pk      string
 	logger  logs.Logger
@@ -56,12 +56,11 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 }
 
 // Version :
-func (c *Client) Version() (version semver.Version) {
-	if c.version.String() != "" {
-		version = c.version
-		return
+func (c *Client) Version() (version *semver.Version) {
+	if c.version == nil {
+		c.version = c.getVersion()
 	}
-	c.version = c.getVersion()
+	version = c.version
 	return
 }
 
@@ -102,7 +101,7 @@ func (c *Client) Database(name string) *Database {
 	}
 }
 
-func (c *Client) getVersion() (version semver.Version) {
+func (c *Client) getVersion() (version *semver.Version) {
 	var (
 		ver string
 		err error
@@ -117,7 +116,7 @@ func (c *Client) getVersion() (version semver.Version) {
 	if err != nil {
 		panic(err)
 	}
-	version, err = semver.Parse(ver)
+	version, err = semver.NewVersion(ver)
 	if err != nil {
 		panic(err)
 	}

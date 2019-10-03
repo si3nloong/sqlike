@@ -12,6 +12,7 @@ import (
 
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
@@ -23,7 +24,8 @@ type Encoder struct {
 // SetEncoders :
 func (enc Encoder) SetEncoders(rg *Registry) {
 	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
-	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeLanguage)
+	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer)
+	rg.SetTypeEncoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer)
 	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
 	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
 	rg.SetKindEncoder(reflect.String, enc.EncodeString)
@@ -61,12 +63,10 @@ func (enc Encoder) EncodeByte(w *Writer, v reflect.Value) error {
 	return nil
 }
 
-// EncodeLanguage :
-func (enc Encoder) EncodeLanguage(w *Writer, v reflect.Value) error {
-	x := v.Interface().(language.Tag)
-	w.WriteRune('"')
-	w.WriteString(x.String())
-	w.WriteRune('"')
+// EncodeStringer :
+func (enc Encoder) EncodeStringer(w *Writer, v reflect.Value) error {
+	x := v.Interface().(fmt.Stringer)
+	w.WriteString(strconv.Quote(x.String()))
 	return nil
 }
 

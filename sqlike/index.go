@@ -5,13 +5,15 @@ import (
 
 	"errors"
 
-	"github.com/blang/semver"
+	"github.com/Masterminds/semver"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/types"
 )
+
+var mysql8 = semver.MustParse("8.0.0")
 
 // Index :
 type Index struct {
@@ -105,10 +107,9 @@ func (idv *IndexView) isSupportDesc() bool {
 	if idv.supportDesc != nil {
 		return *idv.supportDesc
 	}
-	mysql8 := semver.MustParse("8.0.0")
-	version := idv.tb.client.Version()
 	flag := false
-	if idv.tb.client.driverName == "mysql" && version.GTE(mysql8) {
+	if idv.tb.client.driverName == "mysql" &&
+		idv.tb.client.version.GreaterThan(mysql8) {
 		flag = true
 	}
 	idv.supportDesc = &flag

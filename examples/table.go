@@ -55,6 +55,16 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		err = db.Table("NormalStruct").Migrate(normalStruct{})
 		require.NoError(t, err)
 	}
+
+	{
+		err = db.Table("PtrStruct").DropIfExits()
+		require.NoError(t, err)
+	}
+
+	{
+		err = db.Table("PtrStruct").Migrate(ptrStruct{})
+		require.NoError(t, err)
+	}
 }
 
 // MigrateErrorExamples :

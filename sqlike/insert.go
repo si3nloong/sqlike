@@ -150,7 +150,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 
 func encodeValue(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.StructField, v reflect.Value) (interface{}, error) {
 	fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-	if _, isOk := sf.Tag.LookUp("auto_increment"); isOk && reflext.IsZero(fv) {
+	if _, ok := sf.Tag.LookUp("auto_increment"); ok && reflext.IsZero(fv) {
 		return nil, nil
 	}
 	encoder, err := registry.LookupEncoder(fv.Type())

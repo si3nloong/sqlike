@@ -24,27 +24,27 @@ type UpdateActions struct {
 }
 
 // Where :
-func (f *UpdateActions) Where(fields ...interface{}) UpdateStatement {
-	f.Conditions = expr.And(fields...)
-	return f
+func (act *UpdateActions) Where(fields ...interface{}) UpdateStatement {
+	act.Conditions = expr.And(fields...)
+	return act
 }
 
 // Set :
-func (f *UpdateActions) Set(values ...primitive.KV) UpdateStatement {
-	f.Values = append(f.Values, values...)
-	return f
+func (act *UpdateActions) Set(values ...primitive.KV) UpdateStatement {
+	act.Values = append(act.Values, values...)
+	return act
 }
 
 // OrderBy :
-func (f *UpdateActions) OrderBy(fields ...interface{}) UpdateStatement {
-	f.Sorts = fields
-	return f
+func (act *UpdateActions) OrderBy(fields ...interface{}) UpdateStatement {
+	act.Sorts = fields
+	return act
 }
 
 // Limit :
-func (f *UpdateActions) Limit(num uint) UpdateStatement {
+func (act *UpdateActions) Limit(num uint) UpdateStatement {
 	if num > 0 {
-		f.Record = num
+		act.Record = num
 	}
-	return f
+	return act
 }
