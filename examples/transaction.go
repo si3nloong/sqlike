@@ -144,6 +144,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, normalStruct{}, rslt)
 	}
 
+	// Lock record using transaction
 	{
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			nss := []normalStruct{}

@@ -37,7 +37,7 @@ import (
     "github.com/si3nloong/sqlike/sqlike"
     "github.com/si3nloong/sqlike/sqlike/options"
     "github.com/si3nloong/sqlike/sql/expr"
-    uuid "github.com/google/uuid"
+    "github.com/google/uuid"
 )
 
 // UserStatus :
@@ -53,14 +53,14 @@ type User struct {
     Name      string
     Email     string     `sqlike:",size:200"`
     Address   string     `sqlike:",longtext"`
-    Status    UserStatus `sqlike:",charset=latin1,enum:ACTIVE|SUSPEND"`
+    Status    UserStatus `sqlike:",charset:latin1,enum:ACTIVE|SUSPEND"`
     CreatedAt time.Time
     UpdatedAt time.Time
 }
 
 func newUser() (user User) {
     now := time.Now()
-    user.ID = uuid.NewV1()
+    user.ID = uuid.New()
     user.CreatedAt = now
     user.UpdatedAt = now
     return

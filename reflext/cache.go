@@ -9,6 +9,9 @@ import (
 // MapFunc :
 type MapFunc func(*StructField) (skip bool)
 
+// FormatFunc :
+type FormatFunc func(string) string
+
 // Mapper :
 type Mapper struct {
 	mutex   sync.Mutex

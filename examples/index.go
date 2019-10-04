@@ -43,6 +43,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		require.True(t, len(idxs) > 1)
 	}
 
+	// Auto build indexes using yaml file
 	{
 		err = db.BuildIndexes()
 		require.NoError(t, err)
@@ -62,6 +63,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 
 	table = db.Table("NormalStruct")
 
+	// Create multiple indexes
 	{
 		idxs := []indexes.Index{
 			indexes.Index{

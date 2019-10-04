@@ -14,6 +14,7 @@ import (
 
 // SingleResult :
 type SingleResult interface {
+	Scan(dest ...interface{}) error
 	Decode(dest interface{}) error
 	Error() error
 }

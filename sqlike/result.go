@@ -56,6 +56,41 @@ func (r *Result) values() ([]interface{}, error) {
 	return values, nil
 }
 
+// Scan :
+func (r *Result) Scan(dests ...interface{}) error {
+	if r.err != nil {
+		return r.err
+	}
+	if len(dests) == 0 {
+		return errors.New("sqlike: empty destination to scan")
+	}
+	values, err := r.values()
+	if err != nil {
+		return err
+	}
+	max := len(dests)
+	for i, v := range values {
+		if i >= max {
+			break
+		}
+		fv := reflext.ValueOf(dests[i])
+		if fv.Kind() != reflect.Ptr {
+			return ErrUnaddressableEntity
+		}
+		t := fv.Elem().Type()
+		vv := reflext.Zero(t)
+		decoder, err := r.registry.LookupDecoder(t)
+		if err != nil {
+			return err
+		}
+		if err := decoder(v, vv); err != nil {
+			return err
+		}
+		fv.Elem().Set(vv)
+	}
+	return nil
+}
+
 // Decode will decode the current document into val.
 func (r *Result) Decode(dst interface{}) error {
 	if r.close {

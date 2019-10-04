@@ -34,6 +34,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	uid, _ := uuid.Parse("e7977246-910a-11e9-844d-6c96cfd87a51")
 	ts, _ := time.Parse("2006-01-02 15:04:05", "2008-01-28 10:25:33")
 	b := []byte(`abcd1234`)
+	jsonRaw := json.RawMessage(`{"test":"hello world"}`)
 	lang := language.Japanese
 	langs := []language.Tag{
 		language.AmericanEnglish,
@@ -43,9 +44,15 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		language.Korean,
 		language.Japanese,
 	}
+	numMap := map[string]int{
+		"one":    1,
+		"three":  3,
+		"eleven": 11,
+	}
 
 	table := db.Table("NormalStruct")
 
+	// insert record before find
 	{
 		ns = normalStruct{}
 		ns.ID = uid
@@ -62,7 +69,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.Float32 = 10.6789
 		ns.Float64 = 19833.6789
 		ns.GeoPoint = [2]float64{10.12331, 384.7899003}
-		ns.JSONRaw = json.RawMessage(`{"test":"hello world"}`)
+		ns.JSONRaw = jsonRaw
 		ns.Enum = Failed
 		ns.Map = make(map[string]int)
 		ns.Map["one"] = 1
@@ -86,6 +93,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			),
 			options.FindOne().SetDebug(true),
 		).Decode(&ns)
+
 		require.NoError(t, err)
 
 		require.Equal(t, uid, ns.ID)
@@ -104,14 +112,65 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("FAILED"), ns.Enum)
 		require.Equal(t, types.GeoPoint{10.12331, 384.7899003}, ns.GeoPoint)
-		require.Equal(t, map[string]int{
-			"one":    1,
-			"three":  3,
-			"eleven": 11,
-		}, ns.Map)
+		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
+	}
+
+	// Find one with scan
+	{
+		var i struct {
+			skip      string
+			count     uint
+			id        *string
+			emoji     string
+			customStr string
+			boolean   bool
+			jsonRaw   json.RawMessage
+			numMap    map[string]int
+		}
+		ns = normalStruct{}
+
+		// Scan with unmatched number of fields
+		err = table.FindOne(
+			actions.FindOne().Select(
+				expr.As(expr.Count("$Key"), "c"),
+			).Where(
+				expr.Equal("$Key", uid),
+			),
+			options.FindOne().SetDebug(true),
+		).Scan(&i.count, i.skip, &i.id, &i.emoji)
+		require.NoError(t, err)
+		require.True(t, i.count > 0)
+
+		// Scan with fields
+		err = table.FindOne(
+			actions.FindOne().Select(
+				"$Key", "Emoji", "CustomStrType", "Bool",
+				"JSONRaw", "Map", "Language",
+			).Where(
+				expr.Equal("$Key", uid),
+			),
+			options.FindOne().SetDebug(true),
+		).Scan(&i.id, &i.emoji, &i.customStr, &i.boolean, &i.jsonRaw, &i.numMap)
+		require.NoError(t, err)
+		require.NotNil(t, i.id)
+		require.Equal(t, uid.String(), *i.id)
+		require.Equal(t, emoji, i.emoji)
+		require.Equal(t, jsonRaw, i.jsonRaw)
+		require.Equal(t, numMap, i.numMap)
+
+		// Scan error
+		err = table.FindOne(
+			actions.FindOne().Select(
+				"$Key",
+			).Where(
+				expr.Equal("$Key", uid),
+			),
+			options.FindOne().SetDebug(true),
+		).Scan(i.skip)
+		require.Error(t, err)
 	}
 
 	// Find one record by primary key
@@ -142,6 +201,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Find with scan slice
 	{
 		ns = normalStruct{}
 		result, err = table.Find(
@@ -161,6 +221,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		}, emojis)
 	}
 
+	// Find with subquery
 	{
 		ns = normalStruct{}
 		result, err = table.Find(
@@ -193,7 +254,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
-	// query with Like
+	// Query with Like expression
 	{
 		symbol := "Hal%o%()#$\\%^&_"
 		ns = normalStruct{}

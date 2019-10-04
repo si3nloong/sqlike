@@ -23,6 +23,7 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 
 	table := db.Table("NormalStruct")
 
+	// Delete record with primary key
 	{
 		err = table.FindOne(
 			actions.FindOne().

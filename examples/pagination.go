@@ -162,6 +162,7 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		require.Error(t, err)
 	}
 
+	// Loop and get result set
 	{
 		for i := 0; i < len(actuals); i++ {
 			users = []User{}

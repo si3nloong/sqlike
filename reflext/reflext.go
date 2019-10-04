@@ -7,9 +7,6 @@ import (
 	"strings"
 )
 
-// FormatFunc :
-type FormatFunc func(string) string
-
 // StructTag :
 type StructTag struct {
 	name string

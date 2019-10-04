@@ -19,6 +19,7 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		ok  bool
 	)
 
+	// Init policy
 	{
 		a = plugin.MustNew(db.Table("AccessPolicy"))
 		a = plugin.MustNew(db.Table("AccessPolicy"))
@@ -30,6 +31,7 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Create policy
 	{
 		ok, err = e.AddNamedPolicy("p", "casbin", "/*", "GET")
 		require.True(t, ok)
@@ -53,12 +55,14 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Check success access
 	{
 		ok, err = e.Enforce("username", "/*", "*")
 		require.True(t, ok)
 		require.NoError(t, err)
 	}
 
+	// Check failed access
 	{
 		ok, err = e.Enforce("s1", "/*", "*")
 		require.False(t, ok)

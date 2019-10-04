@@ -75,7 +75,7 @@ func testFilters(t *testing.T, p *Parser) {
 
 	// Filters (valid)
 	{
-		query = p.FilterTag + `=(_id%3D%3D%3D133,category%3E%3D10)|c1%3D%3Dtesting,d1%3E10833,d2%3D%3FCOMPLETED%2CFAILED`
+		query = p.FilterTag + `=(_id%3D%3D%3D133,(category%3E%3D10|test%3D%3D))|c1%3D%3Dtesting,d1%3E10833,d2%3D%3FCOMPLETED%2CFAILED`
 		params, err = p.ParseQuery(query)
 		// require.NotNil(t, params)
 		// require.NoError(t, err)
