@@ -122,7 +122,6 @@ func (r *Result) Decode(dst interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
 		fv := mapper.FieldByIndexes(vv, idx)

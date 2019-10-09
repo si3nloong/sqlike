@@ -300,6 +300,29 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 				"C", "MAX(`BigInt`)", "D",
 			}, result.Columns())
 	}
+
+	{
+		table := db.Table("GeneratedStruct")
+
+		first := newGeneratedStruct()
+		cols := []*generatedStruct{
+			first,
+			newGeneratedStruct(),
+		}
+		_, err = table.Insert(&cols,
+			options.Insert().SetDebug(true))
+		require.NoError(t, err)
+		require.Empty(t, first.ID)
+
+		var result generatedStruct
+
+		err = table.FindOne(actions.FindOne().Where(
+			expr.Equal("NestedID", first.Nested.ID),
+		), options.FindOne().SetDebug(true)).Decode(&result)
+		require.NoError(t, err)
+		require.Equal(t, first.Nested.ID, result.ID)
+		require.True(t, result.Amount > 0)
+	}
 }
 
 // FindErrorExamples :

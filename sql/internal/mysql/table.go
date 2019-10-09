@@ -54,6 +54,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
+		k1, k2  string
 		virtual bool
 		stored  bool
 	)
@@ -92,8 +93,8 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 		children := sf.Children
 		for len(children) > 0 {
 			child := children[0]
-			_, virtual = child.Tag.LookUp("virtual_column")
-			_, stored = child.Tag.LookUp("stored_column")
+			k1, virtual = child.Tag.LookUp("virtual_column")
+			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
 				col, err = ms.schema.GetColumn(child)
@@ -101,7 +102,15 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 					return
 				}
 
-				stmt.WriteString(ms.Quote(col.Name))
+				name := col.Name
+				if virtual && k1 != "" {
+					name = k1
+				}
+				if stored && k2 != "" {
+					name = k2
+				}
+
+				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(` ` + col.Type)
 				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
 				stmt.WriteString(` AS `)
