@@ -44,7 +44,7 @@
 - [x] Custom `JSON` decoder
 - [x] [Bug] `UnmarshalJSONB` into `[]byte`
 - [x] [Feature] Single database `Migration`
-- [x] [Feature] Support generated column for `Migration` (`virtual_column` or `stored_column`)
+- [x] [Feature] Support `generated_column` for `Migration` (`virtual_column` or `stored_column`)
 - [x] Support `UnsafeMigrate`
 - [x] Support `MustUnsafeMigrate`
 - [x] [Feature] `InsertIgnore` & `Upsert`

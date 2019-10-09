@@ -104,6 +104,22 @@ func InsertExamples(t *testing.T, db *sqlike.Database) {
 		_, err = table.Insert([]interface{}{})
 		require.Error(t, err)
 	}
+
+	table3 := db.Table("GeneratedStruct")
+
+	// generated column insertion
+	{
+		cols := []*generatedStruct{
+			newGeneratedStruct(),
+			newGeneratedStruct(),
+			newGeneratedStruct(),
+			newGeneratedStruct(),
+			newGeneratedStruct(),
+		}
+		_, err = table3.Insert(&cols,
+			options.Insert().SetDebug(true))
+		require.NoError(t, err)
+	}
 }
 
 // InsertErrorExamples :

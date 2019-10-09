@@ -87,9 +87,9 @@ type Country struct {
 // Address :
 type Address struct {
 	Line1 string
-	Line2 string `sqlike:",virtual"`
-	City  string `sqlike:",virtual"`
-	State string `sqlike:",virtual"`
+	Line2 string `sqlike:",virtual_column"`
+	City  string `sqlike:",virtual_column"`
+	State string `sqlike:",virtual_column"`
 	// Country `sqlike:",inline"`
 	Country Country
 }
@@ -134,6 +134,15 @@ type ptrStruct struct {
 	NullKey       *types.Key
 	NullDate      *types.Date
 	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+}
+
+type generatedStruct struct {
+	ID     string  `sqlike:"NestedID,generated_column"`
+	Amount float64 `sqlike:"Amount,generated_column"`
+	Nested struct {
+		ID     string  `sqlike:",stored_column:NestedID"`
+		Amount float64 `sqlike:",virtual_column:Amount"`
+	}
 }
 
 type mongoStruct struct {
@@ -230,4 +239,11 @@ func newPtrStruct() ptrStruct {
 	ps.NullTimestamp = &now
 	ps.NullEnum = &enum
 	return ps
+}
+
+func newGeneratedStruct() *generatedStruct {
+	gs := &generatedStruct{}
+	gs.Nested.ID = uuid.New().String()
+	gs.Nested.Amount = gofakeit.Float64Range(1, 10000)
+	return gs
 }
