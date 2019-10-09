@@ -2,6 +2,7 @@ package jsonb
 
 type jsonType int
 
+// json type values :
 const (
 	jsonInvalid jsonType = iota
 	jsonNull

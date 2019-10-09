@@ -1,4 +1,4 @@
-package filters
+package rsql
 
 // Params :
 type Params struct {

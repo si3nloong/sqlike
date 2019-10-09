@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
 	github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b
-	github.com/casbin/casbin/v2 v2.0.3-0.20190928074945-8e9b785498b5
+	github.com/casbin/casbin/v2 v2.0.3-0.20191004065331-b06aa8c42611
 	github.com/go-sql-driver/mysql v1.4.1-0.20191001060945-14bb9c0fc20f
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
@@ -15,6 +15,8 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/stretchr/testify v1.4.1-0.20190904163530-85f2b59c4459
 	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/timtadh/data-structures v0.5.3 // indirect
+	github.com/timtadh/lexmachine v0.2.2
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.1.1

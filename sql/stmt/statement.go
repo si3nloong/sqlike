@@ -13,12 +13,12 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
+	strings.Builder
 	start   time.Time
 	elapsed time.Duration
-	strings.Builder
-	fmt  Formatter
-	c    int
-	args []interface{}
+	fmt     Formatter
+	c       int
+	args    []interface{}
 }
 
 // NewStatement :
