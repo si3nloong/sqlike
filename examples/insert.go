@@ -140,10 +140,6 @@ func InsertErrorExamples(t *testing.T, db *sqlike.Database) {
 		ns = normalStruct{}
 		_, err = db.Table("NormalStruct").InsertOne(ns)
 		require.Error(t, err)
-
-		ns = normalStruct{}
-		_, err = db.Table("NormalStruct").InsertOne(&ns)
-		require.Error(t, err)
 	}
 
 	{

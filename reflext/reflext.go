@@ -9,13 +9,19 @@ import (
 
 // StructTag :
 type StructTag struct {
-	name string
-	opts map[string]string
+	originalName string
+	name         string
+	opts         map[string]string
 }
 
 // Name :
 func (st StructTag) Name() string {
 	return st.name
+}
+
+// OriginalName :
+func (st StructTag) OriginalName() string {
+	return st.originalName
 }
 
 // Get :
@@ -163,15 +169,15 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				}
 
 				// embedded struct
+				path := sf.Path
 				if f.Anonymous {
-					path := sf.Path
-					if sf.Tag.name == "" {
+					if sf.Tag.OriginalName() == "" {
 						path = q.pp
 					}
-					queue = append(queue, typeQueue{ft, sf, path})
-				} else {
-					queue = append(queue, typeQueue{ft, sf, sf.Path})
+					// queue = append(queue, typeQueue{ft, sf, path})
 				}
+
+				queue = append(queue, typeQueue{ft, sf, path})
 			}
 
 		nextStep:
@@ -206,6 +212,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 			codec.Properties = append(codec.Properties, sf)
 		}
 	}
+
 	return codec
 }
 
@@ -219,6 +226,7 @@ func appendSlice(s []int, i int) []int {
 func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
 	parts := strings.Split(f.Tag.Get(tagName), ",")
 	name := strings.TrimSpace(parts[0])
+	st.originalName = name
 	if name == "" {
 		name = f.Name
 		if fmtFunc != nil {

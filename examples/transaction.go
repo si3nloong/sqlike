@@ -35,6 +35,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		ns.ID = uid
 		ns.DateTime = now
 		ns.Timestamp = now
+		ns.CreatedAt = now
+		ns.UpdatedAt = now
 		tx, err = db.BeginTransaction()
 		require.NoError(t, err)
 		result, err = tx.Table("NormalStruct").InsertOne(&ns)
@@ -56,6 +58,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		ns.ID = uid
 		ns.DateTime = now
 		ns.Timestamp = now
+		ns.CreatedAt = now
+		ns.UpdatedAt = now
 		tx, err = db.BeginTransaction()
 		require.NoError(t, err)
 		result, err = tx.Table("NormalStruct").InsertOne(&ns)
@@ -86,6 +90,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			ns.ID = uid
 			ns.DateTime = now
 			ns.Timestamp = now
+			ns.CreatedAt = now
+			ns.UpdatedAt = now
 			result, err := ctx.Table("NormalStruct").InsertOne(&ns)
 			if err != nil {
 				return err

@@ -17,6 +17,12 @@ type indexStruct struct {
 	ID     string `sqlike:""`
 }
 
+// Date :
+type Date struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
 	Key           *types.Key
@@ -46,14 +52,13 @@ type normalStruct struct {
 	EmptyStruct   struct{}
 	GeoPoint      types.GeoPoint
 	Struct        struct {
-		VirtualStr string `sqlike:",virtual_column"`
-		StoredStr  string `sqlike:",stored_column"`
-		NestedBool bool   `sqlike:""`
-		// NestedNullInt *int
+		VirtualStr    string `sqlike:",virtual_column"`
+		StoredStr     string `sqlike:",stored_column"`
+		NestedBool    bool
+		NestedNullInt *int
 	}
-	JSONRaw json.RawMessage
-	Map     map[string]int
-	// GeoPoint  types.GeoPoint
+	JSONRaw    json.RawMessage
+	Map        map[string]int
 	DateTime   time.Time `sqlike:",size=0"`
 	Timestamp  time.Time
 	Language   language.Tag
@@ -61,6 +66,7 @@ type normalStruct struct {
 	Currency   currency.Unit
 	Currencies []currency.Unit
 	Enum       Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Date
 }
 
 type jsonStruct struct {
@@ -88,9 +94,9 @@ type Country struct {
 // Address :
 type Address struct {
 	Line1 string
-	Line2 string `sqlike:",virtual_column"`
-	City  string `sqlike:",virtual_column"`
-	State string `sqlike:",virtual_column"`
+	Line2 string `sqlike:",virtual_column"` // this will not work if it's embedded struct
+	City  string `sqlike:",virtual_column"` // this will not work if it's embedded struct
+	State string `sqlike:",virtual_column"` // this will not work if it's embedded struct
 	// Country `sqlike:",inline"`
 	Country Country
 }
@@ -144,6 +150,8 @@ type generatedStruct struct {
 		ID     string  `sqlike:",stored_column=NestedID"`
 		Amount float64 `sqlike:",virtual_column=Amount"`
 	}
+	model
+	Date `sqlike:"Date"`
 }
 
 type mongoStruct struct {
@@ -210,6 +218,8 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 		"FAILED",
 		"UNKNOWN",
 	}))
+	ns.CreatedAt = now
+	ns.UpdatedAt = now
 	return ns
 }
 

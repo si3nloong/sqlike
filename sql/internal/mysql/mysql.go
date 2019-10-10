@@ -65,12 +65,3 @@ func (ms MySQL) GetDatabases() (stmt *sqlstmt.Statement) {
 	stmt.WriteString(`SHOW DATABASES;`)
 	return
 }
-
-// GetColumns :
-func (ms MySQL) GetColumns(dbName, table string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`SELECT ORDINAL_POSITION, COLUMN_NAME, COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE,
-	DATA_TYPE, CHARACTER_SET_NAME, COLLATION_NAME, EXTRA FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs([]interface{}{dbName, table})
-	return
-}

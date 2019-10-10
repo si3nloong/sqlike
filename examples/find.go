@@ -44,6 +44,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		language.Korean,
 		language.Japanese,
 	}
+	virtualColumn := "virtual column"
 	numMap := map[string]int{
 		"one":    1,
 		"three":  3,
@@ -54,6 +55,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 	// insert record before find
 	{
+		now := time.Now()
 		ns = normalStruct{}
 		ns.ID = uid
 		ns.Emoji = emoji
@@ -75,10 +77,13 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.Map["one"] = 1
 		ns.Map["three"] = 3
 		ns.Map["eleven"] = 11
+		ns.Struct.VirtualStr = virtualColumn
 		ns.DateTime = ts
 		ns.Timestamp = ts
 		ns.Language = lang
 		ns.Languages = langs
+		ns.CreatedAt = now
+		ns.UpdatedAt = now
 
 		_, err = table.InsertOne(&ns)
 		require.NoError(t, err)
@@ -112,6 +117,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("FAILED"), ns.Enum)
 		require.Equal(t, types.GeoPoint{10.12331, 384.7899003}, ns.GeoPoint)
+		require.Equal(t, virtualColumn, ns.Struct.VirtualStr)
+		require.Nil(t, ns.Struct.NestedNullInt)
 		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)

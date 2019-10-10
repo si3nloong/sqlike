@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -71,7 +70,7 @@ func (enc DefaultEncoders) EncodeRawBytes(_ *reflext.StructField, v reflect.Valu
 // EncodeJSONRaw :
 func (enc DefaultEncoders) EncodeJSONRaw(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	if v.IsNil() {
-		return []byte(`null`), nil
+		return []byte("null"), nil
 	}
 	buf := new(bytes.Buffer)
 	if err := json.Compact(buf, v.Bytes()); err != nil {
@@ -91,10 +90,11 @@ func (enc DefaultEncoders) EncodeStringer(_ *reflext.StructField, v reflect.Valu
 
 // EncodeTime :
 func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
-	x, ok := v.Interface().(time.Time)
-	if !ok {
-		return nil, errors.New("sqlike/sql/codec: invalid data type")
-	}
+	x := v.Interface().(time.Time)
+	// if x.IsZero() {
+	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
+	// 	return x, nil
+	// }
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
 }
