@@ -19,8 +19,9 @@ type indexStruct struct {
 
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
-	SID           string    `sqlike:",charset:latin1"`
-	Emoji         string    `sqlike:""`
+	Key           *types.Key
+	SID           string `sqlike:",charset:latin1"`
+	Emoji         string `sqlike:""`
 	FullText      string
 	LongStr       string  `sqlike:",longtext"`
 	CustomStrType LongStr `sqlike:",size:300"`
@@ -169,6 +170,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 		`errors.Newで作成したエラーは、%+v のときにファイル名やメソッド名を表示します。`,
 	}))
 	ns.LongStr = gofakeit.Sentence(50)
+	ns.Key = types.NewNameKey("Name", types.NewIDKey("ID", nil))
 	ns.Bool = true
 	ns.FullText = "Hal%o%()#$\\%^&_"
 	ns.Int = gofakeit.Number(100, 99999999)
