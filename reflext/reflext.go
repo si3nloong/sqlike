@@ -105,7 +105,7 @@ type typeQueue struct {
 	pp string // parent path
 }
 
-func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFunc) *Struct {
+func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 	fields := make([]*StructField, 0)
 
 	root := &StructField{}
@@ -114,7 +114,6 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 
 	for len(queue) > 0 {
 		q := queue[0]
-
 		q.sf.Children = make([]*StructField, 0)
 
 		for i := 0; i < q.t.NumField(); i++ {
@@ -157,14 +156,12 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 			sf.Index = appendSlice(q.sf.Index, i)
 			sf.Embedded = ft.Kind() == reflect.Struct && f.Anonymous
 
-			if mapFunc != nil {
-				if mapFunc(sf) {
-					fields = append(fields, sf)
-					continue
-				}
-			}
-
 			if ft.Kind() == reflect.Struct {
+				// check recursive, prevent infinite loop
+				if q.t == ft {
+					goto nextStep
+				}
+
 				// embedded struct
 				if f.Anonymous {
 					path := sf.Path
@@ -177,6 +174,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 				}
 			}
 
+		nextStep:
 			fields = append(fields, sf)
 		}
 

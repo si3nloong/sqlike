@@ -14,24 +14,24 @@ import (
 	"golang.org/x/text/language"
 )
 
-// ColumnTyper :
-type ColumnTyper interface {
+// ColumnType :
+type ColumnType interface {
 	DataType(driver string, sf *reflext.StructField) columns.Column
 }
 
 // DataTypeFunc :
 type DataTypeFunc func(sf *reflext.StructField) columns.Column
 
-// SchemaBuilder :
-type SchemaBuilder struct {
+// Builder :
+type Builder struct {
 	mutex    sync.Mutex
 	typeMap  map[interface{}]sqltype.Type
 	builders map[sqltype.Type]DataTypeFunc
 }
 
-// NewSchemaBuilder :
-func NewSchemaBuilder() *SchemaBuilder {
-	sb := &SchemaBuilder{
+// NewBuilder :
+func NewBuilder() *Builder {
+	sb := &Builder{
 		typeMap:  make(map[interface{}]sqltype.Type),
 		builders: make(map[sqltype.Type]DataTypeFunc),
 	}
@@ -40,32 +40,32 @@ func NewSchemaBuilder() *SchemaBuilder {
 }
 
 // SetType :
-func (sb *SchemaBuilder) SetType(it interface{}, t sqltype.Type) {
+func (sb *Builder) SetType(it interface{}, t sqltype.Type) {
 	sb.mutex.Lock()
 	defer sb.mutex.Unlock()
 	sb.typeMap[it] = t
 }
 
 // SetTypeBuilder :
-func (sb *SchemaBuilder) SetTypeBuilder(t sqltype.Type, builder DataTypeFunc) {
+func (sb *Builder) SetTypeBuilder(t sqltype.Type, builder DataTypeFunc) {
 	sb.mutex.Lock()
 	defer sb.mutex.Unlock()
 	sb.builders[t] = builder
 }
 
 // LookUpType :
-func (sb *SchemaBuilder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
+func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 	t = reflext.Deref(t)
 	typ, exists = sb.typeMap[t]
 	return
 }
 
 // GetColumn :
-func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, error) {
+func (sb *Builder) GetColumn(sf *reflext.StructField) (columns.Column, error) {
 	v := sf.Zero
-	it := reflect.TypeOf((*ColumnTyper)(nil)).Elem()
+	it := reflect.TypeOf((*ColumnType)(nil)).Elem()
 	if v.Type().Implements(it) {
-		return v.Interface().(ColumnTyper).DataType("mysql", sf), nil
+		return v.Interface().(ColumnType).DataType("mysql", sf), nil
 	}
 
 	t := reflext.Deref(v.Type())
@@ -81,7 +81,7 @@ func (sb *SchemaBuilder) GetColumn(sf *reflext.StructField) (columns.Column, err
 }
 
 // SetDefaultTypes :
-func (sb *SchemaBuilder) SetDefaultTypes() {
+func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf([]byte{}), sqltype.Byte)
 	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.String)

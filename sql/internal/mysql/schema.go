@@ -24,7 +24,7 @@ type mySQLSchema struct {
 }
 
 // SetBuilders :
-func (s mySQLSchema) SetBuilders(sb *schema.SchemaBuilder) {
+func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Byte, s.ByteDataType)
 	sb.SetTypeBuilder(sqltype.Date, s.DateDataType)
 	sb.SetTypeBuilder(sqltype.DateTime, s.TimeDataType)

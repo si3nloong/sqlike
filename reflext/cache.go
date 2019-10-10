@@ -17,16 +17,14 @@ type Mapper struct {
 	mutex   sync.Mutex
 	tag     string
 	cache   map[reflect.Type]*Struct
-	mapFunc MapFunc
 	fmtFunc FormatFunc
 }
 
 // NewMapperFunc :
-func NewMapperFunc(tag string, mapFunc MapFunc, fmtFunc FormatFunc) *Mapper {
+func NewMapperFunc(tag string, fmtFunc FormatFunc) *Mapper {
 	return &Mapper{
 		cache:   make(map[reflect.Type]*Struct),
 		tag:     tag,
-		mapFunc: mapFunc,
 		fmtFunc: fmtFunc,
 	}
 }
@@ -37,7 +35,7 @@ func (m *Mapper) CodecByType(t reflect.Type) *Struct {
 	defer m.mutex.Unlock()
 	mapping, ok := m.cache[t]
 	if !ok {
-		mapping = getCodec(t, m.tag, m.mapFunc, m.fmtFunc)
+		mapping = getCodec(t, m.tag, m.fmtFunc)
 		m.cache[t] = mapping
 	}
 	return mapping

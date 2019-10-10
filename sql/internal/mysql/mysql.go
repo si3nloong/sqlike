@@ -9,14 +9,14 @@ import (
 
 // MySQL :
 type MySQL struct {
-	schema *schema.SchemaBuilder
+	schema *schema.Builder
 	parser *sqlstmt.StatementBuilder
 	sqlutil.MySQLUtil
 }
 
 // New :
 func New() *MySQL {
-	sb := schema.NewSchemaBuilder()
+	sb := schema.NewBuilder()
 	pr := sqlstmt.NewStatementBuilder()
 
 	mySQLSchema{}.SetBuilders(sb)
