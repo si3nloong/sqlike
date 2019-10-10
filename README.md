@@ -8,10 +8,10 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 ### Minimum Requirements
 
-We don't really care about legacy support, we want latest feature that mysql and golang offer us :
+We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us :
 
-1. **mysql 5.7** and above
-2. **Golang 1.3** and above
+- **mysql 5.7** and above
+- **Golang 1.3** and above
 
 ### What we provide apart from native package (database/sql)?
 
@@ -19,9 +19,9 @@ We don't really care about legacy support, we want latest feature that mysql and
 - Support `Enum`
 - Support `UUID`
 - Support `generated column` for `stored column` and `virtual column`
-- Extra custom type such as `Date`, `Key`
+- Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
-- Support `language.Tag`, `currency.Unit`
+- Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
 - Prevent toxic query with `Strict Mode` **(in progress)**
 - Support query filtering **(in progress)**

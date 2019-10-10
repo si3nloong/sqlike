@@ -16,9 +16,9 @@ func (x *Boolean) Scan(src interface{}) error {
 		{
 			val := strings.ToLower(string(vi))
 			switch val {
-			case "yes":
+			case "yes", "y":
 				*x = true
-			case "no":
+			case "no", "n":
 				*x = false
 			default:
 				b, _ := strconv.ParseBool(val)
@@ -30,9 +30,9 @@ func (x *Boolean) Scan(src interface{}) error {
 		{
 			vi = strings.ToLower(vi)
 			switch vi {
-			case "yes":
+			case "yes", "y":
 				*x = true
-			case "no":
+			case "no", "n":
 				*x = false
 			default:
 				b, _ := strconv.ParseBool(vi)
