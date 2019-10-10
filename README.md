@@ -18,13 +18,13 @@ We don't really care about legacy support, we want latest feature that mysql and
 - Support `JSON`
 - Support `Enum`
 - Support `UUID`
-- Support `stored column` and `virtual column`
-- Extra type such as `Date`, `Key`
+- Support `generated column` for `stored column` and `virtual column`
+- Extra custom type such as `Date`, `Key`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support `language.Tag`, `currency.Unit`
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
-- Prevent toxic query with `Strict Mode` (in progress)
-- Support query filtering (in progress)
+- Prevent toxic query with `Strict Mode` **(in progress)**
+- Support query filtering **(in progress)**
 
 ### Missing DOC?
 

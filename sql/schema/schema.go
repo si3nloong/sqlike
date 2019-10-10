@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
-	sqltype "github.com/si3nloong/sqlike/sql/types"
+	"github.com/si3nloong/sqlike/sql/driver"
+	sqltype "github.com/si3nloong/sqlike/sql/type"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -16,7 +17,7 @@ import (
 
 // ColumnType :
 type ColumnType interface {
-	DataType(driver string, sf *reflext.StructField) columns.Column
+	DataType(info driver.Info, sf *reflext.StructField) columns.Column
 }
 
 // DataTypeFunc :
@@ -61,11 +62,11 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 }
 
 // GetColumn :
-func (sb *Builder) GetColumn(sf *reflext.StructField) (columns.Column, error) {
+func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns.Column, error) {
 	v := sf.Zero
 	it := reflect.TypeOf((*ColumnType)(nil)).Elem()
 	if v.Type().Implements(it) {
-		return v.Interface().(ColumnType).DataType("mysql", sf), nil
+		return v.Interface().(ColumnType).DataType(info, sf), nil
 	}
 
 	t := reflext.Deref(v.Type())

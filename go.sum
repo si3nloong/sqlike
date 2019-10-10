@@ -6,6 +6,8 @@ github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b h1:slWfe8ZDDVu
 github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b/go.mod h1:8WhrFWLx5svQrZpAq+kYvjRWdRcLj12T1jqy1AHAKZ0=
 github.com/casbin/casbin/v2 v2.0.3-0.20190928074945-8e9b785498b5 h1:OLyF/bnyyi4fl+P30gM9vPUgBlKa5KDCom9Byhfp9k4=
 github.com/casbin/casbin/v2 v2.0.3-0.20190928074945-8e9b785498b5/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
+github.com/casbin/casbin/v2 v2.0.3-0.20191007094951-e745107dd3ad h1:RwKcbeQVH88bEDiKwDs7m/YcF0wxwbR6zwrlCICrUsI=
+github.com/casbin/casbin/v2 v2.0.3-0.20191007094951-e745107dd3ad/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-sql-driver/mysql v1.4.1-0.20191001060945-14bb9c0fc20f h1:Ny8w8RFRlevl6jva0eFC5EWsZu+p3984zD77BNBPO2k=

@@ -37,6 +37,7 @@ func TestExamples(t *testing.T) {
 		Database("sqlike")
 
 	v := client.Version()
+	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 
 	dbs, err := client.ListDatabases()

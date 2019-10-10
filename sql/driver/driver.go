@@ -1,4 +1,4 @@
-package sqldriver
+package driver
 
 import (
 	"context"
@@ -7,6 +7,12 @@ import (
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
+
+// Info :
+type Info interface {
+	DriverName() string
+	// Version()
+}
 
 // Driver :
 type Driver interface {

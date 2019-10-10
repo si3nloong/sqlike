@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 )
 
@@ -11,7 +12,7 @@ import (
 type Timestamp time.Time
 
 // DataType :
-func (ts *Timestamp) DataType(driver string, sf *reflext.StructField) columns.Column {
+func (ts *Timestamp) DataType(_ driver.Info, sf *reflext.StructField) columns.Column {
 	dflt := "CURDATE()"
 	return columns.Column{
 		Name:         sf.Path,

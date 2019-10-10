@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/charset"
+	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -51,7 +51,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		k1, k2  string
@@ -69,7 +69,7 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 			stmt.WriteRune(',')
 		}
 
-		col, err = ms.schema.GetColumn(sf)
+		col, err = ms.schema.GetColumn(info, sf)
 		if err != nil {
 			return
 		}
@@ -97,7 +97,7 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
-				col, err = ms.schema.GetColumn(child)
+				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
 				}
@@ -128,21 +128,21 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 	}
 	stmt.WriteRune(')')
 	stmt.WriteString(" ENGINE=INNODB")
-	if code == "" {
-		stmt.WriteString(" CHARACTER SET utf8mb4")
-		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
-	} else {
-		stmt.WriteString(" CHARACTER SET " + string(code))
-		if collate != "" {
-			stmt.WriteString(" COLLATE " + collate)
-		}
-	}
+	// if code == "" {
+	// 	stmt.WriteString(" CHARACTER SET utf8mb4")
+	// 	stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
+	// } else {
+	// 	stmt.WriteString(" CHARACTER SET " + string(code))
+	// 	if collate != "" {
+	// 		stmt.WriteString(" COLLATE " + collate)
+	// 	}
+	// }
 	stmt.WriteRune(';')
 	return
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		idx     int
@@ -172,7 +172,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 			stmt.WriteRune(',')
 		}
 		stmt.WriteString(action + " ")
-		col, err = ms.schema.GetColumn(sf)
+		col, err = ms.schema.GetColumn(info, sf)
 		if err != nil {
 			return
 		}
@@ -193,7 +193,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 			_, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
-				col, err = ms.schema.GetColumn(child)
+				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
 				}

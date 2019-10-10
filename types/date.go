@@ -10,14 +10,20 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
 )
 
-const dateRegex = `\d{4}\-\d{2}\-\d{2}`
-
 // ErrDateFormat :
 var ErrDateFormat = errors.New(`invalid date format, it should be "YYYY-MM-DD"`)
+
+const dateRegex = `\d{4}\-\d{2}\-\d{2}`
+
+// Date :
+type Date struct {
+	Year, Month, Day int
+}
 
 // ParseDate :
 func ParseDate(str string) (*Date, error) {
@@ -41,13 +47,8 @@ func DateFromTime(t time.Time) (*Date, error) {
 	}, nil
 }
 
-// Date :
-type Date struct {
-	Year, Month, Day int
-}
-
 // DataType :
-func (d *Date) DataType(driver string, sf *reflext.StructField) columns.Column {
+func (d *Date) DataType(_ sqldriver.Info, sf *reflext.StructField) columns.Column {
 	dflt := "CURDATE()"
 	return columns.Column{
 		Name:         sf.Path,
