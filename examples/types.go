@@ -20,11 +20,11 @@ type indexStruct struct {
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
 	Key           *types.Key
-	SID           string `sqlike:",charset:latin1"`
+	SID           string `sqlike:",charset=latin1"`
 	Emoji         string `sqlike:""`
 	FullText      string
 	LongStr       string  `sqlike:",longtext"`
-	CustomStrType LongStr `sqlike:",size:300"`
+	CustomStrType LongStr `sqlike:",size=300"`
 	EmptyByte     []byte
 	Byte          []byte
 	Bool          bool
@@ -54,13 +54,13 @@ type normalStruct struct {
 	JSONRaw json.RawMessage
 	Map     map[string]int
 	// GeoPoint  types.GeoPoint
-	DateTime   time.Time `sqlike:",size:0"`
+	DateTime   time.Time `sqlike:",size=0"`
 	Timestamp  time.Time
 	Language   language.Tag
 	Languages  []language.Tag
 	Currency   currency.Unit
 	Currencies []currency.Unit
-	Enum       Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	Enum       Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type jsonStruct struct {
@@ -134,15 +134,15 @@ type ptrStruct struct {
 	NullTimestamp *time.Time
 	NullKey       *types.Key
 	NullDate      *types.Date
-	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	NullEnum      *Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type generatedStruct struct {
 	ID     string  `sqlike:"NestedID,generated_column"`
 	Amount float64 `sqlike:"Amount,generated_column"`
 	Nested struct {
-		ID     string  `sqlike:",stored_column:NestedID"`
-		Amount float64 `sqlike:",virtual_column:Amount"`
+		ID     string  `sqlike:",stored_column=NestedID"`
+		Amount float64 `sqlike:",virtual_column=Amount"`
 	}
 }
 

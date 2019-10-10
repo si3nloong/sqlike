@@ -52,14 +52,14 @@ type User struct {
     ID        uuid.UUID
     ICNo      string     `sqlike:",generated_column"`
     Name      string
-    Email     string     `sqlike:",size:200"`
+    Email     string     `sqlike:",size=200"`
     Address   string     `sqlike:",longtext"`
     Detail    struct {
-        ICNo    string `sqlike:",virtual_column:ICNo"`
+        ICNo    string `sqlike:",virtual_column=ICNo"`
         PhoneNo string
         Age     uint
     }
-    Status    UserStatus `sqlike:",charset:latin1,enum:ACTIVE|SUSPEND"`
+    Status    UserStatus `sqlike:",charset=latin1,enum=ACTIVE|SUSPEND"`
     CreatedAt time.Time
     UpdatedAt time.Time
 }

@@ -230,8 +230,8 @@ func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st Str
 	if len(parts) > 1 {
 		for _, opt := range parts[1:] {
 			opt = strings.TrimSpace(opt)
-			if strings.Contains(opt, ":") {
-				kv := strings.SplitN(opt, ":", 2)
+			if strings.Contains(opt, "=") {
+				kv := strings.SplitN(opt, "=", 2)
 				k := strings.TrimSpace(strings.ToLower(kv[0]))
 				st.opts[k] = strings.TrimSpace(kv[1])
 				continue

@@ -24,7 +24,7 @@ type User struct {
 	ID        int64
 	Name      string
 	Age       int
-	Status    status `sqlike:",enum:ACTIVE|SUSPEND"`
+	Status    status `sqlike:",enum=ACTIVE|SUSPEND"`
 	CreatedAt time.Time
 }
 
