@@ -106,7 +106,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	}
 
 	col.DefaultValue = &dflt
-	col.CharSet = &charset
+	col.Charset = &charset
 	col.Collation = &collation
 
 	if enum, ok := sf.Tag.LookUp("enum"); ok {
@@ -143,7 +143,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		col.DataType = "TEXT"
 		col.Type = "TEXT"
 		col.DefaultValue = nil
-		col.CharSet = nil
+		col.Charset = nil
 		col.Collation = nil
 		return
 	}
@@ -225,7 +225,7 @@ func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column)
 		charset, collation := "ascii", "ascii_general_ci"
 		col.DataType = "VARCHAR"
 		col.Type = "VARCHAR(36)"
-		col.CharSet = &charset
+		col.Charset = &charset
 		col.Collation = &collation
 		return
 	}

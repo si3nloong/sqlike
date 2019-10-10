@@ -97,7 +97,7 @@ func (tb *Table) ListColumns() ([]Column, error) {
 			&col.DefaultValue,
 			&col.IsNullable,
 			&col.DataType,
-			&col.CharSet,
+			&col.Charset,
 			&col.Collation,
 			&col.Extra,
 		); err != nil {

@@ -36,6 +36,11 @@ func (d *DriverInfo) Charset() charset.Code {
 	return d.charSet
 }
 
+// Collate :
+func (d *DriverInfo) Collate() string {
+	return d.collate
+}
+
 // Client :
 type Client struct {
 	*DriverInfo

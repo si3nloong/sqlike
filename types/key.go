@@ -51,7 +51,7 @@ func (k *Key) DataType(t sqldriver.Info, sf *reflext.StructField) columns.Column
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(512)",
 		Nullable:  reflext.IsNullable(sf.Zero.Type()),
-		CharSet:   &latin1,
+		Charset:   &latin1,
 		Collation: &latin1Bin,
 	}
 }

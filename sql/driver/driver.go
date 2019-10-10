@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/sql/charset"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
@@ -11,7 +12,8 @@ import (
 // Info :
 type Info interface {
 	DriverName() string
-	// Version()
+	Charset() charset.Code
+	Collate() string
 }
 
 // Driver :

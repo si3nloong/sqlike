@@ -128,15 +128,16 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 	}
 	stmt.WriteRune(')')
 	stmt.WriteString(" ENGINE=INNODB")
-	// if code == "" {
-	// 	stmt.WriteString(" CHARACTER SET utf8mb4")
-	// 	stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
-	// } else {
-	// 	stmt.WriteString(" CHARACTER SET " + string(code))
-	// 	if collate != "" {
-	// 		stmt.WriteString(" COLLATE " + collate)
-	// 	}
-	// }
+	code := string(info.Charset())
+	if code == "" {
+		stmt.WriteString(" CHARACTER SET utf8mb4")
+		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
+	} else {
+		stmt.WriteString(" CHARACTER SET " + code)
+		if info.Collate() != "" {
+			stmt.WriteString(" COLLATE " + info.Collate())
+		}
+	}
 	stmt.WriteRune(';')
 	return
 }
@@ -146,6 +147,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 	var (
 		col     columns.Column
 		idx     int
+		k1, k2  string
 		virtual bool
 		stored  bool
 	)
@@ -189,8 +191,8 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 		children := sf.Children
 		for len(children) > 0 {
 			child := children[0]
-			_, virtual = child.Tag.LookUp("virtual_column")
-			_, stored = child.Tag.LookUp("stored_column")
+			k1, virtual = child.Tag.LookUp("virtual_column")
+			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
 				col, err = ms.schema.GetColumn(info, child)
@@ -198,15 +200,23 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 					return
 				}
 
+				name := col.Name
+				if virtual && k1 != "" {
+					name = k1
+				}
+				if stored && k2 != "" {
+					name = k2
+				}
+
 				action = "ADD"
-				idx = cols.IndexOf(child.Path)
+				idx = cols.IndexOf(name)
 				if idx > -1 {
 					action = "MODIFY"
 					cols.Splice(idx)
 				}
 
 				stmt.WriteString(action + " ")
-				stmt.WriteString(ms.Quote(col.Name))
+				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
 				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
 				stmt.WriteString(" AS ")
@@ -217,7 +227,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 				if !col.Nullable {
 					stmt.WriteString(" NOT NULL")
 				}
-				suffix = "AFTER " + ms.Quote(child.Path)
+				suffix = "AFTER " + ms.Quote(name)
 			}
 			children = children[1:]
 			children = append(children, child.Children...)
@@ -231,6 +241,8 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 			stmt.WriteString(ms.Quote(col))
 		}
 	}
+
+	// TODO: character set
 	// stmt.WriteRune(',')
 	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)
 	// stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
@@ -265,8 +277,8 @@ func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyAction
 func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
-	if col.CharSet != nil {
-		stmt.WriteString(" CHARACTER SET " + *col.CharSet)
+	if col.Charset != nil {
+		stmt.WriteString(" CHARACTER SET " + *col.Charset)
 	}
 	if col.Collation != nil {
 		stmt.WriteString(" COLLATE " + *col.Collation)
