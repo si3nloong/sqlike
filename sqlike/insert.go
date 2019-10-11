@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"reflect"
 
+	"errors"
+
 	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
@@ -12,7 +14,6 @@ import (
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"errors"
 )
 
 // InsertOne :
@@ -153,7 +154,7 @@ func encodeValue(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.S
 	if _, ok := sf.Tag.LookUp("auto_increment"); ok && reflext.IsZero(fv) {
 		return nil, nil
 	}
-	encoder, err := registry.LookupEncoder(fv.Type())
+	encoder, err := registry.LookupEncoder(fv)
 	if err != nil {
 		return nil, err
 	}

@@ -85,7 +85,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		ms.buildSchemaByColumn(stmt, col)
 
 		// Generated columns :
-		t := reflext.Deref(sf.Zero.Type())
+		t := reflext.Deref(sf.Type)
 		if t.Kind() != reflect.Struct {
 			continue
 		}
@@ -183,7 +183,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 		suffix = "AFTER " + ms.Quote(sf.Path)
 
 		// Generated columns :
-		t := reflext.Deref(sf.Zero.Type())
+		t := reflext.Deref(sf.Type)
 		if t.Kind() != reflect.Struct {
 			continue
 		}

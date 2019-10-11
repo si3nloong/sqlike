@@ -63,13 +63,13 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 
 // GetColumn :
 func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns.Column, error) {
-	v := sf.Zero
-	it := reflect.TypeOf((*ColumnType)(nil)).Elem()
-	if v.Type().Implements(it) {
-		return v.Interface().(ColumnType).DataType(info, sf), nil
+	t := reflext.Deref(sf.Type)
+	v := reflext.Zero(t)
+	it := v.Interface()
+	if x, ok := it.(ColumnType); ok {
+		return x.DataType(info, sf), nil
 	}
 
-	t := reflext.Deref(v.Type())
 	if x, ok := sb.typeMap[t]; ok {
 		return sb.builders[x](sf), nil
 	}

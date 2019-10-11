@@ -3,6 +3,7 @@ package codec
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"reflect"
 	"sync"
 
@@ -69,19 +70,17 @@ func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
 }
 
 // LookupEncoder :
-func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
+func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	var (
-		enc  ValueEncoder
-		ok bool
+		enc ValueEncoder
+		ok  bool
 	)
 
-	it := reflect.TypeOf((*driver.Valuer)(nil)).Elem()
-	if t.Implements(it) {
-		return func(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
-			return v.Interface().(driver.Valuer).Value()
-		}, nil
+	if _, ok := v.Interface().(driver.Valuer); ok {
+		return encodeValue, nil
 	}
 
+	t := v.Type()
 	enc, ok = r.typeEncoders[t]
 	if ok {
 		return enc, nil
@@ -97,8 +96,8 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 // LookupDecoder :
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
-		dec  ValueDecoder
-		ok bool
+		dec ValueDecoder
+		ok  bool
 	)
 
 	v := reflext.Zero(t)
@@ -118,4 +117,16 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		return dec, nil
 	}
 	return nil, ErrNoDecoder{Type: t}
+}
+
+func encodeValue(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	it := v.Interface()
+	if it == nil || (reflext.IsNullable(v.Type()) && v.IsNil()) {
+		return nil, nil
+	}
+	x, ok := it.(driver.Valuer)
+	if !ok {
+		return nil, errors.New("codec: invalid to convert")
+	}
+	return x.Value()
 }

@@ -41,8 +41,8 @@ type StructField struct {
 	Index      []int
 	Name       string
 	Path       string
+	Type       reflect.Type
 	IsNullable bool
-	Zero       reflect.Value
 	Tag        StructTag
 	Embedded   bool
 	Parent     *StructField
@@ -140,7 +140,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				Name:       f.Name,
 				Path:       tag.name,
 				IsNullable: q.sf.IsNullable || IsNullable(f.Type),
-				Zero:       reflect.Zero(f.Type),
+				Type:       f.Type,
 				Tag:        tag,
 				Children:   make([]*StructField, 0),
 			}

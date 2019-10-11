@@ -58,7 +58,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, "ENUM('SUCCESS','FAILED','UNKNOWN')", columnMap["Enum"].Type)
 
 		require.ElementsMatch(t, []string{
-			"$Key", "Key", "SID",
+			"$Key", "Key", "Date", "SID",
 			"Emoji", "FullText", "LongStr", "CustomStrType",
 			"EmptyByte", "Byte", "Bool",
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",

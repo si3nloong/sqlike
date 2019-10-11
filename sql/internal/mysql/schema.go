@@ -170,7 +170,7 @@ func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col columns.Column) 
 }
 
 func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
-	t := sf.Zero.Type()
+	t := sf.Type
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
@@ -187,7 +187,7 @@ func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
 }
 
 func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col columns.Column) {
-	t := sf.Zero.Type()
+	t := sf.Type
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
@@ -220,7 +220,7 @@ func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column)
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 	// length := sf.Zero.Len()
-	t := sf.Zero.Type().Elem()
+	t := sf.Type.Elem()
 	if t.Kind() == reflect.Uint8 {
 		charset, collation := "ascii", "ascii_general_ci"
 		col.DataType = "VARCHAR"

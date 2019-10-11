@@ -18,7 +18,7 @@ type indexStruct struct {
 }
 
 // Date :
-type Date struct {
+type Model struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -26,6 +26,7 @@ type Date struct {
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
 	Key           *types.Key
+	Date          types.Date
 	SID           string `sqlike:",charset=latin1"`
 	Emoji         string `sqlike:""`
 	FullText      string
@@ -66,7 +67,7 @@ type normalStruct struct {
 	Currency   currency.Unit
 	Currencies []currency.Unit
 	Enum       Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Date
+	Model
 }
 
 type jsonStruct struct {
@@ -151,7 +152,7 @@ type generatedStruct struct {
 		Amount float64 `sqlike:",virtual_column=Amount"`
 	}
 	model
-	Date `sqlike:"Date"`
+	Model `sqlike:"Date"`
 }
 
 type mongoStruct struct {

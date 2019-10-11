@@ -48,14 +48,12 @@ func DateFromTime(t time.Time) (*Date, error) {
 }
 
 // DataType :
-func (d *Date) DataType(_ sqldriver.Info, sf *reflext.StructField) columns.Column {
-	dflt := "CURDATE()"
+func (d Date) DataType(_ sqldriver.Info, sf *reflext.StructField) columns.Column {
 	return columns.Column{
-		Name:         sf.Path,
-		DataType:     "DATE",
-		Type:         "DATE",
-		DefaultValue: &dflt,
-		Nullable:     sf.IsNullable,
+		Name:     sf.Path,
+		DataType: "DATE",
+		Type:     "DATE",
+		Nullable: sf.IsNullable,
 	}
 }
 
@@ -65,10 +63,10 @@ func (d *Date) IsZero() bool {
 }
 
 // Value :
-func (d *Date) Value() (driver.Value, error) {
-	if d == nil {
-		return nil, nil
-	}
+func (d Date) Value() (driver.Value, error) {
+	// if d == nil {
+	// 	return nil, nil
+	// }
 	return d.String(), nil
 }
 
@@ -96,7 +94,7 @@ func (d *Date) Scan(it interface{}) error {
 }
 
 // String :
-func (d *Date) String() string {
+func (d Date) String() string {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	d.marshal(blr)
@@ -104,7 +102,7 @@ func (d *Date) String() string {
 }
 
 // MarshalJSON :
-func (d *Date) MarshalJSON() ([]byte, error) {
+func (d Date) MarshalJSON() ([]byte, error) {
 	b := bytes.NewBuffer(make([]byte, 0, 12))
 	b.WriteRune('"')
 	d.marshal(b)
@@ -146,7 +144,7 @@ func (d *Date) UnmarshalText(b []byte) error {
 	return d.unmarshal(util.UnsafeString(b))
 }
 
-func (d *Date) marshal(w writer) {
+func (d Date) marshal(w writer) {
 	year, month, day := 1, 1, 1
 	if d.Year > 0 {
 		year = d.Year

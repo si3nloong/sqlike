@@ -12,7 +12,7 @@ import (
 type Timestamp time.Time
 
 // DataType :
-func (ts *Timestamp) DataType(_ driver.Info, sf *reflext.StructField) columns.Column {
+func (ts Timestamp) DataType(_ driver.Info, sf *reflext.StructField) columns.Column {
 	dflt := "CURDATE()"
 	return columns.Column{
 		Name:         sf.Path,

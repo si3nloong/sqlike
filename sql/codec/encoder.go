@@ -139,7 +139,7 @@ func (enc *DefaultEncoders) EncodePtr(sf *reflext.StructField, v reflect.Value) 
 		return nil, nil
 	}
 	v = v.Elem()
-	encoder, err := enc.registry.LookupEncoder(v.Type())
+	encoder, err := enc.registry.LookupEncoder(v)
 	if err != nil {
 		return nil, err
 	}
@@ -161,11 +161,11 @@ func (enc DefaultEncoders) EncodeMap(_ *reflext.StructField, v reflect.Value) (i
 	t := v.Type()
 	k := t.Key()
 	if k.Kind() != reflect.String {
-		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map key, it must be string", k.Kind())
+		return nil, fmt.Errorf("codec: unsupported data type %q for map key, it must be string", k.Kind())
 	}
 	k = t.Elem()
 	if !isBaseType(k) {
-		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map value", k.Kind())
+		return nil, fmt.Errorf("codec: unsupported data type %q for map value", k.Kind())
 	}
 	if v.IsNil() {
 		return string("null"), nil
