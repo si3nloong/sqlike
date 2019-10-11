@@ -113,7 +113,7 @@ func (r *Result) Decode(dst interface{}) error {
 	v = reflext.Indirect(v)
 	t = reflext.Deref(t)
 	if !reflext.IsKind(t, reflect.Struct) {
-		return errors.New("it must be struct to decode")
+		return errors.New("sqlike: it must be struct to decode")
 	}
 
 	mapper := core.DefaultMapper

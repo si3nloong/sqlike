@@ -8,23 +8,23 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 ### Minimum Requirements
 
-We don't really care about legacy support, we want latest feature that mysql and golang offer us :
+We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us :
 
-1. **mysql 5.7** and above
-2. **Golang 1.3** and above
+- **mysql 5.7** and above
+- **Golang 1.3** and above
 
 ### What we provide apart from native package (database/sql)?
 
 - Support `JSON`
 - Support `Enum`
 - Support `UUID`
-- Support `stored column` and `virtual column`
-- Extra type such as `Date`, `Key`
+- Support `generated column` for `stored column` and `virtual column`
+- Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
-- Support `language.Tag`, `currency.Unit`
+- Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
-- Prevent toxic query with `Strict Mode` (in progress)
-- Support query filtering (in progress)
+- Prevent toxic query with `Strict Mode` **(in progress)**
+- Support query filtering **(in progress)**
 
 ### Missing DOC?
 
@@ -52,14 +52,14 @@ type User struct {
     ID        uuid.UUID
     ICNo      string     `sqlike:",generated_column"`
     Name      string
-    Email     string     `sqlike:",size:200"`
+    Email     string     `sqlike:",size=200"`
     Address   string     `sqlike:",longtext"`
     Detail    struct {
-        ICNo    string `sqlike:",virtual_column:ICNo"`
+        ICNo    string `sqlike:",virtual_column=ICNo"`
         PhoneNo string
         Age     uint
     }
-    Status    UserStatus `sqlike:",charset:latin1,enum:ACTIVE|SUSPEND"`
+    Status    UserStatus `sqlike:",charset=latin1,enum=ACTIVE|SUSPEND"`
     CreatedAt time.Time
     UpdatedAt time.Time
 }

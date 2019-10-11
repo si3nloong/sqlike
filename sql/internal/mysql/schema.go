@@ -7,7 +7,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/schema"
-	sqltype "github.com/si3nloong/sqlike/sql/types"
+	sqltype "github.com/si3nloong/sqlike/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
@@ -24,7 +24,7 @@ type mySQLSchema struct {
 }
 
 // SetBuilders :
-func (s mySQLSchema) SetBuilders(sb *schema.SchemaBuilder) {
+func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Byte, s.ByteDataType)
 	sb.SetTypeBuilder(sqltype.Date, s.DateDataType)
 	sb.SetTypeBuilder(sqltype.DateTime, s.TimeDataType)
@@ -52,17 +52,17 @@ func (s mySQLSchema) SetBuilders(sb *schema.SchemaBuilder) {
 
 func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col columns.Column) {
 	col.Name = sf.Path
-	col.DataType = `MEDIUMBLOB`
-	col.Type = `MEDIUMBLOB`
+	col.DataType = "MEDIUMBLOB"
+	col.Type = "MEDIUMBLOB"
 	col.Nullable = sf.IsNullable
 	return
 }
 
 func (s mySQLSchema) DateDataType(sf *reflext.StructField) (col columns.Column) {
-	dflt := `CURDATE()`
+	dflt := "CURDATE()"
 	col.Name = sf.Path
-	col.DataType = `DATE`
-	col.Type = `DATE`
+	col.DataType = "DATE"
+	col.Type = "DATE"
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
 	return
@@ -106,7 +106,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	}
 
 	col.DefaultValue = &dflt
-	col.CharSet = &charset
+	col.Charset = &charset
 	col.Collation = &collation
 
 	if enum, ok := sf.Tag.LookUp("enum"); ok {
@@ -143,7 +143,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		col.DataType = "TEXT"
 		col.Type = "TEXT"
 		col.DefaultValue = nil
-		col.CharSet = nil
+		col.Charset = nil
 		col.Collation = nil
 		return
 	}
@@ -170,8 +170,8 @@ func (s mySQLSchema) BoolDataType(sf *reflext.StructField) (col columns.Column) 
 }
 
 func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
-	t := sf.Zero.Type()
-	dflt := `0`
+	t := sf.Type
+	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
 	col.Name = sf.Path
@@ -187,13 +187,13 @@ func (s mySQLSchema) IntDataType(sf *reflext.StructField) (col columns.Column) {
 }
 
 func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col columns.Column) {
-	t := sf.Zero.Type()
-	dflt := `0`
+	t := sf.Type
+	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
 	col.Name = sf.Path
 	col.DataType = dataType
-	col.Type = dataType + ` UNSIGNED`
+	col.Type = dataType + " UNSIGNED"
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
 	if _, ok := sf.Tag.LookUp("auto_increment"); ok {
@@ -204,12 +204,12 @@ func (s mySQLSchema) UintDataType(sf *reflext.StructField) (col columns.Column) 
 }
 
 func (s mySQLSchema) FloatDataType(sf *reflext.StructField) (col columns.Column) {
-	dflt := `0`
+	dflt := "0"
 	col.Name = sf.Path
-	col.DataType = `REAL`
-	col.Type = `REAL`
+	col.DataType = "REAL"
+	col.Type = "REAL"
 	if _, ok := sf.Tag.LookUp("unsigned"); ok {
-		col.Type += ` UNSIGNED`
+		col.Type += " UNSIGNED"
 	}
 	col.Nullable = sf.IsNullable
 	col.DefaultValue = &dflt
@@ -220,32 +220,32 @@ func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column)
 	col.Name = sf.Path
 	col.Nullable = sf.IsNullable
 	// length := sf.Zero.Len()
-	t := sf.Zero.Type().Elem()
+	t := sf.Type.Elem()
 	if t.Kind() == reflect.Uint8 {
-		charset, collation := `ascii`, `ascii_general_ci`
-		col.DataType = `VARCHAR`
-		col.Type = `VARCHAR(36)`
-		col.CharSet = &charset
+		charset, collation := "ascii", "ascii_general_ci"
+		col.DataType = "VARCHAR"
+		col.Type = "VARCHAR(36)"
+		col.Charset = &charset
 		col.Collation = &collation
 		return
 	}
-	col.DataType = `JSON`
-	col.Type = `JSON`
+	col.DataType = "JSON"
+	col.Type = "JSON"
 	return
 }
 
 func (s mySQLSchema) getIntDataType(t reflect.Type) (dataType string) {
 	switch t.Kind() {
 	case reflect.Int8, reflect.Uint8:
-		dataType = `TINYINT`
+		dataType = "TINYINT"
 	case reflect.Int16, reflect.Uint16:
-		dataType = `SMALLINT`
+		dataType = "SMALLINT"
 	case reflect.Int32, reflect.Uint32:
-		dataType = `INT`
+		dataType = "INT"
 	case reflect.Int64, reflect.Uint64:
-		dataType = `BIGINT`
+		dataType = "BIGINT"
 	default:
-		dataType = `INT`
+		dataType = "INT"
 	}
 	return
 }

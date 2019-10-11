@@ -9,13 +9,19 @@ import (
 
 // StructTag :
 type StructTag struct {
-	name string
-	opts map[string]string
+	originalName string
+	name         string
+	opts         map[string]string
 }
 
 // Name :
 func (st StructTag) Name() string {
 	return st.name
+}
+
+// OriginalName :
+func (st StructTag) OriginalName() string {
+	return st.originalName
 }
 
 // Get :
@@ -35,8 +41,8 @@ type StructField struct {
 	Index      []int
 	Name       string
 	Path       string
+	Type       reflect.Type
 	IsNullable bool
-	Zero       reflect.Value
 	Tag        StructTag
 	Embedded   bool
 	Parent     *StructField
@@ -105,7 +111,7 @@ type typeQueue struct {
 	pp string // parent path
 }
 
-func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFunc) *Struct {
+func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 	fields := make([]*StructField, 0)
 
 	root := &StructField{}
@@ -114,7 +120,6 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 
 	for len(queue) > 0 {
 		q := queue[0]
-
 		q.sf.Children = make([]*StructField, 0)
 
 		for i := 0; i < q.t.NumField(); i++ {
@@ -135,7 +140,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 				Name:       f.Name,
 				Path:       tag.name,
 				IsNullable: q.sf.IsNullable || IsNullable(f.Type),
-				Zero:       reflect.Zero(f.Type),
+				Type:       f.Type,
 				Tag:        tag,
 				Children:   make([]*StructField, 0),
 			}
@@ -157,26 +162,25 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 			sf.Index = appendSlice(q.sf.Index, i)
 			sf.Embedded = ft.Kind() == reflect.Struct && f.Anonymous
 
-			if mapFunc != nil {
-				if mapFunc(sf) {
-					fields = append(fields, sf)
-					continue
-				}
-			}
-
 			if ft.Kind() == reflect.Struct {
+				// check recursive, prevent infinite loop
+				if q.t == ft {
+					goto nextStep
+				}
+
 				// embedded struct
+				path := sf.Path
 				if f.Anonymous {
-					path := sf.Path
-					if sf.Tag.name == "" {
+					if sf.Tag.OriginalName() == "" {
 						path = q.pp
 					}
-					queue = append(queue, typeQueue{ft, sf, path})
-				} else {
-					queue = append(queue, typeQueue{ft, sf, sf.Path})
+					// queue = append(queue, typeQueue{ft, sf, path})
 				}
+
+				queue = append(queue, typeQueue{ft, sf, path})
 			}
 
+		nextStep:
 			fields = append(fields, sf)
 		}
 
@@ -208,6 +212,7 @@ func getCodec(t reflect.Type, tagName string, mapFunc MapFunc, fmtFunc FormatFun
 			codec.Properties = append(codec.Properties, sf)
 		}
 	}
+
 	return codec
 }
 
@@ -221,6 +226,7 @@ func appendSlice(s []int, i int) []int {
 func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
 	parts := strings.Split(f.Tag.Get(tagName), ",")
 	name := strings.TrimSpace(parts[0])
+	st.originalName = name
 	if name == "" {
 		name = f.Name
 		if fmtFunc != nil {
@@ -232,8 +238,8 @@ func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st Str
 	if len(parts) > 1 {
 		for _, opt := range parts[1:] {
 			opt = strings.TrimSpace(opt)
-			if strings.Contains(opt, ":") {
-				kv := strings.SplitN(opt, ":", 2)
+			if strings.Contains(opt, "=") {
+				kv := strings.SplitN(opt, "=", 2)
 				k := strings.TrimSpace(strings.ToLower(kv[0]))
 				st.opts[k] = strings.TrimSpace(kv[1])
 				continue

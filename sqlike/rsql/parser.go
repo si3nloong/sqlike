@@ -33,10 +33,10 @@ type Parser struct {
 func NewParser(it interface{}) (*Parser, error) {
 	t := reflext.Deref(reflect.TypeOf(it))
 	if t.Kind() != reflect.Struct {
-		return nil, errors.New("invalid model expected, it must be struct")
+		return nil, errors.New("rsql: invalid model expected, it must be struct")
 	}
 
-	mapper := reflext.NewMapperFunc("rsql", nil, strcase.ToLowerCamel)
+	mapper := reflext.NewMapperFunc("rsql", strcase.ToLowerCamel)
 	lexer := lexmachine.NewLexer()
 	dl := newDefaultTokenLexer()
 	dl.addActions(lexer)

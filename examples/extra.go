@@ -25,12 +25,12 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 		table.Truncate()
 
 		err = table.Copy([]string{
-			"$Key", "SID", "Emoji", "LongStr", "GeoPoint",
+			"$Key", "SID", "Date", "Emoji", "LongStr", "GeoPoint",
 			"TinyInt", "Float64", "EmptyStruct", "Struct",
 		}, actions.Copy().
 			From("sqlike", "NormalStruct").
 			Select(
-				"$Key", "SID", "Emoji", "LongStr", "GeoPoint",
+				"$Key", "SID", "Date", "Emoji", "LongStr", "GeoPoint",
 				"TinyInt", "Float32", "EmptyStruct", "Struct",
 			),
 		)

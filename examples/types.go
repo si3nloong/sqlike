@@ -17,13 +17,21 @@ type indexStruct struct {
 	ID     string `sqlike:""`
 }
 
+// Date :
+type Model struct {
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
-	SID           string    `sqlike:",charset:latin1"`
-	Emoji         string    `sqlike:""`
+	Key           *types.Key
+	Date          types.Date
+	SID           string `sqlike:",charset=latin1"`
+	Emoji         string `sqlike:""`
 	FullText      string
 	LongStr       string  `sqlike:",longtext"`
-	CustomStrType LongStr `sqlike:",size:300"`
+	CustomStrType LongStr `sqlike:",size=300"`
 	EmptyByte     []byte
 	Byte          []byte
 	Bool          bool
@@ -45,21 +53,21 @@ type normalStruct struct {
 	EmptyStruct   struct{}
 	GeoPoint      types.GeoPoint
 	Struct        struct {
-		VirtualStr string `sqlike:",virtual_column"`
-		StoredStr  string `sqlike:",stored_column"`
-		NestedBool bool   `sqlike:""`
-		// NestedNullInt *int
+		VirtualStr    string `sqlike:",virtual_column"`
+		StoredStr     string `sqlike:",stored_column"`
+		NestedBool    bool
+		NestedNullInt *int
 	}
-	JSONRaw json.RawMessage
-	Map     map[string]int
-	// GeoPoint  types.GeoPoint
-	DateTime   time.Time `sqlike:",size:0"`
+	JSONRaw    json.RawMessage
+	Map        map[string]int
+	DateTime   time.Time `sqlike:",size=0"`
 	Timestamp  time.Time
 	Language   language.Tag
 	Languages  []language.Tag
 	Currency   currency.Unit
 	Currencies []currency.Unit
-	Enum       Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	Enum       Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Model
 }
 
 type jsonStruct struct {
@@ -87,9 +95,9 @@ type Country struct {
 // Address :
 type Address struct {
 	Line1 string
-	Line2 string `sqlike:",virtual_column"`
-	City  string `sqlike:",virtual_column"`
-	State string `sqlike:",virtual_column"`
+	Line2 string `sqlike:",virtual_column"` // this will not work if it's embedded struct
+	City  string `sqlike:",virtual_column"` // this will not work if it's embedded struct
+	State string `sqlike:",virtual_column"` // this will not work if it's embedded struct
 	// Country `sqlike:",inline"`
 	Country Country
 }
@@ -133,16 +141,18 @@ type ptrStruct struct {
 	NullTimestamp *time.Time
 	NullKey       *types.Key
 	NullDate      *types.Date
-	NullEnum      *Enum `sqlike:",enum:SUCCESS|FAILED|UNKNOWN"`
+	NullEnum      *Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type generatedStruct struct {
 	ID     string  `sqlike:"NestedID,generated_column"`
 	Amount float64 `sqlike:"Amount,generated_column"`
 	Nested struct {
-		ID     string  `sqlike:",stored_column:NestedID"`
-		Amount float64 `sqlike:",virtual_column:Amount"`
+		ID     string  `sqlike:",stored_column=NestedID"`
+		Amount float64 `sqlike:",virtual_column=Amount"`
 	}
+	model
+	Model `sqlike:"Date"`
 }
 
 type mongoStruct struct {
@@ -169,6 +179,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 		`errors.Newで作成したエラーは、%+v のときにファイル名やメソッド名を表示します。`,
 	}))
 	ns.LongStr = gofakeit.Sentence(50)
+	ns.Key = types.NewNameKey("Name", types.NewIDKey("ID", nil))
 	ns.Bool = true
 	ns.FullText = "Hal%o%()#$\\%^&_"
 	ns.Int = gofakeit.Number(100, 99999999)
@@ -208,6 +219,8 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 		"FAILED",
 		"UNKNOWN",
 	}))
+	ns.CreatedAt = now
+	ns.UpdatedAt = now
 	return ns
 }
 

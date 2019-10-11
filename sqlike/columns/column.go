@@ -11,7 +11,7 @@ type Column struct {
 	Size         int
 	Nullable     bool
 	DefaultValue *string
-	CharSet      *string
+	Charset      *string
 	Collation    *string
 	Extra        string
 }

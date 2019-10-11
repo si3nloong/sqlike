@@ -2,6 +2,7 @@ package sqlike
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
@@ -11,7 +12,7 @@ import (
 // Open : connect to sql server with connection string
 func Open(driver string, opt *options.ConnectOptions) (client *Client, err error) {
 	if opt == nil {
-		panic("sqlike: invalid connection options <nil>")
+		return nil, errors.New("sqlike: invalid connection options <nil>")
 	}
 	var conn *sql.DB
 	dialect := sqldialect.GetDialectByDriver(driver)
@@ -23,6 +24,15 @@ func Open(driver string, opt *options.ConnectOptions) (client *Client, err error
 	}
 	client, err = newClient(driver, conn, dialect, opt.Charset, opt.Collate)
 	return
+}
+
+// MustOpen :
+func MustOpen(driver string, opt *options.ConnectOptions) *Client {
+	client, err := Open(driver, opt)
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
 
 // Connect :

@@ -13,28 +13,54 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
-// Client :
-type Client struct {
+// DriverInfo :
+type DriverInfo struct {
 	driverName string
 	version    *semver.Version
+	charSet    charset.Code
+	collate    string
+}
+
+// DriverName :
+func (d *DriverInfo) DriverName() string {
+	return d.driverName
+}
+
+// Version :
+func (d *DriverInfo) Version() *semver.Version {
+	return d.version
+}
+
+// Charset :
+func (d *DriverInfo) Charset() charset.Code {
+	return d.charSet
+}
+
+// Collate :
+func (d *DriverInfo) Collate() string {
+	return d.collate
+}
+
+// Client :
+type Client struct {
+	*DriverInfo
 	*sql.DB
 	pk      string
 	logger  logs.Logger
-	charSet charset.Code
-	collate string
 	dialect sqldialect.Dialect
 }
 
 func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect, code charset.Code, collate string) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
-		driverName: driver,
-		DB:         db,
-		dialect:    dialect,
-		charSet:    code,
-		collate:    collate,
+		DB:      db,
+		dialect: dialect,
 	}
 	client.pk = "$Key"
+	client.DriverInfo = new(DriverInfo)
+	client.driverName = driver
+	client.charSet = code
+	client.collate = collate
 	client.version = client.getVersion()
 	return client, nil
 }
@@ -53,15 +79,6 @@ func (c *Client) SetLogger(logger logs.Logger) *Client {
 func (c *Client) SetPrimaryKey(pk string) *Client {
 	c.pk = pk
 	return c
-}
-
-// Version :
-func (c *Client) Version() (version *semver.Version) {
-	if c.version == nil {
-		c.version = c.getVersion()
-	}
-	version = c.version
-	return
 }
 
 // ListDatabases :

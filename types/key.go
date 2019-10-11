@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/reflext"
+	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
@@ -44,13 +45,13 @@ type Key struct {
 }
 
 // DataType :
-func (k *Key) DataType(driver string, sf *reflext.StructField) columns.Column {
+func (k Key) DataType(t sqldriver.Info, sf *reflext.StructField) columns.Column {
 	return columns.Column{
 		Name:      sf.Path,
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(512)",
-		Nullable:  reflext.IsNullable(sf.Zero.Type()),
-		CharSet:   &latin1,
+		Nullable:  reflext.IsNullable(sf.Type),
+		Charset:   &latin1,
 		Collation: &latin1Bin,
 	}
 }

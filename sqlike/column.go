@@ -15,7 +15,7 @@ type Column struct {
 	DataType     string
 	IsNullable   types.Boolean
 	DefaultValue *string
-	CharSet      *string
+	Charset      *string
 	Collation    *string
 	Extra        string
 }

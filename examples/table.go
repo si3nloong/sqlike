@@ -10,8 +10,10 @@ import (
 // MigrateExamples :
 func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	var (
-		ns  *normalStruct
-		err error
+		ns      *normalStruct
+		err     error
+		results []sqlike.Column
+		columns []string
 	)
 
 	{
@@ -35,9 +37,40 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// migrate NormalStruct
 	{
 		err = table.Migrate(ns)
 		require.NoError(t, err)
+
+		columnMap := make(map[string]sqlike.Column)
+		columns = make([]string, 0)
+		results, err = table.Columns().List()
+		require.NoError(t, err)
+
+		for _, f := range results {
+			columnMap[f.Name] = f
+			columns = append(columns, f.Name)
+		}
+
+		// check struct tag option
+		require.Equal(t, "VARCHAR(300)", columnMap["CustomStrType"].Type)
+		require.Equal(t, "DOUBLE UNSIGNED", columnMap["UFloat32"].Type)
+		require.Equal(t, "ENUM('SUCCESS','FAILED','UNKNOWN')", columnMap["Enum"].Type)
+
+		require.ElementsMatch(t, []string{
+			"$Key", "Key", "Date", "SID",
+			"Emoji", "FullText", "LongStr", "CustomStrType",
+			"EmptyByte", "Byte", "Bool",
+			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
+			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
+			"Float32", "Float64", "UFloat32",
+			"EmptyStruct", "GeoPoint",
+			"Struct", "Struct.VirtualStr", "Struct.StoredStr",
+			"JSONRaw", "Map",
+			"DateTime", "Timestamp",
+			"Language", "Languages", "Currency", "Currencies",
+			"Enum", "CreatedAt", "UpdatedAt",
+		}, columns)
 	}
 
 	{
@@ -70,6 +103,24 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		table := db.Table("GeneratedStruct")
 		err = table.DropIfExits()
 		require.NoError(t, err)
+
+		err = table.Migrate(generatedStruct{})
+		require.NoError(t, err)
+
+		columns = make([]string, 0)
+		results, err = table.Columns().List()
+		require.NoError(t, err)
+
+		for _, f := range results {
+			columns = append(columns, f.Name)
+		}
+
+		require.ElementsMatch(t, []string{
+			"NestedID", "Amount", "Nested",
+			"No", "id",
+			"Line1", "Line2", "City", "State", "Country",
+			"Date.CreatedAt", "Date.UpdatedAt",
+		}, columns)
 
 		err = table.Migrate(generatedStruct{})
 		require.NoError(t, err)

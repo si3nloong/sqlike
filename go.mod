@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
 	github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b
-	github.com/casbin/casbin/v2 v2.0.3-0.20191004065331-b06aa8c42611
+	github.com/casbin/casbin/v2 v2.0.3-0.20191007094951-e745107dd3ad
 	github.com/go-sql-driver/mysql v1.4.1-0.20191001060945-14bb9c0fc20f
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect

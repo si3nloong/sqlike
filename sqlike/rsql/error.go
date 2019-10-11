@@ -15,7 +15,7 @@ type FieldError struct {
 
 // Error :
 func (fe FieldError) Error() string {
-	return "invalid field " + strconv.Quote(fe.Name) + " in " + fe.Module
+	return "rsql: invalid field " + strconv.Quote(fe.Name) + " in " + fe.Module
 }
 
 // Errors :

@@ -140,7 +140,7 @@ func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error 
 	}
 
 	stmt.WriteByte('?')
-	encoder, err := b.registry.LookupEncoder(t)
+	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -182,9 +182,8 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 		return
 	}
 
-	t := v.Type()
 	stmt.WriteByte('?')
-	encoder, err := b.registry.LookupEncoder(t)
+	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -214,10 +213,6 @@ func (b *mySQLBuilder) BuildNil(stmt *sqlstmt.Statement, it interface{}) error {
 		stmt.WriteString(" IS NOT NULL")
 	}
 	return nil
-}
-
-func unmatchedDataType(callback string) error {
-	return errors.New("invalid data type")
 }
 
 func (b *mySQLBuilder) BuildRaw(stmt *sqlstmt.Statement, it interface{}) error {
@@ -354,7 +349,7 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 	}
 
 	stmt.WriteByte('?')
-	encoder, err := b.registry.LookupEncoder(t)
+	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -367,10 +362,7 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 }
 
 func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err error) {
-	x, ok := it.(primitive.Group)
-	if !ok {
-		return unmatchedDataType("BuildGroup")
-	}
+	x := it.(primitive.Group)
 	for len(x) > 0 {
 		if err := b.getValue(stmt, x[0]); err != nil {
 			return err
@@ -380,23 +372,10 @@ func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err 
 	return
 }
 
-func (b *mySQLBuilder) encodeValue(it interface{}) (interface{}, error) {
-	v := reflext.ValueOf(it)
-	encoder, err := b.registry.LookupEncoder(v.Type())
-	if err != nil {
-		return nil, err
-	}
-	return encoder(nil, v)
-}
-
 func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
-	x, ok := it.(primitive.R)
-	if !ok {
-		return errors.New("expected data type primitive.GV")
-	}
-
+	x := it.(primitive.R)
 	v := reflext.ValueOf(x.From)
-	encoder, err := b.registry.LookupEncoder(v.Type())
+	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -407,7 +386,7 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 	stmt.AppendArg(arg)
 
 	v = reflext.ValueOf(x.To)
-	encoder, err = b.registry.LookupEncoder(v.Type())
+	encoder, err = b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -423,23 +402,19 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 }
 
 func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
-	x, ok := it.(*actions.FindActions)
-	if !ok {
-		return errors.New("data type not match")
-	}
-
+	x := it.(*actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
 		return errors.New("empty table name")
 	}
-	stmt.WriteString(`SELECT `)
+	stmt.WriteString("SELECT ")
 	if x.DistinctOn {
 		stmt.WriteString("DISTINCT ")
 	}
 	if err := b.appendSelect(stmt, x.Projections); err != nil {
 		return err
 	}
-	stmt.WriteString(` FROM ` + b.TableName(x.Database, x.Table))
+	stmt.WriteString(" FROM " + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
 		return err
 	}
@@ -459,7 +434,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{
 	if !ok {
 		return errors.New("data type not match")
 	}
-	stmt.WriteString(`UPDATE ` + b.TableName(x.Database, x.Table) + ` `)
+	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
 	if err := b.appendSet(stmt, x.Values); err != nil {
 		return err
 	}
@@ -474,11 +449,8 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{
 }
 
 func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
-	x, ok := it.(*actions.DeleteActions)
-	if !ok {
-		return errors.New("data type not match")
-	}
-	stmt.WriteString(`DELETE FROM ` + b.TableName(x.Database, x.Table))
+	x := it.(*actions.DeleteActions)
+	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
 		return err
 	}
@@ -502,15 +474,14 @@ func (b *mySQLBuilder) appendSelect(stmt *sqlstmt.Statement, pjs []interface{}) 
 		}
 		return nil
 	}
-
-	stmt.WriteString(`*`)
+	stmt.WriteString("*")
 	return nil
 }
 
 func (b *mySQLBuilder) appendWhere(stmt *sqlstmt.Statement, conds []interface{}) error {
 	length := len(conds)
 	if length > 0 {
-		stmt.WriteString(` WHERE `)
+		stmt.WriteString(" WHERE ")
 		for i := 0; i < length; i++ {
 			if err := b.builder.BuildStatement(stmt, conds[i]); err != nil {
 				return err
@@ -523,7 +494,7 @@ func (b *mySQLBuilder) appendWhere(stmt *sqlstmt.Statement, conds []interface{})
 func (b *mySQLBuilder) appendGroupBy(stmt *sqlstmt.Statement, fields []interface{}) error {
 	length := len(fields)
 	if length > 0 {
-		stmt.WriteString(` GROUP BY `)
+		stmt.WriteString(" GROUP BY ")
 		for i := 0; i < length; i++ {
 			if i > 0 {
 				stmt.WriteRune(',')
@@ -541,7 +512,7 @@ func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{
 	if length < 1 {
 		return nil
 	}
-	stmt.WriteString(` ORDER BY `)
+	stmt.WriteString(" ORDER BY ")
 	for i := 0; i < length; i++ {
 		if i > 0 {
 			stmt.WriteRune(',')
@@ -555,17 +526,17 @@ func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{
 
 func (b *mySQLBuilder) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset uint) {
 	if limit > 0 {
-		stmt.WriteString(` LIMIT ` + strconv.FormatUint(uint64(limit), 10))
+		stmt.WriteString(" LIMIT " + strconv.FormatUint(uint64(limit), 10))
 	}
 	if offset > 0 {
-		stmt.WriteString(` OFFSET ` + strconv.FormatUint(uint64(offset), 10))
+		stmt.WriteString(" OFFSET " + strconv.FormatUint(uint64(offset), 10))
 	}
 }
 
 func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV) error {
 	length := len(values)
 	if length > 0 {
-		stmt.WriteString(`SET `)
+		stmt.WriteString("SET ")
 		for i := 0; i < length; i++ {
 			if i > 0 {
 				stmt.WriteRune(',')
@@ -579,9 +550,12 @@ func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV)
 }
 
 func escapeWildCard(n string) string {
-	length := len(n)
+	length := len(n) - 1
+	if length < 1 {
+		return n
+	}
 	blr := new(strings.Builder)
-	for i := 0; i < length-1; i++ {
+	for i := 0; i < length; i++ {
 		switch n[i] {
 		case '%':
 			blr.WriteString(`\%`)
@@ -593,6 +567,10 @@ func escapeWildCard(n string) string {
 			blr.WriteByte(n[i])
 		}
 	}
-	blr.WriteByte(n[length-1])
+	blr.WriteByte(n[length])
 	return blr.String()
+}
+
+func unmatchedDataType(callback string) error {
+	return errors.New("invalid data type")
 }

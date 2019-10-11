@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -71,7 +70,7 @@ func (enc DefaultEncoders) EncodeRawBytes(_ *reflext.StructField, v reflect.Valu
 // EncodeJSONRaw :
 func (enc DefaultEncoders) EncodeJSONRaw(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	if v.IsNil() {
-		return []byte(`null`), nil
+		return []byte("null"), nil
 	}
 	buf := new(bytes.Buffer)
 	if err := json.Compact(buf, v.Bytes()); err != nil {
@@ -91,10 +90,11 @@ func (enc DefaultEncoders) EncodeStringer(_ *reflext.StructField, v reflect.Valu
 
 // EncodeTime :
 func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
-	x, ok := v.Interface().(time.Time)
-	if !ok {
-		return nil, errors.New("sqlike/sql/codec: invalid data type")
-	}
+	x := v.Interface().(time.Time)
+	// if x.IsZero() {
+	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
+	// 	return x, nil
+	// }
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
 }
@@ -139,7 +139,7 @@ func (enc *DefaultEncoders) EncodePtr(sf *reflext.StructField, v reflect.Value) 
 		return nil, nil
 	}
 	v = v.Elem()
-	encoder, err := enc.registry.LookupEncoder(v.Type())
+	encoder, err := enc.registry.LookupEncoder(v)
 	if err != nil {
 		return nil, err
 	}
@@ -161,11 +161,11 @@ func (enc DefaultEncoders) EncodeMap(_ *reflext.StructField, v reflect.Value) (i
 	t := v.Type()
 	k := t.Key()
 	if k.Kind() != reflect.String {
-		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map key, it must be string", k.Kind())
+		return nil, fmt.Errorf("codec: unsupported data type %q for map key, it must be string", k.Kind())
 	}
 	k = t.Elem()
 	if !isBaseType(k) {
-		return nil, fmt.Errorf("sqlike/sql/codec: unsupported data type %q for map value", k.Kind())
+		return nil, fmt.Errorf("codec: unsupported data type %q for map value", k.Kind())
 	}
 	if v.IsNil() {
 		return string("null"), nil

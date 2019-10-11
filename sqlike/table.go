@@ -97,7 +97,7 @@ func (tb *Table) ListColumns() ([]Column, error) {
 			&col.DefaultValue,
 			&col.IsNullable,
 			&col.DataType,
-			&col.CharSet,
+			&col.Charset,
 			&col.Collation,
 			&col.Extra,
 		); err != nil {
@@ -271,7 +271,13 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(tb.dbName, tb.name, tb.client.charSet, tb.client.collate, tb.pk, fields)
+	stmt, err := tb.dialect.CreateTable(
+		tb.dbName,
+		tb.name,
+		tb.pk,
+		tb.client.DriverInfo,
+		fields,
+	)
 	if err != nil {
 		return err
 	}
@@ -295,7 +301,11 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}
-	stmt, err := tb.dialect.AlterTable(tb.dbName, tb.name, tb.pk, fields, cols, idxs, unsafe)
+	stmt, err := tb.dialect.AlterTable(
+		tb.dbName, tb.name, tb.pk,
+		tb.client.DriverInfo,
+		fields, cols, idxs, unsafe,
+	)
 	if err != nil {
 		return err
 	}

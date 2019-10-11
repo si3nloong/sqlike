@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/charset"
+	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -51,7 +51,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk string, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		k1, k2  string
@@ -69,7 +69,7 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 			stmt.WriteRune(',')
 		}
 
-		col, err = ms.schema.GetColumn(sf)
+		col, err = ms.schema.GetColumn(info, sf)
 		if err != nil {
 			return
 		}
@@ -85,7 +85,7 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 		ms.buildSchemaByColumn(stmt, col)
 
 		// Generated columns :
-		t := reflext.Deref(sf.Zero.Type())
+		t := reflext.Deref(sf.Type)
 		if t.Kind() != reflect.Struct {
 			continue
 		}
@@ -97,7 +97,7 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
-				col, err = ms.schema.GetColumn(child)
+				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
 				}
@@ -128,13 +128,14 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 	}
 	stmt.WriteRune(')')
 	stmt.WriteString(" ENGINE=INNODB")
+	code := string(info.Charset())
 	if code == "" {
 		stmt.WriteString(" CHARACTER SET utf8mb4")
 		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
 	} else {
-		stmt.WriteString(" CHARACTER SET " + string(code))
-		if collate != "" {
-			stmt.WriteString(" COLLATE " + collate)
+		stmt.WriteString(" CHARACTER SET " + code)
+		if info.Collate() != "" {
+			stmt.WriteString(" COLLATE " + info.Collate())
 		}
 	}
 	stmt.WriteRune(';')
@@ -142,10 +143,11 @@ func (ms MySQL) CreateTable(db, table string, code charset.Code, collate, pk str
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		idx     int
+		k1, k2  string
 		virtual bool
 		stored  bool
 	)
@@ -172,7 +174,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 			stmt.WriteRune(',')
 		}
 		stmt.WriteString(action + " ")
-		col, err = ms.schema.GetColumn(sf)
+		col, err = ms.schema.GetColumn(info, sf)
 		if err != nil {
 			return
 		}
@@ -181,7 +183,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 		suffix = "AFTER " + ms.Quote(sf.Path)
 
 		// Generated columns :
-		t := reflext.Deref(sf.Zero.Type())
+		t := reflext.Deref(sf.Type)
 		if t.Kind() != reflect.Struct {
 			continue
 		}
@@ -189,24 +191,32 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 		children := sf.Children
 		for len(children) > 0 {
 			child := children[0]
-			_, virtual = child.Tag.LookUp("virtual_column")
-			_, stored = child.Tag.LookUp("stored_column")
+			k1, virtual = child.Tag.LookUp("virtual_column")
+			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteRune(',')
-				col, err = ms.schema.GetColumn(child)
+				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
 				}
 
+				name := col.Name
+				if virtual && k1 != "" {
+					name = k1
+				}
+				if stored && k2 != "" {
+					name = k2
+				}
+
 				action = "ADD"
-				idx = cols.IndexOf(child.Path)
+				idx = cols.IndexOf(name)
 				if idx > -1 {
 					action = "MODIFY"
 					cols.Splice(idx)
 				}
 
 				stmt.WriteString(action + " ")
-				stmt.WriteString(ms.Quote(col.Name))
+				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
 				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
 				stmt.WriteString(" AS ")
@@ -217,7 +227,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 				if !col.Nullable {
 					stmt.WriteString(" NOT NULL")
 				}
-				suffix = "AFTER " + ms.Quote(child.Path)
+				suffix = "AFTER " + ms.Quote(name)
 			}
 			children = children[1:]
 			children = append(children, child.Children...)
@@ -231,6 +241,8 @@ func (ms *MySQL) AlterTable(db, table, pk string, fields []*reflext.StructField,
 			stmt.WriteString(ms.Quote(col))
 		}
 	}
+
+	// TODO: character set
 	// stmt.WriteRune(',')
 	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)
 	// stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
@@ -265,8 +277,8 @@ func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyAction
 func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
-	if col.CharSet != nil {
-		stmt.WriteString(" CHARACTER SET " + *col.CharSet)
+	if col.Charset != nil {
+		stmt.WriteString(" CHARACTER SET " + *col.Charset)
 	}
 	if col.Collation != nil {
 		stmt.WriteString(" COLLATE " + *col.Collation)

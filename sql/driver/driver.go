@@ -1,12 +1,20 @@
-package sqldriver
+package driver
 
 import (
 	"context"
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/sql/charset"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
+
+// Info :
+type Info interface {
+	DriverName() string
+	Charset() charset.Code
+	Collate() string
+}
 
 // Driver :
 type Driver interface {
