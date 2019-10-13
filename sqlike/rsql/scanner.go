@@ -1,5 +1,76 @@
 package rsql
 
+import (
+	"errors"
+	"log"
+
+	"github.com/timtadh/lexmachine"
+)
+
+// Scanner :
+type Scanner struct {
+	*lexmachine.Scanner
+}
+
+// NextToken :
+func (scan *Scanner) NextToken() (*lexmachine.Token, bool) {
+	it, _, eof := scan.Next()
+	// log.Println("Token :", it)
+	return it.(*lexmachine.Token), eof
+}
+
+// ParseToken :
+func (scan *Scanner) ParseToken() error {
+	tkn, eof := scan.NextToken()
+	if eof {
+		return nil
+	}
+	if tkn.Type == Group && string(tkn.Lexeme) == "(" {
+		return scan.ParseGroup()
+	}
+	return scan.ParseExpression(tkn)
+}
+
+// ParseExpression :
+func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
+	tkn1, eof := scan.NextToken()
+	if eof {
+		return errors.New("")
+	}
+
+	tkn2, eof := scan.NextToken()
+	if eof {
+		return errors.New("")
+	}
+	// log.Println("Debug Expression ===========>")
+	log.Println(string(tkn.Lexeme), string(tkn1.Lexeme), string(tkn2.Lexeme))
+	tkn3, eof := scan.NextToken()
+	if eof {
+		return nil
+	}
+	if tkn3.Type != And && tkn3.Type != Or {
+		return errors.New("")
+	}
+	return nil
+}
+
+// ParseGroup :
+func (scan *Scanner) ParseGroup() error {
+	for {
+		tkn, eof := scan.NextToken()
+		if eof {
+			break
+		}
+		if tkn.Type == Group && string(tkn.Lexeme) == ")" {
+			break
+		}
+		if err := scan.ParseExpression(tkn); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func init() {
 	// b := []byte(`(_id==133,(category!=-10.00;num==.922;test=="value\""));d1=="";c1==testing,d1!=108)`)
 	// lexer := lexmachine.NewLexer()

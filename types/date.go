@@ -25,30 +25,9 @@ type Date struct {
 	Year, Month, Day int
 }
 
-// ParseDate :
-func ParseDate(str string) (*Date, error) {
-	t, err := time.Parse("2006-01-02", str)
-	if err != nil {
-		return nil, ErrDateFormat
-	}
-	return &Date{
-		Day:   t.Day(),
-		Month: int(t.Month()),
-		Year:  t.Year(),
-	}, nil
-}
-
-// DateFromTime :
-func DateFromTime(t time.Time) (*Date, error) {
-	return &Date{
-		Day:   t.Day(),
-		Month: int(t.Month()),
-		Year:  t.Year(),
-	}, nil
-}
-
 // DataType :
 func (d Date) DataType(_ sqldriver.Info, sf *reflext.StructField) columns.Column {
+	// mysql have no function for date default value
 	return columns.Column{
 		Name:     sf.Path,
 		DataType: "DATE",
@@ -181,6 +160,28 @@ func (d *Date) unmarshal(str string) (err error) {
 		return
 	}
 	return
+}
+
+// ParseDate :
+func ParseDate(str string) (*Date, error) {
+	t, err := time.Parse("2006-01-02", str)
+	if err != nil {
+		return nil, ErrDateFormat
+	}
+	return &Date{
+		Day:   t.Day(),
+		Month: int(t.Month()),
+		Year:  t.Year(),
+	}, nil
+}
+
+// DateFromTime :
+func DateFromTime(t time.Time) (*Date, error) {
+	return &Date{
+		Day:   t.Day(),
+		Month: int(t.Month()),
+		Year:  t.Year(),
+	}, nil
 }
 
 func lpad(str, pad string, length int) string {

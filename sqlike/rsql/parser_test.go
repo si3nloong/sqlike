@@ -9,7 +9,7 @@ type testStruct struct {
 
 func TestParser(t *testing.T) {
 	p := MustNewParser(testStruct{})
-	p.ParseQuery([]byte(`(_id==133,(category!=-10.00;num==.922;test=="value\""));d1=="";c1==testing,d1!=108)`))
+	p.ParseQuery([]byte(`(_id==133,category!=-10.00;num==.922;test=="value\"";d1=="";c1==testing,d1!=108)`))
 	// 	p := new(Parser)
 	// 	p.SetComparisonOperator(BasicOperator([]string{">", "=gt="}, false))
 	// 	p.SetComparisonOperator(BasicOperator([]string{"<", "=lt="}, false))

@@ -2,6 +2,7 @@ package rsql
 
 import (
 	"errors"
+	"log"
 	"reflect"
 
 	"github.com/iancoleman/strcase"
@@ -21,19 +22,18 @@ type RSQLParser interface {
 type Parser struct {
 	mapper       *reflext.Struct
 	zero         reflect.Value
+	lexer        *lexmachine.Lexer
 	Parser       RSQLParser
 	FormatColumn FormatFunc
 	DefaultLimit uint
 	MaxLimit     uint
-	// 	MultiplexSort bool
-	// 	operators     *operatorRegistry
 }
 
 // NewParser :
 func NewParser(it interface{}) (*Parser, error) {
 	t := reflext.Deref(reflect.TypeOf(it))
 	if t.Kind() != reflect.Struct {
-		return nil, errors.New("rsql: invalid model expected, it must be struct")
+		return nil, errors.New("rsql: entity must be struct")
 	}
 
 	mapper := reflext.NewMapperFunc("rsql", strcase.ToLowerCamel)
@@ -43,6 +43,7 @@ func NewParser(it interface{}) (*Parser, error) {
 
 	p := new(Parser)
 	p.mapper = mapper.CodecByType(t)
+	p.lexer = lexer
 	p.Parser = dl
 	p.DefaultLimit = defaultLimit
 	p.MaxLimit = defaultMaxLimit
@@ -62,5 +63,13 @@ func MustNewParser(it interface{}) *Parser {
 
 // ParseQuery :
 func (p *Parser) ParseQuery(b []byte) (interface{}, error) {
-	return p.Parser.ParseQuery(string(b))
+	log.Println(string(b))
+	lxr, err := p.lexer.Scanner(b)
+	if err != nil {
+		return nil, err
+	}
+	scan := &Scanner{Scanner: lxr}
+	scan.ParseToken()
+	log.Println(scan.TC, scan.Text)
+	return nil, nil
 }

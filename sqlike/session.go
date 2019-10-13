@@ -3,6 +3,7 @@ package sqlike
 import (
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
@@ -14,10 +15,11 @@ type SessionContext interface {
 
 // Session :
 type Session struct {
-	dbName string
-	table  string
-	pk     string
-	tx     *Transaction
+	dbName   string
+	table    string
+	pk       string
+	tx       *Transaction
+	registry *codec.Registry
 }
 
 // FindOne :
@@ -35,6 +37,7 @@ func (sess *Session) FindOne(act actions.SelectOneStatement, lock options.LockMo
 		sess.tx.context,
 		sess.dbName,
 		sess.table,
+		sess.registry,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -66,6 +69,7 @@ func (sess *Session) Find(act actions.SelectStatement, lock options.LockMode, op
 		sess.tx.context,
 		sess.dbName,
 		sess.table,
+		sess.registry,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -90,6 +94,7 @@ func (sess *Session) InsertOne(src interface{}, opts ...*options.InsertOneOption
 		sess.dbName,
 		sess.table,
 		sess.pk,
+		sess.registry,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,
@@ -109,6 +114,7 @@ func (sess *Session) Insert(src interface{}, opts ...*options.InsertOptions) (sq
 		sess.dbName,
 		sess.table,
 		sess.pk,
+		sess.registry,
 		sess.tx.driver,
 		sess.tx.dialect,
 		sess.tx.logger,

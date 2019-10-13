@@ -26,6 +26,7 @@ type Model struct {
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key"`
 	Key           *types.Key
+	VirtualColumn string `sqlike:",generated_column"`
 	Date          types.Date
 	SID           string `sqlike:",charset=latin1"`
 	Emoji         string `sqlike:""`
@@ -53,7 +54,7 @@ type normalStruct struct {
 	EmptyStruct   struct{}
 	GeoPoint      types.GeoPoint
 	Struct        struct {
-		VirtualStr    string `sqlike:",virtual_column"`
+		VirtualStr    string `sqlike:",virtual_column=VirtualColumn"`
 		StoredStr     string `sqlike:",stored_column"`
 		NestedBool    bool
 		NestedNullInt *int

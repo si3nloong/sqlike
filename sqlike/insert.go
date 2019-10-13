@@ -27,6 +27,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.registry,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -35,7 +36,7 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 	)
 }
 
-func insertOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
+func insertOne(ctx context.Context, dbName, tbName, pk string, registry *codec.Registry, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOneOptions) (sql.Result, error) {
 	v := reflect.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -60,7 +61,7 @@ func insertOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver.
 	values := make([][]interface{}, 1, 1)
 	rows := make([]interface{}, length, length)
 	for i, sf := range fields {
-		val, err := encodeValue(mapper, codec.DefaultRegistry, sf, v)
+		val, err := encodeValue(mapper, registry, sf, v)
 		if err != nil {
 			return nil, err
 		}
@@ -88,6 +89,7 @@ func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Re
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.registry,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -96,7 +98,7 @@ func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Re
 	)
 }
 
-func insertMany(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
+func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.Registry, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
 	v := reflext.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -132,7 +134,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 		vi := reflext.Indirect(v.Index(i))
 		rows := make([]interface{}, length, length)
 		for j, sf := range fields {
-			val, err := encodeValue(mapper, codec.DefaultRegistry, sf, vi)
+			val, err := encodeValue(mapper, registry, sf, vi)
 			if err != nil {
 				return nil, err
 			}

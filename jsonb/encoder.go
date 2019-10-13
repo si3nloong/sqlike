@@ -142,8 +142,9 @@ func (enc *Encoder) EncodePtr(w *Writer, v reflect.Value) error {
 		w.WriteString(null)
 		return nil
 	}
+
 	v = v.Elem()
-	encoder, err := enc.registry.LookupEncoder(v.Type())
+	encoder, err := enc.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -162,7 +163,7 @@ func (enc *Encoder) EncodeStruct(w *Writer, v reflect.Value) error {
 		w.WriteString(strconv.Quote(sf.Path))
 		w.WriteRune(':')
 		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-		encoder, err := enc.registry.LookupEncoder(fv.Type())
+		encoder, err := enc.registry.LookupEncoder(fv)
 		if err != nil {
 			return err
 		}
@@ -188,7 +189,7 @@ func (enc *Encoder) EncodeArray(w *Writer, v reflect.Value) error {
 		}
 
 		fv := v.Index(i)
-		encoder, err := enc.registry.LookupEncoder(fv.Type())
+		encoder, err := enc.registry.LookupEncoder(fv)
 		if err != nil {
 			return err
 		}
@@ -207,8 +208,7 @@ func (enc *Encoder) EncodeInterface(w *Writer, v reflect.Value) error {
 		w.WriteString(null)
 		return nil
 	}
-	t := reflect.TypeOf(it)
-	encoder, err := enc.registry.LookupEncoder(t)
+	encoder, err := enc.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (enc *Encoder) EncodeMap(w *Writer, v reflect.Value) error {
 		escapeString(w, k.String())
 		w.WriteRune('"')
 		w.WriteByte(':')
-		encoder, err := enc.registry.LookupEncoder(vv.Type())
+		encoder, err := enc.registry.LookupEncoder(vv)
 		if err != nil {
 			return err
 		}

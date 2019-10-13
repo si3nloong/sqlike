@@ -227,6 +227,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 				if !col.Nullable {
 					stmt.WriteString(" NOT NULL")
 				}
+				stmt.WriteString(" " + suffix)
 				suffix = "AFTER " + ms.Quote(name)
 			}
 			children = children[1:]

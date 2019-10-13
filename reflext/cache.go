@@ -79,17 +79,30 @@ func (m *Mapper) FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Val
 
 // TraversalsByName :
 func (m *Mapper) TraversalsByName(t reflect.Type, names []string) (idxs [][]int) {
+	idxs = make([][]int, 0, len(names))
+	m.TraversalsByNameFunc(t, names, func(i int, idx []int) {
+		if idxs != nil {
+			idxs = append(idxs, idx)
+		} else {
+			idxs = append(idxs, nil)
+		}
+	})
+	return idxs
+}
+
+// TraversalsByNameFunc :
+func (m *Mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int) {
 	t = Deref(t)
 	mustBe(t, reflect.Struct)
 
 	idxs = make([][]int, 0, len(names))
 	cdc := m.CodecByType(t)
-	for _, name := range names {
-		sf, exist := cdc.Names[name]
-		if exist {
-			idxs = append(idxs, sf.Index)
+	for i, name := range names {
+		sf, ok := cdc.Names[name]
+		if ok {
+			fn(i, sf.Index)
 		} else {
-			// idxs = append(idxs, []int{})
+			fn(i, nil)
 		}
 	}
 	return idxs

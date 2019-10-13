@@ -36,7 +36,9 @@ func IsNull(v reflect.Value) bool {
 	k := v.Kind()
 	return (k == reflect.Ptr ||
 		k == reflect.Slice ||
-		k == reflect.Map) && v.IsNil()
+		k == reflect.Map ||
+		k == reflect.Interface ||
+		k == reflect.Func) && v.IsNil()
 }
 
 // Zero :

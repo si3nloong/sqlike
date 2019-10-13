@@ -124,6 +124,9 @@ func (r *Result) Decode(dst interface{}) error {
 	}
 	vv := reflext.Zero(t)
 	for j, idx := range idxs {
+		if idx == nil {
+			continue
+		}
 		fv := mapper.FieldByIndexes(vv, idx)
 		decoder, err := r.registry.LookupDecoder(fv.Type())
 		if err != nil {
@@ -217,6 +220,9 @@ func (r *Result) All(results interface{}) error {
 		}
 		vv := reflext.Zero(t)
 		for j, idx := range idxs {
+			if idx == nil {
+				continue
+			}
 			fv := mapper.FieldByIndexes(vv, idx)
 			if i < 1 {
 				decoder, err := r.registry.LookupDecoder(fv.Type())

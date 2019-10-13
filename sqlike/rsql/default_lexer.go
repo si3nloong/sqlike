@@ -45,6 +45,16 @@ func (l *defaultTokenLexer) token(name string) lexmachine.Action {
 	}
 }
 
+// func (l *defaultTokenLexer) parseToken() {
+// 	tkn := lexmachine.Token{}
+// 	switch true {
+// 	case tkn.Type == Group && string(tkn.Lexeme) == "(":
+// 		l.parseExpression()
+// 	default:
+// 		l.parseExpression()
+// 	}
+// }
+
 func (l *defaultTokenLexer) ParseQuery(query string) (interface{}, error) {
 	scan, err := l.lexer.Scanner([]byte(query))
 	if err != nil {
