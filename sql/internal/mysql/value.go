@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -28,9 +29,11 @@ func (ms MySQL) Format(it interface{}) (val string) {
 	case float64:
 		val = strconv.FormatFloat(vi, 'e', -1, 64)
 	case time.Time:
-		val = vi.Format(`'2006-01-02 15:04:05.999999'`)
+		val = vi.Format("'2006-01-02 15:04:05.999999'")
 	case json.RawMessage:
 		val = strconv.Quote(util.UnsafeString(vi))
+	case sql.RawBytes:
+		val = string(vi)
 	case nil:
 		val = "NULL"
 	case fmt.Stringer:

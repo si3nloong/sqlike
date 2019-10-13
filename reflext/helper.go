@@ -12,6 +12,14 @@ func ValueOf(i interface{}) reflect.Value {
 	return reflect.ValueOf(i)
 }
 
+// TypeOf : this is the replacement for reflect.TypeOf()
+func TypeOf(i interface{}) reflect.Type {
+	if x, ok := i.(reflect.Type); ok {
+		return x
+	}
+	return reflect.TypeOf(i)
+}
+
 // Deref : this is the replacement for reflect.Elem()
 func Deref(t reflect.Type) reflect.Type {
 	for t.Kind() == reflect.Ptr {

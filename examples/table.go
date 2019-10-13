@@ -16,6 +16,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		columns []string
 	)
 
+	// drop table and create table
 	{
 		err = db.DropIfExists()
 		require.NoError(t, err)
@@ -37,7 +38,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
-	// migrate NormalStruct
+	// migrate table
 	{
 		err = table.Migrate(ns)
 		require.NoError(t, err)
@@ -99,6 +100,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// migrate table with generated columns
 	{
 		table := db.Table("GeneratedStruct")
 		err = table.DropIfExits()

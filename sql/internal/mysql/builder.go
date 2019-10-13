@@ -80,6 +80,8 @@ func (b *mySQLBuilder) BuildCastAs(stmt *sqlstmt.Statement, it interface{}) erro
 	switch x.DataType {
 	case primitive.JSON:
 		stmt.WriteString("JSON")
+	default:
+		return errors.New("mysql: unsupported cast as data type")
 	}
 	stmt.WriteByte(')')
 	return nil
@@ -91,7 +93,7 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 	case primitive.JSONQuote:
 		stmt.WriteString("JSON_QUOTE")
 	default:
-		return errors.New("unsupported function")
+		return errors.New("mysql: unsupported function")
 	}
 	stmt.WriteByte('(')
 	for i, args := range x.Arguments {
@@ -289,7 +291,7 @@ func (b *mySQLBuilder) BuildSort(stmt *sqlstmt.Statement, it interface{}) error 
 	stmt.WriteString(b.Quote(x.Field))
 	if x.Order == primitive.Descending {
 		stmt.WriteRune(' ')
-		stmt.WriteString(`DESC`)
+		stmt.WriteString("DESC")
 	}
 	return nil
 }
@@ -297,7 +299,7 @@ func (b *mySQLBuilder) BuildSort(stmt *sqlstmt.Statement, it interface{}) error 
 func (b *mySQLBuilder) BuildKeyValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(primitive.KV)
 	stmt.WriteString(b.Quote(string(x.Field)))
-	stmt.WriteString(` = `)
+	stmt.WriteString(" = ")
 	return b.getValue(stmt, x.Value)
 }
 
@@ -328,7 +330,7 @@ func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err e
 	} else {
 		stmt.WriteRune('-')
 	}
-	stmt.WriteString(` ` + strconv.Itoa(x.Value))
+	stmt.WriteString(" " + strconv.Itoa(x.Value))
 	return
 }
 
@@ -363,11 +365,11 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 
 func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(primitive.Group)
-	for len(x) > 0 {
-		if err := b.getValue(stmt, x[0]); err != nil {
+	for len(x.Values) > 0 {
+		if err := b.getValue(stmt, x.Values[0]); err != nil {
 			return err
 		}
-		x = x[1:]
+		x.Values = x.Values[1:]
 	}
 	return
 }
@@ -405,7 +407,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 	x := it.(*actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
-		return errors.New("empty table name")
+		return errors.New("mysql: empty table name")
 	}
 	stmt.WriteString("SELECT ")
 	if x.DistinctOn {
@@ -415,7 +417,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 		return err
 	}
 	stmt.WriteString(" FROM " + b.TableName(x.Database, x.Table))
-	if err := b.appendWhere(stmt, x.Conditions); err != nil {
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
 		return err
 	}
 	if err := b.appendGroupBy(stmt, x.GroupBys); err != nil {
@@ -572,5 +574,5 @@ func escapeWildCard(n string) string {
 }
 
 func unmatchedDataType(callback string) error {
-	return errors.New("invalid data type")
+	return errors.New("mysql: invalid data type")
 }

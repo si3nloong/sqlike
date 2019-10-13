@@ -30,7 +30,9 @@ type Func struct {
 }
 
 // Group :
-type Group []interface{}
+type Group struct {
+	Values []interface{}
+}
 
 // Col :
 type Col string

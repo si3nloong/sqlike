@@ -48,5 +48,5 @@ func (sb *StatementBuilder) BuildStatement(stmt *Statement, it interface{}) erro
 		return x(stmt, it)
 	}
 
-	return fmt.Errorf("invalid data type support %v", v.Type())
+	return fmt.Errorf("sqlstmt: invalid data type support %v", v.Type())
 }

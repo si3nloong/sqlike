@@ -10,19 +10,19 @@ import (
 // InsertInto :
 func (ms MySQL) InsertInto(db, table, pk string, columns []string, values [][]interface{}, opt *options.InsertOptions) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`INSERT`)
+	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
-		stmt.WriteString(` IGNORE`)
+		stmt.WriteString(" IGNORE")
 	}
-	stmt.WriteString(` INTO ` + ms.TableName(db, table) + ` (`)
+	stmt.WriteString(" INTO " + ms.TableName(db, table) + " (")
 	for i, col := range columns {
 		if i > 0 {
 			stmt.WriteRune(',')
 		}
 		stmt.WriteString(ms.Quote(col))
 	}
-	stmt.WriteString(`) VALUES `)
-	binds := strings.Repeat(`?,`, len(values[0]))
+	stmt.WriteString(") VALUES ")
+	binds := strings.Repeat("?,", len(values[0]))
 	binds = binds[:len(binds)-1]
 	length := len(values)
 	for i := 0; i < length; i++ {
@@ -34,7 +34,7 @@ func (ms MySQL) InsertInto(db, table, pk string, columns []string, values [][]in
 		values = values[1:]
 	}
 	if opt.Mode == options.InsertOnDuplicate {
-		stmt.WriteString(` ON DUPLICATE KEY UPDATE `)
+		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
 		for _, col := range columns {
 			if col == pk {
@@ -45,7 +45,7 @@ func (ms MySQL) InsertInto(db, table, pk string, columns []string, values [][]in
 				stmt.WriteRune(',')
 			}
 			c := ms.Quote(col)
-			stmt.WriteString(c + `=VALUES(` + c + `)`)
+			stmt.WriteString(c + "=VALUES(" + c + ")")
 			next = true
 		}
 	}

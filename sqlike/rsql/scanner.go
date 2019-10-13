@@ -4,17 +4,26 @@ import (
 	"errors"
 	"log"
 
+	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 	"github.com/timtadh/lexmachine"
 )
 
 // Scanner :
 type Scanner struct {
+	values primitive.Group
+	level  int
+	token  *lexmachine.Token
+	parser *Parser
 	*lexmachine.Scanner
 }
 
 // NextToken :
 func (scan *Scanner) NextToken() (*lexmachine.Token, bool) {
 	it, _, eof := scan.Next()
+	for !eof && it == nil {
+		it, _, eof = scan.Next()
+	}
 	// log.Println("Token :", it)
 	return it.(*lexmachine.Token), eof
 }
@@ -25,7 +34,11 @@ func (scan *Scanner) ParseToken() error {
 	if eof {
 		return nil
 	}
-	if tkn.Type == Group && string(tkn.Lexeme) == "(" {
+	// scan.token = tkn
+	char := string(tkn.Lexeme)
+	if tkn.Type == Group && char == "(" {
+		scan.level++
+		scan.values.Values = append(scan.values.Values, expr.Raw(char))
 		return scan.ParseGroup()
 	}
 	return scan.ParseExpression(tkn)
@@ -33,23 +46,33 @@ func (scan *Scanner) ParseToken() error {
 
 // ParseExpression :
 func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
-	tkn1, eof := scan.NextToken()
+	expression, eof := scan.NextToken()
 	if eof {
 		return errors.New("")
 	}
 
-	tkn2, eof := scan.NextToken()
+	value, eof := scan.NextToken()
 	if eof {
 		return errors.New("")
 	}
 	// log.Println("Debug Expression ===========>")
-	log.Println(string(tkn.Lexeme), string(tkn1.Lexeme), string(tkn2.Lexeme))
+
+	log.Println(string(tkn.Lexeme), string(expression.Lexeme), string(value.Lexeme))
 	tkn3, eof := scan.NextToken()
 	if eof {
 		return nil
 	}
-	if tkn3.Type != And && tkn3.Type != Or {
-		return errors.New("")
+	scan.values.Values = append(scan.values.Values, expr.Equal(string(tkn.Lexeme), string(value.Lexeme)))
+	log.Println(tkn3.Type == Group)
+	switch tkn3.Type {
+	case Group:
+		scan.TC = tkn3.TC
+	case And:
+		scan.values.Values = append(scan.values.Values, primitive.And)
+	case Or:
+		scan.values.Values = append(scan.values.Values, primitive.Or)
+	default:
+		return errors.New("invalid syntax")
 	}
 	return nil
 }
@@ -57,11 +80,15 @@ func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
 // ParseGroup :
 func (scan *Scanner) ParseGroup() error {
 	for {
+		log.Println("HERE !!!")
 		tkn, eof := scan.NextToken()
 		if eof {
 			break
 		}
-		if tkn.Type == Group && string(tkn.Lexeme) == ")" {
+		char := string(tkn.Lexeme)
+		if tkn.Type == Group && char == ")" {
+			scan.level--
+			scan.values.Values = append(scan.values.Values, expr.Raw(char))
 			break
 		}
 		if err := scan.ParseExpression(tkn); err != nil {

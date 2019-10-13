@@ -5,6 +5,7 @@
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
 - [ ] Join Table.
+- [ ] Support `primary_key` tag.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
 - [ ] Extra func before value `driver.Valuer`.
 - [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.

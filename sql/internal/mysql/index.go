@@ -27,13 +27,12 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 	args := []interface{}{dbName, table, idxType, nonUnique}
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("SELECT COUNT(1) FROM (")
-	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c")
-	stmt.WriteString(" FROM INFORMATION_SCHEMA.STATISTICS")
-	stmt.WriteString(" WHERE TABLE_SCHEMA = ?")
-	stmt.WriteString(" AND TABLE_NAME = ?")
-	stmt.WriteString(" AND INDEX_TYPE = ?")
-	stmt.WriteString(" AND NON_UNIQUE = ?")
-	stmt.WriteString(" AND COLUMN_NAME IN ")
+	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c FROM INFORMATION_SCHEMA.STATISTICS ")
+	stmt.WriteString("WHERE TABLE_SCHEMA = ? ")
+	stmt.WriteString("AND TABLE_NAME = ? ")
+	stmt.WriteString("AND INDEX_TYPE = ? ")
+	stmt.WriteString("AND NON_UNIQUE = ? ")
+	stmt.WriteString("AND COLUMN_NAME IN ")
 	stmt.WriteByte('(')
 	for i, col := range idx.Columns {
 		if i > 0 {

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // SelectStatement :
@@ -25,8 +26,8 @@ type FindActions struct {
 	Table       string
 	DistinctOn  bool
 	Projections []interface{}
-	Conditions  []interface{}
-	Havings     []interface{}
+	Conditions  primitive.Group
+	Havings     primitive.Group
 	GroupBys    []interface{}
 	Sorts       []interface{}
 	Skip        uint

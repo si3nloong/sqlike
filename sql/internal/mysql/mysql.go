@@ -31,7 +31,7 @@ func New() *MySQL {
 // GetVersion :
 func (ms MySQL) GetVersion() (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`SELECT VERSION();`)
+	stmt.WriteString("SELECT VERSION();")
 	return
 }
 
@@ -62,6 +62,6 @@ func (ms MySQL) DropDatabase(db string, exists bool) (stmt *sqlstmt.Statement) {
 // GetDatabases :
 func (ms MySQL) GetDatabases() (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`SHOW DATABASES;`)
+	stmt.WriteString("SHOW DATABASES;")
 	return
 }

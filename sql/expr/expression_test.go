@@ -36,35 +36,39 @@ func TestExpression(t *testing.T) {
 
 	t.Run("Empty And", func(ti *testing.T) {
 		grp = And()
-		require.ElementsMatch(ti, primitive.Group{}, grp)
+		require.Equal(ti, primitive.Group{}, grp)
 
 		grp = And(invalids...)
-		require.ElementsMatch(ti, primitive.Group{}, grp)
+		require.Equal(ti, primitive.Group{}, grp)
 	})
 
 	t.Run("And", func(ti *testing.T) {
 		grp = And(filters...)
-		require.ElementsMatch(ti, primitive.Group{
-			Raw("("),
-			Equal("A", 1),
-			primitive.And,
-			Like("B", "abc%"),
-			primitive.And,
-			Between("DateTime", now, now.Add(5*time.Minute)),
-			Raw(")"),
+		require.Equal(ti, primitive.Group{
+			Values: []interface{}{
+				Raw("("),
+				Equal("A", 1),
+				primitive.And,
+				Like("B", "abc%"),
+				primitive.And,
+				Between("DateTime", now, now.Add(5*time.Minute)),
+				Raw(")"),
+			},
 		}, grp)
 	})
 
 	t.Run("Or", func(ti *testing.T) {
 		grp = Or(filters...)
-		require.ElementsMatch(ti, primitive.Group{
-			Raw("("),
-			Equal("A", 1),
-			primitive.Or,
-			Like("B", "abc%"),
-			primitive.Or,
-			Between("DateTime", now, now.Add(5*time.Minute)),
-			Raw(")"),
+		require.Equal(ti, primitive.Group{
+			Values: []interface{}{
+				Raw("("),
+				Equal("A", 1),
+				primitive.Or,
+				Like("B", "abc%"),
+				primitive.Or,
+				Between("DateTime", now, now.Add(5*time.Minute)),
+				Raw(")"),
+			},
 		}, grp)
 	})
 

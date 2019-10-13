@@ -19,7 +19,7 @@ type UpdateOneActions struct {
 
 // Where :
 func (act *UpdateOneActions) Where(fields ...interface{}) UpdateOneStatement {
-	act.Conditions = expr.And(fields...)
+	act.Conditions = expr.And(fields...).Values
 	return act
 }
 

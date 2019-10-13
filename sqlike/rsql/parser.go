@@ -4,9 +4,12 @@ import (
 	"errors"
 	"log"
 	"reflect"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/util"
 	"github.com/timtadh/lexmachine"
 )
 
@@ -20,9 +23,14 @@ type RSQLParser interface {
 
 // Parser :
 type Parser struct {
+	SelectTag    string
+	FilterTag    string
+	SortTag      string
+	LimitTag     string
 	mapper       *reflext.Struct
 	zero         reflect.Value
 	lexer        *lexmachine.Lexer
+	registry     *codec.Registry
 	Parser       RSQLParser
 	FormatColumn FormatFunc
 	DefaultLimit uint
@@ -31,7 +39,7 @@ type Parser struct {
 
 // NewParser :
 func NewParser(it interface{}) (*Parser, error) {
-	t := reflext.Deref(reflect.TypeOf(it))
+	t := reflext.Deref(reflext.TypeOf(it))
 	if t.Kind() != reflect.Struct {
 		return nil, errors.New("rsql: entity must be struct")
 	}
@@ -42,8 +50,13 @@ func NewParser(it interface{}) (*Parser, error) {
 	dl.addActions(lexer)
 
 	p := new(Parser)
+	p.SelectTag = "$select"
+	p.FilterTag = "$filter"
+	p.SortTag = "$sort"
+	p.LimitTag = "$limit"
 	p.mapper = mapper.CodecByType(t)
 	p.lexer = lexer
+	p.registry = codec.DefaultRegistry
 	p.Parser = dl
 	p.DefaultLimit = defaultLimit
 	p.MaxLimit = defaultMaxLimit
@@ -62,14 +75,43 @@ func MustNewParser(it interface{}) *Parser {
 }
 
 // ParseQuery :
-func (p *Parser) ParseQuery(b []byte) (interface{}, error) {
-	log.Println(string(b))
-	lxr, err := p.lexer.Scanner(b)
+func (p *Parser) ParseQuery(query string) (*Params, error) {
+	return p.ParseQueryBytes([]byte(query))
+}
+
+// ParseQueryBytes :
+func (p *Parser) ParseQueryBytes(query []byte) (*Params, error) {
+	values := make(map[string]string)
+	if err := parseRawQuery(values, util.UnsafeString(query)); err != nil {
+		return nil, err
+	}
+
+	var (
+		params = new(Params)
+		err    error
+		// errs   = make(Errors, 0)
+	)
+
+	log.Println(values, len(values))
+	p.parseSelect(values, params)
+	// p.parseFilter(values, query, params)
+	p.parseSort(values, params)
+	p.parseLimit(values, params)
+
 	if err != nil {
 		return nil, err
 	}
-	scan := &Scanner{Scanner: lxr}
-	scan.ParseToken()
-	log.Println(scan.TC, scan.Text)
-	return nil, nil
+	return params, nil
+}
+
+func (p *Parser) columnName(f *reflext.StructField) string {
+	name, ok := f.Tag.LookUp("column")
+	if ok {
+		return strings.TrimSpace(name)
+	}
+	name = f.Name
+	if p.FormatColumn != nil {
+		return p.FormatColumn(name)
+	}
+	return name
 }

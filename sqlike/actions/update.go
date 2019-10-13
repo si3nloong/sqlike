@@ -25,7 +25,7 @@ type UpdateActions struct {
 
 // Where :
 func (act *UpdateActions) Where(fields ...interface{}) UpdateStatement {
-	act.Conditions = expr.And(fields...)
+	act.Conditions = expr.And(fields...).Values
 	return act
 }
 

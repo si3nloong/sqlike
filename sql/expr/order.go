@@ -7,6 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
+// Field :
 func Field(name string, val interface{}) (f primitive.Field) {
 	f.Name = name
 	v := reflect.ValueOf(val)
