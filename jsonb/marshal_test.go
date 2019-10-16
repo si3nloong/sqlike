@@ -29,8 +29,15 @@ func (b Boolean) MarshalJSON() ([]byte, error) {
 	return []byte(`"No"`), nil
 }
 
+type Text string
+
+func (txt Text) MarshalText() ([]byte, error) {
+	return []byte(txt), nil
+}
+
 type normalStruct struct {
 	Str               string
+	Text              Text
 	DecimalStr        Decimal
 	NullDecimalStr    *Decimal `sqlike:"NullableDecimal"`
 	Boolean           Boolean
@@ -87,7 +94,7 @@ func TestMarshal(t *testing.T) {
 		k   = types.NameKey("Name", "@#$%^&*()ashdkjashd", types.NewIDKey("ID", nil))
 	)
 
-	data := `{"Str":"","DecimalStr":"0.00","NullableDecimal":null,`
+	data := `{"Str":"","Text":"","DecimalStr":"0.00","NullableDecimal":null,`
 	data += `"Boolean":"No","LongStr":"","CustomStrType":"",`
 	data += `"EmptyByte":null,"Byte":null,"Bool":false,"Skip":null,`
 	data += `"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,`
@@ -127,6 +134,7 @@ func TestMarshal(t *testing.T) {
 
 	// Marshal struct with pointer value
 	{
+		i.Text = `"My long text.......""`
 		i.Str = "hello world"
 		i.LongStr = symbolStr
 		i.Boolean = true
@@ -139,6 +147,7 @@ func TestMarshal(t *testing.T) {
 		i.NullKey = k
 
 		dataByte, _ = sjson.SetBytes(dataByte, "Str", "hello world")
+		dataByte, _ = sjson.SetBytes(dataByte, "Text", `"My long text.......""`)
 		dataByte, _ = sjson.SetRawBytes(dataByte, "LongStr", []byte(jsonEscapeStr))
 		dataByte, _ = sjson.SetBytes(dataByte, "Boolean", "Yes")
 		dataByte, _ = sjson.SetBytes(dataByte, "DecimalStr", "10.69")

@@ -1,6 +1,7 @@
 package jsonb
 
 import (
+	"encoding"
 	"encoding/json"
 	"reflect"
 	"sync"
@@ -91,6 +92,10 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 
 	if _, ok := it.(json.Marshaler); ok {
 		return jsonMarshalerEncoder(), nil
+	}
+
+	if _, ok := it.(encoding.TextMarshaler); ok {
+		return textMarshalerEncoder(), nil
 	}
 
 	t := v.Type()

@@ -46,7 +46,6 @@ func TestExamples(t *testing.T) {
 
 	{
 		RSQLExamples(t, db)
-		t.Fatal("stop")
 		MigrateExamples(t, db)
 		IndexExamples(t, db)
 		InsertExamples(t, db)

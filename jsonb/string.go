@@ -71,6 +71,7 @@ func (r *Reader) ReadEscapeString() (string, error) {
 	return blr.String(), nil
 }
 
+// ReadRawString :
 func (r *Reader) ReadRawString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
