@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Number :
 type Number = json.Number
 
 // ReadNumber :

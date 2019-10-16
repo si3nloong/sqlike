@@ -15,9 +15,9 @@ func Increment(field string, inc uint) primitive.Math {
 func Multiply(fields ...interface{}) (grp primitive.Group) {
 	for i, f := range fields {
 		if i > 0 {
-			grp = append(grp, Raw("*"))
+			grp.Values = append(grp.Values, Raw("*"))
 		}
-		grp = append(grp, wrapColumn(f))
+		grp.Values = append(grp.Values, wrapColumn(f))
 	}
 	return
 }

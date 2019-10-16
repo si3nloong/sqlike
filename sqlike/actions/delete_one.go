@@ -17,7 +17,7 @@ type DeleteOneActions struct {
 
 // Where :
 func (act *DeleteOneActions) Where(fields ...interface{}) DeleteOneStatement {
-	act.Conditions = expr.And(fields...)
+	act.Conditions = expr.And(fields...).Values
 	return act
 }
 

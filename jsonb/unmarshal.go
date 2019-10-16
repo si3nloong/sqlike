@@ -1,15 +1,17 @@
 package jsonb
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"errors"
+
+	"github.com/si3nloong/sqlike/reflext"
 )
 
-// Unmarshaller :
-type Unmarshaller interface {
+// Unmarshaler :
+type Unmarshaler interface {
 	UnmarshalJSONB([]byte) error
 }
 
@@ -84,10 +86,24 @@ func UnmarshalValue(data []byte, v reflect.Value) error {
 	return nil
 }
 
-// unmarshallerDecoder
-func unmarshallerDecoder() ValueDecoder {
+// unmarshalerDecoder
+func unmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
-		it := v.Interface()
-		return it.(Unmarshaller).UnmarshalJSONB(r.Bytes())
+		x, ok := v.Interface().(Unmarshaler)
+		if !ok {
+			return errors.New("codec: invalid type for assertion")
+		}
+		return x.UnmarshalJSONB(r.Bytes())
+	}
+}
+
+// jsonUnmarshalerDecoder
+func jsonUnmarshalerDecoder() ValueDecoder {
+	return func(r *Reader, v reflect.Value) error {
+		x, ok := v.Interface().(json.Unmarshaler)
+		if !ok {
+			return errors.New("codec: invalid type for assertion")
+		}
+		return x.UnmarshalJSON(r.Bytes())
 	}
 }

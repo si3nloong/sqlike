@@ -72,35 +72,6 @@ func (r *Reader) peekType() jsonType {
 	return typ
 }
 
-// GetBytes :
-func (r *Reader) GetBytes() (b []byte) {
-	r.start = r.pos
-	c := r.nextToken()
-	switch c {
-	case '"':
-		// r.skipString()
-	case 'n':
-		// r.skipThreeBytes('u', 'l', 'l') // null
-	case 't':
-		// iter.skipThreeBytes('r', 'u', 'e') // true
-	case 'f':
-		// iter.skipFourBytes('a', 'l', 's', 'e') // false
-	case '0':
-		// iter.unreadByte()
-		// iter.ReadFloat32()
-	case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		// iter.skipNumber()
-	case '[':
-		// r.skipArray()
-	case '{':
-		// r.skipObject()
-	default:
-		// iter.ReportError("Skip", fmt.Sprintf("do not know how to skip: %v", c))
-		return
-	}
-	return
-}
-
 // IsNull :
 func (r *Reader) IsNull() bool {
 	offset := r.pos + 4

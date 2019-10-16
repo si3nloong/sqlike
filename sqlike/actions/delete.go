@@ -22,7 +22,7 @@ type DeleteActions struct {
 
 // Where :
 func (act *DeleteActions) Where(fields ...interface{}) DeleteStatement {
-	act.Conditions = expr.And(fields...)
+	act.Conditions = expr.And(fields...).Values
 	return act
 }
 

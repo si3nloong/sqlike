@@ -75,12 +75,13 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		return nil, err
 	}
 	return &Transaction{
-		dbName:  db.name,
-		pk:      db.pk,
-		context: ctx,
-		driver:  tx,
-		dialect: db.dialect,
-		logger:  db.logger,
+		dbName:   db.name,
+		pk:       db.pk,
+		context:  ctx,
+		driver:   tx,
+		dialect:  db.dialect,
+		logger:   db.logger,
+		registry: db.registry,
 	}, nil
 }
 

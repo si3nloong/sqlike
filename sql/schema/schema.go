@@ -15,8 +15,8 @@ import (
 	"golang.org/x/text/language"
 )
 
-// ColumnType :
-type ColumnType interface {
+// DataTyper :
+type DataTyper interface {
 	DataType(info driver.Info, sf *reflext.StructField) columns.Column
 }
 
@@ -64,9 +64,8 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 // GetColumn :
 func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns.Column, error) {
 	t := reflext.Deref(sf.Type)
-	v := reflext.Zero(t)
-	it := v.Interface()
-	if x, ok := it.(ColumnType); ok {
+	it := reflext.Zero(t).Interface()
+	if x, ok := it.(DataTyper); ok {
 		return x.DataType(info, sf), nil
 	}
 
@@ -78,7 +77,7 @@ func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns
 		return sb.builders[x](sf), nil
 	}
 
-	return columns.Column{}, fmt.Errorf("invalid data type support %v", t)
+	return columns.Column{}, fmt.Errorf("schema: invalid data type support %v", t)
 }
 
 // SetDefaultTypes :

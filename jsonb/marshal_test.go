@@ -1,40 +1,82 @@
 package jsonb
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/sjson"
 )
 
 type longStr string
 
+type Decimal float64
+
+func (f Decimal) MarshalJSONB() ([]byte, error) {
+	return []byte(fmt.Sprintf(`"%.2f"`, f)), nil
+}
+
+type Boolean bool
+
+func (b Boolean) MarshalJSON() ([]byte, error) {
+	if b {
+		return []byte(`"Yes"`), nil
+	}
+	return []byte(`"No"`), nil
+}
+
+type Text string
+
+func (txt Text) MarshalText() ([]byte, error) {
+	return []byte(txt), nil
+}
+
 type normalStruct struct {
-	Str           string
-	LongStr       string
-	CustomStrType longStr
-	EmptyByte     []byte
-	Byte          []byte
-	Bool          bool
-	priv          int
-	Skip          interface{}
-	Int           int
-	TinyInt       int8
-	SmallInt      int16
-	MediumInt     int32
-	BigInt        int64
-	Uint          uint
-	TinyUint      uint8
-	SmallUint     uint16
-	MediumUint    uint32
-	BigUint       uint64
-	Float32       float32
-	Float64       float64
-	UFloat32      float32
-	EmptyStruct   struct{}
-	JSONRaw       json.RawMessage
-	Timestamp     time.Time
+	Str               string
+	Text              Text
+	DecimalStr        Decimal
+	NullDecimalStr    *Decimal `sqlike:"NullableDecimal"`
+	Boolean           Boolean
+	LongStr           string
+	CustomStrType     longStr
+	EmptyByte         []byte
+	Byte              []byte
+	Bool              bool
+	priv              int
+	Skip              interface{}
+	Int               int
+	TinyInt           int8
+	SmallInt          int16
+	MediumInt         int32
+	BigInt            int64
+	Uint              uint
+	TinyUint          uint8
+	SmallUint         uint16
+	MediumUint        uint32
+	BigUint           uint64
+	Float32           float32
+	Float64           float64
+	UFloat32          float32
+	EmptyArray        []string
+	EmptyMap          map[string]interface{}
+	EmptyStruct       struct{}
+	JSONRaw           json.RawMessage
+	Timestamp         time.Time
+	NullStr           *string
+	NullCustomStrType *longStr
+	NullInt           *int
+	NullTinyInt       *int8
+	NullSmallInt      *int16
+	NullMediumInt     *int32
+	NullBigInt        *int64
+	NullFloat32       *float32
+	NullFloat64       *float64
+	MultiPtr          *****int
+	NullKey           *types.Key
 }
 
 var (
@@ -47,47 +89,78 @@ func TestMarshal(t *testing.T) {
 	var (
 		b   []byte
 		err error
+		i   normalStruct
+		i32 = int(888)
+		k   = types.NameKey("Name", "@#$%^&*()ashdkjashd", types.NewIDKey("ID", nil))
 	)
 
-	b, err = Marshal(nsPtr)
-	require.NoError(t, err)
-	require.Equal(t, []byte(`null`), b)
+	data := `{"Str":"","Text":"","DecimalStr":"0.00","NullableDecimal":null,`
+	data += `"Boolean":"No","LongStr":"","CustomStrType":"",`
+	data += `"EmptyByte":null,"Byte":null,"Bool":false,"Skip":null,`
+	data += `"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,`
+	data += `"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,`
+	data += `"Float32":0,"Float64":0,"UFloat32":0,`
+	data += `"EmptyArray":null,"EmptyMap":null,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z",`
+	data += `"NullStr":null,"NullCustomStrType":null,`
+	data += `"NullInt":null,"NullTinyInt":null,"NullSmallInt":null,"NullMediumInt":null,"NullBigInt":null,`
+	data += `"NullFloat32":null,"NullFloat64":null,`
+	data += `"MultiPtr":null,"NullKey":null}`
+	dataByte := []byte(data)
 
-	b, err = Marshal(nsInit)
-	require.NoError(t, err)
-	require.Equal(t, []byte(`{"Str":"","LongStr":"","CustomStrType":"","EmptyByte":null,"Byte":null,"Bool":false,"Skip":null,"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z"}`), b)
+	// Marshal nil
+	{
+		b, err = Marshal(nsPtr)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`null`), b)
 
-	// b, err = Marshal(nsInit)
-	// log.Println(string(b))
-	// require.NoError(t, err)
+		b, err = Marshal(nil)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`null`), b)
+	}
 
-	// b, err = Marshal(nsPtr)
-	// log.Println(string(b))
-	// require.NoError(t, err)
+	// Marshal initialized struct
+	{
+		b, err = Marshal(nsInit)
+		require.NoError(t, err)
+		require.Equal(t, dataByte, b)
+	}
 
-	symbolStr := `'ajhdjasd12380912$%^&*()_\\"asdasd123910293"""\\\\123210312930-\\`
-	result := []byte(`{"Str":"","LongStr":"'ajhdjasd12380912$%^&*()_\\\\\"asdasd123910293\"\"\"\\\\\\\\123210312930-\\\\","CustomStrType":"","EmptyByte":"YWJjZDEyMzQ=","Byte":null,"Bool":false,"Skip":null,"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z"}`)
+	var (
+		symbolStr     = `'ajhdjasd12380912$%^&*()_\\"asdasd123910293"""\\\\123210312930-\\`
+		jsonEscapeStr = `"'ajhdjasd12380912$%^&*()_\\\\\"asdasd123910293\"\"\"\\\\\\\\123210312930-\\\\"`
+		bytes         = []byte(`abcd1234`)
+		// result        = []byte(`{"Str":"hello world","DecimalStr":"10.69","NullableDecimal":null,"Boolean":"Yes","LongStr":"` + jsonEscapeStr + `","CustomStrType":"","EmptyByte":"YWJjZDEyMzQ=","Byte":null,"Bool":false,"Skip":null,"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,"Timestamp":"0001-01-01T00:00:00Z","NullStr":"` + jsonEscapeStr + `","NullCustomStrType":null,"NullInt":888,"NullTinyInt":null,"NullSmallInt":null,"NullMediumInt":null,"NullBigInt":null,"NullFloat32":null,"NullFloat64":null,"MultiPtr":null,"NullKey":"` + k.String() + `"}`)
+	)
 
-	var i normalStruct
-	i.LongStr = symbolStr
-	i.EmptyByte = []byte(`abcd1234`)
-	b, err = Marshal(i)
-	require.Equal(t, result, b)
+	// Marshal struct with pointer value
+	{
+		i.Text = `"My long text.......""`
+		i.Str = "hello world"
+		i.LongStr = symbolStr
+		i.Boolean = true
+		i.DecimalStr = 10.688
+		i.EmptyByte = bytes
+		i.EmptyArray = make([]string, 0)
+		i.EmptyMap = make(map[string]interface{})
+		i.NullStr = &symbolStr
+		i.NullInt = &i32
+		i.NullKey = k
 
-	// var o normalStruct
-	// err = Unmarshal(result, &o)
-	// require.Equal(t, symbolStr, o.LongStr)
+		dataByte, _ = sjson.SetBytes(dataByte, "Str", "hello world")
+		dataByte, _ = sjson.SetBytes(dataByte, "Text", `"My long text.......""`)
+		dataByte, _ = sjson.SetRawBytes(dataByte, "LongStr", []byte(jsonEscapeStr))
+		dataByte, _ = sjson.SetBytes(dataByte, "Boolean", "Yes")
+		dataByte, _ = sjson.SetBytes(dataByte, "DecimalStr", "10.69")
+		dataByte, _ = sjson.SetBytes(dataByte, "EmptyByte", base64.StdEncoding.EncodeToString(bytes))
+		dataByte, _ = sjson.SetBytes(dataByte, "EmptyArray", make([]string, 0))
+		dataByte, _ = sjson.SetBytes(dataByte, "EmptyMap", make(map[string]interface{}))
+		dataByte, _ = sjson.SetRawBytes(dataByte, "NullStr", []byte(jsonEscapeStr))
+		dataByte, _ = sjson.SetBytes(dataByte, "NullInt", i32)
+		dataByte, _ = sjson.SetBytes(dataByte, "NullKey", k.String())
 
-	// output := `{"Str":"","LongStr":"","CustomStrType":"",`
-	// output += `"EmptyByte":null,"Byte":null,"Bool":false,`
-	// output += `"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,`
-	// output += `"BigInt":0,"Uint":0,"TinyUint":0,"SmallUint":0,`
-	// output += `"MediumUint":0,"BigUint":0,"Float32":0,"Float64":0,`
-	// output += `"UFloat32":0,"EmptyStruct":{},"JSONRaw":null,`
-	// output += `"Timestamp":"0001-01-01T00:00:00Z"}`
-	// ins := new(normalStruct)
-	// b, _ = Marshal(ins)
-	// assert.Equal(t, b, []byte(output), "it should match the expected result")
+		b, err = Marshal(i)
+		require.Equal(t, dataByte, b)
+	}
 }
 
 func BenchmarkJSONMarshal(b *testing.B) {

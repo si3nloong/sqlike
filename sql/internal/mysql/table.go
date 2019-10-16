@@ -15,9 +15,9 @@ import (
 // RenameTable :
 func (ms MySQL) RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`RENAME TABLE `)
+	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
-	stmt.WriteString(` TO `)
+	stmt.WriteString(" TO ")
 	stmt.WriteString(ms.TableName(db, newName))
 	stmt.WriteByte(';')
 	return
@@ -60,7 +60,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 	)
 
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`CREATE TABLE ` + ms.TableName(db, table) + ` `)
+	stmt.WriteString("CREATE TABLE " + ms.TableName(db, table) + " ")
 	stmt.WriteRune('(')
 
 	// Main columns :
@@ -111,15 +111,15 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 				}
 
 				stmt.WriteString(ms.Quote(name))
-				stmt.WriteString(` ` + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), `.`)
-				stmt.WriteString(` AS `)
-				stmt.WriteString(`(` + ms.Quote(sf.Path) + `->>'$.` + path + `')`)
+				stmt.WriteString(" " + col.Type)
+				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
+				stmt.WriteString(" AS ")
+				stmt.WriteString("(" + ms.Quote(sf.Path) + "->>'$." + path + "')")
 				if stored {
-					stmt.WriteString(` STORED`)
+					stmt.WriteString(" STORED")
 				}
 				if !col.Nullable {
-					stmt.WriteString(` NOT NULL`)
+					stmt.WriteString(" NOT NULL")
 				}
 			}
 			children = children[1:]
@@ -154,9 +154,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 
 	suffix := "FIRST"
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`ALTER TABLE ` + ms.TableName(db, table) + ` `)
-
-	// TODO: add primary key when missing
+	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 
 	for i, sf := range fields {
 		if i > 0 {
@@ -273,24 +271,4 @@ func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyAction
 	}
 	stmt.WriteByte(';')
 	return
-}
-
-func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
-	stmt.WriteString(ms.Quote(col.Name))
-	stmt.WriteString(" " + col.Type)
-	if col.Charset != nil {
-		stmt.WriteString(" CHARACTER SET " + *col.Charset)
-	}
-	if col.Collation != nil {
-		stmt.WriteString(" COLLATE " + *col.Collation)
-	}
-	if col.Extra != "" {
-		stmt.WriteString(" " + col.Extra)
-	}
-	if !col.Nullable {
-		stmt.WriteString(" NOT NULL")
-		if col.DefaultValue != nil {
-			stmt.WriteString(" DEFAULT " + ms.WrapOnlyValue(*col.DefaultValue))
-		}
-	}
 }

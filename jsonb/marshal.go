@@ -1,48 +1,83 @@
 package jsonb
 
 import (
+	"encoding"
+	"encoding/json"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
 )
 
-// Marshaller :
-type Marshaller interface {
+// Marshaler :
+type Marshaler interface {
 	MarshalJSONB() ([]byte, error)
 }
 
 // Marshal :
 func Marshal(src interface{}) (b []byte, err error) {
 	v := reflext.ValueOf(src)
-	if src == nil || reflext.IsNull(v) {
-		b = []byte(`null`)
+	if src == nil || !v.IsValid() || reflext.IsNull(v) {
+		b = []byte(null)
 		return
 	}
 
-	t := reflext.Deref(v.Type())
-	encoder, err := registry.LookupEncoder(t)
+	encoder, err := registry.LookupEncoder(v)
 	if err != nil {
 		return nil, err
 	}
 
-	v = reflext.Indirect(v)
 	w := NewWriter()
 	if err := encoder(w, v); err != nil {
 		return nil, err
 	}
-
 	b = w.Bytes()
 	return
 }
 
-// marshallerEncoder
-func marshallerEncoder() ValueEncoder {
+// marshalerEncoder
+func marshalerEncoder() ValueEncoder {
 	return func(w *Writer, v reflect.Value) error {
-		b, err := v.Interface().(Marshaller).MarshalJSONB()
+		x := v.Interface().(Marshaler)
+		b, err := x.MarshalJSONB()
 		if err != nil {
 			return err
 		}
 		w.Write(b)
+		return nil
+	}
+}
+
+func jsonMarshalerEncoder() ValueEncoder {
+	return func(w *Writer, v reflect.Value) error {
+		x := v.Interface().(json.Marshaler)
+		b, err := x.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		w.Write(b)
+		return nil
+	}
+}
+
+func textMarshalerEncoder() ValueEncoder {
+	return func(w *Writer, v reflect.Value) error {
+		x := v.Interface().(encoding.TextMarshaler)
+		b, err := x.MarshalText()
+		if err != nil {
+			return err
+		}
+		length := len(b)
+		w.WriteByte('"')
+		for i := 0; i < length; i++ {
+			char := b[0]
+			b = b[1:]
+			if x, ok := escapeCharMap[char]; ok {
+				w.Write(x)
+				continue
+			}
+			w.WriteByte(char)
+		}
+		w.WriteByte('"')
 		return nil
 	}
 }

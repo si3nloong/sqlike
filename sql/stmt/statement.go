@@ -13,49 +13,49 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
+	strings.Builder
 	start   time.Time
 	elapsed time.Duration
-	strings.Builder
-	fmt  Formatter
-	c    int
-	args []interface{}
+	fmt     Formatter
+	c       int
+	args    []interface{}
 }
 
 // NewStatement :
-func NewStatement(fmt Formatter) (stmt *Statement) {
-	stmt = new(Statement)
-	stmt.fmt = fmt
+func NewStatement(fmt Formatter) (sm *Statement) {
+	sm = new(Statement)
+	sm.fmt = fmt
 	return
 }
 
 // Args :
-func (stmt *Statement) Args() []interface{} {
-	return stmt.args
+func (sm *Statement) Args() []interface{} {
+	return sm.args
 }
 
 // AppendArg :
-func (stmt *Statement) AppendArg(arg interface{}) *Statement {
-	stmt.args = append(stmt.args, arg)
-	stmt.c = len(stmt.args)
-	return stmt
+func (sm *Statement) AppendArg(arg interface{}) *Statement {
+	sm.args = append(sm.args, arg)
+	sm.c = len(sm.args)
+	return sm
 }
 
 // AppendArgs :
-func (stmt *Statement) AppendArgs(args []interface{}) {
-	stmt.args = append(stmt.args, args...)
-	stmt.c = len(stmt.args)
+func (sm *Statement) AppendArgs(args []interface{}) {
+	sm.args = append(sm.args, args...)
+	sm.c = len(sm.args)
 }
 
 // Format :
-func (stmt Statement) Format(state fmt.State, verb rune) {
-	str := stmt.String()
+func (sm Statement) Format(state fmt.State, verb rune) {
+	str := sm.String()
 	if !state.Flag('+') {
 		state.Write([]byte(str))
 		return
 	}
 	// TODO: change variable
 	i := 1
-	args := stmt.Args()
+	args := sm.Args()
 	for {
 		idx := strings.Index(str, "?")
 		if idx < 0 {
@@ -63,7 +63,7 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 			break
 		}
 		state.Write([]byte(str[:idx]))
-		state.Write([]byte(stmt.fmt.Format(args[0])))
+		state.Write([]byte(sm.fmt.Format(args[0])))
 		str = str[idx+1:]
 		args = args[1:]
 		i++
@@ -72,19 +72,19 @@ func (stmt Statement) Format(state fmt.State, verb rune) {
 }
 
 // StartTimer :
-func (stmt *Statement) StartTimer() {
-	stmt.start = time.Now()
+func (sm *Statement) StartTimer() {
+	sm.start = time.Now()
 }
 
 // StopTimer :
-func (stmt *Statement) StopTimer() {
-	stmt.elapsed = time.Since(stmt.start)
+func (sm *Statement) StopTimer() {
+	sm.elapsed = time.Since(sm.start)
 }
 
 // TimeElapsed :
-func (stmt *Statement) TimeElapsed() time.Duration {
-	if stmt.elapsed < 0 {
-		stmt.StopTimer()
+func (sm *Statement) TimeElapsed() time.Duration {
+	if sm.elapsed < 0 {
+		sm.StopTimer()
 	}
-	return stmt.elapsed
+	return sm.elapsed
 }

@@ -34,6 +34,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 		context.Background(),
 		tb.dbName,
 		tb.name,
+		tb.registry,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -69,6 +70,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 		context.Background(),
 		tb.dbName,
 		tb.name,
+		tb.registry,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -82,7 +84,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 	return csr, nil
 }
 
-func find(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
+func find(ctx context.Context, dbName, tbName string, registry *codec.Registry, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
 	if act.Database == "" {
 		act.Database = dbName
 	}
@@ -90,7 +92,7 @@ func find(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, d
 		act.Table = tbName
 	}
 	csr := new(Result)
-	csr.registry = codec.DefaultRegistry
+	csr.registry = registry
 	stmt, err := dialect.Select(act, lock)
 	if err != nil {
 		csr.err = err

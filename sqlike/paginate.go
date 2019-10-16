@@ -73,6 +73,7 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 		context.Background(),
 		pg.table.dbName,
 		pg.table.name,
+		pg.table.registry,
 		pg.table.driver,
 		pg.table.dialect,
 		pg.table.logger,
@@ -93,6 +94,7 @@ func (pg *Paginator) All(results interface{}) error {
 		context.Background(),
 		pg.table.dbName,
 		pg.table.name,
+		pg.table.registry,
 		pg.table.driver,
 		pg.table.dialect,
 		pg.table.logger,
@@ -129,10 +131,10 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 		fields[i] = v
 	}
 	filters = append(filters, expr.Or(fields...))
-	if len(action.Conditions) > 0 {
-		action.Conditions = append(action.Conditions, primitive.And)
+	if len(action.Conditions.Values) > 0 {
+		action.Conditions.Values = append(action.Conditions.Values, primitive.And)
 	}
-	action.Conditions = append(action.Conditions, expr.And(filters...))
+	action.Conditions.Values = append(action.Conditions.Values, expr.And(filters...))
 	return &action
 }
 

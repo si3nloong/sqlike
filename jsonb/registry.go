@@ -1,8 +1,12 @@
 package jsonb
 
 import (
+	"encoding"
+	"encoding/json"
 	"reflect"
 	"sync"
+
+	"github.com/si3nloong/sqlike/reflext"
 )
 
 // ValueDecoder :
@@ -68,17 +72,33 @@ func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
 }
 
 // LookupEncoder :
-func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
+func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	var (
-		enc  ValueEncoder
-		ok bool
+		enc ValueEncoder
+		ok  bool
 	)
 
-	it := reflect.TypeOf((*Marshaller)(nil)).Elem()
-	if t.Implements(it) {
-		return marshallerEncoder(), nil
+	if !v.IsValid() || reflext.IsNull(v) {
+		return func(w *Writer, v reflect.Value) error {
+			w.WriteString(null)
+			return nil
+		}, nil
 	}
 
+	it := v.Interface()
+	if _, ok := it.(Marshaler); ok {
+		return marshalerEncoder(), nil
+	}
+
+	if _, ok := it.(json.Marshaler); ok {
+		return jsonMarshalerEncoder(), nil
+	}
+
+	if _, ok := it.(encoding.TextMarshaler); ok {
+		return textMarshalerEncoder(), nil
+	}
+
+	t := v.Type()
 	enc, ok = r.typeEncoders[t]
 	if ok {
 		return enc, nil
@@ -94,13 +114,18 @@ func (r *Registry) LookupEncoder(t reflect.Type) (ValueEncoder, error) {
 // LookupDecoder :
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
-		dec  ValueDecoder
-		ok bool
+		dec ValueDecoder
+		ok  bool
 	)
 
-	it := reflect.TypeOf((*Unmarshaller)(nil)).Elem()
+	it := reflect.TypeOf((*Unmarshaler)(nil)).Elem()
 	if t.Implements(it) {
-		return unmarshallerDecoder(), nil
+		return unmarshalerDecoder(), nil
+	}
+
+	it = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
+	if t.Implements(it) {
+		return jsonUnmarshalerDecoder(), nil
 	}
 
 	dec, ok = r.typeDecoders[t]

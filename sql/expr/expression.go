@@ -50,18 +50,18 @@ func inGroup(field interface{}, op primitive.Operator, values interface{}) (c pr
 	c.Field = wrapColumn(field)
 	c.Operator = primitive.In
 	grp := primitive.Group{}
-	grp = append(grp, Raw("("))
+	grp.Values = append(grp.Values, Raw("("))
 	if k == reflect.Array || k == reflect.Slice {
 		for i := 0; i < v.Len(); i++ {
 			if i > 0 {
-				grp = append(grp, Raw(","))
+				grp.Values = append(grp.Values, Raw(","))
 			}
-			grp = append(grp, v.Index(i).Interface())
+			grp.Values = append(grp.Values, v.Index(i).Interface())
 		}
 	} else {
-		grp = append(grp, values)
+		grp.Values = append(grp.Values, values)
 	}
-	grp = append(grp, Raw(")"))
+	grp.Values = append(grp.Values, Raw(")"))
 	c.Value = grp
 	return c
 }
@@ -131,28 +131,38 @@ func Or(conds ...interface{}) (g primitive.Group) {
 
 func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.Group) {
 	length := len(conds)
-	if length > 0 {
-		sg := make([]interface{}, 0, length)
-		for len(conds) > 0 {
-			cond := conds[0]
-			conds = conds[1:]
-			if cond == nil || reflext.IsZero(reflect.ValueOf(cond)) {
-				continue
-			}
-			if len(sg) > 0 {
-				sg = append(sg, op)
-			}
-			sg = append(sg, cond)
-		}
-		if len(sg) > 1 {
-			g = append(g, Raw("("))
-			g = append(g, sg...)
-			g = append(g, Raw(")"))
-			return
-		}
-		g = append(g, sg...)
+	if length < 1 {
 		return
 	}
+	if length == 1 {
+		x, ok := conds[0].(primitive.Group)
+		if ok {
+			g = x
+			return
+		}
+	}
+
+	sg := make([]interface{}, 0, length)
+	for len(conds) > 0 {
+		cond := conds[0]
+		conds = conds[1:]
+
+		if cond == nil || reflext.IsZero(reflext.ValueOf(cond)) {
+			continue
+		}
+
+		if len(sg) > 0 {
+			sg = append(sg, op)
+		}
+		sg = append(sg, cond)
+	}
+	if len(sg) > 1 {
+		g.Values = append(g.Values, Raw("("))
+		g.Values = append(g.Values, sg...)
+		g.Values = append(g.Values, Raw(")"))
+		return
+	}
+	g.Values = append(g.Values, sg...)
 	return
 }
 

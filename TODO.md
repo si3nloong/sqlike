@@ -1,71 +1,73 @@
 #### TODO
 
 - [ ] Prevent toxic query.
-- [x] Change `DataType` api.
 - [ ] Support `URL` filter. **(in progress)**
-- [ ] Change `charset` and `collate` on `AlterTable`.
+- [ ] BeforeSave and AfterLoad hook.
+- [ ] Support `charset` and `collate` on `AlterTable`.
+- [ ] Join Table.
+- [ ] Support `primary_key` tag.
+- [ ] [BREAKING CHANGE] collate should reside in charset package.
+- [ ] Extra func before value `driver.Valuer`.
+- [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
+- [x] Change `DataType` api.
 - [x] `CreateDatabase` api.
-- [x] Escape wildcard `%` on `LIKE` condition.
-- [x] Escape wildcard `_` on `LIKE` condition.
+- [x] Escape wildcard `%`, `_` on `LIKE` condition.
 - [x] Add `Database` name as `table` prefix.
 - [x] Add `Field` api.
-- [x] Allow nil on where conditions, skip it if `nil` or invalid
-- [x] Support auto build index
-- [x] `In` and `NotIn`
-- [x] Cursor pagination using `Paginate` api
-- [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`
-- [x] Connect to `MySQL` server with `options.Connect`
-- [x] Support omit options on `InsertOne` and `Insert`
-- [x] Support custom type `GeoPoint`
-- [x] Allow custom name of primary key with `SetPrimaryKey`
-- [x] Support extra options like `charset` and `collation` in connection
-- [x] Get `MySQL` server version
-- [x] Drop selected `Database`
-- [x] Support omit options on `ModifyOne`
-- [x] List all `Database`
-- [x] Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`
-- [x] [Feature] Truncate selected `Table`
-- [x] [Feature] List all column for selected `Table`
-- [x] Add index using `CreateOne` and `CreateMany`
-- [x] [Feature] Drop selected `Table`
-- [x] [Feature] Rename `Table`
-- [x] [Feature] Check `Table` exists
-- [x] [Feature] Create single `Index` (support `unique`, `fulltext` and `spatial`)
-- [x] [Feature] Support primary key on `Migration`
-- [x] [Feature] Create multiple `Index`
-- [x] [Feature] List all `Index`
-- [x] [Feature] Drop selected `Index`
-- [x] [Feature] `Transaction` support
-- [x] [Feature] Add timeout for `Transaction`
-- [x] [Bug] Virtual column sequence in `ALTER TABLE`
-- [x] Support custom type `Key`
-- [x] Support custom type `Date`
-- [x] [Feature] Create `Logger`
-- [x] [Feature] Custom `JSON` encoder (w/o cover `Map` datatype)
-- [x] Custom `JSON` decoder
-- [x] [Bug] `UnmarshalJSONB` into `[]byte`
-- [x] [Feature] Single database `Migration`
+- [x] Allow nil on where conditions, skip it if `nil` or invalid.
+- [x] Support auto build index.
+- [x] Expression `In` and `NotIn`.
+- [x] Cursor pagination using `Paginate` api.
+- [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`.
+- [x] Connect to `MySQL` server with `options.Connect`.
+- [x] Support omit options on `InsertOne` and `Insert`.
+- [x] Support custom type `GeoPoint`.
+- [x] Change default primary key with `SetPrimaryKey`.
+- [x] Support extra options like `charset` and `collation` in connection.
+- [x] Get `MySQL` server version.
+- [x] Drop selected `Database`.
+- [x] Support omit options on `ModifyOne`.
+- [x] List all `Database`.
+- [x] Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`.
+- [x] [Feature] Truncate selected `Table`.
+- [x] [Feature] List all column for selected `Table`.
+- [x] Add index using `CreateOne` and `CreateMany`.
+- [x] [Feature] Drop selected `Table`.
+- [x] [Feature] Rename `Table`.
+- [x] [Feature] Check `Table` exists.
+- [x] [Feature] Create single `Index` (support `unique`, `fulltext` and `spatial`).
+- [x] [Feature] Support primary key on `Migration`.
+- [x] [Feature] Create multiple `Index`.
+- [x] [Feature] List all `Index`.
+- [x] [Feature] Drop selected `Index`.
+- [x] [Feature] `Transaction` support.
+- [x] [Feature] Add timeout for `Transaction`.
+- [x] [Bug] Virtual column sequence in `ALTER TABLE`.
+- [x] Support custom type `Key`.
+- [x] Support custom type `Date`.
+- [x] [Feature] Create `Logger`.
+- [x] [Feature] Custom `JSON` encoder (w/o cover `Map` datatype).
+- [x] Custom `JSON` decoder.
+- [x] [Bug] `UnmarshalJSONB` into `[]byte`.
+- [x] [Feature] Single database `Migration`.
 - [x] [Feature] Support `generated_column` for `Migration` (`virtual_column` or `stored_column`)
-- [x] Support `UnsafeMigrate`
-- [x] Support `MustUnsafeMigrate`
-- [x] [Feature] `InsertIgnore` & `Upsert`
-- [x] Set omit or setter fields on `Upsert`
-- [x] Insert single record into `Table`
-- [x] Insert multiple record into `Table`
-- [x] Retrieve single record from `Table`
-- [x] Retrieve multiple record from `Table`
-- [x] Update single record
-- [x] Modify single record by `$Key`
-- [x] Update multiple record
-- [x] Delete single record by `$Key`
-- [x] Delete multiple record
-- [x] Delete single record
-- [x] Replace into (replace with `Copy` API)
-- [x] Support option tag `unique_index` and `index` on create table
-- [ ] Support option tag `unique_index` and `index` on alter table
+- [x] Support `UnsafeMigrate`.
+- [x] Support `MustUnsafeMigrate`.
+- [x] [Feature] `InsertIgnore` & `Upsert`.
+- [x] Set omit or setter fields on `Upsert`.
+- [x] Insert single record into `Table`.
+- [x] Insert multiple record into `Table`.
+- [x] Retrieve single record from `Table`.
+- [x] Retrieve multiple record from `Table`.
+- [x] Update single record.
+- [x] Modify single record using primary key.
+- [x] Update multiple record.
+- [x] Delete single record using primary key.
+- [x] Delete multiple record.
+- [x] Delete single record.
+- [x] Replace into (replace with `Copy` API).
+- [x] Support option tag `unique_index` and `index` on create table.
+- [ ] Support option tag `unique_index` and `index` on alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
-- [ ] [Bug] Support nested `json.RawMessage` unmarshal
-- [ ] Write testcases (70%)
-- [ ] Extra func before value `driver.Valuer`
-- [ ] Support `map` key implement `fmt.Stringer`
-- [ ] Support `Postgres`
+- [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
+- [ ] Support `Postgres`.

@@ -7,6 +7,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/schema"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
@@ -232,6 +233,26 @@ func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column)
 	col.DataType = "JSON"
 	col.Type = "JSON"
 	return
+}
+
+func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
+	stmt.WriteString(ms.Quote(col.Name))
+	stmt.WriteString(" " + col.Type)
+	if col.Charset != nil {
+		stmt.WriteString(" CHARACTER SET " + *col.Charset)
+	}
+	if col.Collation != nil {
+		stmt.WriteString(" COLLATE " + *col.Collation)
+	}
+	if col.Extra != "" {
+		stmt.WriteString(" " + col.Extra)
+	}
+	if !col.Nullable {
+		stmt.WriteString(" NOT NULL")
+		if col.DefaultValue != nil {
+			stmt.WriteString(" DEFAULT " + ms.WrapOnlyValue(*col.DefaultValue))
+		}
+	}
 }
 
 func (s mySQLSchema) getIntDataType(t reflect.Type) (dataType string) {
