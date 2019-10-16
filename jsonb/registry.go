@@ -111,6 +111,12 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	return nil, ErrNoEncoder{Type: t}
 }
 
+var (
+	jsonbUnmarshaler = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
+	jsonUnmarshaler  = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
+	textUnmarshaler  = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+)
+
 // LookupDecoder :
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
@@ -118,14 +124,21 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ok  bool
 	)
 
-	it := reflect.TypeOf((*Unmarshaler)(nil)).Elem()
-	if t.Implements(it) {
+	ptrType := t
+	if t.Kind() != reflect.Ptr {
+		ptrType = reflect.PtrTo(t)
+	}
+
+	if ptrType.Implements(jsonbUnmarshaler) {
 		return unmarshalerDecoder(), nil
 	}
 
-	it = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
-	if t.Implements(it) {
+	if ptrType.Implements(jsonUnmarshaler) {
 		return jsonUnmarshalerDecoder(), nil
+	}
+
+	if ptrType.Implements(textUnmarshaler) {
+		return textUnmarshalerDecoder(), nil
 	}
 
 	dec, ok = r.typeDecoders[t]

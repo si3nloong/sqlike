@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,6 +15,7 @@ type User struct {
 	Name  string
 	Email string
 	Age   int
+	UUID  uuid.UUID
 }
 
 type ptrStruct struct {
@@ -40,12 +42,14 @@ type ptrStruct struct {
 
 type testStruct struct {
 	Str        string
+	UUID       *****uuid.UUID
 	BigDecimal float64
 	SymbolStr  string
 	EscapeStr  string
 	StrSlice   []string
 	Users      []User
 	Nested     struct {
+		MultiPtr ***string
 		Security struct {
 			PrivateKey []byte
 		}
@@ -84,6 +88,19 @@ func TestUnmarshal(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, b, pk)
 	}
+
+	t.Run("Unmarshal UUID", func(it *testing.T) {
+		var uid uuid.UUID
+		err = Unmarshal([]byte(`"4c03d1de-645b-40d2-9ed5-12bb537a602e"`), &uid)
+		require.NoError(t, err)
+		require.Equal(t, uuid.MustParse("4c03d1de-645b-40d2-9ed5-12bb537a602e"), uid)
+
+		var ptruid *****uuid.UUID
+		err = Unmarshal([]byte(`"4c03d1de-645b-40d2-9ed5-12bb537a602e"`), &ptruid)
+		require.NoError(t, err)
+		require.NotNil(t, ptruid)
+		require.Equal(t, uuid.MustParse("4c03d1de-645b-40d2-9ed5-12bb537a602e"), *****ptruid)
+	})
 
 	t.Run("Unmarshal String", func(it *testing.T) {
 		var (
@@ -262,10 +279,10 @@ func TestUnmarshal(t *testing.T) {
 		b = []byte(`"` + date + `"`)
 
 		Unmarshal(b, &dt)
-		require.Equal(t, date, dt.Format(time.RFC3339))
+		require.Equal(t, date, dt.UTC().Format(time.RFC3339))
 
 		Unmarshal(nullval, &dt)
-		require.Equal(t, `0001-01-01T00:00:00Z`, dt.Format(time.RFC3339))
+		require.Equal(t, `0001-01-01T00:00:00Z`, dt.UTC().Format(time.RFC3339))
 	})
 
 	t.Run("Unmarshal Array", func(it *testing.T) {
@@ -345,6 +362,7 @@ func TestUnmarshal(t *testing.T) {
 			b = []byte(`
 		{
 			"Str" :"hello world!!" ,
+			"UUID":     "4c03d1de-645b-40d2-9ed5-12bb537a602e",
 			"SymbolStr"   : "x1#$%^\t!\n\t\t@#$%^&*())))?\\<>.,/:\":;'{}[]-=+_~",
 			"EscapeStr"     :    "<html><div>hello world!</div></html>",
 			"StrSlice" : ["a", "b", "c", "d"],
@@ -352,6 +370,7 @@ func TestUnmarshal(t *testing.T) {
 				{"Name":"SianLoong",   "Age": 18}   ,
 			 { "Name":"Junkai"}],
 			"Nested": {
+				"MultiPtr": "testing \"multiple\" pointer",
 				"Security"   : {
 					"PrivateKey": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWFFJQkFBS0JnUUMrYUlTemtOdXFiZmdxWW9IYW1iS0dyaEF6UnV0dWYydWFzOUJIeXllUFJUdUk5ZVdwCnJHY3lRZlhPVlh2OGJBZVMxK2tIS0MvK1ZDTk9EbGZBTFlQWVVZa053eHVvRnFMbU1SR3E1MzMwSEVLSUpySDcKSUU5aUs0QUVZL3h5WjBTUEp5ZkNnQ2ZaeGtJTmpacWFoSS8rVWxrL1BmdWwyaEQ0ZTNUZVpGTm5HUUlEQVFBQgpBb0dBSHpOYlExMWlVV3dSdFVoTkJQZ1lnKzh6NG1NbG93YW9LRUo4eDdibmRaZWZxTks2WG5KTXVyU0tSZFJHCks5ZTc2ZmtOUzBudmkxcFlLcXM0LzltMWQ4Mk9XdmtDeXZvR3pmRXdyNGJ6bVBBZjdkczVkWElhb29wbWV4WWwKbFpsSmtuMDhWNFJmOWc4RFEyNFRsb3BpZ3RrSzY5UktRSzFHaHVyV1A4UjVxeTBDUVFEZ3dxcGVKZFF5RUdaYgpQUElJN2ZsSUVDRjlQNnNVc1ovNW40cEhNNmg2N0dOdGU1cEx4bDkzOXYybVhaN09aSUZHQU1rUmNDL1ZIK3c4Cm5oaytaNE9yQWtFQTJOK01oOWRpN1YreldaNUNIWXBWTHM5Qi9xOVl3YjFCNjN0UnZUbG9QSnFqTHc1NDUzZUUKbEs0ZnJSaVhXbEhLaUpLYlBOTU1ZUVkyTVRrcEQ2dDhTd0pCQUlkU2JRVFdQZFlPcmJITkZlUnVjeUlDSkVlbQpwN2lENFUrSDBOZGhzTlNoc3BOZVVkM0JpQVZRZmhOR1ZyRHBMalFaa1BXZzJBdTNkcUpnaGM1ZXdKVUNRQUVFCkV4RnoxZGZNMGZkQ2dZYkg1aHhCQmtzZUlTbFBMS2JndmdKSDZaQVhIVnFVRThicHpXb3c0cDhaOVdPTDdJbjEKUGRyc0ZpdkNMckRPVnIzbkRMOENRUURKSENwSEVFNTc0ckpzblJNYk5rR0F5dmZheW9MeElhVUF5WXovaGxrMgpzQ0wzb3BsdDNYM0tjYzV1MkRISVFsZTdGM1M4Wmp4REZMSVRrbnJ4QS9UVgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
 				},
@@ -378,15 +397,16 @@ func TestUnmarshal(t *testing.T) {
 			var o testStruct
 			err = Unmarshal(cp, &o)
 			require.NoError(t, err)
-			// after unmarshal, the input should be the same (input shouldn't modified)
-			require.Equal(t, b, cp)
 
+			// after unmarshal, the input should be the same (input shouldn't modified)
+			require.Equal(t, uuid.MustParse(`4c03d1de-645b-40d2-9ed5-12bb537a602e`), *****o.UUID)
+			require.Equal(t, `testing "multiple" pointer`, ***o.Nested.MultiPtr)
+			require.Equal(t, b, cp)
 			require.Equal(t, `hello world!!`, o.Str)
 			require.Equal(t, `x1#$%^	!
 		@#$%^&*())))?\<>.,/:":;'{}[]-=+_~`, o.SymbolStr)
 			require.Equal(t, pk, o.Nested.Security.PrivateKey)
 			require.Equal(t, true, o.Bool)
-
 			require.Equal(t, int(6000), o.Integer)
 			require.Equal(t, float64(100.111), o.BigDecimal)
 			require.ElementsMatch(t, []User{
@@ -406,9 +426,9 @@ func TestUnmarshal(t *testing.T) {
 		}
 
 		{
-			var u User
+			u := new(User)
 			u.Name = "testing"
-			Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), &u)
+			Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), u)
 			require.Equal(t, "lol", u.Name)
 			require.Equal(t, "test@hotmail.com", u.Email)
 			require.Equal(t, int(18), u.Age)

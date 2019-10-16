@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
@@ -37,6 +38,7 @@ func (txt Text) MarshalText() ([]byte, error) {
 
 type normalStruct struct {
 	Str               string
+	UUID              uuid.UUID
 	Text              Text
 	DecimalStr        Decimal
 	NullDecimalStr    *Decimal `sqlike:"NullableDecimal"`
@@ -94,7 +96,7 @@ func TestMarshal(t *testing.T) {
 		k   = types.NameKey("Name", "@#$%^&*()ashdkjashd", types.NewIDKey("ID", nil))
 	)
 
-	data := `{"Str":"","Text":"","DecimalStr":"0.00","NullableDecimal":null,`
+	data := `{"Str":"","UUID":"00000000-0000-0000-0000-000000000000","Text":"","DecimalStr":"0.00","NullableDecimal":null,`
 	data += `"Boolean":"No","LongStr":"","CustomStrType":"",`
 	data += `"EmptyByte":null,"Byte":null,"Bool":false,"Skip":null,`
 	data += `"Int":0,"TinyInt":0,"SmallInt":0,"MediumInt":0,"BigInt":0,`

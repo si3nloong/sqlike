@@ -1,6 +1,8 @@
 package jsonb
 
 import (
+	"bytes"
+	"encoding"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -89,21 +91,34 @@ func UnmarshalValue(data []byte, v reflect.Value) error {
 // unmarshalerDecoder
 func unmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
-		x, ok := v.Interface().(Unmarshaler)
-		if !ok {
-			return errors.New("codec: invalid type for assertion")
+		r.pos = r.len
+		if v.Kind() != reflect.Ptr {
+			return v.Addr().Interface().(Unmarshaler).UnmarshalJSONB(r.Bytes())
 		}
-		return x.UnmarshalJSONB(r.Bytes())
+		return reflext.Init(v).Interface().(Unmarshaler).UnmarshalJSONB(r.Bytes())
 	}
 }
 
 // jsonUnmarshalerDecoder
 func jsonUnmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
-		x, ok := v.Interface().(json.Unmarshaler)
-		if !ok {
-			return errors.New("codec: invalid type for assertion")
+		r.pos = r.len
+		if v.Kind() != reflect.Ptr {
+			return v.Addr().Interface().(json.Unmarshaler).UnmarshalJSON(r.Bytes())
 		}
-		return x.UnmarshalJSON(r.Bytes())
+		return reflext.Init(v).Interface().(json.Unmarshaler).UnmarshalJSON(r.Bytes())
+	}
+}
+
+// textUnmarshalerDecoder
+func textUnmarshalerDecoder() ValueDecoder {
+	return func(r *Reader, v reflect.Value) error {
+		r.pos = r.len
+		b := r.Bytes()
+		b = bytes.Trim(b, `"`)
+		if v.Kind() != reflect.Ptr {
+			return v.Addr().Interface().(encoding.TextUnmarshaler).UnmarshalText(b)
+		}
+		return reflext.Init(v).Interface().(encoding.TextUnmarshaler).UnmarshalText(b)
 	}
 }
