@@ -1,10 +1,14 @@
 package examples
 
 import (
+	"log"
 	"testing"
 
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/sqlike/rsql"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,9 +25,9 @@ type queryStruct struct {
 // RSQLExamples :
 func RSQLExamples(t *testing.T, db *sqlike.Database) {
 	var (
-		// parser *rsql.Parser
-		// params *rsql.Params
-		err error
+		parser *rsql.Parser
+		params *rsql.Params
+		err    error
 	)
 
 	table := db.Table("rsql_struct")
@@ -48,27 +52,27 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
-	// var src **queryStruct
-	// parser = rsql.MustNewParser(src)
-	// require.NotNil(t, parser)
+	var src **queryStruct
+	parser = rsql.MustNewParser(src)
+	require.NotNil(t, parser)
 
-	// query := `$select=&$filter=(id==value)&$sort=&$limit=100`
+	query := `$select=&$filter=(id==value)&$sort=&$limit=100`
 
-	// {
+	{
 
-	// 	params, err = parser.ParseQuery(query)
-	// 	require.NoError(t, err)
-	// 	require.NotNil(t, params)
+		params, err = parser.ParseQuery(query)
+		require.NoError(t, err)
+		require.NotNil(t, params)
 
-	// 	_, err = table.Find(actions.Find().
-	// 		Where(
-	// 			params.Filters,
-	// 			expr.Equal("Status", Success),
-	// 		), options.Find().SetDebug(true))
-	// 	require.NoError(t, err)
+		_, err = table.Find(actions.Find().
+			Where(
+				params.Filters,
+				expr.Equal("Status", Success),
+			), options.Find().SetDebug(true))
+		require.NoError(t, err)
 
-	// 	log.Println(parser)
-	// 	log.Println(params.Filters)
+		log.Println(parser)
+		log.Println(params.Filters)
 
-	// }
+	}
 }

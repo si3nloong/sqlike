@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -45,7 +44,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		return ErrNilEntity
 	}
 
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	if _, exists := cdc.Names[pk]; !exists {
 		return fmt.Errorf("sqlike: missing primary key field %q", pk)

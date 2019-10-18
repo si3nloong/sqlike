@@ -16,6 +16,14 @@ func TestKey(t *testing.T) {
 		err error
 	)
 
+	t.Run("ParseKey", func(it *testing.T) {
+		str := `Parent,1288888/Name,'sianloong'`
+		k, err = ParseKey(str)
+		require.NoError(t, err)
+		require.NotNil(t, k)
+		require.Equal(t, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), k)
+	})
+
 	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -43,7 +42,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 		return ErrNilEntity
 	}
 
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	f, exists := cdc.Names[pk]
 	if !exists {

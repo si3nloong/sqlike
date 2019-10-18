@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
+
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -253,7 +253,7 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 		return ErrExpectedStruct
 	}
 
-	cdc := core.DefaultMapper.CodecByType(t)
+	cdc := reflext.DefaultMapper.CodecByType(t)
 	_, fields := skipColumns(cdc.Properties, nil)
 	if len(fields) < 1 {
 		return ErrEmptyFields

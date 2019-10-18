@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -154,7 +153,7 @@ func (enc *Encoder) EncodePtr(w *Writer, v reflect.Value) error {
 // EncodeStruct :
 func (enc *Encoder) EncodeStruct(w *Writer, v reflect.Value) error {
 	w.WriteRune('{')
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(v.Type())
 	for i, sf := range cdc.Properties {
 		if i > 0 {

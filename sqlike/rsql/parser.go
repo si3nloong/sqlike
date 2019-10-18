@@ -93,6 +93,10 @@ func (p *Parser) ParseQueryBytes(query []byte) (*Params, error) {
 	)
 
 	log.Println(values, len(values))
+	log.Println("Select :", values["$select"])
+	log.Println("Filter :", values["$filter"])
+	log.Println("Limit :", values["$limit"])
+	log.Println("Sort :", values["$sort"])
 	p.parseSelect(values, params)
 	// p.parseFilter(values, query, params)
 	p.parseSort(values, params)

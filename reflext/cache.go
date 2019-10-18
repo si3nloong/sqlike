@@ -6,6 +6,9 @@ import (
 	"sync"
 )
 
+// DefaultMapper :
+var DefaultMapper = NewMapperFunc("sqlike", nil)
+
 // MapFunc :
 type MapFunc func(*StructField) (skip bool)
 

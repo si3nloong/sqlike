@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -76,12 +75,16 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 
 // DecodeLanguage :
 func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
-	x, err := r.ReadString()
+	str, err := r.ReadString()
 	if err != nil {
 		return err
 	}
-	l, err := language.Parse(x)
+	if str == "" {
+		return nil
+	}
+	l, err := language.Parse(str)
 	if err != nil {
+		v.Set(reflect.ValueOf(language.Tag{}))
 		return err
 	}
 	v.Set(reflect.ValueOf(l))
@@ -90,11 +93,15 @@ func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
 
 // DecodeCurrency :
 func (dec Decoder) DecodeCurrency(r *Reader, v reflect.Value) error {
-	x, err := r.ReadString()
+	str, err := r.ReadString()
 	if err != nil {
 		return err
 	}
-	cur, err := currency.ParseISO(x)
+	if str == "" {
+		v.Set(reflect.ValueOf(currency.Unit{}))
+		return nil
+	}
+	cur, err := currency.ParseISO(str)
 	if err != nil {
 		return err
 	}
@@ -214,7 +221,7 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 		return err
 	}
 	if v.OverflowFloat(x) {
-		return errors.New("float overflow")
+		return errors.New("jsonb: float overflow")
 	}
 	v.SetFloat(x)
 	return nil
@@ -243,7 +250,7 @@ func (dec *Decoder) DecodePtr(r *Reader, v reflect.Value) error {
 
 // DecodeStruct :
 func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	if r.IsNull() {
 		v.Set(reflect.Zero(v.Type()))
 		return r.skipNull()

@@ -345,6 +345,15 @@ func (k *Key) Encode() string {
 	return strings.TrimRight(base64.URLEncoding.EncodeToString(b), "=")
 }
 
+// ParseKey :
+func ParseKey(value string) (*Key, error) {
+	k := new(Key)
+	if err := k.unmarshal(value); err != nil {
+		return nil, err
+	}
+	return k, nil
+}
+
 // DecodeKey decodes a key from the opaque representation returned by Encode.
 func DecodeKey(encoded string) (*Key, error) {
 	// Re-add padding.

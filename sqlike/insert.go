@@ -7,7 +7,6 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
@@ -50,7 +49,7 @@ func insertOne(ctx context.Context, dbName, tbName, pk string, registry *codec.R
 		return nil, ErrNilEntity
 	}
 
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	columns, fields := skipColumns(cdc.Properties, opt.Omits)
 	length := len(columns)
@@ -119,7 +118,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 		return nil, ErrUnaddressableEntity
 	}
 
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
 	columns, fields := skipColumns(cdc.Properties, opt.Omits)
 	length := len(columns)

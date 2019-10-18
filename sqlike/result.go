@@ -7,7 +7,6 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/core"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
 )
@@ -116,7 +115,7 @@ func (r *Result) Decode(dst interface{}) error {
 		return errors.New("sqlike: it must be struct to decode")
 	}
 
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	idxs := mapper.TraversalsByName(t, r.columns)
 	values, err := r.values()
 	if err != nil {
@@ -210,7 +209,7 @@ func (r *Result) All(results interface{}) error {
 	length := len(r.columns)
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
-	mapper := core.DefaultMapper
+	mapper := reflext.DefaultMapper
 	idxs := mapper.TraversalsByName(t, r.columns)
 	decoders := make([]codec.ValueDecoder, length, length)
 	for i := 0; r.rows.Next(); i++ {
