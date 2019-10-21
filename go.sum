@@ -4,8 +4,8 @@ github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8 h1:fRMn4k/mYz
 github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8/go.mod h1:8CV7kYbvgykQs8Io0EDPxUVkQQsXveUpKzLB6tuHV2w=
 github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b h1:slWfe8ZDDVuZDEVqPAi62+sS6rE0o7rIJ4fuA4GGkaU=
 github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b/go.mod h1:8WhrFWLx5svQrZpAq+kYvjRWdRcLj12T1jqy1AHAKZ0=
-github.com/casbin/casbin/v2 v2.1.1-0.20191016032332-cae83f7bf903 h1:pBm4Km+Rb6aBZ3bM13PRU1lZpwHHS0MlNNam4YWO0Yw=
-github.com/casbin/casbin/v2 v2.1.1-0.20191016032332-cae83f7bf903/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
+github.com/casbin/casbin/v2 v2.1.1-0.20191019105932-ac70fb4fa1cc h1:0MjLLEKvY37YwNIdELU2hQQXkEK2BmyqUmXwqmqK4nA=
+github.com/casbin/casbin/v2 v2.1.1-0.20191019105932-ac70fb4fa1cc/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-sql-driver/mysql v1.4.1-0.20191001060945-14bb9c0fc20f h1:Ny8w8RFRlevl6jva0eFC5EWsZu+p3984zD77BNBPO2k=

@@ -2,7 +2,7 @@ package options
 
 // UpdateOneOptions :
 type UpdateOneOptions struct {
-	Debug bool
+	UpdateOptions
 }
 
 // UpdateOne :

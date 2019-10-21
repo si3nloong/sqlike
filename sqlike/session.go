@@ -147,6 +147,10 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 	if x.Table == "" {
 		x.Table = sess.table
 	}
+	opt := new(options.UpdateOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return update(
 		sess.tx.context,
 		sess.dbName,
@@ -155,14 +159,19 @@ func (sess *Session) UpdateOne(act actions.UpdateOneStatement, opts ...*options.
 		sess.tx.dialect,
 		sess.tx.logger,
 		&x.UpdateActions,
+		&opt.UpdateOptions,
 	)
 }
 
 // Update :
-func (sess *Session) Update(act actions.UpdateStatement) (int64, error) {
+func (sess *Session) Update(act actions.UpdateStatement, opts ...*options.UpdateOptions) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
+	}
+	opt := new(options.UpdateOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
 	}
 	return update(
 		sess.tx.context,
@@ -172,6 +181,7 @@ func (sess *Session) Update(act actions.UpdateStatement) (int64, error) {
 		sess.tx.dialect,
 		sess.tx.logger,
 		x,
+		opt,
 	)
 }
 
@@ -205,7 +215,7 @@ func (sess *Session) Delete(act actions.DeleteStatement, opts ...*options.Delete
 		sess.table,
 		sess.tx.driver,
 		sess.tx.dialect,
-		sess.tx.logger,
+		getLogger(sess.tx.logger, opt.Debug),
 		x,
 		opt,
 	)

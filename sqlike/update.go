@@ -84,9 +84,6 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 	); err != nil {
 		return err
 	}
-	// if affected, _ := result.RowsAffected(); affected <= 0 {
-	// 	return errors.New("unable to modify entity")
-	// }
 	return err
 }
 
@@ -108,8 +105,9 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 		tb.name,
 		tb.driver,
 		tb.dialect,
-		getLogger(tb.logger, opt.Debug),
+		tb.logger,
 		&x.UpdateActions,
+		&opt.UpdateOptions,
 	)
 }
 
@@ -129,12 +127,13 @@ func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOpti
 		tb.name,
 		tb.driver,
 		tb.dialect,
-		getLogger(tb.logger, opt.Debug),
+		tb.logger,
 		x,
+		opt,
 	)
 }
 
-func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions) (int64, error) {
+func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions, opt *options.UpdateOptions) (int64, error) {
 	if act.Database == "" {
 		act.Database = dbName
 	}
@@ -152,7 +151,7 @@ func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver,
 		ctx,
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
 		return 0, err
