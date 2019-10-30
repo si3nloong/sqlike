@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	gouuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
@@ -85,6 +86,7 @@ func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns
 func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf([]byte{}), sqltype.Byte)
 	sb.SetType(reflect.TypeOf(uuid.UUID{}), sqltype.UUID)
+	sb.SetType(reflect.TypeOf(gouuid.UUID{}), sqltype.UUID)
 	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)

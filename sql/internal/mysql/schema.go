@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
@@ -62,14 +61,13 @@ func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col columns.Column) 
 }
 
 func (s mySQLSchema) UUIDDataType(sf *reflext.StructField) (col columns.Column) {
-	latin := string(charset.Latin1)
-	latinBin := "latin1_bin"
+	charset, collation := "ascii", "ascii_general_ci"
 	col.Name = sf.Path
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(36)"
 	col.Size = 36
-	col.Charset = &latin
-	col.Collation = &latinBin
+	col.Charset = &charset
+	col.Collation = &collation
 	col.Nullable = sf.IsNullable
 	return
 }

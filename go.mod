@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.1.2-0.20190416172445-c2e93f3ae59f
 	github.com/iancoleman/strcase v0.0.0-20190422225806-e506e3ef7365
 	github.com/kr/pretty v0.1.0 // indirect
+	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/stretchr/testify v1.4.1-0.20190904163530-85f2b59c4459
 	github.com/tidwall/gjson v1.3.2 // indirect
 	github.com/tidwall/sjson v1.0.4
