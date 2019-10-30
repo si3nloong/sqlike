@@ -129,6 +129,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			ns.ID = uid
 			ns.DateTime = now
 			ns.Timestamp = now
+			ns.CreatedAt = now
+			ns.UpdatedAt = now
 			_, err := sessCtx.Table("NormalStruct").
 				InsertOne(&ns, options.InsertOne().SetDebug(true))
 			if err != nil {

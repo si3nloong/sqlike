@@ -1,8 +1,6 @@
 package rsql
 
 import (
-	"log"
-
 	"github.com/timtadh/lexmachine"
 	"github.com/timtadh/lexmachine/machines"
 )
@@ -43,63 +41,6 @@ func (l *defaultTokenLexer) token(name string) lexmachine.Action {
 	return func(s *lexmachine.Scanner, m *machines.Match) (interface{}, error) {
 		return s.Token(l.ids[name], string(m.Bytes), m), nil
 	}
-}
-
-// func (l *defaultTokenLexer) parseToken() {
-// 	tkn := lexmachine.Token{}
-// 	switch true {
-// 	case tkn.Type == Group && string(tkn.Lexeme) == "(":
-// 		l.parseExpression()
-// 	default:
-// 		l.parseExpression()
-// 	}
-// }
-
-func (l *defaultTokenLexer) ParseQuery(query string) (interface{}, error) {
-	scan, err := l.lexer.Scanner([]byte(query))
-	if err != nil {
-		return nil, err
-	}
-
-	level := 0
-	for {
-		it, err, eof := scan.Next()
-		if err != nil {
-			return nil, err
-		}
-		if eof {
-			break
-		}
-		if it == nil {
-			continue
-		}
-
-		tkn := it.(*lexmachine.Token)
-		str := string(tkn.Lexeme)
-		switch str {
-		case "(":
-			level++
-		case ")":
-			level--
-		}
-		log.Println("Token1 :", tkn)
-
-		// it, err, eof = scan.Next()
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// tkn = it.(*lexmachine.Token)
-		// log.Println("Token2 :", tkn)
-
-		// it, err, eof = scan.Next()
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// tkn = it.(*lexmachine.Token)
-		// log.Println("Token3 :", tkn)
-	}
-	log.Println(scan)
-	return nil, nil
 }
 
 func handleSpace(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {

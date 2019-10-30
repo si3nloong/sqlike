@@ -7,6 +7,7 @@ import (
 
 func (p *Parser) parseLimit(values map[string]string, params *Params) (errs Errors) {
 	val, ok := values[p.LimitTag]
+	delete(values, p.LimitTag)
 	if !ok || len(val) < 1 {
 		return nil
 	}

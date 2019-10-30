@@ -1,7 +1,6 @@
 package rsql
 
 import (
-	"log"
 	"net/url"
 	"strings"
 
@@ -10,11 +9,10 @@ import (
 
 func (p *Parser) parseSelect(values map[string]string, params *Params) (errs Errors) {
 	val, ok := values[p.SelectTag]
+	delete(values, p.SelectTag)
 	if !ok || len(val) < 1 {
 		return nil
 	}
-
-	log.Println("Select", val)
 
 	paths := strings.Split(val, ",")
 	for _, v := range paths {

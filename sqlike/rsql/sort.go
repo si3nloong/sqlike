@@ -9,6 +9,7 @@ import (
 
 func (p *Parser) parseSort(values map[string]string, params *Params) (errs Errors) {
 	val, ok := values[p.SortTag]
+	delete(values, p.SortTag)
 	if !ok || len(val) < 1 {
 		return nil
 	}

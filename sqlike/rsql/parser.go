@@ -16,11 +16,6 @@ import (
 // FormatFunc :
 type FormatFunc func(string) string
 
-// RSQLParser :
-type RSQLParser interface {
-	ParseQuery(query string) (interface{}, error)
-}
-
 // Parser :
 type Parser struct {
 	SelectTag    string
@@ -31,7 +26,6 @@ type Parser struct {
 	zero         reflect.Value
 	lexer        *lexmachine.Lexer
 	registry     *codec.Registry
-	Parser       RSQLParser
 	FormatColumn FormatFunc
 	DefaultLimit uint
 	MaxLimit     uint
@@ -57,7 +51,6 @@ func NewParser(it interface{}) (*Parser, error) {
 	p.mapper = mapper.CodecByType(t)
 	p.lexer = lexer
 	p.registry = codec.DefaultRegistry
-	p.Parser = dl
 	p.DefaultLimit = defaultLimit
 	p.MaxLimit = defaultMaxLimit
 	p.zero = reflext.Zero(t)
@@ -88,22 +81,18 @@ func (p *Parser) ParseQueryBytes(query []byte) (*Params, error) {
 
 	var (
 		params = new(Params)
-		err    error
-		// errs   = make(Errors, 0)
+		errs   = make(Errors, 0)
 	)
 
-	log.Println(values, len(values))
-	log.Println("Select :", values["$select"])
-	log.Println("Filter :", values["$filter"])
-	log.Println("Limit :", values["$limit"])
-	log.Println("Sort :", values["$sort"])
-	p.parseSelect(values, params)
-	// p.parseFilter(values, query, params)
-	p.parseSort(values, params)
-	p.parseLimit(values, params)
+	errs = append(errs, p.parseSelect(values, params)...)
+	errs = append(errs, p.parseSort(values, params)...)
+	errs = append(errs, p.parseLimit(values, params)...)
+	errs = append(errs, p.parseFilter(values, params)...)
 
-	if err != nil {
-		return nil, err
+	log.Println("Params :", params.Filters)
+
+	if len(errs) > 0 {
+		return nil, errs
 	}
 	return params, nil
 }

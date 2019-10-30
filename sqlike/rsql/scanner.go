@@ -80,7 +80,6 @@ func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
 // ParseGroup :
 func (scan *Scanner) ParseGroup() error {
 	for {
-		log.Println("HERE !!!")
 		tkn, eof := scan.NextToken()
 		if eof {
 			break

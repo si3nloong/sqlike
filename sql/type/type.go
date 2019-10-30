@@ -29,6 +29,7 @@ const (
 	Slice
 	Map
 	JSON
+	UUID
 )
 
 func (t Type) String() string {
@@ -75,6 +76,8 @@ func (t Type) String() string {
 		return "datetime"
 	case JSON:
 		return "json"
+	case UUID:
+		return "uuid"
 	default:
 		return "unknown"
 	}

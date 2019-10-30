@@ -13,3 +13,15 @@ const (
 	Group
 	Whitespace
 )
+
+// Token L
+type Token struct {
+	Type        int
+	Value       string
+	Lexeme      []byte
+	TC          int
+	StartLine   int
+	StartColumn int
+	EndLine     int
+	EndColumn   int
+}

@@ -120,7 +120,8 @@ type model struct {
 }
 
 type ptrStruct struct {
-	ID            int64   `sqlike:"$Key,auto_increment"`
+	ID            int64 `sqlike:"$Key,auto_increment"`
+	NullUUID      *uuid.UUID
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool
 	NullByte      *[]byte
@@ -228,6 +229,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 func newPtrStruct() ptrStruct {
 	now := time.Now()
 	str := `hello world`
+	uid := uuid.New()
 	flag := true
 	b := []byte(`hello world`)
 	date, _ := types.ParseDate("2019-01-02")
@@ -241,6 +243,7 @@ func newPtrStruct() ptrStruct {
 
 	ps := ptrStruct{}
 	ps.NullStr = &str
+	ps.NullUUID = &uid
 	ps.NullByte = &b
 	ps.NullBool = &flag
 	ps.NullInt = &i
@@ -256,8 +259,11 @@ func newPtrStruct() ptrStruct {
 }
 
 func newGeneratedStruct() *generatedStruct {
+	utcNow := time.Now().UTC()
 	gs := &generatedStruct{}
 	gs.Nested.ID = uuid.New().String()
 	gs.Nested.Amount = gofakeit.Float64Range(1, 10000)
+	gs.CreatedAt = utcNow
+	gs.UpdatedAt = utcNow
 	return gs
 }

@@ -16,7 +16,7 @@ type Logger struct {
 }
 
 func (l Logger) Debug(stmt *sqlstmt.Statement) {
-	log.Printf("%v", stmt)
+	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
 	return
 }
@@ -33,9 +33,6 @@ func TestExamples(t *testing.T) {
 
 	mg := connectMongoDB()
 
-	db := client.SetLogger(Logger{}).
-		Database("sqlike")
-
 	v := client.Version()
 	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
@@ -44,8 +41,11 @@ func TestExamples(t *testing.T) {
 	require.True(t, len(dbs) > 0)
 	require.NoError(t, err)
 
+	db := client.SetLogger(Logger{}).
+		Database("sqlike")
+
 	{
-		RSQLExamples(t, db)
+		// RSQLExamples(t, db)
 		MigrateExamples(t, db)
 		IndexExamples(t, db)
 		InsertExamples(t, db)

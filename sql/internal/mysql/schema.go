@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
@@ -30,6 +31,7 @@ func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Date, s.DateDataType)
 	sb.SetTypeBuilder(sqltype.DateTime, s.TimeDataType)
 	sb.SetTypeBuilder(sqltype.Timestamp, s.TimeDataType)
+	sb.SetTypeBuilder(sqltype.UUID, s.UUIDDataType)
 	sb.SetTypeBuilder(sqltype.JSON, s.JSONDataType)
 	sb.SetTypeBuilder(sqltype.String, s.StringDataType)
 	sb.SetTypeBuilder(sqltype.Bool, s.BoolDataType)
@@ -55,6 +57,19 @@ func (s mySQLSchema) ByteDataType(sf *reflext.StructField) (col columns.Column) 
 	col.Name = sf.Path
 	col.DataType = "MEDIUMBLOB"
 	col.Type = "MEDIUMBLOB"
+	col.Nullable = sf.IsNullable
+	return
+}
+
+func (s mySQLSchema) UUIDDataType(sf *reflext.StructField) (col columns.Column) {
+	latin := string(charset.Latin1)
+	latinBin := "latin1_bin"
+	col.Name = sf.Path
+	col.DataType = "VARCHAR"
+	col.Type = "VARCHAR(36)"
+	col.Size = 36
+	col.Charset = &latin
+	col.Collation = &latinBin
 	col.Nullable = sf.IsNullable
 	return
 }

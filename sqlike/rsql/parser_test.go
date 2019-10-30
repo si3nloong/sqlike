@@ -1,9 +1,10 @@
 package rsql
 
 import (
-	"log"
 	"testing"
 
+	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +28,14 @@ func TestParser(t *testing.T) {
 	{
 		params, err = p.ParseQuery(query)
 		require.NoError(t, err)
+
 		require.NotNil(t, params)
-		log.Println(params)
+		require.ElementsMatch(t, []primitive.Column{
+			expr.Column("ID"),
+			expr.Column("Name"),
+		}, params.Selects)
+		// require.Equal(t, primitive.Group{}, params.Filters)
+		require.ElementsMatch(t, []interface{}{}, params.Sorts)
+		require.Equal(t, uint(100), params.Limit)
 	}
 }
