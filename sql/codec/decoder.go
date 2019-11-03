@@ -2,6 +2,7 @@ package codec
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"reflect"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
@@ -18,35 +20,6 @@ import (
 // DefaultDecoders :
 type DefaultDecoders struct {
 	registry *Registry
-}
-
-// SetDecoders :
-func (dec DefaultDecoders) SetDecoders(rg *Registry) {
-	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
-	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
-	rg.SetTypeDecoder(reflect.TypeOf(currency.Unit{}), dec.DecodeCurrency)
-	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
-	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
-	rg.SetKindDecoder(reflect.String, dec.DecodeString)
-	rg.SetKindDecoder(reflect.Bool, dec.DecodeBool)
-	rg.SetKindDecoder(reflect.Int, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int8, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int16, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int32, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int64, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Uint, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint8, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint16, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint32, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint64, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Float32, dec.DecodeFloat)
-	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
-	rg.SetKindDecoder(reflect.Ptr, dec.DecodePtr)
-	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
-	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
-	rg.SetKindDecoder(reflect.Slice, dec.DecodeArray)
-	rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
-	dec.registry = rg
 }
 
 // DecodeByte :
@@ -68,6 +41,25 @@ func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 		}
 	case nil:
 		x = make([]byte, 0, 0)
+	}
+	v.SetBytes(x)
+	return nil
+}
+
+// DecodeRawBytes :
+func (dec DefaultDecoders) DecodeRawBytes(it interface{}, v reflect.Value) error {
+	var (
+		x sql.RawBytes
+	)
+	switch vi := it.(type) {
+	case []byte:
+		x = sql.RawBytes(vi)
+	case string:
+		x = sql.RawBytes(vi)
+	case sql.RawBytes:
+		x = vi
+	case nil:
+	default:
 	}
 	v.SetBytes(x)
 	return nil
@@ -147,12 +139,12 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	case time.Time:
 		x = vi
 	case string:
-		x, err = time.Parse(time.RFC3339, vi)
+		x, err = types.DecodeTime(vi)
 		if err != nil {
 			return err
 		}
 	case []byte:
-		x, err = time.Parse(time.RFC3339, b2s(vi))
+		x, err = types.DecodeTime(b2s(vi))
 		if err != nil {
 			return err
 		}

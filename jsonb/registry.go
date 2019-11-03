@@ -5,8 +5,19 @@ import (
 	"encoding/json"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
+)
+
+var (
+	registry = buildDefaultRegistry()
+
+	jsonbUnmarshaler = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
+	jsonUnmarshaler  = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
+	textUnmarshaler  = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
 
 // ValueDecoder :
@@ -24,12 +35,36 @@ type Registry struct {
 	kindDecoders map[reflect.Kind]ValueDecoder
 }
 
-var registry = buildRegistry()
-
-func buildRegistry() *Registry {
+func buildDefaultRegistry() *Registry {
 	rg := NewRegistry()
-	Decoder{}.SetDecoders(rg)
-	Encoder{}.SetEncoders(rg)
+	enc := DefaultEncoder{rg}
+	dec := DefaultDecoder{rg}
+	rg.SetTypeCoder(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
+	rg.SetTypeCoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
+	rg.SetTypeCoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
+	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
+	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.SetTypeCoder(reflect.TypeOf(json.Number("")), enc.EncodeStringer, dec.DecodeJSONNumber)
+	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
+	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
+	rg.SetKindCoder(reflect.Int, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int8, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int16, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int32, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int64, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Uint, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint8, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint16, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint32, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint64, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Float32, enc.EncodeFloat, dec.DecodeFloat)
+	rg.SetKindCoder(reflect.Float64, enc.EncodeFloat, dec.DecodeFloat)
+	rg.SetKindCoder(reflect.Ptr, enc.EncodePtr, dec.DecodePtr)
+	rg.SetKindCoder(reflect.Struct, enc.EncodeStruct, dec.DecodeStruct)
+	rg.SetKindCoder(reflect.Array, enc.EncodeArray, dec.DecodeArray)
+	rg.SetKindCoder(reflect.Slice, enc.EncodeArray, dec.DecodeSlice)
+	rg.SetKindCoder(reflect.Map, enc.EncodeMap, dec.DecodeMap)
+	rg.SetKindCoder(reflect.Interface, enc.EncodeInterface, dec.DecodeInterface)
 	return rg
 }
 
@@ -43,31 +78,31 @@ func NewRegistry() *Registry {
 	}
 }
 
-// SetTypeEncoder :
-func (r *Registry) SetTypeEncoder(t reflect.Type, enc ValueEncoder) {
+// SetTypeCoder :
+func (r *Registry) SetTypeCoder(t reflect.Type, enc ValueEncoder, dec ValueDecoder) {
+	if enc == nil {
+		panic("missing encoder")
+	}
+	if dec == nil {
+		panic("missing decoder")
+	}
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
-}
-
-// SetTypeDecoder :
-func (r *Registry) SetTypeDecoder(t reflect.Type, dec ValueDecoder) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeDecoders[t] = dec
 }
 
-// SetKindEncoder :
-func (r *Registry) SetKindEncoder(k reflect.Kind, enc ValueEncoder) {
+// SetKindCoder :
+func (r *Registry) SetKindCoder(k reflect.Kind, enc ValueEncoder, dec ValueDecoder) {
+	if enc == nil {
+		panic("missing encoder")
+	}
+	if dec == nil {
+		panic("missing decoder")
+	}
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
-}
-
-// SetKindDecoder :
-func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindDecoders[k] = dec
 }
 
@@ -111,12 +146,6 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	return nil, ErrNoEncoder{Type: t}
 }
 
-var (
-	jsonbUnmarshaler = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
-	jsonUnmarshaler  = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
-	textUnmarshaler  = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
-)
-
 // LookupDecoder :
 func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	var (
@@ -129,6 +158,11 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
+	dec, ok = r.typeDecoders[reflext.Deref(t)]
+	if ok {
+		return dec, nil
+	}
+
 	if ptrType.Implements(jsonbUnmarshaler) {
 		return unmarshalerDecoder(), nil
 	}
@@ -139,11 +173,6 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 
 	if ptrType.Implements(textUnmarshaler) {
 		return textUnmarshalerDecoder(), nil
-	}
-
-	dec, ok = r.typeDecoders[t]
-	if ok {
-		return dec, nil
 	}
 
 	dec, ok = r.kindDecoders[t.Kind()]

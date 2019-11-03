@@ -13,7 +13,7 @@ type CustomString string
 
 func TestDecodeByte(t *testing.T) {
 	var (
-		dec = Decoder{}
+		dec = DefaultDecoder{}
 		r   *Reader
 		x   []byte
 		b   []byte
@@ -41,7 +41,7 @@ func TestDecodeByte(t *testing.T) {
 
 func TestDecodeTime(t *testing.T) {
 	var (
-		dec = Decoder{}
+		dec = DefaultDecoder{}
 		r   *Reader
 		dt  time.Time
 		x   time.Time
@@ -74,7 +74,7 @@ func TestDecodeTime(t *testing.T) {
 
 func TestDecodeMap(t *testing.T) {
 	var (
-		dec = Decoder{registry: buildRegistry()}
+		dec = DefaultDecoder{registry: buildDefaultRegistry()}
 		r   *Reader
 		x   map[string]interface{}
 		err error

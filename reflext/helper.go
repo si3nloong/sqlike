@@ -4,6 +4,31 @@ import (
 	"reflect"
 )
 
+// Init :
+func Init(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		v.Set(reflect.New(v.Type().Elem()))
+	}
+	if v.Kind() == reflect.Map && v.IsNil() {
+		v.Set(reflect.MakeMap(v.Type()))
+	}
+	if v.Kind() == reflect.Slice && v.IsNil() {
+		v.Set(reflect.MakeSlice(v.Type(), 0, 0))
+	}
+	return v
+}
+
+// IndirectInit :
+func IndirectInit(v reflect.Value) reflect.Value {
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
+		}
+		v = v.Elem()
+	}
+	return v
+}
+
 // ValueOf : this is the replacement for reflect.ValueOf()
 func ValueOf(i interface{}) reflect.Value {
 	if x, ok := i.(reflect.Value); ok {
@@ -101,4 +126,9 @@ func IsZero(v reflect.Value) bool {
 	// Compare other types directly:
 	z := reflect.Zero(v.Type())
 	return v.Interface() == z.Interface()
+}
+
+// Set :
+func Set(src, v reflect.Value) {
+	IndirectInit(src).Set(v)
 }

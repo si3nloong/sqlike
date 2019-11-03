@@ -3,22 +3,52 @@ package codec
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"reflect"
 	"sync"
+	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
 )
 
 // DefaultMapper :
 var (
 	DefaultRegistry = buildDefaultRegistry()
+	sqlScanner      = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
 )
 
 func buildDefaultRegistry() *Registry {
 	rg := NewRegistry()
-	DefaultDecoders{}.SetDecoders(rg)
-	DefaultEncoders{}.SetEncoders(rg)
+	dec := DefaultDecoders{rg}
+	enc := DefaultEncoders{rg}
+	rg.SetTypeCoder(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
+	rg.SetTypeCoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
+	rg.SetTypeCoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
+	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
+	rg.SetTypeCoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
+	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
+	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
+	rg.SetKindCoder(reflect.Int, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int8, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int16, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int32, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Int64, enc.EncodeInt, dec.DecodeInt)
+	rg.SetKindCoder(reflect.Uint, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint8, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint16, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint32, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Uint64, enc.EncodeUint, dec.DecodeUint)
+	rg.SetKindCoder(reflect.Float32, enc.EncodeFloat, dec.DecodeFloat)
+	rg.SetKindCoder(reflect.Float64, enc.EncodeFloat, dec.DecodeFloat)
+	rg.SetKindCoder(reflect.Ptr, enc.EncodePtr, dec.DecodePtr)
+	rg.SetKindCoder(reflect.Struct, enc.EncodeStruct, dec.DecodeStruct)
+	rg.SetKindCoder(reflect.Array, enc.EncodeArray, dec.DecodeArray)
+	rg.SetKindCoder(reflect.Slice, enc.EncodeArray, dec.DecodeArray)
+	rg.SetKindCoder(reflect.Map, enc.EncodeMap, dec.DecodeMap)
 	return rg
 }
 
@@ -41,6 +71,14 @@ func NewRegistry() *Registry {
 	}
 }
 
+// SetTypeCoder :
+func (r *Registry) SetTypeCoder(t reflect.Type, enc ValueEncoder, dec ValueDecoder) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.typeEncoders[t] = enc
+	r.typeDecoders[t] = dec
+}
+
 // SetTypeEncoder :
 func (r *Registry) SetTypeEncoder(t reflect.Type, enc ValueEncoder) {
 	r.mutex.Lock()
@@ -53,6 +91,14 @@ func (r *Registry) SetTypeDecoder(t reflect.Type, dec ValueDecoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.typeDecoders[t] = dec
+}
+
+// SetKindCoder :
+func (r *Registry) SetKindCoder(k reflect.Kind, enc ValueEncoder, dec ValueDecoder) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.kindEncoders[k] = enc
+	r.kindDecoders[k] = dec
 }
 
 // SetKindEncoder :
@@ -106,10 +152,17 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ok  bool
 	)
 
-	v := reflext.Zero(t)
-	if _, ok := v.Addr().Interface().(sql.Scanner); ok {
+	ptrType := t
+	if t.Kind() != reflect.Ptr {
+		ptrType = reflect.PtrTo(t)
+	}
+
+	if ptrType.Implements(sqlScanner) {
 		return func(it interface{}, v reflect.Value) error {
-			return v.Addr().Interface().(sql.Scanner).Scan(it)
+			if v.Kind() != reflect.Ptr {
+				return v.Addr().Interface().(sql.Scanner).Scan(it)
+			}
+			return reflext.Init(v).Interface().(sql.Scanner).Scan(it)
 		}, nil
 	}
 

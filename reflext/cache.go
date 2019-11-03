@@ -111,17 +111,6 @@ func (m *Mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(in
 	return idxs
 }
 
-// Init :
-func Init(v reflect.Value) reflect.Value {
-	if v.Kind() == reflect.Ptr && v.IsNil() {
-		v.Set(reflect.New(v.Type().Elem()))
-	}
-	if v.Kind() == reflect.Map && v.IsNil() {
-		v.Set(reflect.MakeMap(v.Type()))
-	}
-	return v
-}
-
 // FieldByIndexes :
 func FieldByIndexes(v reflect.Value, indexes []int) reflect.Value {
 	for _, i := range indexes {

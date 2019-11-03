@@ -2,57 +2,25 @@ package jsonb
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
-// Decoder :
-type Decoder struct {
+// DefaultDecoder :
+type DefaultDecoder struct {
 	registry *Registry
 }
 
-// SetDecoders :
-func (dec Decoder) SetDecoders(rg *Registry) {
-	rg.SetTypeDecoder(reflect.TypeOf([]byte{}), dec.DecodeByte)
-	rg.SetTypeDecoder(reflect.TypeOf(language.Tag{}), dec.DecodeLanguage)
-	rg.SetTypeDecoder(reflect.TypeOf(currency.Unit{}), dec.DecodeCurrency)
-	rg.SetTypeDecoder(reflect.TypeOf(time.Time{}), dec.DecodeTime)
-	rg.SetTypeDecoder(reflect.TypeOf(json.RawMessage{}), dec.DecodeJSONRaw)
-	rg.SetTypeDecoder(reflect.TypeOf(json.Number("")), dec.DecodeJSONNumber)
-	rg.SetKindDecoder(reflect.String, dec.DecodeString)
-	rg.SetKindDecoder(reflect.Bool, dec.DecodeBool)
-	rg.SetKindDecoder(reflect.Int, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int8, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int16, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int32, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Int64, dec.DecodeInt)
-	rg.SetKindDecoder(reflect.Uint, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint8, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint16, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint32, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Uint64, dec.DecodeUint)
-	rg.SetKindDecoder(reflect.Float32, dec.DecodeFloat)
-	rg.SetKindDecoder(reflect.Float64, dec.DecodeFloat)
-	rg.SetKindDecoder(reflect.Ptr, dec.DecodePtr)
-	rg.SetKindDecoder(reflect.Struct, dec.DecodeStruct)
-	rg.SetKindDecoder(reflect.Array, dec.DecodeArray)
-	rg.SetKindDecoder(reflect.Slice, dec.DecodeSlice)
-	rg.SetKindDecoder(reflect.Map, dec.DecodeMap)
-	rg.SetKindDecoder(reflect.Interface, dec.DecodeInterface)
-	dec.registry = rg
-}
-
 // DecodeByte :
-func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeByte(r *Reader, v reflect.Value) error {
 	x, err := r.ReadRawString()
 	if err != nil {
 		return err
@@ -74,7 +42,7 @@ func (dec Decoder) DecodeByte(r *Reader, v reflect.Value) error {
 }
 
 // DecodeLanguage :
-func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeLanguage(r *Reader, v reflect.Value) error {
 	str, err := r.ReadString()
 	if err != nil {
 		return err
@@ -92,7 +60,7 @@ func (dec Decoder) DecodeLanguage(r *Reader, v reflect.Value) error {
 }
 
 // DecodeCurrency :
-func (dec Decoder) DecodeCurrency(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeCurrency(r *Reader, v reflect.Value) error {
 	str, err := r.ReadString()
 	if err != nil {
 		return err
@@ -110,14 +78,14 @@ func (dec Decoder) DecodeCurrency(r *Reader, v reflect.Value) error {
 }
 
 // DecodeTime :
-func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeTime(r *Reader, v reflect.Value) error {
 	b, err := r.ReadBytes()
 	if err != nil {
 		return err
 	}
 	str := string(b)
 	if str == null || str == `""` {
-		v.Set(reflect.ValueOf(time.Time{}))
+		reflext.Set(v, reflect.ValueOf(time.Time{}))
 		return nil
 	}
 	if len(b) < 2 || b[0] != '"' || b[len(b)-1] != '"' {
@@ -125,29 +93,22 @@ func (dec Decoder) DecodeTime(r *Reader, v reflect.Value) error {
 	}
 	str = string(b[1 : len(b)-1])
 	var x time.Time
-	switch {
-	case regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`).MatchString(str):
-		x, err = time.Parse(`2006-01-02`, str)
-	case regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`).MatchString(str):
-		x, err = time.Parse(`2006-01-02 15:04:05`, str)
-	default:
-		x, err = time.Parse(time.RFC3339Nano, str)
-	}
+	x, err = types.DecodeTime(str)
 	if err != nil {
 		return err
 	}
-	v.Set(reflect.ValueOf(x))
+	reflext.Set(v, reflect.ValueOf(x))
 	return nil
 }
 
 // DecodeJSONRaw :
-func (dec Decoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
 	v.SetBytes(r.Bytes())
 	return nil
 }
 
 // DecodeJSONNumber :
-func (dec Decoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
 	x, err := r.ReadNumber()
 	if err != nil {
 		return err
@@ -157,7 +118,7 @@ func (dec Decoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
 }
 
 // DecodeString :
-func (dec Decoder) DecodeString(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeString(r *Reader, v reflect.Value) error {
 	x, err := r.ReadEscapeString()
 	if err != nil {
 		return err
@@ -167,7 +128,7 @@ func (dec Decoder) DecodeString(r *Reader, v reflect.Value) error {
 }
 
 // DecodeBool :
-func (dec Decoder) DecodeBool(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeBool(r *Reader, v reflect.Value) error {
 	x, err := r.ReadBoolean()
 	if err != nil {
 		return err
@@ -177,7 +138,7 @@ func (dec Decoder) DecodeBool(r *Reader, v reflect.Value) error {
 }
 
 // DecodeInt :
-func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeInt(r *Reader, v reflect.Value) error {
 	num, err := r.ReadNumber()
 	if err != nil {
 		return err
@@ -194,7 +155,7 @@ func (dec Decoder) DecodeInt(r *Reader, v reflect.Value) error {
 }
 
 // DecodeUint :
-func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeUint(r *Reader, v reflect.Value) error {
 	num, err := r.ReadNumber()
 	if err != nil {
 		return err
@@ -211,7 +172,7 @@ func (dec Decoder) DecodeUint(r *Reader, v reflect.Value) error {
 }
 
 // DecodeFloat :
-func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeFloat(r *Reader, v reflect.Value) error {
 	num, err := r.ReadNumber()
 	if err != nil {
 		return err
@@ -228,7 +189,7 @@ func (dec Decoder) DecodeFloat(r *Reader, v reflect.Value) error {
 }
 
 // DecodePtr :
-func (dec *Decoder) DecodePtr(r *Reader, v reflect.Value) error {
+func (dec *DefaultDecoder) DecodePtr(r *Reader, v reflect.Value) error {
 	t := v.Type()
 	if r.IsNull() {
 		v.Set(reflect.Zero(t))
@@ -249,7 +210,7 @@ func (dec *Decoder) DecodePtr(r *Reader, v reflect.Value) error {
 }
 
 // DecodeStruct :
-func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
+func (dec *DefaultDecoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	mapper := reflext.DefaultMapper
 	if r.IsNull() {
 		v.Set(reflect.Zero(v.Type()))
@@ -270,7 +231,7 @@ func (dec *Decoder) DecodeStruct(r *Reader, v reflect.Value) error {
 }
 
 // DecodeArray :
-func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
+func (dec *DefaultDecoder) DecodeArray(r *Reader, v reflect.Value) error {
 	t := v.Type()
 	if r.IsNull() {
 		v.Set(reflect.Zero(t))
@@ -297,7 +258,7 @@ func (dec *Decoder) DecodeArray(r *Reader, v reflect.Value) error {
 }
 
 // DecodeSlice :
-func (dec *Decoder) DecodeSlice(r *Reader, v reflect.Value) error {
+func (dec *DefaultDecoder) DecodeSlice(r *Reader, v reflect.Value) error {
 	t := v.Type()
 	if r.IsNull() {
 		v.Set(reflect.Zero(t))
@@ -317,7 +278,7 @@ func (dec *Decoder) DecodeSlice(r *Reader, v reflect.Value) error {
 }
 
 // DecodeMap :
-func (dec *Decoder) DecodeMap(r *Reader, v reflect.Value) error {
+func (dec *DefaultDecoder) DecodeMap(r *Reader, v reflect.Value) error {
 	if r.IsNull() {
 		v.Set(reflect.Zero(v.Type()))
 		return r.skipNull()
@@ -356,7 +317,7 @@ func (dec *Decoder) DecodeMap(r *Reader, v reflect.Value) error {
 }
 
 // DecodeInterface :
-func (dec Decoder) DecodeInterface(r *Reader, v reflect.Value) error {
+func (dec DefaultDecoder) DecodeInterface(r *Reader, v reflect.Value) error {
 	x, err := r.ReadValue()
 	if err != nil {
 		return err

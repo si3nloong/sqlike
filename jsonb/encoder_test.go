@@ -10,7 +10,7 @@ import (
 func TestEncodeMap(t *testing.T) {
 	var (
 		v   reflect.Value
-		enc = Encoder{registry: buildRegistry()}
+		enc = DefaultEncoder{registry: buildDefaultRegistry()}
 		w   *Writer
 		err error
 	)

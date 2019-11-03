@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"golang.org/x/text/currency"
-	"golang.org/x/text/language"
 
 	"github.com/si3nloong/sqlike/jsonb"
 )
@@ -20,36 +18,6 @@ import (
 // DefaultEncoders :
 type DefaultEncoders struct {
 	registry *Registry
-}
-
-// SetEncoders :
-func (enc DefaultEncoders) SetEncoders(rg *Registry) {
-	rg.SetTypeEncoder(reflect.TypeOf([]byte{}), enc.EncodeByte)
-	rg.SetTypeEncoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer)
-	rg.SetTypeEncoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer)
-	rg.SetTypeEncoder(reflect.TypeOf(time.Time{}), enc.EncodeTime)
-	rg.SetTypeEncoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes)
-	rg.SetTypeEncoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw)
-	rg.SetKindEncoder(reflect.String, enc.EncodeString)
-	rg.SetKindEncoder(reflect.Bool, enc.EncodeBool)
-	rg.SetKindEncoder(reflect.Int, enc.EncodeInt)
-	rg.SetKindEncoder(reflect.Int8, enc.EncodeInt)
-	rg.SetKindEncoder(reflect.Int16, enc.EncodeInt)
-	rg.SetKindEncoder(reflect.Int32, enc.EncodeInt)
-	rg.SetKindEncoder(reflect.Int64, enc.EncodeInt)
-	rg.SetKindEncoder(reflect.Uint, enc.EncodeUint)
-	rg.SetKindEncoder(reflect.Uint8, enc.EncodeUint)
-	rg.SetKindEncoder(reflect.Uint16, enc.EncodeUint)
-	rg.SetKindEncoder(reflect.Uint32, enc.EncodeUint)
-	rg.SetKindEncoder(reflect.Uint64, enc.EncodeUint)
-	rg.SetKindEncoder(reflect.Float32, enc.EncodeFloat)
-	rg.SetKindEncoder(reflect.Float64, enc.EncodeFloat)
-	rg.SetKindEncoder(reflect.Ptr, enc.EncodePtr)
-	rg.SetKindEncoder(reflect.Struct, enc.EncodeStruct)
-	rg.SetKindEncoder(reflect.Array, enc.EncodeArray)
-	rg.SetKindEncoder(reflect.Slice, enc.EncodeArray)
-	rg.SetKindEncoder(reflect.Map, enc.EncodeMap)
-	enc.registry = rg
 }
 
 // EncodeByte :
