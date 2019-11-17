@@ -38,6 +38,9 @@ func MustOpen(driver string, opt *options.ConnectOptions) *Client {
 // Connect :
 func Connect(driver string, opt *options.ConnectOptions) (client *Client, err error) {
 	client, err = Open(driver, opt)
+	if err != nil {
+		return
+	}
 	err = client.Ping()
 	if err != nil {
 		client.Close()
