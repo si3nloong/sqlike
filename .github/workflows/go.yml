@@ -5,12 +5,12 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql version: "8.0" # Optional, default value is "latest". The version of the MySQL
-          mysql database: "sqlike" # Optional, default value is "test". The specified database which will be create
-          mysql root password: "abcd1234"
+      # - name: Setup MySQL
+      #   uses: mirromutth/mysql-action@v1.1
+      #   with:
+      #     mysql version: "8.0" # Optional, default value is "latest". The version of the MySQL
+      #     mysql database: "sqlike" # Optional, default value is "test". The specified database which will be create
+      #     mysql root password: "abcd1234"
 
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
