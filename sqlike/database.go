@@ -145,6 +145,7 @@ func (db *Database) BuildIndexes(filepath ...string) error {
 		columns := make([]indexes.Column, 0, len(idx.Columns))
 		for _, col := range idx.Columns {
 			dir := indexes.Ascending
+			col.Direction = strings.TrimSpace(strings.ToLower(col.Direction))
 			if col.Direction == "desc" || col.Direction == "descending" {
 				dir = indexes.Descending
 			}
@@ -219,6 +220,8 @@ func parseIndexType(name string) (idxType indexes.Type) {
 		idxType = indexes.BTree
 	case "fulltext":
 		idxType = indexes.FullText
+	case "primary":
+		idxType = indexes.Primary
 	default:
 		panic(fmt.Errorf("invalid index type %q", name))
 	}

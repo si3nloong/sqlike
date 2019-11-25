@@ -19,4 +19,11 @@ indexes:
   columns:
   - name: TinyInt
   - name: SmallInt
+
+# Composite primary key
+- table: GeneratedStruct
+  type: primary
+  columns:
+  - name: NestedID
+  - name: id
     

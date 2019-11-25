@@ -23,6 +23,9 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 		idxType = "FULLTEXT"
 	case indexes.Spatial:
 		idxType = "SPATIAL"
+	case indexes.Primary:
+		nonUnique = false
+		idxType = "PRIMARY"
 	}
 	args := []interface{}{dbName, table, idxType, nonUnique}
 	stmt = sqlstmt.NewStatement(ms)
@@ -60,14 +63,14 @@ func (ms MySQL) GetIndexes(dbName, table string) (stmt *sqlstmt.Statement) {
 // CreateIndexes :
 func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDesc bool) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`ALTER TABLE ` + ms.TableName(db, table))
+	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
 			stmt.WriteRune(',')
 		}
 
-		stmt.WriteString(` ADD ` + ms.getIndexByType(idx.Type))
-		stmt.WriteString(` ` + ms.Quote(idx.GetName()) + ` `)
+		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type))
+		stmt.WriteString(" " + ms.Quote(idx.GetName()) + " ")
 		stmt.WriteRune('(')
 		for j, col := range idx.Columns {
 			if j > 0 {
@@ -90,9 +93,9 @@ func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDes
 // DropIndex :
 func (ms MySQL) DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`DROP INDEX`)
-	stmt.WriteString(` ` + ms.Quote(idxName))
-	stmt.WriteString(` ON ` + ms.TableName(db, table))
+	stmt.WriteString("DROP INDEX ")
+	stmt.WriteString(ms.Quote(idxName))
+	stmt.WriteString(" ON " + ms.TableName(db, table))
 	stmt.WriteRune(';')
 	return
 }
@@ -100,12 +103,15 @@ func (ms MySQL) DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement) {
 func (ms MySQL) getIndexByType(k indexes.Type) (idx string) {
 	switch k {
 	case indexes.FullText:
-		idx = `FULLTEXT `
+		idx = "FULLTEXT "
 	case indexes.Spatial:
-		idx = `SPATIAL `
+		idx = "SPATIAL "
 	case indexes.Unique:
-		idx = `UNIQUE `
+		idx = "UNIQUE "
+	case indexes.Primary:
+		idx = "PRIMARY KEY"
+		return
 	}
-	idx += `INDEX`
+	idx += "INDEX"
 	return
 }

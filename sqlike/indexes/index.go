@@ -13,6 +13,7 @@ const (
 	FullText
 	Unique
 	Spatial
+	Primary
 )
 
 func (t Type) String() string {
@@ -23,6 +24,8 @@ func (t Type) String() string {
 		return "UNIQUE"
 	case Spatial:
 		return "SPATIAL"
+	case Primary:
+		return "PRIMARY"
 	default:
 		return "BTREE"
 	}
@@ -38,6 +41,7 @@ type Index struct {
 // Direction :
 type Direction int
 
+// direction :
 const (
 	Ascending Direction = iota
 	Descending
@@ -64,6 +68,10 @@ func (idx *Index) GetName() string {
 	switch idx.Type {
 	case Unique:
 		blr.WriteString("UX")
+	case Primary:
+		blr.WriteString("PRIMARY")
+		idx.Name = blr.String()
+		return idx.Name
 	default:
 		blr.WriteString("IX")
 	}
