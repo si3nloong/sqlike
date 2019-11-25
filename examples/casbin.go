@@ -19,10 +19,13 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		ok  bool
 	)
 
+	table := db.Table("AccessPolicy")
 	// Init policy
 	{
-		a = plugin.MustNew(db.Table("AccessPolicy"))
-		a = plugin.MustNew(db.Table("AccessPolicy"))
+		err = table.DropIfExits()
+		require.NoError(t, err)
+		a = plugin.MustNew(table)
+		a = plugin.MustNew(table)
 		e, err = casbin.NewEnforcer("./rbac_model.conf", a)
 		require.NoError(t, err)
 		err = e.LoadModel()

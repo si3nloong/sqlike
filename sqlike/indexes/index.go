@@ -70,8 +70,7 @@ func (idx *Index) GetName() string {
 		blr.WriteString("UX")
 	case Primary:
 		blr.WriteString("PRIMARY")
-		idx.Name = blr.String()
-		return idx.Name
+		return ""
 	default:
 		blr.WriteString("IX")
 	}

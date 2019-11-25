@@ -25,7 +25,6 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 		idxType = "SPATIAL"
 	case indexes.Primary:
 		nonUnique = false
-		idxType = "PRIMARY"
 	}
 	args := []interface{}{dbName, table, idxType, nonUnique}
 	stmt = sqlstmt.NewStatement(ms)
@@ -70,8 +69,11 @@ func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDes
 		}
 
 		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type))
-		stmt.WriteString(" " + ms.Quote(idx.GetName()) + " ")
-		stmt.WriteRune('(')
+		name := idx.GetName()
+		if name != "" {
+			stmt.WriteString(" " + ms.Quote(name))
+		}
+		stmt.WriteString(" (")
 		for j, col := range idx.Columns {
 			if j > 0 {
 				stmt.WriteRune(',')
@@ -103,15 +105,15 @@ func (ms MySQL) DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement) {
 func (ms MySQL) getIndexByType(k indexes.Type) (idx string) {
 	switch k {
 	case indexes.FullText:
-		idx = "FULLTEXT "
+		idx = "FULLTEXT INDEX"
 	case indexes.Spatial:
-		idx = "SPATIAL "
+		idx = "SPATIAL INDEX"
 	case indexes.Unique:
-		idx = "UNIQUE "
+		idx = "UNIQUE INDEX"
 	case indexes.Primary:
 		idx = "PRIMARY KEY"
-		return
+	default:
+		idx = "INDEX"
 	}
-	idx += "INDEX"
 	return
 }
