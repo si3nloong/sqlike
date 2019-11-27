@@ -133,7 +133,8 @@ func (c *Client) getVersion() (version *semver.Version) {
 	if err != nil {
 		panic(err)
 	}
-	version, err = semver.NewVersion(ver)
+	paths := strings.Split(ver, "-")
+	version, err = semver.NewVersion(paths[0])
 	if err != nil {
 		panic(err)
 	}
