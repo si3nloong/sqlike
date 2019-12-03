@@ -24,6 +24,18 @@ func TestKey(t *testing.T) {
 		require.Equal(t, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), k)
 	})
 
+	t.Run("Encode & Decode", func(it *testing.T) {
+		str := `Parent,1288888/Name,'sianloong'`
+		k, err = ParseKey(str)
+		require.NoError(it, err)
+		require.Equal(it, `EgROYW1lIglzaWFubG9vbmcqDBIGUGFyZW50GLjVTg`, k.Encode())
+
+		var pk *Key
+		pk, err = DecodeKey(k.Encode())
+		require.NoError(it, err)
+		require.Equal(it, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), pk)
+	})
+
 	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())

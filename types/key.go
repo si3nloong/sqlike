@@ -14,7 +14,9 @@ import (
 
 	"errors"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
+	pb "github.com/si3nloong/sqlike/proto"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
@@ -337,7 +339,8 @@ func gobKeyToKey(gk *gobKey) *Key {
 // suitable for use in HTML and URLs.
 // This is compatible with the Python and Java runtimes.
 func (k *Key) Encode() string {
-	b, err := k.GobEncode()
+	pk := keyToProto(k)
+	b, err := proto.Marshal(pk)
 	if err != nil {
 		panic(err)
 	}
@@ -366,11 +369,12 @@ func DecodeKey(encoded string) (*Key, error) {
 		return nil, err
 	}
 
-	k := new(Key)
-	if err := k.GobDecode(b); err != nil {
+	k := new(pb.Key)
+	if err := proto.Unmarshal(b, k); err != nil {
 		return nil, err
 	}
-	return k, nil
+
+	return protoToKey(k), nil
 }
 
 // String returns a string representation of the key.
@@ -401,6 +405,34 @@ func (k *Key) GobDecode(buf []byte) error {
 	}
 	*k = *gobKeyToKey(gk)
 	return nil
+}
+
+func keyToProto(k *Key) *pb.Key {
+	if k == nil {
+		return nil
+	}
+
+	return &pb.Key{
+		Namespace: k.Namespace,
+		Kind:      k.Kind,
+		NameID:    k.NameID,
+		IntID:     k.IntID,
+		Parent:    keyToProto(k.Parent),
+	}
+}
+
+func protoToKey(pk *pb.Key) *Key {
+	if pk == nil {
+		return nil
+	}
+
+	return &Key{
+		Namespace: pk.Namespace,
+		Kind:      pk.Kind,
+		NameID:    pk.NameID,
+		IntID:     pk.IntID,
+		Parent:    protoToKey(pk.Parent),
+	}
 }
 
 // NameKey creates a new key with a name.

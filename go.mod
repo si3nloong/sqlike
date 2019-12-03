@@ -1,6 +1,6 @@
 module github.com/si3nloong/sqlike
 
-go 1.13
+go 1.13.4
 
 require (
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
@@ -8,6 +8,7 @@ require (
 	github.com/casbin/casbin/v2 v2.1.1-0.20191019105932-ac70fb4fa1cc
 	github.com/go-sql-driver/mysql v1.4.1-0.20191001060945-14bb9c0fc20f
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/golang/protobuf v1.3.2
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/google/uuid v1.1.2-0.20190416172445-c2e93f3ae59f
