@@ -76,7 +76,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 		tb.logger,
 		x,
 		opt,
-		options.NoLock,
+		opt.LockMode,
 	)
 	if csr.err != nil {
 		return nil, csr.err

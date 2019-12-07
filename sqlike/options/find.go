@@ -10,7 +10,7 @@ type FindOptions struct {
 
 // Find :
 func Find() *FindOptions {
-	return &FindOptions{}
+	return &FindOptions{LockMode: NoLock}
 }
 
 // SetNoLimit :
