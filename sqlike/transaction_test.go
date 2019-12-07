@@ -201,3 +201,10 @@ func TestPaginateTrx(t *testing.T) {
 
 	trx.RollbackTransaction()
 }
+
+func TestLockMode(t *testing.T) {
+	opt := options.FindOne().SetLockMode(options.LockForRead)
+	if opt.LockMode != options.LockForRead {
+		t.Error("Lock mode doens't update in FindOneOptions.")
+	}
+}
