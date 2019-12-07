@@ -77,6 +77,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 	return &Transaction{
 		dbName:   db.name,
 		pk:       db.pk,
+		client:   db.client,
 		context:  ctx,
 		driver:   tx,
 		dialect:  db.dialect,
@@ -85,7 +86,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 	}, nil
 }
 
-type txCallback func(ctx SessionContext) error
+type txCallback func(tx *Transaction) error
 
 // RunInTransaction :
 func (db *Database) RunInTransaction(cb txCallback, opts ...*options.TransactionOptions) error {
