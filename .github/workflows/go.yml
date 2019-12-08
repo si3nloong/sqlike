@@ -4,6 +4,16 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: abcd1234
+          MYSQL_DATABASE: sqlike
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s
+
     steps:
       # - name: Setup MySQL
       #   uses: mirromutth/mysql-action@v1.1
