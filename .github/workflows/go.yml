@@ -1,5 +1,12 @@
 name: Go
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
 jobs:
   build:
     name: Build
@@ -48,4 +55,4 @@ jobs:
           fi
 
       - name: Test
-        run: go test ./...
+        run: go test ./... -v
