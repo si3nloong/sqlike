@@ -1,4 +1,4 @@
-name: Go
+name: sqlike
 on:
   push:
     branches:
@@ -11,16 +11,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    # services:
-    # mysql:
-    #   image: mysql:8.0
-    #   env:
-    #     MYSQL_ROOT_PASSWORD: abcd1234
-    #     MYSQL_DATABASE: sqlike
-    #   ports:
-    #     - 8888:3306
-    #   options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s
-
     steps:
       - name: Shutdown Ubuntu MySQL (SUDO)
         run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
