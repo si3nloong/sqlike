@@ -11,7 +11,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: abcd1234
           MYSQL_DATABASE: sqlike
         ports:
-          - 33306:3306
+          - 8888:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s
 
     steps:
@@ -28,9 +28,11 @@ jobs:
         run: |
           go get -v -t -d ./...
           if [ -f Gopkg.toml ]; then
-              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-              dep ensure
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
           fi
+
+      - run: mysql --port 8888 -u root -p abcd1234 -e 'CREATE DATABASE IF NOT EXISTS sqlike;'
 
       - name: Test
         run: go test ./...
