@@ -13,12 +13,14 @@ import (
 )
 
 type rsqlStruct struct {
-	ID     int64 `sqlike:",primary_key"`
-	Status Enum  `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	ID       int64 `sqlike:",primary_key"`
+	LongText string
+	Status   Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type queryStruct struct {
 	ID     int64  `rsql:"id,select,filter,sort"`
+	Text   string `rsql:"text,filter,column=LongText"`
 	Status string `rsql:",filter,sort"`
 }
 
@@ -56,10 +58,9 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 	parser = rsql.MustNewParser(src)
 	require.NotNil(t, parser)
 
-	query := `$select=&$filter=(id==value)&$sort=&$limit=100`
+	query := `$select=&$filter=(id==1080;text!="12321adhajs")&$sort=&$limit=100`
 
 	{
-
 		params, err = parser.ParseQuery(query)
 		require.NoError(t, err)
 		require.NotNil(t, params)
@@ -71,8 +72,7 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 			), options.Find().SetDebug(true))
 		require.NoError(t, err)
 
-		log.Println(parser)
-		log.Println(params.Filters)
-
+		log.Println("Parser :", parser)
+		log.Println("Filter :", params.Filters)
 	}
 }

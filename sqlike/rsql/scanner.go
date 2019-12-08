@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 	"github.com/timtadh/lexmachine"
@@ -11,7 +12,6 @@ import (
 
 // Scanner :
 type Scanner struct {
-	values primitive.Group
 	level  int
 	token  *lexmachine.Token
 	parser *Parser
@@ -20,33 +20,83 @@ type Scanner struct {
 
 // NextToken :
 func (scan *Scanner) NextToken() (*lexmachine.Token, bool) {
-	it, _, eof := scan.Next()
-	for !eof && it == nil {
-		it, _, eof = scan.Next()
+	it, err, eof := scan.Next()
+	for !eof && err == nil && it == nil {
+		it, err, eof = scan.Next()
 	}
-	// log.Println("Token :", it)
+	if err != nil || eof {
+		return nil, true
+	}
 	return it.(*lexmachine.Token), eof
 }
 
-// ParseToken :
-func (scan *Scanner) ParseToken() error {
-	tkn, eof := scan.NextToken()
-	if eof {
-		return nil
+// ParseTokens :
+func (scan *Scanner) ParseTokens() (primitive.Group, error) {
+	grp := new(primitive.Group)
+	grps := make([]bool, 0)
+
+	for {
+		tkn, eof := scan.NextToken()
+		if eof {
+			break
+		}
+
+		char := string(tkn.Lexeme)
+		switch tkn.Type {
+		case Whitespace:
+			// skip
+		case Group:
+			if char == "(" {
+				grps = append(grps, true)
+				grp.Values = append(grp.Values, expr.Raw("("))
+			} else {
+				grps = grps[:len(grps)-1]
+				grp.Values = append(grp.Values, expr.Raw(")"))
+			}
+		case Text:
+			// check expression
+			// scan.ParseExpression(grp, tkn)
+			log.Println("Text :", char)
+		case String:
+			// scan.ParseExpression(grp, tkn)
+			log.Println("String :", char)
+		case And:
+			grp.Values = append(grp.Values, primitive.And)
+		case Or:
+			grp.Values = append(grp.Values, primitive.Or)
+		}
 	}
-	// scan.token = tkn
-	char := string(tkn.Lexeme)
-	if tkn.Type == Group && char == "(" {
-		scan.level++
-		scan.values.Values = append(scan.values.Values, expr.Raw(char))
-		return scan.ParseGroup()
-	}
-	return scan.ParseExpression(tkn)
+
+	log.Println("Filters :::", grp.Values)
+	// tkn, eof := scan.NextToken()
+	// if eof {
+	// 	return nil
+	// }
+	// // scan.token = tkn
+	// char := string(tkn.Lexeme)
+	// if tkn.Type == Group && char == "(" {
+	// 	scan.level++
+	// 	scan.values.Values = append(scan.values.Values, expr.Raw(char))
+	// 	return scan.ParseGroup()
+	// }
+	// return scan.ParseExpression(tkn)
+	return *grp, nil
 }
 
 // ParseExpression :
-func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
-	expression, eof := scan.NextToken()
+func (scan *Scanner) ParseExpression(grp *primitive.Group, column *lexmachine.Token) error {
+	log.Println("Mapper :", scan.parser.mapper.Names)
+	log.Println("Key :", string(column.Lexeme))
+	field, ok := scan.parser.mapper.Names[string(column.Lexeme)]
+	if !ok {
+		return errors.New("")
+	}
+
+	if _, ok := field.Tag.LookUp("filter"); !ok {
+		return errors.New("")
+	}
+
+	operator, eof := scan.NextToken()
 	if eof {
 		return errors.New("")
 	}
@@ -55,127 +105,50 @@ func (scan *Scanner) ParseExpression(tkn *lexmachine.Token) error {
 	if eof {
 		return errors.New("")
 	}
-	// log.Println("Debug Expression ===========>")
 
-	log.Println(string(tkn.Lexeme), string(expression.Lexeme), string(value.Lexeme))
-	tkn3, eof := scan.NextToken()
-	if eof {
-		return nil
+	decoder, err := scan.parser.registry.LookupDecoder(field.Type)
+	if err != nil {
+		return err
 	}
-	scan.values.Values = append(scan.values.Values, expr.Equal(string(tkn.Lexeme), string(value.Lexeme)))
-	log.Println(tkn3.Type == Group)
-	switch tkn3.Type {
-	case Group:
-		scan.TC = tkn3.TC
-	case And:
-		scan.values.Values = append(scan.values.Values, primitive.And)
-	case Or:
-		scan.values.Values = append(scan.values.Values, primitive.Or)
-	default:
-		return errors.New("invalid syntax")
+
+	v := reflext.Zero(field.Type)
+	log.Println("datatype :", v.Type())
+	if err := decoder(string(value.Lexeme), v); err != nil {
+		log.Println("Decode err:", err)
+		return err
 	}
+
+	log.Println("token 2 :", string(operator.Lexeme))
+	log.Println("value :", value)
+
+	it := v.Interface()
+	log.Println("after :", it)
+
+	// (==|!=|>|>=|<|<=|=ne=|=nin=)
+	name := field.Name
+	if v, ok := field.Tag.LookUp("column"); ok {
+		name = v
+	}
+	switch string(operator.Lexeme) {
+	case "==":
+		grp.Values = append(grp.Values, expr.Equal(name, it))
+	case "!=":
+		grp.Values = append(grp.Values, expr.NotEqual(name, it))
+	case ">":
+		grp.Values = append(grp.Values, expr.GreaterThan(name, it))
+	case ">=":
+		grp.Values = append(grp.Values, expr.GreaterOrEqual(name, it))
+	case "<":
+		grp.Values = append(grp.Values, expr.LesserThan(name, it))
+	case "<=":
+		grp.Values = append(grp.Values, expr.LesserOrEqual(name, it))
+	case "=ne=":
+		grp.Values = append(grp.Values, expr.NotIn(name, it))
+	case "=nin=":
+		grp.Values = append(grp.Values, expr.NotIn(name, it))
+	}
+
 	return nil
-}
-
-// ParseGroup :
-func (scan *Scanner) ParseGroup() error {
-	for {
-		tkn, eof := scan.NextToken()
-		if eof {
-			break
-		}
-		char := string(tkn.Lexeme)
-		if tkn.Type == Group && char == ")" {
-			scan.level--
-			scan.values.Values = append(scan.values.Values, expr.Raw(char))
-			break
-		}
-		if err := scan.ParseExpression(tkn); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func init() {
-	// b := []byte(`(_id==133,(category!=-10.00;num==.922;test=="value\""));d1=="";c1==testing,d1!=108)`)
-	// lexer := lexmachine.NewLexer()
-	// // skip white space
-	// lexer.Add([]byte(`\s`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return nil, nil
-	// })
-	// lexer.Add([]byte(`\(|\)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: Group, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`\"(\\.|[^\"])*\"`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: String, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`(\,|or)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: Or, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`(\;|and)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: And, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`(\-)?([0-9]*\.[0-9]+|[0-9]+)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: Numeric, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`[a-zA-Z0-9\_\.\%]+`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: Text, Lexeme: match.Bytes}, nil
-	// })
-	// lexer.Add([]byte(`(\=\=|\!\=|\>|\>\=|\<|\<\=|\=ne\=|\=nin\=)`), func(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	// 	return &Token{Type: Operator, Lexeme: match.Bytes}, nil
-	// })
-
-	// s, _ := lexer.Scanner(b)
-	// group := make([]*Token, 0)
-	// values := make([]interface{}, 0)
-	// log.Println(lexer)
-	// for {
-	// 	tkn, err, eof := s.Next()
-	// 	if err != nil {
-
-	// 	}
-	// 	if eof {
-	// 		log.Println(eof, err)
-	// 		break
-	// 	}
-
-	// 	if tkn == nil {
-	// 		continue
-	// 	}
-	// 	field := tkn.(*Token)
-
-	// 	if field.Type == Group {
-	// 		group = append(group, field)
-	// 		continue
-	// 	}
-
-	// 	tkn, _, _ = s.Next()
-	// 	operator := tkn.(*Token)
-	// 	if operator.Type != Operator {
-	// 		break
-	// 	}
-
-	// 	tkn, _, _ = s.Next()
-	// 	value = tkn.(*Token)
-
-	// 	switch string(operator.Lexeme) {
-	// 	case "!=":
-	// 	}
-
-	// 	values = append(values)
-
-	// 	tkn, _, _ = s.Next()
-	// 	x = tkn.(*Token)
-	// 	if x.Type != And && x.Type != Or && x.Type != Group {
-	// 		break
-	// 	}
-	// 	log.Println(x.Type, "|", string(x.Lexeme), x)
-
-	// 	// log.Println("Token :", token)
-	// }
-	// log.Println()
-	// log.Println(s.TC)
 }
 
 // var (

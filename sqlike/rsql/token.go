@@ -14,9 +14,9 @@ const (
 	Whitespace
 )
 
-// Token L
+// Token :
 type Token struct {
-	Type        int
+	Type        tokenType
 	Value       string
 	Lexeme      []byte
 	TC          int
