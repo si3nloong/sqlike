@@ -21,6 +21,11 @@ type Transaction struct {
 	logger   logs.Logger
 }
 
+// SessionContext :
+type SessionContext interface {
+	Table(name string) *Table
+}
+
 // Table :
 func (tx *Transaction) Table(name string) *Table {
 	return &Table{
@@ -33,13 +38,6 @@ func (tx *Transaction) Table(name string) *Table {
 		registry: tx.registry,
 		logger:   tx.logger,
 	}
-	// return &Session{
-	// 	dbName:   tx.dbName,
-	// 	table:    name,
-	// 	pk:       tx.pk,
-	// 	tx:       tx,
-	// 	registry: tx.registry,
-	// }
 }
 
 // RollbackTransaction :
