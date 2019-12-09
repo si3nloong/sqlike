@@ -13,6 +13,7 @@ import (
 type Transaction struct {
 	dbName   string
 	pk       string
+	client   *Client
 	context  context.Context
 	driver   *sql.Tx
 	dialect  sqldialect.Dialect
@@ -20,14 +21,22 @@ type Transaction struct {
 	logger   logs.Logger
 }
 
+// SessionContext :
+type SessionContext interface {
+	Table(name string) *Table
+}
+
 // Table :
-func (tx *Transaction) Table(name string) *Session {
-	return &Session{
+func (tx *Transaction) Table(name string) *Table {
+	return &Table{
 		dbName:   tx.dbName,
-		table:    name,
+		name:     name,
 		pk:       tx.pk,
-		tx:       tx,
+		client:   tx.client,
+		driver:   tx.driver,
+		dialect:  tx.dialect,
 		registry: tx.registry,
+		logger:   tx.logger,
 	}
 }
 

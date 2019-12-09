@@ -40,7 +40,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 		tb.logger,
 		&x.FindActions,
 		&opt.FindOptions,
-		options.NoLock,
+		opt.FindOptions.LockMode,
 	)
 	csr.close = true
 	if csr.err != nil {
@@ -76,7 +76,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 		tb.logger,
 		x,
 		opt,
-		options.NoLock,
+		opt.LockMode,
 	)
 	if csr.err != nil {
 		return nil, csr.err

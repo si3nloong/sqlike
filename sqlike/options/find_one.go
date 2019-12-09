@@ -21,3 +21,9 @@ func (opt *FindOneOptions) SetOmitFields(fields ...string) *FindOneOptions {
 	opt.OmitFields = fields
 	return opt
 }
+
+// SetLockMode :
+func (opt *FindOneOptions) SetLockMode(lock LockMode) *FindOneOptions {
+	opt.LockMode = lock
+	return opt
+}

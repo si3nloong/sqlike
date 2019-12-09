@@ -77,6 +77,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 	return &Transaction{
 		dbName:   db.name,
 		pk:       db.pk,
+		client:   db.client,
 		context:  ctx,
 		driver:   tx,
 		dialect:  db.dialect,
