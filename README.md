@@ -1,5 +1,7 @@
 # Sequel ORM
 
+[![Build Status](https://github.com/si3nloong/sqlike/workflows/sqlike/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions)
+
 ```bash
 go get github.com/si3nloong/sqlike
 ```
