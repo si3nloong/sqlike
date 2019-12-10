@@ -30,6 +30,7 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 		parser *rsql.Parser
 		params *rsql.Params
 		err    error
+		errs   error
 	)
 
 	table := db.Table("rsql_struct")
@@ -58,11 +59,11 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 	parser = rsql.MustNewParser(src)
 	require.NotNil(t, parser)
 
-	query := `$select=&$filter=(id==1080;text!="12321adhajs")&$sort=&$limit=100`
-
+	// Valid rsql filter
 	{
-		params, err = parser.ParseQuery(query)
-		require.NoError(t, err)
+		query := `$select=&$filter=(id==1080;text!="12321adhajs")&$sort=&$limit=100`
+		params, errs = parser.ParseQuery(query)
+		require.NoError(t, errs)
 		require.NotNil(t, params)
 
 		_, err = table.Find(actions.Find().
@@ -74,5 +75,30 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 
 		log.Println("Parser :", parser)
 		log.Println("Filter :", params.Filters)
+	}
+
+	// Invalid rsql select
+	{
+		query := `$select=t1,t2`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
+	}
+
+	// Invalid rsql sort
+	{
+		query := `$sort=t1,t2`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
+	}
+
+	// Invalid rsql limit
+	{
+		query := `$limit=abcd`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
+		log.Println(errs)
 	}
 }

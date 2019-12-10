@@ -9,16 +9,15 @@ import (
 
 func (p *Parser) parseFilter(values map[string]string, params *Params) (errs Errors) {
 	val, ok := values[p.FilterTag]
-	log.Println("QueryString :", string(val))
 	if !ok || len(val) < 1 {
-		return nil
+		return
 	}
 
 	lxr, _ := p.lexer.Scanner([]byte(val))
 	scan := &Scanner{parser: p, Scanner: lxr}
 
 	grp := new(primitive.Group)
-	grps := make([]bool, 0)
+	stack := make([]bool, 0)
 
 	for {
 		tkn, eof := scan.NextToken()
@@ -31,11 +30,19 @@ func (p *Parser) parseFilter(values map[string]string, params *Params) (errs Err
 		case Whitespace:
 			// skip
 		case Group:
-			if char == "(" {
-				grps = append(grps, true)
-				grp.Values = append(grp.Values, expr.Raw("("))
-			} else {
-				grps = grps[:len(grps)-1]
+			{
+				if char == "(" {
+					stack = append(stack, true)
+					grp.Values = append(grp.Values, expr.Raw("("))
+					continue
+				}
+
+				if len(stack) < 0 {
+					errs = append(errs, &FieldError{Module: p.FilterTag})
+					continue
+				}
+
+				stack = stack[:len(stack)-1]
 				grp.Values = append(grp.Values, expr.Raw(")"))
 			}
 		case Text:
@@ -56,5 +63,5 @@ func (p *Parser) parseFilter(values map[string]string, params *Params) (errs Err
 	}
 
 	params.Filters = *grp
-	return nil
+	return
 }
