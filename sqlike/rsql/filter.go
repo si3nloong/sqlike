@@ -1,8 +1,6 @@
 package rsql
 
 import (
-	"log"
-
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
@@ -15,7 +13,6 @@ func (p *Parser) parseFilter(values map[string]string, params *Params) (errs Err
 
 	lxr, _ := p.lexer.Scanner([]byte(val))
 	scan := &Scanner{parser: p, Scanner: lxr}
-
 	grp := new(primitive.Group)
 	stack := make([]bool, 0)
 
@@ -45,16 +42,17 @@ func (p *Parser) parseFilter(values map[string]string, params *Params) (errs Err
 				stack = stack[:len(stack)-1]
 				grp.Values = append(grp.Values, expr.Raw(")"))
 			}
+
 		case Text:
 			// check expression
 			if err := scan.ParseExpression(grp, tkn); err != nil {
 
 			}
+
 		case String:
 			if err := scan.ParseExpression(grp, tkn); err != nil {
 
 			}
-			log.Println("String :", char)
 		case And:
 			grp.Values = append(grp.Values, primitive.And)
 		case Or:

@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"log"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -14,14 +13,16 @@ import (
 
 type rsqlStruct struct {
 	ID       int64 `sqlike:",primary_key"`
+	Name     string
 	LongText string
 	Status   Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type queryStruct struct {
+	Name   string `rsql:"name,filter,sort"`
 	ID     int64  `rsql:"id,select,filter,sort"`
 	Text   string `rsql:"text,filter,column=LongText"`
-	Status string `rsql:",filter,sort"`
+	Status Enum   `rsql:",filter,sort"`
 }
 
 // RSQLExamples :
@@ -61,20 +62,20 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 
 	// Valid rsql filter
 	{
-		query := `$select=&$filter=(id==1080;text!="12321adhajs")&$sort=&$limit=100`
-		params, errs = parser.ParseQuery(query)
-		require.NoError(t, errs)
+		query := `$filter=(name==test;status==SUCCESS)&$limit=100`
+		params, err = parser.ParseQuery(query)
+		require.NoError(t, err)
 		require.NotNil(t, params)
+		require.Equal(t, expr.And(
+			expr.Equal("Name", "test"),
+			expr.Equal("Status", Success),
+		), params.Filters)
 
 		_, err = table.Find(actions.Find().
 			Where(
 				params.Filters,
-				expr.Equal("Status", Success),
 			), options.Find().SetDebug(true))
 		require.NoError(t, err)
-
-		log.Println("Parser :", parser)
-		log.Println("Filter :", params.Filters)
 	}
 
 	// Invalid rsql select
@@ -99,6 +100,5 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 		params, errs = parser.ParseQuery(query)
 		require.Nil(t, params)
 		require.Error(t, errs)
-		log.Println(errs)
 	}
 }

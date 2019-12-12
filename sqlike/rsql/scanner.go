@@ -1,7 +1,6 @@
 package rsql
 
 import (
-	"errors"
 	"log"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -30,149 +29,107 @@ func (scan *Scanner) NextToken() (*lexmachine.Token, bool) {
 	return it.(*lexmachine.Token), eof
 }
 
-// ParseTokens :
-func (scan *Scanner) ParseTokens() (primitive.Group, error) {
-	grp := new(primitive.Group)
-	grps := make([]bool, 0)
-
-	for {
-		tkn, eof := scan.NextToken()
-		if eof {
-			break
-		}
-
-		char := string(tkn.Lexeme)
-		switch tkn.Type {
-		case Whitespace:
-			// skip
-		case Group:
-			if char == "(" {
-				grps = append(grps, true)
-				grp.Values = append(grp.Values, expr.Raw("("))
-			} else {
-				grps = grps[:len(grps)-1]
-				grp.Values = append(grp.Values, expr.Raw(")"))
-			}
-		case Text:
-			// check expression
-			// scan.ParseExpression(grp, tkn)
-			log.Println("Text :", char)
-		case String:
-			// scan.ParseExpression(grp, tkn)
-			log.Println("String :", char)
-		case And:
-			grp.Values = append(grp.Values, primitive.And)
-		case Or:
-			grp.Values = append(grp.Values, primitive.Or)
-		}
-	}
-
-	log.Println("Filters :::", grp.Values)
-	// tkn, eof := scan.NextToken()
-	// if eof {
-	// 	return nil
-	// }
-	// // scan.token = tkn
-	// char := string(tkn.Lexeme)
-	// if tkn.Type == Group && char == "(" {
-	// 	scan.level++
-	// 	scan.values.Values = append(scan.values.Values, expr.Raw(char))
-	// 	return scan.ParseGroup()
-	// }
-	// return scan.ParseExpression(tkn)
-	return *grp, nil
+var operatorMap = map[string]primitive.Operator{
+	"==":    primitive.Equal,
+	"=eq=":  primitive.Equal,
+	"!=":    primitive.NotEqual,
+	"=ne=":  primitive.NotEqual,
+	">":     primitive.GreaterThan,
+	"=gt=":  primitive.GreaterThan,
+	">=":    primitive.GreaterOrEqual,
+	"=gte=": primitive.GreaterOrEqual,
+	"<":     primitive.LesserThan,
+	"=lt=":  primitive.LesserThan,
+	"<=":    primitive.LesserOrEqual,
+	"=lte=": primitive.LesserOrEqual,
+	"=in=":  primitive.In,
+	"=nin=": primitive.NotIn,
 }
 
 // ParseExpression :
 func (scan *Scanner) ParseExpression(grp *primitive.Group, column *lexmachine.Token) error {
-	log.Println("Mapper :", scan.parser.mapper.Names)
-	log.Println("Key :", string(column.Lexeme))
 	field, ok := scan.parser.mapper.Names[string(column.Lexeme)]
 	if !ok {
-		return errors.New("")
+		return &FieldError{Module: ""}
 	}
 
 	if _, ok := field.Tag.LookUp("filter"); !ok {
-		return errors.New("")
+		return &FieldError{}
 	}
 
 	operator, eof := scan.NextToken()
 	if eof {
-		return errors.New("")
+		return &FieldError{}
 	}
 
 	value, eof := scan.NextToken()
 	if eof {
-		return errors.New("")
+		return &FieldError{}
 	}
 
 	decoder, err := scan.parser.registry.LookupDecoder(field.Type)
 	if err != nil {
-		return err
+		return &FieldError{}
 	}
 
 	v := reflext.Zero(field.Type)
-	log.Println("datatype :", v.Type())
 	if err := decoder(string(value.Lexeme), v); err != nil {
-		log.Println("Decode err:", err)
-		return err
+		// return &FieldError{}
 	}
 
-	log.Println("token 2 :", string(operator.Lexeme))
-	log.Println("value :", value)
-
 	it := v.Interface()
-	log.Println("after :", it)
 
 	// (==|!=|>|>=|<|<=|=ne=|=nin=)
 	name := field.Name
 	if v, ok := field.Tag.LookUp("column"); ok {
 		name = v
 	}
-	switch string(operator.Lexeme) {
-	case "==":
-		grp.Values = append(grp.Values, expr.Equal(name, it))
-	case "!=":
-		grp.Values = append(grp.Values, expr.NotEqual(name, it))
-	case ">":
-		grp.Values = append(grp.Values, expr.GreaterThan(name, it))
-	case ">=":
-		grp.Values = append(grp.Values, expr.GreaterOrEqual(name, it))
-	case "<":
-		grp.Values = append(grp.Values, expr.LesserThan(name, it))
-	case "<=":
-		grp.Values = append(grp.Values, expr.LesserOrEqual(name, it))
-	case "=ne=":
-		grp.Values = append(grp.Values, expr.NotIn(name, it))
-	case "=nin=":
-		grp.Values = append(grp.Values, expr.NotIn(name, it))
+
+	optr, ok := operatorMap[string(operator.Lexeme)]
+	switch optr {
+	case primitive.In:
+		scan.NextGroup(value)
+		return nil
+	case primitive.NotIn:
+		scan.NextGroup(value)
+		return nil
 	}
 
+	grp.Values = append(grp.Values, primitive.C{
+		Field:    expr.Column(name),
+		Operator: optr,
+		Value:    it,
+	})
 	return nil
 }
 
-// var (
-// 	valueMap = make([]tokenType, 256)
-// )
+// NextGroup :
+func (scan *Scanner) NextGroup(tkn *lexmachine.Token) (values []string, err error) {
+	values = make([]string, 0)
+	if scan.Text[tkn.TC] != '(' {
+	}
 
-// // EOF :
-// var EOF = byte(0)
+	length := len(scan.Text)
 
-// // Token :
-// type Token struct {
-// 	t tokenType
-// 	s string
-// }
+	tkn.TC++
 
-// // Scanner :
-// type Scanner struct {
-// 	r *bufio.Reader
-// }
+OUTER:
+	for i := tkn.TC; i < length; {
+		switch scan.Text[i] {
+		case ')':
+			log.Println("End with :", string(scan.Text[tkn.TC:i]))
+			values = append(values, string(scan.Text[tkn.TC:i]))
+			scan.TC = i + 1
+			break OUTER
+		}
+		i++
+	}
 
-// // NewScanner :
-// func NewScanner() *Scanner {
-// 	return &Scanner{}
-// }
+	log.Println("VALUE ::::", values, len(values))
+	// log.Println(string(scan.Text[tkn.TC:]))
+	// log.Println(string(scan.Text[tkn.StartLine:]))
+	return
+}
 
 // // Scan returns the next token and literal value.
 // func (s *Scanner) Scan(r io.Reader) (out []Token, err error) {

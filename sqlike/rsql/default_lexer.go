@@ -33,7 +33,7 @@ func (l *defaultTokenLexer) addActions(lexer *lexmachine.Lexer) {
 	lexer.Add([]byte(`(\;|and)`), l.token("and"))
 	lexer.Add([]byte(`(\-)?([0-9]*\.[0-9]+|[0-9]+)`), l.token("numeric"))
 	lexer.Add([]byte(`[a-zA-Z0-9\_\.\%]+`), l.token("text"))
-	lexer.Add([]byte(`(\=\=|\!\=|\>|\>\=|\<|\<\=|\=ne\=|\=nin\=)`), l.token("operator"))
+	lexer.Add([]byte(`(\=\=|\!\=|\>|\>\=|\<|\<\=|\=ne\=|\=in\=|\=nin\=)`), l.token("operator"))
 	l.lexer = lexer
 }
 

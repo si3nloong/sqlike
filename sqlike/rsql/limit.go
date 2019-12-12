@@ -2,7 +2,6 @@ package rsql
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -13,7 +12,6 @@ func (p *Parser) parseLimit(values map[string]string, params *Params) (errs Erro
 		return
 	}
 
-	log.Println("HERE")
 	u64, err := strconv.ParseUint(val, 10, 64)
 	if err != nil {
 		errs = append(errs, &FieldError{Value: "invalid value, " + val, Module: p.LimitTag})
