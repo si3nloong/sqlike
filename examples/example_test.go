@@ -45,7 +45,6 @@ func TestExamples(t *testing.T) {
 		Database("sqlike")
 
 	{
-		RSQLExamples(t, db)
 		MigrateExamples(t, db)
 		IndexExamples(t, db)
 		InsertExamples(t, db)
@@ -57,6 +56,7 @@ func TestExamples(t *testing.T) {
 		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
 		CasbinExamples(t, db)
+		RSQLExamples(t, db)
 	}
 
 	// Errors

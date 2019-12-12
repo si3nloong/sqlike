@@ -133,7 +133,16 @@ func (db *Database) BuildIndexes(filepath ...string) error {
 	file := pwd + "/index.yaml"
 	if len(filepath) > 0 {
 		file = filepath[0]
+		goto READFILE
 	}
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		file = pwd + "/index.yml"
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return err
+		}
+	}
+
+READFILE:
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
