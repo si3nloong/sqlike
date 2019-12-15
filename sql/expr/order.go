@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // Field :
 func Field(name string, val interface{}) (f primitive.Field) {
 	f.Name = name
-	v := reflect.ValueOf(val)
+	v := reflext.Indirect(reflect.ValueOf(val))
 	k := v.Kind()
 	if k != reflect.Array && k != reflect.Slice {
 		panic(fmt.Errorf("unsupported data type: %v", k))

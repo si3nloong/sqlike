@@ -31,7 +31,7 @@ type FindActions struct {
 	GroupBys    []interface{}
 	Sorts       []interface{}
 	Skip        uint
-	Record      uint
+	Count       uint
 }
 
 // Select :
@@ -89,7 +89,7 @@ func (act *FindActions) GroupBy(fields ...interface{}) SelectStatement {
 // Limit :
 func (act *FindActions) Limit(num uint) SelectStatement {
 	if num > 0 {
-		act.Record = num
+		act.Count = num
 	}
 	return act
 }

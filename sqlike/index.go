@@ -3,8 +3,6 @@ package sqlike
 import (
 	"context"
 
-	"errors"
-
 	"github.com/Masterminds/semver"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -42,7 +40,7 @@ func (idv *IndexView) CreateOne(idx indexes.Index) error {
 func (idv *IndexView) Create(idxs []indexes.Index) error {
 	for _, idx := range idxs {
 		if len(idx.Columns) < 1 {
-			return errors.New("sqlike: empty columns to create index")
+			return ErrNoColumn
 		}
 	}
 	_, err := sqldriver.Execute(
@@ -64,7 +62,7 @@ func (idv *IndexView) CreateIfNotExists(idxs []indexes.Index) error {
 	cols := make([]indexes.Index, 0, len(idxs))
 	for _, idx := range idxs {
 		if len(idx.Columns) < 1 {
-			return errors.New("sqlike: empty columns to create index")
+			return ErrNoColumn
 		}
 		var count int
 		if err := sqldriver.QueryRowContext(

@@ -79,7 +79,7 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 		pg.table.logger,
 		&fa.FindActions,
 		&options.FindOptions{Debug: pg.option.Debug},
-		0,
+		options.NoLock,
 	)
 	pg.values, err = result.nextValues()
 	if err != nil {
@@ -100,7 +100,7 @@ func (pg *Paginator) All(results interface{}) error {
 		pg.table.logger,
 		pg.buildAction(),
 		pg.option,
-		0,
+		options.NoLock,
 	)
 	return result.All(results)
 }

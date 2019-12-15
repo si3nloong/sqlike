@@ -46,7 +46,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 	cdc := mapper.CodecByType(t)
 	f, exists := cdc.Names[pk]
 	if !exists {
-		return fmt.Errorf("missing primary key field %q", pk)
+		return fmt.Errorf("sqlike: missing primary key field %q", pk)
 	}
 
 	x := new(actions.DeleteActions)
@@ -69,7 +69,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 		return err
 	}
 	if affected, _ := result.RowsAffected(); affected <= 0 {
-		return errors.New("sqlike: unable to modify entity")
+		return errors.New("sqlike: unable to delete entity")
 	}
 	return err
 }
@@ -127,7 +127,7 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 		act.Table = tbName
 	}
 	if len(act.Conditions) < 1 {
-		return 0, errors.New("sqlike: no condition is not allow for delete")
+		return 0, errors.New("sqlike: empty condition is not allow for delete, please use truncate instead")
 	}
 	stmt, err := dialect.Delete(act)
 	if err != nil {
