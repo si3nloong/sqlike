@@ -53,6 +53,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.BuildRaw)
 	blr.SetBuilder(reflect.TypeOf(primitive.Aggregate{}), b.BuildAggregate)
 	blr.SetBuilder(reflect.TypeOf(primitive.Column{}), b.BuildColumn)
+	blr.SetBuilder(reflect.TypeOf(primitive.JSONColumn{}), b.BuildJSONColumn)
 	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.BuildClause)
 	blr.SetBuilder(reflect.TypeOf(primitive.L{}), b.BuildLike)
 	blr.SetBuilder(reflect.TypeOf(primitive.Operator(0)), b.BuildOperator)
@@ -201,6 +202,40 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 func (b *mySQLBuilder) BuildColumn(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Column)
 	stmt.WriteString(b.Quote(x.Name))
+	return nil
+}
+
+// BuildJSONColumn :
+func (b *mySQLBuilder) BuildJSONColumn(stmt *sqlstmt.Statement, it interface{}) error {
+	/*
+		Expected columns ( JSON_EXTRACT )
+		Column : Address
+		Nested : [ State, City ]
+		UnquoteResult : false
+
+		Result
+		`Address`->'$.State.City'
+
+		--------------------------------------------
+
+		Expected columns ( JSON_EXTRACT(JSON_UNQUOTE) )
+		Column : Address
+		Nested : [ State, City ]
+		UnquoteResult : true
+
+		Result
+		`Address`->>'$.State.City'
+	*/
+	x := it.(primitive.JSONColumn)
+	nested := strings.Join(x.Nested, ".")
+	operator := "->"
+	if !strings.HasPrefix(nested, "$.") {
+		nested = "$." + nested
+	}
+	if x.UnquoteResult {
+		operator += ">"
+	}
+	stmt.WriteString(b.Quote(x.Column) + operator + b.Wrap(nested))
 	return nil
 }
 

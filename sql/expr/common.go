@@ -23,3 +23,11 @@ func Column(name string, alias ...string) (c primitive.Column) {
 	c.Name = name
 	return
 }
+
+// JSONColumn :
+func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
+	c.Column = column
+	c.Nested = nested
+	c.UnquoteResult = false
+	return
+}

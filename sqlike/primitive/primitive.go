@@ -1,8 +1,38 @@
 package primitive
 
+import (
+	"fmt"
+	"strings"
+)
+
 // Raw :
 type Raw struct {
 	Value string
+}
+
+// JSONColumn :
+type JSONColumn struct {
+	Column        string
+	Nested        []string
+	UnquoteResult bool
+}
+
+// WithQuote :
+func (x JSONColumn) WithQuote() JSONColumn {
+	x.UnquoteResult = true
+	return x
+}
+
+func (x JSONColumn) String() string {
+	nested := strings.Join(x.Nested, ".")
+	operator := "->"
+	if strings.HasPrefix(nested, "$.") {
+		nested = "$." + nested
+	}
+	if x.UnquoteResult {
+		operator += ">"
+	}
+	return fmt.Sprintf("`%s`%s'$.%s'", x.Column, operator, nested)
 }
 
 // Column :
