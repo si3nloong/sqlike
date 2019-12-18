@@ -86,7 +86,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 	}, nil
 }
 
-type txCallback func(tx *Transaction) error
+type txCallback func(ctx SessionContext) error
 
 // RunInTransaction :
 func (db *Database) RunInTransaction(cb txCallback, opts ...*options.TransactionOptions) error {

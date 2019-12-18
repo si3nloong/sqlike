@@ -38,13 +38,6 @@ func (tx *Transaction) Table(name string) *Table {
 		registry: tx.registry,
 		logger:   tx.logger,
 	}
-	// return &Session{
-	// 	dbName:   tx.dbName,
-	// 	table:    name,
-	// 	pk:       tx.pk,
-	// 	tx:       tx,
-	// 	registry: tx.registry,
-	// }
 }
 
 // RollbackTransaction :
