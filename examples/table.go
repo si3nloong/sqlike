@@ -42,7 +42,6 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	{
 		err = table.Migrate(ns)
 		require.NoError(t, err)
-
 		columnMap := make(map[string]sqlike.Column)
 		columns = make([]string, 0)
 		results, err = table.Columns().List()

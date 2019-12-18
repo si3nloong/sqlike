@@ -123,9 +123,7 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	)
 
 	if !v.IsValid() || reflext.IsNull(v) {
-		return func(_ *reflext.StructField, _ reflect.Value) (interface{}, error) {
-			return nil, nil
-		}, nil
+		return NilEncoder, nil
 	}
 
 	if _, ok := v.Interface().(driver.Valuer); ok {
@@ -179,9 +177,17 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 }
 
 func encodeValue(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	if !v.IsValid() || reflext.IsNull(v) {
+		return nil, nil
+	}
 	x, ok := v.Interface().(driver.Valuer)
 	if !ok {
 		return nil, errors.New("codec: invalid type for assertion")
 	}
 	return x.Value()
+}
+
+// NilEncoder :
+func NilEncoder(_ *reflext.StructField, _ reflect.Value) (interface{}, error) {
+	return nil, nil
 }

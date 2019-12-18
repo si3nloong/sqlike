@@ -55,7 +55,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		opt = opts[0]
 	}
 
-	_, fields := skipColumns(cdc.Properties, opt.Omits)
+	fields := skipColumns(cdc.Properties, opt.Omits)
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 
