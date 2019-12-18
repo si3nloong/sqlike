@@ -5,9 +5,17 @@ import (
 )
 
 // JSONQuote :
-func JSONQuote(value string) (fc primitive.Func) {
+func JSONQuote(value string) (fc primitive.JSONFunc) {
 	fc.Type = primitive.JSONQuote
 	fc.Arguments = append(fc.Arguments, wrapColumn(value))
+	return
+}
+
+// JSONColumn :
+func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
+	c.Column = column
+	c.Nested = nested
+	c.UnquoteResult = false
 	return
 }
 
@@ -37,7 +45,7 @@ func wrapJSONColumn(it interface{}) interface{} {
 			Value:    vi,
 			DataType: primitive.JSON,
 		}
-	case primitive.Func:
+	case primitive.JSONFunc:
 		return vi
 	default:
 		return primitive.Value{Raw: vi}

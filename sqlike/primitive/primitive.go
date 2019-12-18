@@ -55,7 +55,13 @@ type CastAs struct {
 
 // Func :
 type Func struct {
-	Type      Function
+	Name      string
+	Arguments []interface{}
+}
+
+// JSONFunc :
+type JSONFunc struct {
+	Type      jsonFunction
 	Arguments []interface{}
 }
 

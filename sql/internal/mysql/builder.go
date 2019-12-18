@@ -46,6 +46,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	}
 	blr.SetBuilder(reflect.TypeOf(primitive.CastAs{}), b.BuildCastAs)
 	blr.SetBuilder(reflect.TypeOf(primitive.Func{}), b.BuildFunction)
+	blr.SetBuilder(reflect.TypeOf(primitive.JSONFunc{}), b.BuildJSONFunction)
 	blr.SetBuilder(reflect.TypeOf(primitive.Field{}), b.BuildField)
 	blr.SetBuilder(reflect.TypeOf(primitive.Value{}), b.BuildValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.As{}), b.BuildAs)
@@ -90,9 +91,27 @@ func (b *mySQLBuilder) BuildCastAs(stmt *sqlstmt.Statement, it interface{}) erro
 
 func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Func)
+	stmt.WriteString(x.Name)
+	stmt.WriteByte('(')
+	for i, args := range x.Arguments {
+		if i > 0 {
+			stmt.WriteByte(',')
+		}
+		if err := b.builder.BuildStatement(stmt, args); err != nil {
+			return err
+		}
+	}
+	stmt.WriteByte(')')
+	return nil
+}
+
+func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(primitive.JSONFunc)
 	switch x.Type {
 	case primitive.JSONQuote:
 		stmt.WriteString("JSON_QUOTE")
+	case primitive.JSONContains:
+
 	default:
 		return errors.New("mysql: unsupported function")
 	}

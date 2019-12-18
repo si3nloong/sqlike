@@ -49,26 +49,42 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 
 	// advance query
 	{
-		// result, err = table.Find(
-		// 	actions.Find().
-		// 		Where(
-		// 			expr.JSONContains(
-		// 				json.RawMessage(`[0,17,9]`),
-		// 				expr.Column("TinyUint"),
-		// 			),
-		// 			expr.JSONContains(
-		// 				"JSONRaw",
-		// 				json.RawMessage(`{"test":"hello world"}`),
-		// 			),
-		// 		).
-		// 		OrderBy(
-		// 			expr.Desc("$Key"),
-		// 		),
-		// 	options.Find().
-		// 		SetDebug(true).
-		// 		SetNoLimit(true),
-		// )
-		// require.NoError(t, err)
+		type output struct {
+			Raw string
+		}
+
+		result, err = table.Find(
+			actions.Find().
+				Select(
+					expr.As(
+						expr.Function("REPLACE", expr.Column("Raw"), "message", "msg"),
+						"Raw",
+					),
+				).
+				Where(
+					// expr.JSONContains(
+					// 	"IntArr",
+					// 	expr.Column("IntAtt"),
+					// ),
+					expr.Equal(
+						expr.JSONColumn("Raw", "message"),
+						"ok",
+					),
+				).
+				OrderBy(
+					expr.Desc("$Key"),
+				),
+			options.Find().
+				SetDebug(true).
+				SetNoLimit(true),
+		)
+		require.NoError(t, err)
+
+		arr := []output{}
+		err = result.All(&arr)
+		require.True(t, len(arr) > 0)
+		require.Equal(t, `{"msg": "ok"}`, arr[0].Raw)
+		require.NoError(t, err)
 	}
 }
 

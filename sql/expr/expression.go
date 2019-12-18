@@ -173,11 +173,6 @@ func ColumnValue(field string, value interface{}) (kv primitive.KV) {
 	return
 }
 
-// Date :
-func Date(field string) (d primitive.Func) {
-	return
-}
-
 // CastAs :
 func CastAs(value interface{}, datatype primitive.DataType) (cast primitive.CastAs) {
 	cast.Value = value
