@@ -11,7 +11,7 @@ func (p *Parser) parseSelect(values map[string]string, params *Params) (errs Err
 	val, ok := values[p.SelectTag]
 	delete(values, p.SelectTag)
 	if !ok || len(val) < 1 {
-		return nil
+		return
 	}
 
 	paths := strings.Split(val, ",")
@@ -22,7 +22,7 @@ func (p *Parser) parseSelect(values map[string]string, params *Params) (errs Err
 		}
 		v, err := url.QueryUnescape(v)
 		if err != nil {
-			errs = append(errs, &FieldError{})
+			errs = append(errs, &FieldError{Name: v, Module: p.SelectTag})
 			continue
 		}
 		f, ok := p.mapper.Names[v]
@@ -36,5 +36,5 @@ func (p *Parser) parseSelect(values map[string]string, params *Params) (errs Err
 		}
 		params.Selects = append(params.Selects, expr.Column(f.Name))
 	}
-	return nil
+	return
 }

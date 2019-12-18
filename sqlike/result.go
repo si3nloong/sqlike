@@ -112,7 +112,7 @@ func (r *Result) Decode(dst interface{}) error {
 	v = reflext.Indirect(v)
 	t = reflext.Deref(t)
 	if !reflext.IsKind(t, reflect.Struct) {
-		return errors.New("sqlike: it must be struct to decode")
+		return errors.New("sqlike: it must be a struct to decode")
 	}
 
 	mapper := reflext.DefaultMapper
@@ -158,7 +158,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Slice) {
-		return errors.New("it must be a slice of entity")
+		return errors.New("sqlike: it must be a slice of entity")
 	}
 
 	slice := reflect.MakeSlice(t, 0, 0)
@@ -203,7 +203,7 @@ func (r *Result) All(results interface{}) error {
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Slice) {
-		return errors.New("it must be a slice of entity")
+		return errors.New("sqlike: it must be a slice of entity")
 	}
 
 	length := len(r.columns)

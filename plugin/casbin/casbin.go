@@ -11,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // Adapter :
@@ -18,6 +19,8 @@ type Adapter struct {
 	table    *sqlike.Table
 	filtered bool
 }
+
+var _ persist.FilteredAdapter = new(Adapter)
 
 // MustNew :
 func MustNew(table *sqlike.Table) persist.FilteredAdapter {
@@ -78,12 +81,19 @@ func (a *Adapter) LoadPolicy(model model.Model) error {
 // LoadFilteredPolicy :
 func (a *Adapter) LoadFilteredPolicy(model model.Model, filter interface{}) error {
 	var policies []*Policy
-	x, ok := filter.([]interface{})
+	x, ok := filter.(primitive.Group)
 	if !ok {
 		return errors.New("invalid filter data type, expected []interface{}")
 	}
 
-	result, err := a.table.Find(actions.Find().Where(x...))
+	act := new(actions.FindActions)
+	act.Conditions = x
+	result, err := a.table.Find(
+		act,
+		options.Find().
+			SetNoLimit(true).
+			SetDebug(true),
+	)
 	if err != nil {
 		return err
 	}

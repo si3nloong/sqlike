@@ -26,14 +26,14 @@ func newDefaultTokenLexer() *defaultTokenLexer {
 }
 
 func (l *defaultTokenLexer) addActions(lexer *lexmachine.Lexer) {
-	lexer.Add([]byte(`\s`), handleSpace)
+	lexer.Add([]byte(`\s`), l.token("whitespace"))
 	lexer.Add([]byte(`\(|\)`), l.token("grouping"))
 	lexer.Add([]byte(`\"(\\.|[^\"])*\"`), l.token("string"))
 	lexer.Add([]byte(`(\,|or)`), l.token("or"))
 	lexer.Add([]byte(`(\;|and)`), l.token("and"))
 	lexer.Add([]byte(`(\-)?([0-9]*\.[0-9]+|[0-9]+)`), l.token("numeric"))
 	lexer.Add([]byte(`[a-zA-Z0-9\_\.\%]+`), l.token("text"))
-	lexer.Add([]byte(`(\=\=|\!\=|\>|\>\=|\<|\<\=|\=ne\=|\=nin\=)`), l.token("operator"))
+	lexer.Add([]byte(`(\=\=|\!\=|\>|\>\=|\<|\<\=|\=ne\=|\=in\=|\=nin\=)`), l.token("operator"))
 	l.lexer = lexer
 }
 
@@ -41,8 +41,4 @@ func (l *defaultTokenLexer) token(name string) lexmachine.Action {
 	return func(s *lexmachine.Scanner, m *machines.Match) (interface{}, error) {
 		return s.Token(l.ids[name], string(m.Bytes), m), nil
 	}
-}
-
-func handleSpace(scan *lexmachine.Scanner, match *machines.Match) (interface{}, error) {
-	return nil, nil
 }

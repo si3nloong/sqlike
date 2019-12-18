@@ -106,10 +106,11 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 	v = reflext.Indirect(v)
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Array) && !reflext.IsKind(t, reflect.Slice) {
-		return nil, errors.New("sqlike.Insert only support array or slice of entity")
+		return nil, errors.New("sqlike: insert only support array or slice of entity")
 	}
 
-	if v.Len() < 1 {
+	records := v.Len()
+	if records < 1 {
 		return nil, ErrInvalidInput
 	}
 
@@ -126,10 +127,9 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 		return nil, ErrEmptyFields
 	}
 
-	values := make([][]interface{}, 0)
+	values := make([][]interface{}, records, records)
 	v = reflext.Indirect(v)
-	count := v.Len()
-	for i := 0; i < count; i++ {
+	for i := 0; i < records; i++ {
 		vi := reflext.Indirect(v.Index(i))
 		rows := make([]interface{}, length, length)
 		for j, sf := range fields {
@@ -139,7 +139,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 			}
 			rows[j] = val
 		}
-		values = append(values, rows)
+		values[i] = rows
 	}
 	stmt := dialect.InsertInto(dbName, tbName, pk, columns, values, opt)
 	return sqldriver.Execute(

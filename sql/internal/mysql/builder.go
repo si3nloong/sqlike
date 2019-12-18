@@ -324,7 +324,7 @@ func (b *mySQLBuilder) BuildJSONContains(stmt *sqlstmt.Statement, it interface{}
 
 func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(primitive.Math)
-	stmt.WriteString(b.Quote(string(x.Field)) + ` `)
+	stmt.WriteString(b.Quote(string(x.Field)) + " ")
 	if x.Mode == primitive.Add {
 		stmt.WriteRune('+')
 	} else {
@@ -426,7 +426,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Record, x.Skip)
+	b.appendLimitNOffset(stmt, x.Count, x.Skip)
 
 	return nil
 }
