@@ -63,7 +63,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 		opt = opts[0]
 	}
 	// has limit and limit value is zero
-	if !opt.NoLimit && x.Record < 1 {
+	if !opt.NoLimit && x.Count < 1 {
 		x.Limit(100)
 	}
 	csr := find(

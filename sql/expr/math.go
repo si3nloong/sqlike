@@ -11,6 +11,15 @@ func Increment(field string, inc uint) primitive.Math {
 	}
 }
 
+// Decrement :
+func Decrement(field string, inc uint) primitive.Math {
+	return primitive.Math{
+		Field: primitive.Col(field),
+		Mode:  primitive.Deduct,
+		Value: int(inc),
+	}
+}
+
 // Multiply :
 func Multiply(fields ...interface{}) (grp primitive.Group) {
 	for i, f := range fields {

@@ -6,6 +6,7 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
 	plugin "github.com/si3nloong/sqlike/plugin/casbin"
+	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/stretchr/testify/require"
 )
@@ -34,6 +35,16 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	adminRules := [...][]string{
+		{"admin", "/login", "POST"},
+		{"admin", "/logout", "POST"},
+		{"admin", "/dashboard", "GET"},
+	}
+
+	marketingRules := [...][]string{
+		{"marketing", "/dashboard", "GET"},
+	}
+
 	// Create policy
 	{
 		ok, err = e.AddNamedPolicy("p", "casbin", "/*", "GET")
@@ -43,16 +54,15 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		require.True(t, ok)
 		require.NoError(t, err)
 		e.AddGroupingPolicy("admin", "tester", "/*")
-		e.AddPolicy("admin", "/login", "POST")
-		e.AddPolicy("admin", "/logout", "POST")
+		e.AddPolicy(adminRules[0])
+		e.AddPolicy(adminRules[1])
+		e.AddPolicy(adminRules[2])
+		e.AddPolicy(marketingRules[0])
 		e.AddNamedPolicy("p", "admin", "/login", "POST")
 		e.AddNamedPolicy("p", "admin", "/login", "POST")
 
-		policies := e.GetFilteredPolicy(0, "admin")
-		require.ElementsMatch(t, [][]string{
-			[]string{"admin", "/login", "POST"},
-			[]string{"admin", "/logout", "POST"},
-		}, policies)
+		adminPolicies := e.GetFilteredPolicy(0, "admin")
+		require.ElementsMatch(t, adminRules, adminPolicies)
 
 		err = e.SavePolicy()
 		require.NoError(t, err)
@@ -72,6 +82,7 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// check permission
 	{
 		ok, err = e.Enforce("admin", "/login", "POST")
 		require.True(t, ok)
@@ -84,6 +95,30 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		ok, err = e.Enforce("admin", "/logout", "*")
 		require.False(t, ok)
 		require.NoError(t, err)
+	}
+
+	// Remove Policy
+	{
+
+	}
+
+	{
+		e.ClearPolicy()
+		err = e.LoadFilteredPolicy(
+			plugin.Filter(
+				expr.Equal("V0", "admin"),
+			),
+		)
+		require.NoError(t, err)
+		require.ElementsMatch(t, adminRules, e.GetPolicy())
+
+		err = e.LoadFilteredPolicy(
+			plugin.Filter(
+				expr.Equal("V0", "marketing"),
+			),
+		)
+		require.NoError(t, err)
+		require.ElementsMatch(t, marketingRules, e.GetPolicy())
 	}
 
 }

@@ -39,9 +39,3 @@ func parseRawQuery(m map[string]string, query string) (err error) {
 	}
 	return err
 }
-
-// // expression  = [ "(" ]
-// // ( constraint / expression )
-// // [ operator ( constraint / expression ) ]
-// // [ ")" ]
-// // operator    = ";" / ","

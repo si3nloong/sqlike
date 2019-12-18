@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"log"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -13,13 +12,17 @@ import (
 )
 
 type rsqlStruct struct {
-	ID     int64 `sqlike:",primary_key"`
-	Status Enum  `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	ID       int64 `sqlike:",primary_key"`
+	Name     string
+	LongText string
+	Status   Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
 type queryStruct struct {
+	Name   string `rsql:"name,filter,sort"`
 	ID     int64  `rsql:"id,select,filter,sort"`
-	Status string `rsql:",filter,sort"`
+	Text   string `rsql:"text,filter,column=LongText"`
+	Status Enum   `rsql:",filter,sort"`
 }
 
 // RSQLExamples :
@@ -28,6 +31,7 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 		parser *rsql.Parser
 		params *rsql.Params
 		err    error
+		errs   error
 	)
 
 	table := db.Table("rsql_struct")
@@ -56,23 +60,45 @@ func RSQLExamples(t *testing.T, db *sqlike.Database) {
 	parser = rsql.MustNewParser(src)
 	require.NotNil(t, parser)
 
-	query := `$select=&$filter=(id==value)&$sort=&$limit=100`
-
+	// Valid rsql filter
 	{
-
+		query := `$filter=(name==test;status==SUCCESS)&$limit=100`
 		params, err = parser.ParseQuery(query)
 		require.NoError(t, err)
 		require.NotNil(t, params)
+		require.Equal(t, expr.And(
+			expr.Equal("Name", "test"),
+			expr.Equal("Status", Success),
+		), params.Filters)
 
 		_, err = table.Find(actions.Find().
 			Where(
 				params.Filters,
-				expr.Equal("Status", Success),
 			), options.Find().SetDebug(true))
 		require.NoError(t, err)
+	}
 
-		log.Println(parser)
-		log.Println(params.Filters)
+	// Invalid rsql select
+	{
+		query := `$select=t1,t2`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
+	}
 
+	// Invalid rsql sort
+	{
+		query := `$sort=t1,t2`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
+	}
+
+	// Invalid rsql limit
+	{
+		query := `$limit=abcd`
+		params, errs = parser.ParseQuery(query)
+		require.Nil(t, params)
+		require.Error(t, errs)
 	}
 }

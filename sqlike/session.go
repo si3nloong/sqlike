@@ -8,11 +8,6 @@ package sqlike
 // 	"github.com/si3nloong/sqlike/sqlike/options"
 // )
 
-// // SessionContext :
-// type SessionContext interface {
-// 	Table(name string) *Session
-// }
-
 // // Session :
 // type Session struct {
 // 	dbName   string

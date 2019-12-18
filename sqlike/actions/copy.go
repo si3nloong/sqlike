@@ -79,7 +79,7 @@ func (act *CopyActions) GroupBy(fields ...interface{}) CopyStatement {
 // Limit :
 func (act *CopyActions) Limit(num uint) CopyStatement {
 	if num > 0 {
-		act.Record = num
+		act.Count = num
 	}
 	return act
 }

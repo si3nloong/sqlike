@@ -21,6 +21,11 @@ type Transaction struct {
 	logger   logs.Logger
 }
 
+// SessionContext :
+type SessionContext interface {
+	Table(name string) *Table
+}
+
 // Table :
 func (tx *Transaction) Table(name string) *Table {
 	return &Table{

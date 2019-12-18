@@ -2,7 +2,6 @@ package rsql
 
 import (
 	"errors"
-	"log"
 	"reflect"
 	"strings"
 
@@ -81,15 +80,13 @@ func (p *Parser) ParseQueryBytes(query []byte) (*Params, error) {
 
 	var (
 		params = new(Params)
-		errs   = make(Errors, 0)
+		errs   = make(Errors, 0, 0)
 	)
 
 	errs = append(errs, p.parseSelect(values, params)...)
 	errs = append(errs, p.parseSort(values, params)...)
 	errs = append(errs, p.parseLimit(values, params)...)
 	errs = append(errs, p.parseFilter(values, params)...)
-
-	log.Println("Params :", params.Filters)
 
 	if len(errs) > 0 {
 		return nil, errs

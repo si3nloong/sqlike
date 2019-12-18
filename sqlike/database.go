@@ -133,7 +133,16 @@ func (db *Database) BuildIndexes(filepath ...string) error {
 	file := pwd + "/index.yaml"
 	if len(filepath) > 0 {
 		file = filepath[0]
+		goto READFILE
 	}
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		file = pwd + "/index.yml"
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			return err
+		}
+	}
+
+READFILE:
 	b, err := ioutil.ReadFile(file)
 	if err != nil {
 		return err
@@ -143,17 +152,18 @@ func (db *Database) BuildIndexes(filepath ...string) error {
 	}
 
 	for _, idx := range id.Indexes {
-		columns := make([]indexes.Column, 0, len(idx.Columns))
-		for _, col := range idx.Columns {
+		length := len(idx.Columns)
+		columns := make([]indexes.Column, length, length)
+		for i, col := range idx.Columns {
 			dir := indexes.Ascending
 			col.Direction = strings.TrimSpace(strings.ToLower(col.Direction))
 			if col.Direction == "desc" || col.Direction == "descending" {
 				dir = indexes.Descending
 			}
-			columns = append(columns, indexes.Column{
+			columns[i] = indexes.Column{
 				Name:      col.Name,
 				Direction: dir,
-			})
+			}
 		}
 
 		index := indexes.Index{

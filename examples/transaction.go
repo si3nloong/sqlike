@@ -3,6 +3,7 @@ package examples
 import (
 	"database/sql"
 	"errors"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -14,6 +15,11 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
+
+type user struct {
+	ID   int `sqlike:"$Key"`
+	Name string
+}
 
 // TransactionExamples :
 func TransactionExamples(t *testing.T, db *sqlike.Database) {
@@ -157,8 +163,10 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		err = db.RunInTransaction(func(sessCtx sqlike.SessionContext) error {
 			nss := []normalStruct{}
 			result, err := sessCtx.Table("NormalStruct").
-				Find(nil, options.LockForUpdate,
-					options.Find().SetDebug(true))
+				Find(nil, options.Find().
+					SetLockMode(options.LockForUpdate).
+					SetDebug(true),
+				)
 			if err != nil {
 				return err
 			}
@@ -167,5 +175,70 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			return nil
 		})
 		require.NoError(t, err)
+	}
+
+	table := db.Table("user")
+	table.DropIfExits()
+	table.MustMigrate(new(user))
+
+	// Commit Transaction
+	{
+		data := &user{ID: rand.Intn(10000), Name: "Oska"}
+		trx, _ := db.BeginTransaction()
+		trx.Table("user").InsertOne(data)
+
+		err = trx.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			)).Decode(&user{})
+		require.NoError(t, err)
+
+		err = db.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			)).Decode(&user{})
+		require.Error(t, err)
+
+		trx.CommitTransaction()
+
+		err = db.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			)).Decode(&user{})
+		require.NoError(t, err)
+
+		// Remove tested data
+		err = db.Table("user").DestroyOne(data)
+		require.NoError(t, err)
+	}
+
+	// Rollback Transaction
+	{
+		data := &user{ID: 1234, Name: "Oska"}
+		trx, _ := db.BeginTransaction()
+		trx.Table("user").InsertOne(data)
+
+		err = trx.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			),
+		).Decode(&user{})
+		require.NoError(t, err)
+
+		err = db.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			),
+		).Decode(&user{})
+		require.Error(t, err)
+
+		trx.RollbackTransaction()
+
+		err = db.Table("user").FindOne(
+			actions.FindOne().Where(
+				expr.Equal("$Key", data.ID),
+			),
+		).Decode(&user{})
+		require.Error(t, err)
 	}
 }
