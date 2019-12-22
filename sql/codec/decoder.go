@@ -92,20 +92,23 @@ func (dec DefaultDecoders) DecodeCurrency(it interface{}, v reflect.Value) error
 func (dec DefaultDecoders) DecodeLanguage(it interface{}, v reflect.Value) error {
 	var (
 		x   language.Tag
+		str string
 		err error
 	)
 	switch vi := it.(type) {
 	case string:
-		x, err = language.Parse(vi)
-		if err != nil {
-			return err
-		}
+		str = vi
 	case []byte:
-		x, err = language.Parse(string(vi))
+		str = string(vi)
+	case nil:
+	default:
+		return errors.New("language tag is not well-formed")
+	}
+	if str != "" {
+		x, err = language.Parse(str)
 		if err != nil {
 			return err
 		}
-	case nil:
 	}
 	v.Set(reflect.ValueOf(x))
 	return nil
