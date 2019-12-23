@@ -10,10 +10,13 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 ### Minimum Requirements
 
-We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us :
-
 - **mysql 5.7** and above
-- **Golang 1.3** and above
+- **Golang 1.13** and above
+
+### Why another ORM?
+
+- We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us
+- We want to get rid from _toxic query_
 
 ### What we provide apart from native package (database/sql)?
 
@@ -31,6 +34,14 @@ We don't really care about _legacy support_, we want _latest feature_ that mysql
 ### Missing DOC?
 
 You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
+
+### Limitation
+
+Our main objective is anti toxic query, that why some functionality we doesn't offer
+
+- join (eg. left join, outer join, inner join)
+- left wildcard search using Like is not allow
+- bidirectional sorting is not allow
 
 ```go
 import (

@@ -8,6 +8,7 @@
 - [ ] Support `primary_key` tag.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
 - [ ] Extra func before value `driver.Valuer`.
+- [ ] Foreign key.
 - [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
 - [x] Change `DataType` api.
 - [x] `CreateDatabase` api.
