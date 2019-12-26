@@ -224,12 +224,18 @@ func (k *Key) marshal(w writer, escape bool) {
 
 // MarshalJSON :
 func (k *Key) MarshalJSON() ([]byte, error) {
-	return []byte(k.Encode()), nil
+	if k == nil {
+		return []byte(`null`), nil
+	}
+	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalBinary :
 func (k *Key) MarshalBinary() ([]byte, error) {
-	return k.MarshalJSONB()
+	if k == nil {
+		return []byte(`null`), nil
+	}
+	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalText :
@@ -250,11 +256,20 @@ func (k *Key) MarshalJSONB() ([]byte, error) {
 
 // UnmarshalJSON :
 func (k *Key) UnmarshalJSON(b []byte) error {
-	key, err := DecodeKey(string(b))
+	length := len(b)
+	if length < 2 {
+		return errors.New("types: invalid key json value")
+	}
+	str := string(b)
+	if str == "null" {
+		return nil
+	}
+	str = string(b[1 : length-1])
+	key, err := DecodeKey(str)
 	if err != nil {
 		return err
 	}
-	k = key
+	*k = *key
 	return nil
 }
 
@@ -276,7 +291,6 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 	}
 	str := string(b)
 	if str == "null" {
-		k = nil
 		return nil
 	}
 	str = string(b[1 : length-1])

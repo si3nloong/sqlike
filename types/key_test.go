@@ -1,9 +1,11 @@
 package types
 
 import (
+	"encoding/json"
 	"strconv"
 	"testing"
 
+	"github.com/si3nloong/sqlike/jsonb"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
@@ -48,7 +50,7 @@ func TestKey(t *testing.T) {
 		require.NoError(it, err)
 	})
 
-	t.Run("MarshalJSONB & UnmarshalJSONB", func(it *testing.T) {
+	t.Run("JSONB Marshal & Unmarshal", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())
 
@@ -61,29 +63,62 @@ func TestKey(t *testing.T) {
 		b, err = rk.MarshalJSONB()
 		require.Equal(it, `"Parent,1288888/Name,'sianloong'"`, string(b))
 
-		keyvalue := `Parent,1560407411636169424/Name,'sianloong'`
-		b = []byte(strconv.Quote(keyvalue))
+		kv := `Parent,1560407411636169424/Name,'sianloong'`
+		b = []byte(strconv.Quote(kv))
 		err = rk.UnmarshalJSONB(b)
 		require.NoError(it, err)
-		require.Equal(it, keyvalue, rk.String())
+		require.Equal(it, kv, rk.String())
 
-		keyvalue = `Parent,1560407411636169424`
-		b = []byte(strconv.Quote(keyvalue))
+		kv = `Parent,1560407411636169424`
+		b = []byte(strconv.Quote(kv))
 		k = new(Key)
 		err = k.UnmarshalJSONB(b)
 		require.NoError(it, err)
-		require.Equal(it, keyvalue, k.String())
+		require.Equal(it, kv, k.String())
 
-		keyvalue = `Parent,'a'`
-		b = []byte(strconv.Quote(keyvalue))
+		kv = `Parent,'a'`
+		b = []byte(strconv.Quote(kv))
 		k = new(Key)
 		err = k.UnmarshalJSONB(b)
 		require.NoError(it, err)
-		require.Equal(it, keyvalue, k.String())
+		require.Equal(it, kv, k.String())
 
 		k = new(Key)
 		err = k.UnmarshalJSONB([]byte("null"))
 		require.NoError(it, err)
 		require.Equal(it, new(Key), k)
+
+		nk := NameKey("Name", "sianloong", pk)
+		b, err = jsonb.Marshal(nk)
+		require.NoError(it, err)
+		require.Equal(it, `"Parent,1560407411636169424/Name,'sianloong'"`, string(b))
+
+		k2 := new(Key)
+		err = jsonb.Unmarshal(b, k2)
+		require.NoError(it, err)
+		require.Equal(it, nk, k2)
+
+		k3 := new(Key)
+		err = jsonb.Unmarshal([]byte(`null`), k3)
+		require.NoError(it, err)
+		require.Equal(it, &Key{}, k3)
+	})
+
+	t.Run("JSON Marshal & Unmarshal", func(it *testing.T) {
+		k := NameKey("Name", "sianloong", nil)
+		b := []byte(`"EgROYW1lIglzaWFubG9vbmc"`)
+		binary, err := json.Marshal(k)
+		require.NoError(it, err)
+		require.Equal(it, b, binary)
+
+		var k2 *Key
+		err = json.Unmarshal(binary, &k2)
+		require.NoError(it, err)
+		require.Equal(it, k, k2)
+
+		k3 := new(Key)
+		err = json.Unmarshal([]byte(`null`), k3)
+		require.NoError(it, err)
+		require.Equal(it, &Key{}, k3)
 	})
 }

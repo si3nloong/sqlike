@@ -5,13 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
+)
+
+// date format :
+var (
+	ddmmyyyy       = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
+	ddmmyyyyhhmmss = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
 )
 
 // DefaultDecoder :
@@ -93,7 +99,7 @@ func (dec DefaultDecoder) DecodeTime(r *Reader, v reflect.Value) error {
 	}
 	str = string(b[1 : len(b)-1])
 	var x time.Time
-	x, err = types.DecodeTime(str)
+	x, err = DecodeTime(str)
 	if err != nil {
 		return err
 	}
@@ -326,4 +332,17 @@ func (dec DefaultDecoder) DecodeInterface(r *Reader, v reflect.Value) error {
 		v.Set(reflect.ValueOf(x))
 	}
 	return nil
+}
+
+// DecodeTime :
+func DecodeTime(str string) (t time.Time, err error) {
+	switch {
+	case ddmmyyyy.MatchString(str):
+		t, err = time.Parse("2006-01-02", str)
+	case ddmmyyyyhhmmss.MatchString(str):
+		t, err = time.Parse("2006-01-02 15:04:05", str)
+	default:
+		t, err = time.Parse(time.RFC3339Nano, str)
+	}
+	return
 }

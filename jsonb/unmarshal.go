@@ -21,7 +21,7 @@ type Unmarshaler interface {
 func Unmarshal(data []byte, dst interface{}) error {
 	v := reflext.ValueOf(dst)
 	if !v.IsValid() {
-		return errors.New("invalid value for jsonb.Unmarshal")
+		return errors.New("invalid value for Unmarshal")
 	}
 
 	t := v.Type()
