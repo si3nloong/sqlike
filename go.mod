@@ -22,6 +22,7 @@ require (
 	github.com/tidwall/sjson v1.0.4
 	github.com/timtadh/data-structures v0.5.3 // indirect
 	github.com/timtadh/lexmachine v0.2.3-0.20191122170559-2474ad5d8313
+	github.com/valyala/bytebufferpool v1.0.0
 	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.2.1-0.20191219222723-b10214111f81

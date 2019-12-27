@@ -1,8 +1,19 @@
 package indexes
 
 import (
-	"github.com/si3nloong/sqlike/util"
+	"crypto/md5"
+	"fmt"
+	"io"
+	"strings"
+
+	"github.com/valyala/bytebufferpool"
 )
+
+type writer interface {
+	io.Writer
+	io.StringWriter
+	io.ByteWriter
+}
 
 // Type :
 type Type int
@@ -48,8 +59,21 @@ const (
 )
 
 // Columns :
-func Columns(cols ...interface{}) []Column {
-	return nil
+func Columns(cols ...string) []Column {
+	columns := make([]Column, 0, len(cols))
+	for _, col := range cols {
+		dir := Ascending
+		col = strings.TrimSpace(col)
+		if col[0] == '-' {
+			col = col[1:]
+			dir = Descending
+		}
+		columns = append(columns, Column{
+			Name:      col,
+			Direction: dir,
+		})
+	}
+	return columns
 }
 
 // Column :
@@ -59,34 +83,44 @@ type Column struct {
 }
 
 // GetName :
-func (idx *Index) GetName() string {
+func (idx Index) GetName() string {
 	if idx.Name != "" {
 		return idx.Name
 	}
-	blr := util.AcquireString()
-	defer util.ReleaseString(blr)
+	return idx.HashName()
+}
+
+func (idx Index) buildName(w writer) {
 	switch idx.Type {
 	case Unique:
-		blr.WriteString("UX")
+		w.WriteString("UX")
 	case Primary:
-		blr.WriteString("PRIMARY")
-		return ""
+		w.WriteString("PRIMARY")
+		return
 	default:
-		blr.WriteString("IX")
+		w.WriteString("IX")
 	}
-	blr.WriteByte('-')
+	w.WriteByte('-')
 	for i, col := range idx.Columns {
 		if i > 0 {
-			blr.WriteByte('-')
+			w.WriteByte(';')
 		}
-		blr.WriteString(col.Name)
-		blr.WriteByte('_')
+		w.WriteString(col.Name)
+		w.WriteByte('@')
 		if col.Direction == 0 {
-			blr.WriteString("ASC")
+			w.WriteString("ASC")
 		} else {
-			blr.WriteString("DESC")
+			w.WriteString("DESC")
 		}
 	}
-	idx.Name = blr.String()
-	return idx.Name
+}
+
+// HashName :
+func (idx Index) HashName() string {
+	hash := md5.New()
+	buf := bytebufferpool.Get()
+	defer bytebufferpool.Put(buf)
+	idx.buildName(buf)
+	hash.Write(buf.Bytes())
+	return fmt.Sprintf("%x", hash.Sum(nil))
 }
