@@ -40,7 +40,7 @@ func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 			return err
 		}
 	case nil:
-		x = make([]byte, 0, 0)
+		x = make([]byte, 0)
 	}
 	v.SetBytes(x)
 	return nil

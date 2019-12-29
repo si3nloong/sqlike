@@ -9,7 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/paulmach/orb"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/spatial"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
@@ -30,6 +32,12 @@ func buildDefaultRegistry() *Registry {
 	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
 	rg.SetTypeCoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
 	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.SetTypeEncoder(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point))
+	rg.SetTypeEncoder(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString))
+	rg.SetTypeEncoder(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon))
+	rg.SetTypeEncoder(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint))
+	rg.SetTypeEncoder(reflect.TypeOf(orb.MultiLineString{}), enc.EncodeSpatial(spatial.MultiLineString))
+	rg.SetTypeEncoder(reflect.TypeOf(orb.MultiPolygon{}), enc.EncodeSpatial(spatial.MultiPolygon))
 	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
 	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
 	rg.SetKindCoder(reflect.Int, enc.EncodeInt, dec.DecodeInt)
@@ -122,7 +130,10 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 		ok  bool
 	)
 
-	if !v.IsValid() || reflext.IsNull(v) {
+	// if !v.IsValid() || reflext.IsNull(v) {
+	// 	return NilEncoder, nil
+	// }
+	if !v.IsValid() {
 		return NilEncoder, nil
 	}
 

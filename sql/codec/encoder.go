@@ -10,7 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/spatial"
 
 	"github.com/si3nloong/sqlike/jsonb"
 )
@@ -24,7 +27,7 @@ type DefaultEncoders struct {
 func (enc DefaultEncoders) EncodeByte(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	b := v.Bytes()
 	if b == nil {
-		return make([]byte, 0, 0), nil
+		return make([]byte, 0), nil
 	}
 	x := base64.StdEncoding.EncodeToString(b)
 	return []byte(x), nil
@@ -65,6 +68,16 @@ func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (
 	// }
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
+}
+
+func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
+	return func(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+		x := v.Interface().(orb.Geometry)
+		return spatial.Geometry{
+			Type:  st,
+			Value: wkt.MarshalString(x),
+		}, nil
+	}
 }
 
 // EncodeString :
