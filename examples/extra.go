@@ -19,7 +19,8 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 
 	{
 		table.MustMigrate(normalStruct{})
-		table.Truncate()
+		err = table.Truncate()
+		require.NoError(t, err)
 
 		err = table.Copy([]string{
 			"$Key", "SID", "Date", "Emoji", "LongStr", "GeoPoint",

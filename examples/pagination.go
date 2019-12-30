@@ -129,7 +129,6 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		data[length*2:],
 	}
 
-	cursor = nil
 	pg, err := table.Paginate(actions.Paginate().
 		OrderBy(
 			expr.Desc("Age"),
