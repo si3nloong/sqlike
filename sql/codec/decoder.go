@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"reflect"
 	"strconv"
 	"time"
 
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/jsonb"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
@@ -156,6 +159,50 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	// convert back to UTC
 	v.Set(reflect.ValueOf(x.UTC()))
 	return nil
+}
+
+// DecodeSpatial :
+func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
+	data, ok := it.([]byte)
+	if !ok {
+		return errors.New("point must be []byte")
+	}
+
+	if len(data) == 42 {
+		dst := make([]byte, 21)
+		_, err := hex.Decode(dst, data)
+		if err != nil {
+			return err
+		}
+		data = dst
+	}
+
+	p := orb.Point{}
+	scanner := wkb.Scanner(&p)
+	// if len(data) == 21 {
+	// 	// the length of a point type in WKB
+	// 	return scan.Scan(data[:])
+	// }
+
+	if len(data) == 25 {
+		// Most likely MySQL's SRID+WKB format.
+		// However, could be a line string or multipoint with only one point.
+		// But those would be invalid for parsing a point.
+		// return p.unmarshalWKB(data[4:])
+		if err := scanner.Scan(data[4:]); err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(p))
+		return nil
+	}
+
+	if len(data) == 0 {
+		// empty data, return empty go struct which in this case
+		// would be [0,0]
+		return nil
+	}
+
+	return errors.New("incorrect point")
 }
 
 // DecodeString :

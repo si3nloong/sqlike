@@ -32,7 +32,7 @@ func buildDefaultRegistry() *Registry {
 	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
 	rg.SetTypeCoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
 	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
-	rg.SetTypeEncoder(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point))
+	rg.SetTypeCoder(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
 	rg.SetTypeEncoder(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString))
 	rg.SetTypeEncoder(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon))
 	rg.SetTypeEncoder(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint))

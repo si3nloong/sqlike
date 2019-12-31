@@ -29,8 +29,8 @@ func Column(name string, alias ...string) (c primitive.Column) {
 	return
 }
 
-// Function :
-func Function(name string, value interface{}, others ...interface{}) (f primitive.Func) {
+// Func :
+func Func(name string, value interface{}, others ...interface{}) (f primitive.Func) {
 	f.Name = strings.ToUpper(strings.TrimSpace(name))
 	f.Arguments = append(f.Arguments, wrapRaw(value))
 	if len(others) > 0 {

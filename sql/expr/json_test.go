@@ -15,7 +15,7 @@ func TestJSON(t *testing.T) {
 
 	// json_quote
 	{
-		it = JSONQuote("a")
+		it = JSON_QUOTE("a")
 		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSONQuote,
 			Arguments: []interface{}{
@@ -26,13 +26,13 @@ func TestJSON(t *testing.T) {
 
 	// json_contains
 	{
-		it = JSONContains("a", "b")
+		it = JSON_CONTAINS("a", "b")
 		require.Equal(t, primitive.JC{
 			Target:    primitive.Column{Name: "a"},
 			Candidate: primitive.Value{Raw: "b"},
 		}, it)
 
-		it = JSONContains("a", Column("b"))
+		it = JSON_CONTAINS("a", Column("b"))
 		require.Equal(t, primitive.JC{
 			Target: primitive.Column{Name: "a"},
 			Candidate: primitive.CastAs{
@@ -41,7 +41,7 @@ func TestJSON(t *testing.T) {
 			},
 		}, it)
 
-		it = JSONContains(
+		it = JSON_CONTAINS(
 			json.RawMessage(`["A","B","C"]`),
 			Column("b"),
 		)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sqlike/actions"
 )
 
 // ErrNoRows :
@@ -22,6 +23,7 @@ type Result struct {
 	close    bool
 	rows     *sql.Rows
 	registry *codec.Registry
+	actions  actions.FindActions
 	columns  []string
 	err      error
 }
@@ -45,7 +47,7 @@ func (r *Result) nextValues() ([]interface{}, error) {
 
 func (r *Result) values() ([]interface{}, error) {
 	length := len(r.columns)
-	values := make([]interface{}, length, length)
+	values := make([]interface{}, length)
 	for j := 0; j < length; j++ {
 		values[j] = &values[j]
 	}
@@ -211,7 +213,7 @@ func (r *Result) All(results interface{}) error {
 	t = t.Elem()
 	mapper := reflext.DefaultMapper
 	idxs := mapper.TraversalsByName(t, r.columns)
-	decoders := make([]codec.ValueDecoder, length, length)
+	decoders := make([]codec.ValueDecoder, length)
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()
 		if err != nil {

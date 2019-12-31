@@ -5,22 +5,14 @@ import (
 )
 
 // JSONQuote :
-func JSONQuote(value string) (fc primitive.JSONFunc) {
+func JSON_QUOTE(value string) (fc primitive.JSONFunc) {
 	fc.Type = primitive.JSONQuote
 	fc.Arguments = append(fc.Arguments, wrapColumn(value))
 	return
 }
 
-// JSONColumn :
-func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
-	c.Column = column
-	c.Nested = nested
-	c.UnquoteResult = false
-	return
-}
-
-// JSONContains :
-func JSONContains(target, candidate interface{}, paths ...string) (jc primitive.JC) {
+// JSON_CONTAINS :
+func JSON_CONTAINS(target, candidate interface{}, paths ...string) (jc primitive.JC) {
 	var path *string
 	if len(paths) > 0 {
 		path = &paths[0]
@@ -35,6 +27,19 @@ func JSONContains(target, candidate interface{}, paths ...string) (jc primitive.
 	}
 	jc.Candidate = wrapJSONColumn(candidate)
 	jc.Path = path
+	return
+}
+
+// func JSON_REPLACE()
+// func JSON_TYPE()
+// func JSON_VALID()
+// func JSON_UNQUOTE()
+
+// JSONColumn :
+func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
+	c.Column = column
+	c.Nested = nested
+	c.UnquoteResult = false
 	return
 }
 
