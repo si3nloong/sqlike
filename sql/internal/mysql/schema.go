@@ -32,6 +32,12 @@ func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Timestamp, s.TimeDataType)
 	sb.SetTypeBuilder(sqltype.UUID, s.UUIDDataType)
 	sb.SetTypeBuilder(sqltype.JSON, s.JSONDataType)
+	sb.SetTypeBuilder(sqltype.Point, s.SpatialDataType("POINT"))
+	sb.SetTypeBuilder(sqltype.LineString, s.SpatialDataType("LINESTRING"))
+	sb.SetTypeBuilder(sqltype.Polygon, s.SpatialDataType("POLYGON"))
+	sb.SetTypeBuilder(sqltype.MultiPoint, s.SpatialDataType("MULTIPOINT"))
+	sb.SetTypeBuilder(sqltype.MultiLineString, s.SpatialDataType("MULTILINESTRING"))
+	sb.SetTypeBuilder(sqltype.MultiPolygon, s.SpatialDataType("MULTIPOLYGON"))
 	sb.SetTypeBuilder(sqltype.String, s.StringDataType)
 	sb.SetTypeBuilder(sqltype.Bool, s.BoolDataType)
 	sb.SetTypeBuilder(sqltype.Int, s.IntDataType)
@@ -105,6 +111,22 @@ func (s mySQLSchema) JSONDataType(sf *reflext.StructField) (col columns.Column) 
 	col.Type = "JSON"
 	col.Nullable = sf.IsNullable
 	return
+}
+
+func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
+	return func(sf *reflext.StructField) (col columns.Column) {
+		col.Name = sf.Path
+		col.DataType = dataType
+		col.Type = dataType
+		col.Nullable = sf.IsNullable
+		if v, ok := sf.Tag.LookUp("sid"); ok {
+			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
+				return
+			}
+			col.Extra = "SRID " + v
+		}
+		return
+	}
 }
 
 func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column) {

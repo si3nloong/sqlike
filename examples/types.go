@@ -157,16 +157,17 @@ type generatedStruct struct {
 	Model `sqlike:"Date"`
 }
 
-type mongoStruct struct {
-	Key  *types.Key
-	Name string
-}
+// type mongoStruct struct {
+// 	Key  *types.Key
+// 	Name string
+// }
 
 func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}
 	// ns.Key = types.IDKey("NormalStruct", id, nil)
 	ns.ID = uuid.New()
+	ns.priv = 100
 	ns.Emoji = `😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`
 	ns.Byte = []byte(`-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCklQio4TeIZo63S0FvNonY2/nA

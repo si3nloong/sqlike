@@ -18,7 +18,6 @@ type Logger struct {
 func (l Logger) Debug(stmt *sqlstmt.Statement) {
 	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
-	return
 }
 
 // TestExamples :
@@ -57,6 +56,7 @@ func TestExamples(t *testing.T) {
 		JSONExamples(t, db)
 		CasbinExamples(t, db)
 		RSQLExamples(t, db)
+		SpatialExamples(t, db)
 	}
 
 	// Errors

@@ -18,7 +18,8 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("JSON")
-	table.DropIfExits()
+	err = table.DropIfExits()
+	require.NoError(t, err)
 
 	// migrate
 	{
@@ -37,14 +38,16 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
+		jss2 := []jsonStruct{}
 		result, err = table.Find(
 			actions.Find().Select(
-				expr.JSONQuote("Text"),
+				expr.JSON_QUOTE("Text"),
 			),
 			options.Find().SetDebug(true),
 		)
 		require.NoError(t, err)
-		result.All(&jss)
+		err = result.All(&jss2)
+		require.NoError(t, err)
 	}
 
 	// advance query
@@ -57,7 +60,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 			actions.Find().
 				Select(
 					expr.As(
-						expr.Function("REPLACE", expr.Column("Raw"), "message", "msg"),
+						expr.Func("REPLACE", expr.Column("Raw"), "message", "msg"),
 						"Raw",
 					),
 				).

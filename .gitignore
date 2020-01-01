@@ -2,3 +2,4 @@ main
 main.go
 vendor/*
 .idea/
+.vscode/*

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/paulmach/orb"
 	gouuid "github.com/satori/go.uuid"
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/driver"
@@ -91,6 +92,12 @@ func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)
 	sb.SetType(reflect.TypeOf(json.RawMessage{}), sqltype.JSON)
+	sb.SetType(reflect.TypeOf(orb.Point{}), sqltype.Point)
+	sb.SetType(reflect.TypeOf(orb.LineString{}), sqltype.LineString)
+	sb.SetType(reflect.TypeOf(orb.Polygon{}), sqltype.Polygon)
+	sb.SetType(reflect.TypeOf(orb.MultiPoint{}), sqltype.MultiPoint)
+	sb.SetType(reflect.TypeOf(orb.MultiLineString{}), sqltype.MultiLineString)
+	sb.SetType(reflect.TypeOf(orb.MultiPolygon{}), sqltype.MultiPolygon)
 	sb.SetType(reflect.String, sqltype.String)
 	sb.SetType(reflect.Bool, sqltype.Bool)
 	sb.SetType(reflect.Int, sqltype.Int)

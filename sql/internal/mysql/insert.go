@@ -1,10 +1,11 @@
 package mysql
 
 import (
+	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/spatial"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -27,15 +28,19 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, registr
 	}
 	stmt.WriteString(") VALUES ")
 	length := len(fields)
-	binds := strings.Repeat("?,", length)
-	binds = "(" + binds[:len(binds)-1] + ")"
-	encoders := make([]codec.ValueEncoder, length, length)
+	// binds := strings.Repeat("?,", length)
+	// binds = "(" + binds[:len(binds)-1] + ")"
+	encoders := make([]codec.ValueEncoder, length)
 	for i := 0; i < records; i++ {
 		if i > 0 {
 			stmt.WriteRune(',')
 		}
+		stmt.WriteRune('(')
 		vi := reflext.Indirect(v.Index(i))
 		for j, sf := range fields {
+			if j > 0 {
+				stmt.WriteRune(',')
+			}
 			// first record only find encoders
 			fv := mapper.FieldByIndexesReadOnly(vi, sf.Index)
 			if i == 0 {
@@ -50,9 +55,11 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, registr
 				return nil, err
 			}
 
-			stmt.AppendArg(val)
+			convertSpatial(stmt, val)
+
 		}
-		stmt.WriteString(binds)
+		stmt.WriteRune(')')
+		// stmt.WriteString(binds)
 	}
 	if opt.Mode == options.InsertOnDuplicate {
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
@@ -83,4 +90,36 @@ func findEncoder(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.S
 		return nil, err
 	}
 	return encoder, nil
+}
+
+func convertSpatial(stmt *sqlstmt.Statement, val interface{}) {
+	switch vi := val.(type) {
+	case spatial.Geometry:
+		switch vi.Type {
+		case spatial.Point:
+			stmt.WriteString("ST_PointFromText")
+		case spatial.LineString:
+			stmt.WriteString("ST_LineStringFromText")
+		case spatial.Polygon:
+			stmt.WriteString("ST_PolygonFromText")
+		case spatial.MultiPoint:
+			stmt.WriteString("ST_MultiPointFromText")
+		case spatial.MultiLineString:
+			stmt.WriteString("ST_MultiLineStringFromText")
+		case spatial.MultiPolygon:
+			stmt.WriteString("ST_MultiPolygonFromText")
+		default:
+		}
+
+		stmt.WriteString("(?")
+		if vi.SID > 0 {
+			stmt.WriteString(fmt.Sprintf(", %d", vi.SID))
+		}
+		stmt.WriteRune(')')
+		stmt.AppendArg(vi.WKT)
+
+	default:
+		stmt.WriteRune('?')
+		stmt.AppendArg(val)
+	}
 }

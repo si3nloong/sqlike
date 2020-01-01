@@ -170,7 +170,9 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			if err != nil {
 				return err
 			}
-			result.All(&nss)
+			if err := result.All(&nss); err != nil {
+				return err
+			}
 			time.Sleep(1 * time.Second)
 			return nil
 		})
@@ -178,14 +180,16 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	table := db.Table("user")
-	table.DropIfExits()
+	err = table.DropIfExits()
+	require.NoError(t, err)
 	table.MustMigrate(new(user))
 
 	// Commit Transaction
 	{
 		data := &user{ID: rand.Intn(10000), Name: "Oska"}
 		trx, _ := db.BeginTransaction()
-		trx.Table("user").InsertOne(data)
+		_, err = trx.Table("user").InsertOne(data)
+		require.NoError(t, err)
 
 		err = trx.Table("user").FindOne(
 			actions.FindOne().Where(
@@ -199,7 +203,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 			)).Decode(&user{})
 		require.Error(t, err)
 
-		trx.CommitTransaction()
+		err = trx.CommitTransaction()
+		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(
 			actions.FindOne().Where(
@@ -216,7 +221,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	{
 		data := &user{ID: 1234, Name: "Oska"}
 		trx, _ := db.BeginTransaction()
-		trx.Table("user").InsertOne(data)
+		_, err = trx.Table("user").InsertOne(data)
+		require.NoError(t, err)
 
 		err = trx.Table("user").FindOne(
 			actions.FindOne().Where(
@@ -232,7 +238,8 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		).Decode(&user{})
 		require.Error(t, err)
 
-		trx.RollbackTransaction()
+		err = trx.RollbackTransaction()
+		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(
 			actions.FindOne().Where(

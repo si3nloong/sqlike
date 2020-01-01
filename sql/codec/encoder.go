@@ -7,10 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/spatial"
 
 	"github.com/si3nloong/sqlike/jsonb"
 )
@@ -24,7 +28,7 @@ type DefaultEncoders struct {
 func (enc DefaultEncoders) EncodeByte(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
 	b := v.Bytes()
 	if b == nil {
-		return make([]byte, 0, 0), nil
+		return make([]byte, 0), nil
 	}
 	x := base64.StdEncoding.EncodeToString(b)
 	return []byte(x), nil
@@ -65,6 +69,30 @@ func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (
 	// }
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
+}
+
+func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
+	return func(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
+		if reflext.IsZero(v) {
+			return nil, nil
+		}
+		x := v.Interface().(orb.Geometry)
+		var sid uint
+		if sf != nil {
+			tag, ok := sf.Tag.LookUp("sid")
+			if ok {
+				integer, _ := strconv.Atoi(tag)
+				if integer > 0 {
+					sid = uint(integer)
+				}
+			}
+		}
+		return spatial.Geometry{
+			Type: st,
+			SID:  sid,
+			WKT:  wkt.MarshalString(x),
+		}, nil
+	}
 }
 
 // EncodeString :

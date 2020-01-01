@@ -24,6 +24,7 @@ type Result struct {
 	registry *codec.Registry
 	columns  []string
 	err      error
+	// actions  actions.FindActions
 }
 
 // Columns :
@@ -45,7 +46,7 @@ func (r *Result) nextValues() ([]interface{}, error) {
 
 func (r *Result) values() ([]interface{}, error) {
 	length := len(r.columns)
-	values := make([]interface{}, length, length)
+	values := make([]interface{}, length)
 	for j := 0; j < length; j++ {
 		values[j] = &values[j]
 	}
@@ -163,7 +164,6 @@ func (r *Result) ScanSlice(results interface{}) error {
 
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
-	// decoders := make([]coder.ValueDecoder, length, length)
 
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()
@@ -211,7 +211,7 @@ func (r *Result) All(results interface{}) error {
 	t = t.Elem()
 	mapper := reflext.DefaultMapper
 	idxs := mapper.TraversalsByName(t, r.columns)
-	decoders := make([]codec.ValueDecoder, length, length)
+	decoders := make([]codec.ValueDecoder, length)
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()
 		if err != nil {

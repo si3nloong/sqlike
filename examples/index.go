@@ -41,6 +41,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		idxs, err = idx.List()
 		require.True(t, len(idxs) > 1)
+		require.NoError(t, err)
 	}
 
 	// Auto build indexes using yaml file

@@ -80,7 +80,7 @@ func (p *Parser) ParseQueryBytes(query []byte) (*Params, error) {
 
 	var (
 		params = new(Params)
-		errs   = make(Errors, 0, 0)
+		errs   = make(Errors, 0)
 	)
 
 	errs = append(errs, p.parseSelect(values, params)...)

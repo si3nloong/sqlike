@@ -30,6 +30,12 @@ const (
 	Map
 	JSON
 	UUID
+	Point
+	LineString
+	Polygon
+	MultiPoint
+	MultiLineString
+	MultiPolygon
 )
 
 func (t Type) String() string {

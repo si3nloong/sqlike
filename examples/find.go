@@ -194,6 +194,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	// Find multiple records by where condition
 	{
 		ns = normalStruct{}
+		nss := []normalStruct{}
 		result, err = table.Find(
 			actions.Find().Where(
 				expr.Between("TinyInt", 1, 100),
@@ -205,6 +206,8 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			),
 			options.Find().SetDebug(true),
 		)
+		require.NoError(t, err)
+		err = result.All(&nss)
 		require.NoError(t, err)
 	}
 
