@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -38,6 +39,9 @@ func (ms MySQL) Format(it interface{}) (val string) {
 		val = "NULL"
 	case fmt.Stringer:
 		val = vi.String()
+	case driver.Valuer:
+		v, _ := vi.Value()
+		val = ms.Format(v)
 	default:
 		val = fmt.Sprintf("%v", vi)
 	}

@@ -118,7 +118,13 @@ func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
 		col.Name = sf.Path
 		col.DataType = dataType
 		col.Type = dataType
-		col.Nullable = false
+		col.Nullable = sf.IsNullable
+		if v, ok := sf.Tag.LookUp("sid"); ok {
+			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
+				return
+			}
+			col.Extra = "SRID " + v
+		}
 		return
 	}
 }

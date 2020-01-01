@@ -12,36 +12,14 @@ const (
 	MultiPolygon
 )
 
-// Function :
-type Function int
-
-// functions :
-const (
-	GeomCollection Function = iota + 1
-	GeometryCollection
-	ST_LineString
-	MBRContains
-	MBRConveredBy
-	ST_Point
-	ST_Polygon
-	Area
-	AsText
-	AsWKB
-	AsWKT
-	AsGeoJSON
-	SRID
-	Transform
-	Equals
-	Within
-	X
-	Y
-	SymDifference
-	PointFromText
-	PointFromWKB
-)
-
 // Geometry :
 type Geometry struct {
-	Type  Type
-	Value string
+	Type Type
+	SID  uint
+	WKT  string
+}
+
+// Value :
+func (g Geometry) Value() (interface{}, error) {
+	return g.WKT, nil
 }

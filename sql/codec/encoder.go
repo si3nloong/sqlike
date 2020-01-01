@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -71,11 +72,25 @@ func (enc DefaultEncoders) EncodeTime(_ *reflext.StructField, v reflect.Value) (
 }
 
 func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
-	return func(_ *reflext.StructField, v reflect.Value) (interface{}, error) {
+	return func(sf *reflext.StructField, v reflect.Value) (interface{}, error) {
+		if reflext.IsZero(v) {
+			return nil, nil
+		}
 		x := v.Interface().(orb.Geometry)
+		var sid uint
+		if sf != nil {
+			tag, ok := sf.Tag.LookUp("sid")
+			if ok {
+				integer, _ := strconv.Atoi(tag)
+				if integer > 0 {
+					sid = uint(integer)
+				}
+			}
+		}
 		return spatial.Geometry{
-			Type:  st,
-			Value: wkt.MarshalString(x),
+			Type: st,
+			SID:  sid,
+			WKT:  wkt.MarshalString(x),
 		}, nil
 	}
 }

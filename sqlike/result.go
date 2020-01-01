@@ -9,7 +9,6 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 )
 
 // ErrNoRows :
@@ -23,9 +22,9 @@ type Result struct {
 	close    bool
 	rows     *sql.Rows
 	registry *codec.Registry
-	actions  actions.FindActions
 	columns  []string
 	err      error
+	// actions  actions.FindActions
 }
 
 // Columns :
@@ -165,7 +164,6 @@ func (r *Result) ScanSlice(results interface{}) error {
 
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
-	// decoders := make([]coder.ValueDecoder, length, length)
 
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()

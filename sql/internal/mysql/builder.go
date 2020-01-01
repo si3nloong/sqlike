@@ -8,6 +8,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/expr/spatial"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -64,6 +65,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.JC{}), b.BuildJSONContains)
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
+	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
@@ -204,7 +206,6 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 		return
 	}
 
-	stmt.WriteByte('?')
 	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
@@ -213,7 +214,9 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 	if err != nil {
 		return err
 	}
-	stmt.AppendArg(vv)
+	convertSpatial(stmt, vv)
+	// stmt.WriteRune('?')
+	// stmt.AppendArg(vv)
 	return nil
 }
 
@@ -388,6 +391,29 @@ func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err e
 	return
 }
 
+func (b *mySQLBuilder) BuildSpatialFunc(stmt *sqlstmt.Statement, it interface{}) (err error) {
+	x := it.(spatial.Func)
+	switch x.Type {
+	case spatial.Distance:
+		stmt.WriteString("ST_Distance")
+	case spatial.GeomFromText:
+		stmt.WriteString("ST_GeomFromText")
+	case spatial.AsText:
+	case spatial.Point:
+	}
+	stmt.WriteByte('(')
+	for i, arg := range x.Args {
+		if i > 0 {
+			stmt.WriteByte(',')
+		}
+		if err := b.builder.BuildStatement(stmt, arg); err != nil {
+			return err
+		}
+	}
+	stmt.WriteByte(')')
+	return
+}
+
 func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	v := reflext.ValueOf(it)
 	if !v.IsValid() {
@@ -404,7 +430,6 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 		return nil
 	}
 
-	stmt.WriteByte('?')
 	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
@@ -413,7 +438,9 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 	if err != nil {
 		return err
 	}
-	stmt.AppendArg(vv)
+	// stmt.WriteByte('?')
+	// stmt.AppendArg(vv)
+	convertSpatial(stmt, vv)
 	return
 }
 

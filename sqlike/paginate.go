@@ -29,7 +29,7 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	}
 	// sort by primary key
 	length := len(x.Sorts)
-	fields := make([]interface{}, length+1, length+1)
+	fields := make([]interface{}, length+1)
 	sort := expr.Asc(tb.pk)
 	if length > 0 {
 		x := x.Sorts[length-1].(primitive.Sort)
@@ -38,7 +38,6 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 		}
 	}
 	x.Sorts = append(x.Sorts, sort)
-	length++
 	for i, sf := range x.Sorts {
 		fields[i] = sf.(primitive.Sort).Field
 	}
@@ -62,6 +61,9 @@ type Paginator struct {
 
 // NextPage :
 func (pg *Paginator) NextPage(cursor interface{}) (err error) {
+	if pg.err != nil {
+		return pg.err
+	}
 	if cursor == nil || reflext.IsZero(reflext.ValueOf(cursor)) {
 		return ErrInvalidCursor
 	}
@@ -90,6 +92,9 @@ func (pg *Paginator) NextPage(cursor interface{}) (err error) {
 
 // All :
 func (pg *Paginator) All(results interface{}) error {
+	if pg.err != nil {
+		return pg.err
+	}
 	result := find(
 		context.Background(),
 		pg.table.dbName,
@@ -114,7 +119,7 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 	filters := make([]interface{}, 0, length)
 	fields := make([]interface{}, length, length)
 	for i, sf := range action.Sorts {
-		v := primitive.C{}
+		var v primitive.C
 		val := toString(pg.values[i])
 		x := sf.(primitive.Sort)
 		if x.Order == primitive.Ascending {

@@ -205,6 +205,26 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 	return errors.New("incorrect point")
 }
 
+// DecodeLineString :
+func (dec DefaultDecoders) DecodeLineString(it interface{}, v reflect.Value) error {
+	data, ok := it.([]byte)
+	if !ok {
+		return errors.New("line string must be []byte")
+	}
+
+	if len(data) == 0 {
+		return nil
+	}
+
+	p := orb.LineString{}
+	scanner := wkb.Scanner(&p)
+	if err := scanner.Scan(data[4:]); err != nil {
+		return err
+	}
+	v.Set(reflect.ValueOf(p))
+	return nil
+}
+
 // DecodeString :
 func (dec DefaultDecoders) DecodeString(it interface{}, v reflect.Value) error {
 	var x string

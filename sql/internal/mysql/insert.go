@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -96,20 +97,26 @@ func convertSpatial(stmt *sqlstmt.Statement, val interface{}) {
 	case spatial.Geometry:
 		switch vi.Type {
 		case spatial.Point:
-			stmt.WriteString("ST_PointFromText(?)")
+			stmt.WriteString("ST_PointFromText")
 		case spatial.LineString:
-			stmt.WriteString("ST_LineStringFromText(?)")
+			stmt.WriteString("ST_LineStringFromText")
 		case spatial.Polygon:
-			stmt.WriteString("ST_PolygonFromText(?)")
+			stmt.WriteString("ST_PolygonFromText")
 		case spatial.MultiPoint:
-			stmt.WriteString("ST_MultiPointFromText(?)")
+			stmt.WriteString("ST_MultiPointFromText")
 		case spatial.MultiLineString:
-			stmt.WriteString("ST_MultiLineStringFromText(?)")
+			stmt.WriteString("ST_MultiLineStringFromText")
 		case spatial.MultiPolygon:
-			stmt.WriteString("ST_MultiPolygonFromText(?)")
+			stmt.WriteString("ST_MultiPolygonFromText")
+		default:
 		}
 
-		stmt.AppendArg(vi.Value)
+		stmt.WriteString("(?")
+		if vi.SID > 0 {
+			stmt.WriteString(fmt.Sprintf(", %d", vi.SID))
+		}
+		stmt.WriteRune(')')
+		stmt.AppendArg(vi.WKT)
 
 	default:
 		stmt.WriteRune('?')
