@@ -64,7 +64,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
 			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
 			"Float32", "Float64", "UFloat32",
-			"EmptyStruct", "GeoPoint",
+			"EmptyStruct",
 			"Struct", "VirtualColumn", "Struct.StoredStr",
 			"JSONRaw", "Map",
 			"DateTime", "Timestamp",

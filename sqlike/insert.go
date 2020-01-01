@@ -118,15 +118,3 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 		getLogger(logger, opt.Debug),
 	)
 }
-
-func encodeValue(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.StructField, v reflect.Value) (interface{}, error) {
-	fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-	if _, ok := sf.Tag.LookUp("auto_increment"); ok && reflext.IsZero(fv) {
-		return nil, nil
-	}
-	encoder, err := registry.LookupEncoder(fv)
-	if err != nil {
-		return nil, err
-	}
-	return encoder(sf, fv)
-}

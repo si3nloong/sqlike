@@ -25,7 +25,7 @@ func TestHelper(t *testing.T) {
 	{
 		rt := reflect.TypeOf(multiptrint)
 		rt = Deref(rt)
-		// require.Equal(t, reflect.TypeOf(int(1)), multiptrint)
+		require.Equal(t, reflect.TypeOf(int(1)), rt)
 	}
 
 	{

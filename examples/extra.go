@@ -23,12 +23,12 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 		require.NoError(t, err)
 
 		err = table.Copy([]string{
-			"$Key", "SID", "Date", "Emoji", "LongStr", "GeoPoint",
+			"$Key", "SID", "Date", "Emoji", "LongStr",
 			"TinyInt", "Float64", "EmptyStruct", "Struct",
 		}, actions.Copy().
 			From("sqlike", "NormalStruct").
 			Select(
-				"$Key", "SID", "Date", "Emoji", "LongStr", "GeoPoint",
+				"$Key", "SID", "Date", "Emoji", "LongStr",
 				"TinyInt", "Float32", "EmptyStruct", "Struct",
 			),
 		)

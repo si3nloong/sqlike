@@ -9,9 +9,9 @@ const (
 	jsonObject
 	jsonArray
 	jsonWhitespace
-	jsonLiteral
+	// jsonLiteral
 	jsonString
-	jsonComma
+	// jsonComma
 	jsonBoolean
 	jsonNumber
 )

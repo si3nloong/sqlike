@@ -63,7 +63,9 @@ func (tb *Table) Exists() bool {
 		stmt,
 		tb.logger,
 	)
-	row.Scan(&count)
+	if err := row.Scan(&count); err != nil {
+		panic(err)
+	}
 	return count > 0
 }
 
@@ -293,11 +295,11 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 }
 
 func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []indexes.Index, unsafe bool) error {
-	cols := make([]string, len(columns), len(columns))
+	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name
 	}
-	idxs := make([]string, len(indexs), len(indexs))
+	idxs := make([]string, len(indexs))
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}

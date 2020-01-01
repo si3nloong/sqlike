@@ -52,7 +52,6 @@ type normalStruct struct {
 	Float64       float64
 	UFloat32      float32 `sqlike:",unsigned"`
 	EmptyStruct   struct{}
-	GeoPoint      types.GeoPoint
 	Struct        struct {
 		VirtualStr    string `sqlike:",virtual_column=VirtualColumn"`
 		StoredStr     string `sqlike:",stored_column"`
@@ -81,7 +80,6 @@ type jsonStruct struct {
 	Struct struct {
 	}
 	NullableFloat *float64
-	GeoPoint      types.GeoPoint
 }
 
 // LongStr :
@@ -206,7 +204,6 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 			"message": "please contact our support"
 		}
 	}`)
-	ns.GeoPoint = [2]float64{0.11, 0.12312}
 	ns.Struct.VirtualStr = gofakeit.Sentence(10)
 	ns.Struct.StoredStr = `hello world!`
 	ns.Struct.NestedBool = true

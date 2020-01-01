@@ -11,8 +11,8 @@ import (
 
 // Scanner :
 type Scanner struct {
-	level  int
-	token  *lexmachine.Token
+	// level  int
+	// token  *lexmachine.Token
 	parser *Parser
 	*lexmachine.Scanner
 }

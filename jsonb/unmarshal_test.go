@@ -113,8 +113,9 @@ func TestUnmarshal(t *testing.T) {
 		require.Equal(t, nilptr, addrptr)
 
 		var str string
-		Unmarshal([]byte(`"`+strval+`"`), &str)
+		err = Unmarshal([]byte(`"`+strval+`"`), &str)
 		require.Equal(it, strval, str)
+		require.NoError(t, err)
 
 		output := `
 			<html>

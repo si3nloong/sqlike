@@ -9,19 +9,6 @@ import (
 
 type Enum string
 
-type normalStruct struct {
-	ID      int64 `sqlike:"$Key"`
-	private bool
-	Name    string
-	Num     int
-}
-
-type pointerStruct struct {
-	ID   int64
-	Name *string
-	Num  *int
-}
-
 type recursiveStruct struct {
 	Name      string
 	Recursive *recursiveStruct

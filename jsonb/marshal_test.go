@@ -138,6 +138,7 @@ func TestMarshal(t *testing.T) {
 	{
 		i.Text = `"My long text.......""`
 		i.Str = "hello world"
+		i.priv = 100
 		i.LongStr = symbolStr
 		i.Boolean = true
 		i.DecimalStr = 10.688
@@ -162,41 +163,50 @@ func TestMarshal(t *testing.T) {
 
 		b, err = Marshal(i)
 		require.Equal(t, dataByte, b)
+		require.NoError(t, err)
 	}
 }
 
 func BenchmarkJSONMarshal(b *testing.B) {
+	var err error
 	b.Run("Pointer Struct w/o initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			json.Marshal(nsPtr)
+			_, err = json.Marshal(nsPtr)
+			require.NoError(t, err)
 		}
 	})
 	b.Run("Pointer Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			json.Marshal(nsInit)
+			_, err = json.Marshal(nsInit)
+			require.NoError(t, err)
 		}
 	})
 	b.Run("Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			json.Marshal(nsPtr)
+			_, err = json.Marshal(nsPtr)
+			require.NoError(t, err)
 		}
 	})
 }
 
 func BenchmarkJSONBMarshal(b *testing.B) {
+	var err error
 	b.Run("Pointer Struct w/o initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			Marshal(nsPtr)
+			_, err = Marshal(nsPtr)
+			require.NoError(t, err)
 		}
 	})
 	b.Run("Pointer Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			Marshal(nsInit)
+			_, err = Marshal(nsInit)
+			require.NoError(t, err)
 		}
 	})
 	b.Run("Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
-			Marshal(nsPtr)
+			_, err = Marshal(nsPtr)
+			require.NoError(t, err)
 		}
 	})
 }

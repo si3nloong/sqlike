@@ -1,7 +1,5 @@
 package rsql
 
-type tokenType int
-
 // types :
 const (
 	Operator = iota

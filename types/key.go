@@ -163,29 +163,29 @@ func (k *Key) unmarshal(str string) error {
 	}
 }
 
-// valid returns whether the key is valid.
-func (k *Key) valid() bool {
-	if k == nil {
-		return false
-	}
-	for ; k != nil; k = k.Parent {
-		if k.Kind == "" {
-			return false
-		}
-		if k.NameID != "" && k.IntID != 0 {
-			return false
-		}
-		if k.Parent != nil {
-			if k.Parent.Incomplete() {
-				return false
-			}
-			if k.Parent.Namespace != k.Namespace {
-				return false
-			}
-		}
-	}
-	return true
-}
+// // valid returns whether the key is valid.
+// func (k *Key) valid() bool {
+// 	if k == nil {
+// 		return false
+// 	}
+// 	for ; k != nil; k = k.Parent {
+// 		if k.Kind == "" {
+// 			return false
+// 		}
+// 		if k.NameID != "" && k.IntID != 0 {
+// 			return false
+// 		}
+// 		if k.Parent != nil {
+// 			if k.Parent.Incomplete() {
+// 				return false
+// 			}
+// 			if k.Parent.Namespace != k.Namespace {
+// 				return false
+// 			}
+// 		}
+// 	}
+// 	return true
+// }
 
 // Equal reports whether two keys are equal. Two keys are equal if they are
 // both nil, or if their kinds, IDs, names, namespaces and parents are equal.

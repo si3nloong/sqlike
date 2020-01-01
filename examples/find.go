@@ -10,7 +10,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 )
@@ -70,7 +69,6 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.BigUint = 1298738901289381212
 		ns.Float32 = 10.6789
 		ns.Float64 = 19833.6789
-		ns.GeoPoint = [2]float64{10.12331, 384.7899003}
 		ns.JSONRaw = jsonRaw
 		ns.Enum = Failed
 		ns.Map = make(map[string]int)
@@ -116,7 +114,6 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float32(10.6789), ns.Float32)
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("FAILED"), ns.Enum)
-		require.Equal(t, types.GeoPoint{10.12331, 384.7899003}, ns.GeoPoint)
 		require.Equal(t, virtualColumn, ns.Struct.VirtualStr)
 		require.Nil(t, ns.Struct.NestedNullInt)
 		require.Equal(t, numMap, ns.Map)
