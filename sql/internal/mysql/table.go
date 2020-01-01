@@ -73,8 +73,9 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		if err != nil {
 			return
 		}
-		if sf.Path == pk {
-			stmt.WriteString("PRIMARY KEY (" + ms.Quote(pk) + ")")
+		_, ok := sf.Tag.LookUp("primary_key")
+		if ok || sf.Path == pk {
+			stmt.WriteString("PRIMARY KEY (" + ms.Quote(sf.Path) + ")")
 			stmt.WriteRune(',')
 		}
 		if _, ok := sf.Tag.LookUp("unique_index"); ok {

@@ -14,7 +14,7 @@ import (
 )
 
 type Spatial struct {
-	ID             int64 `sqlike:",primary_key"`
+	ID             int64 `sqlike:",primary_key,auto_increment"`
 	Point          orb.Point
 	PtrPoint       *orb.Point
 	Point4326      orb.Point `sqlike:"PointWithSID,sid=4326"`
@@ -46,7 +46,6 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		sp.ID = 1
 		sp.Point4326 = point
 		sp.Point = point
 		sp.LineString = []orb.Point{

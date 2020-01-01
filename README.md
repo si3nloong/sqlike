@@ -27,6 +27,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
+- Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
 - Prevent toxic query with `Strict Mode` **(in progress)**
 - Support query filtering **(in progress)**
@@ -41,7 +42,7 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 
 - join (eg. left join, outer join, inner join)
 - left wildcard search using Like is not allow
-- bidirectional sorting is not allow
+- bidirectional sorting is not allow (except mysql 8.0)
 
 ```go
 import (

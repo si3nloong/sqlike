@@ -4,12 +4,12 @@
 - [ ] Support `URL` filter. **(in progress)**
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] Join Table.
-- [ ] Support `primary_key` tag.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
-- [ ] Extra func before value `driver.Valuer`.
 - [ ] Foreign key.
 - [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
+- [x] Support `Point`.
+- [x] Support `LineString`.
+- [x] Support `primary_key` tag.
 - [x] Change `DataType` api.
 - [x] `CreateDatabase` api.
 - [x] Escape wildcard `%`, `_` on `LIKE` condition.
