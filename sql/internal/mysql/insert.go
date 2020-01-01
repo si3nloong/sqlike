@@ -112,8 +112,8 @@ func convertSpatial(stmt *sqlstmt.Statement, val interface{}) {
 		}
 
 		stmt.WriteString("(?")
-		if vi.SID > 0 {
-			stmt.WriteString(fmt.Sprintf(", %d", vi.SID))
+		if vi.SRID > 0 {
+			stmt.WriteString(fmt.Sprintf(", %d", vi.SRID))
 		}
 		stmt.WriteRune(')')
 		stmt.AppendArg(vi.WKT)

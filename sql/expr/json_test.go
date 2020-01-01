@@ -17,7 +17,7 @@ func TestJSON(t *testing.T) {
 	{
 		it = JSON_QUOTE("a")
 		require.Equal(t, primitive.JSONFunc{
-			Type: primitive.JSONQuote,
+			Type: primitive.JSON_QUOTE,
 			Arguments: []interface{}{
 				primitive.Column{Name: "a"},
 			},

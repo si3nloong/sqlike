@@ -25,6 +25,7 @@ type Dialect interface {
 	Format(v interface{}) (val string)
 	HasTable(db, table string) (stmt *sqlstmt.Statement)
 	RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement)
+	RenameColumn(db, table, oldColName, newColName string) (stmt *sqlstmt.Statement)
 	DropColumn(db, table, column string) (stmt *sqlstmt.Statement)
 	DropTable(db, table string, exists bool) (stmt *sqlstmt.Statement)
 	TruncateTable(db, table string) (stmt *sqlstmt.Statement)

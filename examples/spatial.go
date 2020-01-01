@@ -6,9 +6,9 @@ import (
 
 	"github.com/paulmach/orb"
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sql/expr/spatial"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
@@ -17,12 +17,12 @@ type Spatial struct {
 	ID             int64 `sqlike:",primary_key,auto_increment"`
 	Point          orb.Point
 	PtrPoint       *orb.Point
-	Point4326      orb.Point `sqlike:"PointWithSID,sid=4326"`
+	Point4326      orb.Point `sqlike:"PointWithSRID,srid=4326"`
 	LineString     orb.LineString
 	LineString2    orb.LineString
 	LineString3    orb.LineString
 	PtrLineString  *orb.LineString
-	LineString4326 orb.LineString `sqlike:"LineStringWithSID,sid=4326"`
+	LineString4326 orb.LineString `sqlike:"LineStringWithSRID,srid=4326"`
 	// Polygon    orb.Polygon
 }
 
@@ -43,6 +43,21 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 		table.MustMigrate(Spatial{})
+		iv := table.Indexes()
+		idx := indexes.Index{
+			Type:    indexes.Spatial,
+			Columns: indexes.Columns("Point"),
+		}
+		err = iv.CreateOne(idx)
+		require.NoError(t, err)
+		result, err := iv.List()
+		require.NoError(t, err)
+		require.True(t, len(result) > 0)
+		require.Equal(t, sqlike.Index{
+			Name:      idx.GetName(),
+			Type:      "SPATIAL",
+			IsVisible: true,
+		}, result[0])
 	}
 
 	{
@@ -116,26 +131,34 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 		origin := orb.Point{20, 10}
 		p1 := orb.Point{1, 3}
 		p2 := orb.Point{4, 18}
-		var dist1, dist2 float64
+		var o struct {
+			Dist1 float64
+			Dist2 float64
+			Text  string
+		}
 		err = table.FindOne(
 			actions.FindOne().
 				Select(
-					expr.As(spatial.ST_Distance(expr.Column("Point"), origin), "dist"),
-					spatial.ST_Distance(
-						spatial.ST_GeomFromText(p1, 4326),
-						spatial.ST_GeomFromText(p2, 4326),
+					expr.As(expr.ST_Distance(expr.Column("Point"), origin), "dist"),
+					expr.ST_Distance(
+						expr.ST_GeomFromText(p1, 4326),
+						expr.ST_GeomFromText(p2, 4326),
 					),
+					expr.ST_AsText(expr.Column("Point")),
 				).
 				Where(
 					expr.Equal("ID", 1),
+					expr.ST_Equals(origin, origin),
+					// expr.ST_Within(expr.Column("Point"), orb.Point{0, 0}),
 				).
 				OrderBy(
 					expr.Desc("dist"),
 				),
 			options.FindOne().SetDebug(true),
-		).Scan(&dist1, &dist2)
+		).Scan(&o.Dist1, &o.Dist2, &o.Text)
 		require.NoError(t, err)
-		require.Equal(t, float64(19.6468827043885), dist1)
-		require.True(t, dist2 > 0)
+		require.Equal(t, float64(19.6468827043885), o.Dist1)
+		require.True(t, o.Dist2 > 0)
+		require.Equal(t, "POINT(1 5)", o.Text)
 	}
 }

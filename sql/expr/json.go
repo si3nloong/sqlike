@@ -4,10 +4,17 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
-// JSONQuote :
-func JSON_QUOTE(value string) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONQuote
-	fc.Arguments = append(fc.Arguments, wrapColumn(value))
+// JSON_QUOTE :
+func JSON_QUOTE(val string) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSON_QUOTE
+	fc.Arguments = append(fc.Arguments, wrapColumn(val))
+	return
+}
+
+// JSON_UNQUOTE :
+func JSON_UNQUOTE(val interface{}) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSON_UNQUOTE
+	fc.Arguments = append(fc.Arguments, wrapColumn(val))
 	return
 }
 

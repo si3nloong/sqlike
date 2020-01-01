@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/spatial"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/expr/spatial"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -110,12 +110,13 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.JSONFunc)
 	switch x.Type {
-	case primitive.JSONQuote:
+	case primitive.JSON_QUOTE:
 		stmt.WriteString("JSON_QUOTE")
-	case primitive.JSONContains:
-
+	case primitive.JSON_UNQUOTE:
+		stmt.WriteString("JSON_UNQUOTE")
+	case primitive.JSON_CONTAINS:
 	default:
-		return errors.New("mysql: unsupported function")
+		return errors.New("unsupported json function")
 	}
 	stmt.WriteByte('(')
 	for i, args := range x.Arguments {
@@ -393,14 +394,7 @@ func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err e
 
 func (b *mySQLBuilder) BuildSpatialFunc(stmt *sqlstmt.Statement, it interface{}) (err error) {
 	x := it.(spatial.Func)
-	switch x.Type {
-	case spatial.Distance:
-		stmt.WriteString("ST_Distance")
-	case spatial.GeomFromText:
-		stmt.WriteString("ST_GeomFromText")
-	case spatial.AsText:
-	case spatial.Point:
-	}
+	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
 	for i, arg := range x.Args {
 		if i > 0 {

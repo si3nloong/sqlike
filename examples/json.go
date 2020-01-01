@@ -53,7 +53,8 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	// advance query
 	{
 		type output struct {
-			Raw string
+			Raw     string
+			Message string
 		}
 
 		result, err = table.Find(
@@ -62,6 +63,10 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 					expr.As(
 						expr.Func("REPLACE", expr.Column("Raw"), "message", "msg"),
 						"Raw",
+					),
+					expr.As(
+						expr.JSON_UNQUOTE(expr.JSONColumn("Raw", "message")),
+						"Message",
 					),
 				).
 				Where(
@@ -87,6 +92,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 		err = result.All(&arr)
 		require.True(t, len(arr) > 0)
 		require.Equal(t, `{"msg": "ok"}`, arr[0].Raw)
+		require.Equal(t, "ok", arr[0].Message)
 		require.NoError(t, err)
 	}
 }

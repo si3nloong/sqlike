@@ -45,15 +45,11 @@ func New(table *sqlike.Table) (persist.FilteredAdapter, error) {
 	if err := a.table.Indexes().
 		CreateOneIfNotExists(indexes.Index{
 			Type: indexes.Primary,
-			Columns: []indexes.Column{
-				indexes.Column{Name: "PType"},
-				indexes.Column{Name: "V0"},
-				indexes.Column{Name: "V1"},
-				indexes.Column{Name: "V2"},
-				indexes.Column{Name: "V3"},
-				indexes.Column{Name: "V4"},
-				indexes.Column{Name: "V5"},
-			},
+			Columns: indexes.Columns(
+				"PType",
+				"V0", "V1", "V2",
+				"V3", "V4", "V5",
+			),
 		}); err != nil {
 		return nil, err
 	}

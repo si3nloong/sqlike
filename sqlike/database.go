@@ -153,14 +153,14 @@ READFILE:
 
 	for _, idx := range id.Indexes {
 		length := len(idx.Columns)
-		columns := make([]indexes.Column, length, length)
+		columns := make([]indexes.Col, length, length)
 		for i, col := range idx.Columns {
 			dir := indexes.Ascending
 			col.Direction = strings.TrimSpace(strings.ToLower(col.Direction))
 			if col.Direction == "desc" || col.Direction == "descending" {
 				dir = indexes.Descending
 			}
-			columns[i] = indexes.Column{
+			columns[i] = indexes.Col{
 				Name:      col.Name,
 				Direction: dir,
 			}

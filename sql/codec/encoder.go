@@ -77,19 +77,19 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
 			return nil, nil
 		}
 		x := v.Interface().(orb.Geometry)
-		var sid uint
+		var srid uint
 		if sf != nil {
-			tag, ok := sf.Tag.LookUp("sid")
+			tag, ok := sf.Tag.LookUp("srid")
 			if ok {
 				integer, _ := strconv.Atoi(tag)
 				if integer > 0 {
-					sid = uint(integer)
+					srid = uint(integer)
 				}
 			}
 		}
 		return spatial.Geometry{
 			Type: st,
-			SID:  sid,
+			SRID: srid,
 			WKT:  wkt.MarshalString(x),
 		}, nil
 	}

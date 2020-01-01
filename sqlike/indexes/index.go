@@ -46,7 +46,7 @@ func (t Type) String() string {
 type Index struct {
 	Name    string
 	Type    Type
-	Columns []Column
+	Columns []Col
 }
 
 // Direction :
@@ -59,25 +59,30 @@ const (
 )
 
 // Columns :
-func Columns(cols ...string) []Column {
-	columns := make([]Column, 0, len(cols))
-	for _, col := range cols {
-		dir := Ascending
-		col = strings.TrimSpace(col)
-		if col[0] == '-' {
-			col = col[1:]
-			dir = Descending
-		}
-		columns = append(columns, Column{
-			Name:      col,
-			Direction: dir,
-		})
+func Columns(names ...string) []Col {
+	columns := make([]Col, 0, len(names))
+	for _, n := range names {
+		columns = append(columns, Column(n))
 	}
 	return columns
 }
 
 // Column :
-type Column struct {
+func Column(name string) Col {
+	dir := Ascending
+	name = strings.TrimSpace(name)
+	if name[0] == '-' {
+		name = name[1:]
+		dir = Descending
+	}
+	return Col{
+		Name:      name,
+		Direction: dir,
+	}
+}
+
+// Column :
+type Col struct {
 	Name      string
 	Direction Direction
 }

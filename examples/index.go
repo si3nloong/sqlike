@@ -34,9 +34,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 	{
 		idx := table.Indexes()
 		err = idx.CreateOne(indexes.Index{
-			Columns: []indexes.Column{
-				indexes.Column{Name: "ID"},
-			},
+			Columns: indexes.Columns("ID"),
 		})
 		require.NoError(t, err)
 		idxs, err = idx.List()
@@ -69,20 +67,14 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 	{
 		idxs := []indexes.Index{
 			indexes.Index{
-				Name: "Bool_Int",
-				Type: indexes.BTree,
-				Columns: []indexes.Column{
-					indexes.Column{Name: "Bool"},
-					indexes.Column{Name: "Int"},
-				},
+				Name:    "Bool_Int",
+				Type:    indexes.BTree,
+				Columns: indexes.Columns("Bool", "Int"),
 			},
 			indexes.Index{
-				Name: "DateTime_Timestamp",
-				Type: indexes.BTree,
-				Columns: []indexes.Column{
-					indexes.Column{Name: "DateTime"},
-					indexes.Column{Name: "Timestamp"},
-				},
+				Name:    "DateTime_Timestamp",
+				Type:    indexes.BTree,
+				Columns: indexes.Columns("DateTime", "Timestamp"),
 			},
 		}
 

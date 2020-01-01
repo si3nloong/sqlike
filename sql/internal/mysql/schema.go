@@ -119,7 +119,7 @@ func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
 		col.DataType = dataType
 		col.Type = dataType
 		col.Nullable = sf.IsNullable
-		if v, ok := sf.Tag.LookUp("sid"); ok {
+		if v, ok := sf.Tag.LookUp("srid"); ok {
 			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
 				return
 			}

@@ -11,6 +11,15 @@ func (ms *MySQL) GetColumns(dbName, table string) (stmt *sqlstmt.Statement) {
 	return
 }
 
+// RenameColumn :
+func (ms *MySQL) RenameColumn(db, table, oldColName, newColName string) (stmt *sqlstmt.Statement) {
+	stmt = sqlstmt.NewStatement(ms)
+	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
+	stmt.WriteString(" RENAME COLUMN " + ms.Quote(oldColName) + " TO " + ms.Quote(newColName))
+	stmt.WriteRune(';')
+	return
+}
+
 // DropColumn :
 func (ms *MySQL) DropColumn(db, table, column string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
