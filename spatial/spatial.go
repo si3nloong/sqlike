@@ -16,19 +16,19 @@ type function int
 
 func (f function) String() string {
 	switch f {
-	case ST_GeomFromText:
+	case SpatialTypeGeomFromText:
 		return "ST_GeomFromText"
-	case ST_Distance:
+	case SpatialTypeDistance:
 		return "ST_Distance"
-	case ST_Within:
+	case SpatialTypeWithin:
 		return "ST_Within"
-	case ST_Equals:
+	case SpatialTypeEquals:
 		return "ST_Equals"
-	case ST_PointFromText:
+	case SpatialTypePointFromText:
 		return "ST_PointFromText"
-	case ST_LineString:
+	case SpatialTypeLineString:
 		return "ST_LineString"
-	case ST_AsText:
+	case SpatialTypeAsText:
 		return "ST_AsText"
 	}
 	return "UNKNOWN FUNCTION"
@@ -38,18 +38,18 @@ func (f function) String() string {
 const (
 	ST_GeomCollection function = iota + 1
 	// GeometryCollection
-	ST_GeomFromText
-	ST_Distance
-	ST_Within
-	ST_Equals
-	ST_PointFromText
-	ST_LineString
-	ST_Point
-	ST_Polygon
-	ST_Area
-	ST_AsText
-	ST_AsWKB
-	ST_AsWKT
+	SpatialTypeGeomFromText
+	SpatialTypeDistance
+	SpatialTypeWithin
+	SpatialTypeEquals
+	SpatialTypePointFromText
+	SpatialTypeLineString
+	SpatialTypePoint
+	SpatialTypePolygon
+	SpatialTypeArea
+	SpatialTypeAsText
+	SpatialTypeAsWKB
+	SpatialTypeAsWKT
 	// MBRContains
 	// MBRConveredBy
 	// AsGeoJSON

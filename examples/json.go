@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -28,6 +29,8 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 
 	jss := [...]jsonStruct{
 		newJSONStruct(),
+		newJSONStruct(),
+		newJSONStruct(),
 	}
 
 	{
@@ -38,16 +41,32 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		jss2 := []jsonStruct{}
-		result, err = table.Find(
-			actions.Find().Select(
-				expr.JSON_QUOTE("Text"),
+		var o struct {
+			Text         string
+			Message      string
+			QuoteMessage string
+			ObjKeys      []string
+		}
+
+		extr := expr.JSON_EXTRACT(expr.Column("Raw"), "$.message")
+		err = table.FindOne(
+			actions.FindOne().Select(
+				expr.As(expr.JSON_QUOTE("Text"), "Text"),
+				expr.JSON_UNQUOTE(extr),
+				extr,
+				expr.JSON_KEYS(expr.Column("Raw")),
 			),
-			options.Find().SetDebug(true),
-		)
+			options.FindOne().SetDebug(true),
+		).Scan(&o.Text, &o.Message, &o.QuoteMessage, &o.ObjKeys)
 		require.NoError(t, err)
-		err = result.All(&jss2)
-		require.NoError(t, err)
+		require.Equal(t, `"TEXT"`, o.Text)
+		require.Equal(t, `ok`, o.Message)
+		require.Equal(t, `"ok"`, o.QuoteMessage)
+
+		sort.Strings(o.ObjKeys)
+		require.ElementsMatch(t, []string{
+			"amountInCents", "category", "message", "status", "type",
+		}, o.ObjKeys)
 	}
 
 	// advance query
@@ -70,10 +89,6 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 					),
 				).
 				Where(
-					// expr.JSONContains(
-					// 	"IntArr",
-					// 	expr.Column("IntAtt"),
-					// ),
 					expr.Equal(
 						expr.JSONColumn("Raw", "message"),
 						"ok",
@@ -91,7 +106,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 		arr := []output{}
 		err = result.All(&arr)
 		require.True(t, len(arr) > 0)
-		require.Equal(t, `{"msg": "ok"}`, arr[0].Raw)
+		require.True(t, len(arr[0].Raw) > 3)
 		require.Equal(t, "ok", arr[0].Message)
 		require.NoError(t, err)
 	}
@@ -99,7 +114,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 
 func newJSONStruct() (js jsonStruct) {
 	js.Text = "TEXT"
-	js.Raw = []byte(`{"message":"ok"}`)
+	js.Raw = []byte(`{"message":"ok","type":"TNG","category":"EWALLET","status":"SUCCESS","amountInCents":1000}`)
 	js.StrArr = []string{"a", "b", "c", "d", "e", "f"}
 	js.IntArr = []int{100, 16, -2, 88, 32, -47, 25}
 	return

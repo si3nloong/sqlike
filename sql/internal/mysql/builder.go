@@ -109,15 +109,7 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 
 func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.JSONFunc)
-	switch x.Type {
-	case primitive.JSON_QUOTE:
-		stmt.WriteString("JSON_QUOTE")
-	case primitive.JSON_UNQUOTE:
-		stmt.WriteString("JSON_UNQUOTE")
-	case primitive.JSON_CONTAINS:
-	default:
-		return errors.New("unsupported json function")
-	}
+	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
 	for i, args := range x.Arguments {
 		if i > 0 {

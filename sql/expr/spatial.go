@@ -9,7 +9,7 @@ import (
 
 // ST_GeomFromText :
 func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
-	f.Type = spatial.ST_GeomFromText
+	f.Type = spatial.SpatialTypeGeomFromText
 	switch vi := g.(type) {
 	case string:
 		f.Args = append(f.Args, primitive.Column{
@@ -34,7 +34,7 @@ func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
 
 // ST_AsText :
 func ST_AsText(g interface{}) (f spatial.Func) {
-	f.Type = spatial.ST_AsText
+	f.Type = spatial.SpatialTypeAsText
 	switch vi := g.(type) {
 	case string:
 		f.Args = append(f.Args, primitive.Column{
@@ -55,7 +55,7 @@ func ST_AsText(g interface{}) (f spatial.Func) {
 // column, value, ST_GeomFromText(column), ST_GeomFromText(value)
 // ST_Distance :
 func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
-	f.Type = spatial.ST_Distance
+	f.Type = spatial.SpatialTypeDistance
 	for _, arg := range []interface{}{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
@@ -76,7 +76,7 @@ func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
 
 // ST_Equals :
 func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
-	f.Type = spatial.ST_Equals
+	f.Type = spatial.SpatialTypeEquals
 	for _, arg := range []interface{}{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
@@ -97,7 +97,7 @@ func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
 
 // ST_Within :
 func ST_Within(g1, g2 interface{}) (f spatial.Func) {
-	f.Type = spatial.ST_Within
+	f.Type = spatial.SpatialTypeWithin
 	for _, arg := range []interface{}{g1, g2} {
 		switch vi := arg.(type) {
 		case string:

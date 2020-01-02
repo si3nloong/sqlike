@@ -43,6 +43,7 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 		table.MustMigrate(Spatial{})
+		table.MustUnsafeMigrate(Spatial{})
 		iv := table.Indexes()
 		idx := indexes.Index{
 			Type:    indexes.Spatial,

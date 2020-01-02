@@ -5,16 +5,47 @@ import (
 )
 
 // JSON_QUOTE :
-func JSON_QUOTE(val string) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSON_QUOTE
-	fc.Arguments = append(fc.Arguments, wrapColumn(val))
+func JSON_QUOTE(doc string) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSONQuote
+	fc.Arguments = append(fc.Arguments, wrapColumn(doc))
 	return
 }
 
 // JSON_UNQUOTE :
-func JSON_UNQUOTE(val interface{}) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSON_UNQUOTE
-	fc.Arguments = append(fc.Arguments, wrapColumn(val))
+func JSON_UNQUOTE(doc interface{}) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSONUnquote
+	fc.Arguments = append(fc.Arguments, wrapColumn(doc))
+	return
+}
+
+// JSON_EXTRACT :
+func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSONExtract
+	fc.Arguments = append(fc.Arguments, doc)
+	for _, p := range append([]string{path}, otherPaths...) {
+		fc.Arguments = append(fc.Arguments, primitive.Value{
+			Raw: p,
+		})
+	}
+	return
+}
+
+// JSON_KEYS :
+func JSON_KEYS(doc interface{}, paths ...string) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSONKeys
+	fc.Arguments = append(fc.Arguments, doc)
+	for _, p := range paths {
+		fc.Arguments = append(fc.Arguments, primitive.Value{
+			Raw: p,
+		})
+	}
+	return
+}
+
+// JSON_VALID :
+func JSON_VALID(val interface{}) (fc primitive.JSONFunc) {
+	fc.Type = primitive.JSONValid
+	fc.Arguments = append(fc.Arguments, val)
 	return
 }
 
