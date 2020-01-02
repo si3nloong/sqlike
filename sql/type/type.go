@@ -84,6 +84,18 @@ func (t Type) String() string {
 		return "json"
 	case UUID:
 		return "uuid"
+	case Point:
+		return "point"
+	case LineString:
+		return "linestring"
+	case Polygon:
+		return "polygon"
+	case MultiPoint:
+		return "multipoint"
+	case MultiLineString:
+		return "multilinestring"
+	case MultiPolygon:
+		return "multipolygon"
 	default:
 		return "unknown"
 	}

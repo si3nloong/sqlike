@@ -1,5 +1,7 @@
 package util
 
+import "sort"
+
 // StringSlice :
 type StringSlice []string
 
@@ -19,4 +21,8 @@ func (slice StringSlice) IndexOf(search string) (idx int) {
 // Splice :
 func (slice *StringSlice) Splice(idx int) {
 	*slice = append((*slice)[:idx], (*slice)[idx+1:]...)
+}
+
+func (slice *StringSlice) Sort() {
+	sort.Strings(*slice)
 }

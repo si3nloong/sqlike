@@ -30,19 +30,29 @@ func (f function) String() string {
 		return "ST_LineString"
 	case SpatialTypeAsText:
 		return "ST_AsText"
+	case SpatialTypeAsWKB:
+		return "ST_AsWKB"
+	case SpatialTypeAsWKT:
+		return "ST_AsWKT"
+	case SpatialTypeSRID:
+		return "ST_SRID"
+	case SpatialTypeIsValid:
+		return "ST_IsValid"
+	case SpatialTypeIntersects:
+		return "ST_Intersects"
 	}
 	return "UNKNOWN FUNCTION"
 }
 
 // functions :
 const (
-	ST_GeomCollection function = iota + 1
-	// GeometryCollection
+	SpatialTypeGeomCollection function = iota + 1
 	SpatialTypeGeomFromText
 	SpatialTypeDistance
 	SpatialTypeWithin
 	SpatialTypeEquals
 	SpatialTypePointFromText
+	SpatialTypePointFromWKB
 	SpatialTypeLineString
 	SpatialTypePoint
 	SpatialTypePolygon
@@ -50,17 +60,13 @@ const (
 	SpatialTypeAsText
 	SpatialTypeAsWKB
 	SpatialTypeAsWKT
-	// MBRContains
-	// MBRConveredBy
-	// AsGeoJSON
-	// ST_SRID
-	// Transform
-	// X
-	// Equals
-	// Y
-	// SymDifference
-	// PointFromText
-	// PointFromWKB
+	SpatilaTypeAsGeoJSON
+	SpatialTypeSRID
+	SpatialTypeX
+	SpatialTypeY
+	SpatialTypeIsValid
+	SpatialTypeIntersects
+	SpatialTypeTransform
 )
 
 // Func :
