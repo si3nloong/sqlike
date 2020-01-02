@@ -61,8 +61,8 @@ type Func struct {
 
 // JSONFunc :
 type JSONFunc struct {
-	Type      jsonFunction
-	Arguments []interface{}
+	Type jsonFunction
+	Args []interface{}
 }
 
 // Group :
@@ -143,13 +143,6 @@ type Sort struct {
 // Value :
 type Value struct {
 	Raw interface{}
-}
-
-// JC :
-type JC struct {
-	Target    interface{}
-	Candidate interface{}
-	Path      *string
 }
 
 type aggregate int

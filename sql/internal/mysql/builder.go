@@ -63,7 +63,6 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	blr.SetBuilder(reflect.TypeOf(primitive.R{}), b.BuildRange)
 	blr.SetBuilder(reflect.TypeOf(primitive.Sort{}), b.BuildSort)
 	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
-	blr.SetBuilder(reflect.TypeOf(primitive.JC{}), b.BuildJSONContains)
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
@@ -111,7 +110,7 @@ func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}
 	x := it.(primitive.JSONFunc)
 	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
-	for i, args := range x.Arguments {
+	for i, args := range x.Args {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
@@ -351,25 +350,6 @@ func (b *mySQLBuilder) BuildKeyValue(stmt *sqlstmt.Statement, it interface{}) (e
 	stmt.WriteString(b.Quote(string(x.Field)))
 	stmt.WriteString(" = ")
 	return b.getValue(stmt, x.Value)
-}
-
-func (b *mySQLBuilder) BuildJSONContains(stmt *sqlstmt.Statement, it interface{}) error {
-	x := it.(primitive.JC)
-	stmt.WriteString("JSON_CONTAINS")
-	stmt.WriteByte('(')
-	if err := b.builder.BuildStatement(stmt, x.Target); err != nil {
-		return err
-	}
-	stmt.WriteByte(',')
-	if err := b.builder.BuildStatement(stmt, x.Candidate); err != nil {
-		return err
-	}
-	if x.Path != nil {
-		stmt.WriteByte(',')
-		stmt.WriteString("'" + *x.Path + "'")
-	}
-	stmt.WriteByte(')')
-	return nil
 }
 
 func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err error) {

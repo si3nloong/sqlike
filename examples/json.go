@@ -51,7 +51,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 		extr := expr.JSON_EXTRACT(expr.Column("Raw"), "$.message")
 		err = table.FindOne(
 			actions.FindOne().Select(
-				expr.As(expr.JSON_QUOTE("Text"), "Text"),
+				expr.As(expr.JSON_QUOTE(expr.Column("Text")), "Text"),
 				expr.JSON_UNQUOTE(extr),
 				extr,
 				expr.JSON_KEYS(expr.Column("Raw")),
@@ -89,6 +89,10 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 					),
 				).
 				Where(
+					expr.JSON_CONTAINS(
+						expr.Column("StrArr"),
+						expr.JSON_QUOTE("a"),
+					),
 					expr.Equal(
 						expr.JSONColumn("Raw", "message"),
 						"ok",

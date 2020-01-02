@@ -1,29 +1,44 @@
 package expr
 
 import (
+	"encoding/json"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // JSON_QUOTE :
-func JSON_QUOTE(doc string) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONQuote
-	fc.Arguments = append(fc.Arguments, wrapColumn(doc))
+func JSON_QUOTE(doc interface{}) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONQuote
+	switch vi := doc.(type) {
+	case string:
+		f.Args = append(f.Args, primitive.Value{
+			Raw: vi,
+		})
+	default:
+		f.Args = append(f.Args, vi)
+	}
 	return
 }
 
 // JSON_UNQUOTE :
-func JSON_UNQUOTE(doc interface{}) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONUnquote
-	fc.Arguments = append(fc.Arguments, wrapColumn(doc))
+func JSON_UNQUOTE(doc interface{}) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONUnquote
+	switch vi := doc.(type) {
+	case string:
+		f.Args = append(f.Args, primitive.Value{
+			Raw: vi,
+		})
+	default:
+		f.Args = append(f.Args, vi)
+	}
 	return
 }
 
 // JSON_EXTRACT :
 func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (fc primitive.JSONFunc) {
 	fc.Type = primitive.JSONExtract
-	fc.Arguments = append(fc.Arguments, doc)
+	fc.Args = append(fc.Args, doc)
 	for _, p := range append([]string{path}, otherPaths...) {
-		fc.Arguments = append(fc.Arguments, primitive.Value{
+		fc.Args = append(fc.Args, primitive.Value{
 			Raw: p,
 		})
 	}
@@ -33,9 +48,9 @@ func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (fc primit
 // JSON_KEYS :
 func JSON_KEYS(doc interface{}, paths ...string) (fc primitive.JSONFunc) {
 	fc.Type = primitive.JSONKeys
-	fc.Arguments = append(fc.Arguments, doc)
+	fc.Args = append(fc.Args, doc)
 	for _, p := range paths {
-		fc.Arguments = append(fc.Arguments, primitive.Value{
+		fc.Args = append(fc.Args, primitive.Value{
 			Raw: p,
 		})
 	}
@@ -45,26 +60,30 @@ func JSON_KEYS(doc interface{}, paths ...string) (fc primitive.JSONFunc) {
 // JSON_VALID :
 func JSON_VALID(val interface{}) (fc primitive.JSONFunc) {
 	fc.Type = primitive.JSONValid
-	fc.Arguments = append(fc.Arguments, val)
+	fc.Args = append(fc.Args, val)
 	return
 }
 
 // JSON_CONTAINS :
-func JSON_CONTAINS(target, candidate interface{}, paths ...string) (jc primitive.JC) {
-	var path *string
+func JSON_CONTAINS(target, candidate interface{}, paths ...string) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONContains
+	for _, arg := range []interface{}{target, candidate} {
+		switch vi := arg.(type) {
+		case string, json.RawMessage:
+			f.Args = append(f.Args, primitive.Value{
+				Raw: vi,
+			})
+		case primitive.Column:
+			f.Args = append(f.Args, vi)
+		default:
+			f.Args = append(f.Args, vi)
+		}
+	}
 	if len(paths) > 0 {
-		path = &paths[0]
+		for _, p := range paths {
+			f.Args = append(f.Args, p)
+		}
 	}
-	switch vi := target.(type) {
-	case string:
-		jc.Target = primitive.Column{Name: vi}
-	case primitive.Column:
-		jc.Target = vi
-	default:
-		jc.Target = primitive.Value{Raw: vi}
-	}
-	jc.Candidate = wrapJSONColumn(candidate)
-	jc.Path = path
 	return
 }
 
