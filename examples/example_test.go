@@ -55,7 +55,6 @@ func TestExamples(t *testing.T) {
 		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
 		CasbinExamples(t, db)
-		RSQLExamples(t, db)
 		SpatialExamples(t, db)
 	}
 

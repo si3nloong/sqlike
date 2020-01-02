@@ -90,7 +90,6 @@ func JSON_CONTAINS(target, candidate interface{}, paths ...string) (f primitive.
 // func JSON_REPLACE()
 // func JSON_TYPE()
 // func JSON_VALID()
-// func JSON_UNQUOTE()
 
 // JSONColumn :
 func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {

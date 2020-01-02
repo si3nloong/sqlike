@@ -44,28 +44,6 @@ func NotIn(field, values interface{}) (c primitive.C) {
 	return
 }
 
-func inGroup(field interface{}, op primitive.Operator, values interface{}) (c primitive.C) {
-	v := reflect.ValueOf(values)
-	k := v.Kind()
-	c.Field = wrapColumn(field)
-	c.Operator = primitive.In
-	grp := primitive.Group{}
-	grp.Values = append(grp.Values, Raw("("))
-	if k == reflect.Array || k == reflect.Slice {
-		for i := 0; i < v.Len(); i++ {
-			if i > 0 {
-				grp.Values = append(grp.Values, Raw(","))
-			}
-			grp.Values = append(grp.Values, v.Index(i).Interface())
-		}
-	} else {
-		grp.Values = append(grp.Values, values)
-	}
-	grp.Values = append(grp.Values, Raw(")"))
-	c.Value = grp
-	return c
-}
-
 // Like :
 func Like(field, value interface{}) (p primitive.L) {
 	p.Field = wrapColumn(field)
@@ -81,9 +59,21 @@ func NotLike(field, value interface{}) (p primitive.L) {
 	return
 }
 
+// GTE :
+func GTE(field, value interface{}) (c primitive.C) {
+	c = GreaterOrEqual(field, value)
+	return
+}
+
 // GreaterOrEqual :
 func GreaterOrEqual(field, value interface{}) (c primitive.C) {
 	c = clause(field, primitive.GreaterOrEqual, value)
+	return
+}
+
+// GT :
+func GT(field, value interface{}) (c primitive.C) {
+	c = GreaterThan(field, value)
 	return
 }
 
@@ -93,9 +83,21 @@ func GreaterThan(field, value interface{}) (c primitive.C) {
 	return
 }
 
+// LTE :
+func LTE(field, value interface{}) (c primitive.C) {
+	c = LesserOrEqual(field, value)
+	return
+}
+
 // LesserOrEqual :
 func LesserOrEqual(field, value interface{}) (c primitive.C) {
 	c = clause(field, primitive.LesserOrEqual, value)
+	return
+}
+
+// LT :
+func LT(field, value interface{}) (c primitive.C) {
+	c = LesserThan(field, value)
 	return
 }
 
@@ -178,6 +180,28 @@ func CastAs(value interface{}, datatype primitive.DataType) (cast primitive.Cast
 	cast.Value = value
 	cast.DataType = datatype
 	return
+}
+
+func inGroup(field interface{}, op primitive.Operator, values interface{}) (c primitive.C) {
+	v := reflect.ValueOf(values)
+	k := v.Kind()
+	c.Field = wrapColumn(field)
+	c.Operator = primitive.In
+	grp := primitive.Group{}
+	grp.Values = append(grp.Values, Raw("("))
+	if k == reflect.Array || k == reflect.Slice {
+		for i := 0; i < v.Len(); i++ {
+			if i > 0 {
+				grp.Values = append(grp.Values, Raw(","))
+			}
+			grp.Values = append(grp.Values, v.Index(i).Interface())
+		}
+	} else {
+		grp.Values = append(grp.Values, values)
+	}
+	grp.Values = append(grp.Values, Raw(")"))
+	c.Value = grp
+	return c
 }
 
 func wrapColumn(it interface{}) interface{} {

@@ -30,7 +30,6 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
 - Prevent toxic query with `Strict Mode` **(in progress)**
-- Support query filtering **(in progress)**
 
 ### Missing DOC?
 

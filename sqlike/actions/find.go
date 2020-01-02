@@ -22,10 +22,11 @@ type SelectStatement interface {
 
 // FindActions :
 type FindActions struct {
+	DistinctOn  bool
 	Database    string
 	Table       string
-	DistinctOn  bool
 	Projections []interface{}
+	IndexHints  string
 	Conditions  primitive.Group
 	Havings     primitive.Group
 	GroupBys    []interface{}
@@ -52,12 +53,18 @@ func (act *FindActions) From(values ...string) SelectStatement {
 	if length == 0 {
 		panic("empty table name")
 	}
-	if length > 0 {
+	switch length {
+	case 1:
 		act.Table = strings.TrimSpace(values[0])
-	}
-	if length > 1 {
+	case 2:
 		act.Database = strings.TrimSpace(values[0])
 		act.Table = strings.TrimSpace(values[1])
+	case 3:
+		act.Database = strings.TrimSpace(values[0])
+		act.Table = strings.TrimSpace(values[1])
+		act.IndexHints = strings.TrimSpace(values[3])
+	default:
+		panic("invalid length of arguments")
 	}
 	return act
 }
