@@ -18,7 +18,7 @@ func Field(name string, val interface{}) (f primitive.Field) {
 	}
 	length := v.Len()
 	if length < 1 {
-		panic("zero length of array/slice")
+		panic("zero length of array or slice")
 	}
 	for i := 0; i < length; i++ {
 		f.Values = append(f.Values, v.Index(i).Interface())
@@ -27,15 +27,15 @@ func Field(name string, val interface{}) (f primitive.Field) {
 }
 
 // Asc :
-func Asc(field string) (s primitive.Sort) {
-	s.Field = field
+func Asc(field interface{}) (s primitive.Sort) {
+	s.Field = wrapColumn(field)
 	s.Order = primitive.Ascending
 	return
 }
 
 // Desc :
-func Desc(field string) (s primitive.Sort) {
-	s.Field = field
+func Desc(field interface{}) (s primitive.Sort) {
+	s.Field = wrapColumn(field)
 	s.Order = primitive.Descending
 	return
 }

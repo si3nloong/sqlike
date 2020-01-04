@@ -55,8 +55,8 @@ type CastAs struct {
 
 // Func :
 type Func struct {
-	Name      string
-	Arguments []interface{}
+	Name string
+	Args []interface{}
 }
 
 // JSONFunc :
@@ -69,9 +69,6 @@ type JSONFunc struct {
 type Group struct {
 	Values []interface{}
 }
-
-// Col :
-type Col string
 
 // R :
 type R struct {
@@ -115,7 +112,7 @@ const (
 
 // Math :
 type Math struct {
-	Field Col
+	Field string
 	Mode  operator
 	Value int
 }
@@ -136,7 +133,7 @@ type Nil struct {
 
 // Sort :
 type Sort struct {
-	Field string
+	Field interface{}
 	Order order
 }
 

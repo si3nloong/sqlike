@@ -23,7 +23,9 @@ func As(field interface{}, alias string) (as primitive.As) {
 // Column :
 func Column(name string, alias ...string) (c primitive.Column) {
 	if len(alias) > 0 {
-		c.Table = alias[0]
+		c.Table = name
+		c.Name = alias[0]
+		return
 	}
 	c.Name = name
 	return
@@ -32,10 +34,10 @@ func Column(name string, alias ...string) (c primitive.Column) {
 // Func :
 func Func(name string, value interface{}, others ...interface{}) (f primitive.Func) {
 	f.Name = strings.ToUpper(strings.TrimSpace(name))
-	f.Arguments = append(f.Arguments, wrapRaw(value))
+	f.Args = append(f.Args, wrapRaw(value))
 	if len(others) > 0 {
 		for _, arg := range others {
-			f.Arguments = append(f.Arguments, wrapRaw(arg))
+			f.Args = append(f.Args, wrapRaw(arg))
 		}
 	}
 	return

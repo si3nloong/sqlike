@@ -8,6 +8,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/spatial"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
@@ -65,6 +66,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
+	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
 	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
@@ -94,7 +96,7 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 	x := it.(primitive.Func)
 	stmt.WriteString(x.Name)
 	stmt.WriteByte('(')
-	for i, args := range x.Arguments {
+	for i, args := range x.Args {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
@@ -215,6 +217,10 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 // BuildColumn :
 func (b *mySQLBuilder) BuildColumn(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Column)
+	if x.Table != "" {
+		stmt.WriteString(b.Quote(x.Table))
+		stmt.WriteByte('.')
+	}
 	stmt.WriteString(b.Quote(x.Name))
 	return nil
 }
@@ -337,7 +343,9 @@ func (b *mySQLBuilder) BuildClause(stmt *sqlstmt.Statement, it interface{}) erro
 
 func (b *mySQLBuilder) BuildSort(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(primitive.Sort)
-	stmt.WriteString(b.Quote(x.Field))
+	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
+		return err
+	}
 	if x.Order == primitive.Descending {
 		stmt.WriteRune(' ')
 		stmt.WriteString("DESC")
@@ -478,6 +486,33 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 	return nil
 }
 
+func (b *mySQLBuilder) BuildSelectStmt(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(*sql.SelectStmt)
+	stmt.WriteString("SELECT ")
+	if x.DistinctOn {
+		stmt.WriteString("DISTINCT ")
+	}
+	if err := b.appendSelect(stmt, x.Projections); err != nil {
+		return err
+	}
+	stmt.WriteString(" FROM ")
+	if err := b.appendTable(stmt, x.Tables); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, x.Skip)
+
+	return nil
+}
+
 func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x, ok := it.(*actions.UpdateActions)
 	if !ok {
@@ -524,6 +559,21 @@ func (b *mySQLBuilder) appendSelect(stmt *sqlstmt.Statement, pjs []interface{}) 
 		return nil
 	}
 	stmt.WriteString("*")
+	return nil
+}
+
+func (b *mySQLBuilder) appendTable(stmt *sqlstmt.Statement, fields []interface{}) error {
+	length := len(fields)
+	if length > 0 {
+		for i := 0; i < length; i++ {
+			if i > 0 {
+				stmt.WriteRune(' ')
+			}
+			if err := b.builder.BuildStatement(stmt, fields[i]); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 

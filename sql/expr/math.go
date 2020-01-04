@@ -5,7 +5,7 @@ import "github.com/si3nloong/sqlike/sqlike/primitive"
 // Increment :
 func Increment(field string, inc uint) primitive.Math {
 	return primitive.Math{
-		Field: primitive.Col(field),
+		Field: field,
 		Mode:  primitive.Add,
 		Value: int(inc),
 	}
@@ -14,7 +14,7 @@ func Increment(field string, inc uint) primitive.Math {
 // Decrement :
 func Decrement(field string, inc uint) primitive.Math {
 	return primitive.Math{
-		Field: primitive.Col(field),
+		Field: field,
 		Mode:  primitive.Deduct,
 		Value: int(inc),
 	}

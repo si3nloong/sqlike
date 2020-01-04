@@ -24,7 +24,6 @@ type Result struct {
 	registry *codec.Registry
 	columns  []string
 	err      error
-	// actions  actions.FindActions
 }
 
 // Columns :

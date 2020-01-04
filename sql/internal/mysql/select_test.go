@@ -1,9 +1,11 @@
 package mysql
 
 import (
+	"log"
 	"testing"
 	"time"
 
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -48,5 +50,45 @@ func TestSelect(t *testing.T) {
 		)
 		require.NoError(t, err)
 		require.Equal(t, "SELECT * FROM `A`.`Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())
+	}
+
+	{
+		stmt := sql.
+			Select(
+				expr.As(sql.Select().From("Testing"), "t"),
+			).
+			From("db", "Hell", expr.Raw("FORCE INDEX")).
+			Where(
+				expr.Equal("A", 1),
+				expr.In("Key", sql.Select().
+					From("Inner").
+					Where(
+						expr.Equal(expr.Column("x", "Z"), true),
+					).
+					OrderBy(
+						expr.Desc(expr.Column("x", "G")),
+					).
+					Having(
+						expr.Equal("L", "ok"),
+					).
+					Limit(10).
+					Offset(1),
+				),
+				expr.NotNull("B"),
+				expr.Or(
+					expr.In("C", []string{"1", "2", "3"}),
+					expr.Equal("A", 100),
+					expr.Between("Time", time.Now(), time.Now().Add(time.Minute*10)),
+				),
+			).OrderBy(
+			expr.Desc("A"),
+			expr.Asc("C"),
+		).Limit(1)
+
+		x := New()
+		stmt2 := sqlstmt.NewStatement(x)
+		x.parser.BuildStatement(stmt2, stmt)
+		log.Println(stmt2.String())
+		// New().Select(stmt)
 	}
 }
