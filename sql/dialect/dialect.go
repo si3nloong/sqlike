@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/internal/mysql"
@@ -41,7 +42,7 @@ type Dialect interface {
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)
 	Update(*actions.UpdateActions) (stmt *sqlstmt.Statement, err error)
 	Delete(*actions.DeleteActions) (stmt *sqlstmt.Statement, err error)
-	Copy(db, table string, columns []string, act *actions.CopyActions) (stmt *sqlstmt.Statement, err error)
+	Replace(db, table string, columns []string, query *sql.SelectStmt) (stmt *sqlstmt.Statement, err error)
 }
 
 var (

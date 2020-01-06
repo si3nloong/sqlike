@@ -13,6 +13,7 @@ type SelectStmt struct {
 	DistinctOn  bool
 	Tables      []interface{}
 	Projections []interface{}
+	Joins       []interface{}
 	IndexHints  string
 	Conditions  primitive.Group
 	Havings     primitive.Group
@@ -20,6 +21,12 @@ type SelectStmt struct {
 	Sorts       []interface{}
 	Max         uint
 	Skip        uint
+}
+
+// Select :
+func Select(fields ...interface{}) *SelectStmt {
+	stmt := new(SelectStmt)
+	return stmt.Select(fields...)
 }
 
 // Distinct :
@@ -71,6 +78,11 @@ func (stmt *SelectStmt) From(values ...interface{}) *SelectStmt {
 	return stmt
 }
 
+// // LeftJoin :
+// func (stmt *SelectStmt) LeftJoin() *SelectStmt {
+// 	return stmt
+// }
+
 // Distinct :
 func (stmt *SelectStmt) Distinct() *SelectStmt {
 	stmt.DistinctOn = true
@@ -112,12 +124,6 @@ func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 		stmt.Skip = num
 	}
 	return stmt
-}
-
-// Select :
-func Select(fields ...interface{}) *SelectStmt {
-	stmt := new(SelectStmt)
-	return stmt.Select(fields...)
 }
 
 func mustString(it interface{}) string {

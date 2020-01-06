@@ -8,7 +8,6 @@ import (
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 )
 
@@ -247,29 +246,5 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)
 	// stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
 	stmt.WriteRune(';')
-	return
-}
-
-// Copy :
-func (ms MySQL) Copy(db, table string, columns []string, act *actions.CopyActions) (stmt *sqlstmt.Statement, err error) {
-	stmt = new(sqlstmt.Statement)
-	stmt.WriteString("REPLACE INTO ")
-	stmt.WriteString(ms.TableName(db, table) + " ")
-	if len(columns) > 0 {
-		stmt.WriteByte('(')
-		for i, col := range columns {
-			if i > 0 {
-				stmt.WriteByte(',')
-			}
-			stmt.WriteString(ms.Quote(col))
-		}
-		stmt.WriteByte(')')
-		stmt.WriteByte(' ')
-	}
-	err = ms.parser.BuildStatement(stmt, &act.FindActions)
-	if err != nil {
-		return
-	}
-	stmt.WriteByte(';')
 	return
 }

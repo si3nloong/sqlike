@@ -34,11 +34,11 @@ func JSON_UNQUOTE(doc interface{}) (f primitive.JSONFunc) {
 }
 
 // JSON_EXTRACT :
-func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONExtract
-	fc.Args = append(fc.Args, doc)
+func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONExtract
+	f.Args = append(f.Args, doc)
 	for _, p := range append([]string{path}, otherPaths...) {
-		fc.Args = append(fc.Args, primitive.Value{
+		f.Args = append(f.Args, primitive.Value{
 			Raw: p,
 		})
 	}
@@ -46,11 +46,11 @@ func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (fc primit
 }
 
 // JSON_KEYS :
-func JSON_KEYS(doc interface{}, paths ...string) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONKeys
-	fc.Args = append(fc.Args, doc)
+func JSON_KEYS(doc interface{}, paths ...string) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONKeys
+	f.Args = append(f.Args, doc)
 	for _, p := range paths {
-		fc.Args = append(fc.Args, primitive.Value{
+		f.Args = append(f.Args, primitive.Value{
 			Raw: p,
 		})
 	}
@@ -58,9 +58,9 @@ func JSON_KEYS(doc interface{}, paths ...string) (fc primitive.JSONFunc) {
 }
 
 // JSON_VALID :
-func JSON_VALID(val interface{}) (fc primitive.JSONFunc) {
-	fc.Type = primitive.JSONValid
-	fc.Args = append(fc.Args, val)
+func JSON_VALID(val interface{}) (f primitive.JSONFunc) {
+	f.Type = primitive.JSONValid
+	f.Args = append(f.Args, val)
 	return
 }
 
@@ -87,9 +87,12 @@ func JSON_CONTAINS(target, candidate interface{}, paths ...string) (f primitive.
 	return
 }
 
-// func JSON_REPLACE()
-// func JSON_TYPE()
-// func JSON_VALID()
+// JSON_TYPE :
+func JSON_TYPE(val interface{}) (f primitive.JSONFunc) {
+	// f.Type = primitive.JSONType
+	f.Args = append(f.Args, val)
+	return
+}
 
 // JSONColumn :
 func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {

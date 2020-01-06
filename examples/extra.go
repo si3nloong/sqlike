@@ -3,8 +3,8 @@ package examples
 import (
 	"testing"
 
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -22,15 +22,15 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 		err = table.Truncate()
 		require.NoError(t, err)
 
-		err = table.Copy([]string{
-			"$Key", "SID", "Date", "Emoji", "LongStr",
-			"TinyInt", "Float64", "EmptyStruct", "Struct",
-		}, actions.Copy().
-			From("sqlike", "NormalStruct").
-			Select(
+		err = table.Replace(
+			[]string{
+				"$Key", "SID", "Date", "Emoji", "LongStr",
+				"TinyInt", "Float64", "EmptyStruct", "Struct",
+			},
+			sql.Select(
 				"$Key", "SID", "Date", "Emoji", "LongStr",
 				"TinyInt", "Float32", "EmptyStruct", "Struct",
-			),
+			).From("sqlike", "NormalStruct"),
 		)
 		require.NoError(t, err)
 	}

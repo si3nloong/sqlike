@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql"
 
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
@@ -205,16 +205,9 @@ func (tb Table) Drop() (err error) {
 	return
 }
 
-// Copy :
-func (tb *Table) Copy(fields []string, act actions.CopyStatement) error {
-	x := new(actions.CopyActions)
-	if act != nil {
-		*x = *(act.(*actions.CopyActions))
-	}
-	if x.Table == "" {
-		return errors.New("sqlike: empty table name")
-	}
-	stmt, err := tb.dialect.Copy(tb.dbName, tb.name, fields, x)
+// Replace :
+func (tb *Table) Replace(fields []string, query *sql.SelectStmt) error {
+	stmt, err := tb.dialect.Replace(tb.dbName, tb.name, fields, query)
 	if err != nil {
 		return err
 	}

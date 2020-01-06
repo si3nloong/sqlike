@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
+	sqls "github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
@@ -116,6 +117,10 @@ func (c *Client) Database(name string) *Database {
 		logger:     c.logger,
 		registry:   codec.DefaultRegistry,
 	}
+}
+
+func (c *Client) Run(stmt *sqls.SelectStmt) {
+
 }
 
 func (c *Client) getVersion() (version *semver.Version) {

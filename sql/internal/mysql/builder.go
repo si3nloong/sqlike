@@ -67,6 +67,8 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.St
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
+	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
+	blr.SetBuilder(reflect.TypeOf(&sql.DeleteStmt{}), b.BuildDeleteStmt)
 	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
@@ -458,6 +460,62 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 	return
 }
 
+func (b *mySQLBuilder) BuildSelectStmt(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(*sql.SelectStmt)
+	stmt.WriteString("SELECT ")
+	if x.DistinctOn {
+		stmt.WriteString("DISTINCT ")
+	}
+	if err := b.appendSelect(stmt, x.Projections); err != nil {
+		return err
+	}
+	stmt.WriteString(" FROM ")
+	if err := b.appendTable(stmt, x.Tables); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, x.Skip)
+
+	return nil
+}
+
+func (b *mySQLBuilder) BuildUpdateStmt(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(*sql.UpdateStmt)
+	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
+	if err := b.appendSet(stmt, x.Values); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, 0)
+	return nil
+}
+
+func (b *mySQLBuilder) BuildDeleteStmt(stmt *sqlstmt.Statement, it interface{}) error {
+	x := it.(*sql.DeleteStmt)
+	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, 0)
+	return nil
+}
+
 func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
 	x := it.(*actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
@@ -482,33 +540,6 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 		return err
 	}
 	b.appendLimitNOffset(stmt, x.Count, x.Skip)
-
-	return nil
-}
-
-func (b *mySQLBuilder) BuildSelectStmt(stmt *sqlstmt.Statement, it interface{}) error {
-	x := it.(*sql.SelectStmt)
-	stmt.WriteString("SELECT ")
-	if x.DistinctOn {
-		stmt.WriteString("DISTINCT ")
-	}
-	if err := b.appendSelect(stmt, x.Projections); err != nil {
-		return err
-	}
-	stmt.WriteString(" FROM ")
-	if err := b.appendTable(stmt, x.Tables); err != nil {
-		return err
-	}
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-		return err
-	}
-	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Max, x.Skip)
 
 	return nil
 }
