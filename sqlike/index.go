@@ -8,16 +8,15 @@ import (
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/types"
 )
 
 var mysql8 = semver.MustParse("8.0.0")
 
 // Index :
 type Index struct {
-	Name      string
-	Type      string
-	IsVisible types.Boolean
+	Name     string
+	Type     string
+	IsUnique bool
 }
 
 // IndexView :

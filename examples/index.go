@@ -50,14 +50,14 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
 			// Name:      "IX-SID@ASC;Emoji@ASC;Bool@DESC",
-			Name:      "eb8bc4a93ee6af77e2ec575e12935e6d",
-			Type:      "BTREE",
-			IsVisible: true,
+			Name:     "eb8bc4a93ee6af77e2ec575e12935e6d",
+			Type:     "BTREE",
+			IsUnique: false,
 		})
 		require.Contains(t, idxs, sqlike.Index{
-			Name:      "test_idx",
-			Type:      "BTREE",
-			IsVisible: true,
+			Name:     "test_idx",
+			Type:     "BTREE",
+			IsUnique: false,
 		})
 	}
 

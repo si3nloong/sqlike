@@ -130,15 +130,14 @@ func (tb *Table) ListIndexes() ([]Index, error) {
 	idxs := make([]Index, 0)
 	for i := 0; rows.Next(); i++ {
 		idx := Index{}
-
 		if err := rows.Scan(
 			&idx.Name,
 			&idx.Type,
-			&idx.IsVisible,
+			&idx.IsUnique,
 		); err != nil {
 			return nil, err
 		}
-
+		idx.IsUnique = !idx.IsUnique
 		idxs = append(idxs, idx)
 	}
 	return idxs, nil
