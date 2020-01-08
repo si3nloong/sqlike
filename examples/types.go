@@ -38,6 +38,7 @@ type normalStruct struct {
 	Bool          bool
 	priv          int
 	Skip          interface{} `sqlike:"-"`
+	AutoIncInt    int64       `sqlike:",auto_increment"`
 	Int           int
 	TinyInt       int8
 	SmallInt      int16

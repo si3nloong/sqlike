@@ -60,7 +60,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.ElementsMatch(t, []string{
 			"$Key", "Key", "Date", "SID",
 			"Emoji", "FullText", "LongStr", "CustomStrType",
-			"EmptyByte", "Byte", "Bool",
+			"EmptyByte", "Byte", "Bool", "AutoIncInt",
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
 			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
 			"Float32", "Float64", "UFloat32",
