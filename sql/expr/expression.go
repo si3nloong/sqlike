@@ -59,21 +59,9 @@ func NotLike(field, value interface{}) (p primitive.L) {
 	return
 }
 
-// GTE :
-func GTE(field, value interface{}) (c primitive.C) {
-	c = GreaterOrEqual(field, value)
-	return
-}
-
 // GreaterOrEqual :
 func GreaterOrEqual(field, value interface{}) (c primitive.C) {
 	c = clause(field, primitive.GreaterOrEqual, value)
-	return
-}
-
-// GT :
-func GT(field, value interface{}) (c primitive.C) {
-	c = GreaterThan(field, value)
 	return
 }
 
@@ -83,21 +71,9 @@ func GreaterThan(field, value interface{}) (c primitive.C) {
 	return
 }
 
-// LTE :
-func LTE(field, value interface{}) (c primitive.C) {
-	c = LesserOrEqual(field, value)
-	return
-}
-
 // LesserOrEqual :
 func LesserOrEqual(field, value interface{}) (c primitive.C) {
 	c = clause(field, primitive.LesserOrEqual, value)
-	return
-}
-
-// LT :
-func LT(field, value interface{}) (c primitive.C) {
-	c = LesserThan(field, value)
 	return
 }
 

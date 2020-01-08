@@ -2,10 +2,12 @@ package examples
 
 import (
 	"encoding/json"
+	"log"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -329,6 +331,31 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.Equal(t, first.Nested.ID, result.ID)
 		require.True(t, result.Amount > 0)
+	}
+
+	{
+		stmt := expr.Union(
+			sql.Select().
+				From("sqlike", "GeneratedStruct").
+				Where(
+					expr.Equal("State", ""),
+					expr.GreaterThan("Date.CreatedAt", "2006-01-02 16:00:00"),
+					expr.GreaterOrEqual("No", 0),
+				).
+				OrderBy(
+					expr.Desc("NestedID"),
+					expr.Asc("Amount"),
+				).
+				Limit(1).
+				Offset(1),
+			sql.Select().
+				From("sqlike", "GeneratedStruct").
+				Limit(1),
+		)
+		result, err := db.QueryStmt(stmt)
+		require.NoError(t, err)
+		log.Println(result)
+		panic("")
 	}
 }
 

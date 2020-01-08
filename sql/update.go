@@ -1,7 +1,6 @@
 package sql
 
 import (
-	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
@@ -28,7 +27,7 @@ func (stmt *UpdateStmt) Update(fields ...interface{}) *UpdateStmt {
 
 // Where :
 func (stmt *UpdateStmt) Where(fields ...interface{}) *UpdateStmt {
-	stmt.Conditions = expr.And(fields...)
+	// stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 

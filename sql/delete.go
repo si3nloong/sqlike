@@ -1,14 +1,12 @@
 package sql
 
 import (
-	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
 
 // DeleteStmt :
 type DeleteStmt struct {
-	Database   string
-	Table      string
+	Tables     []interface{}
 	Conditions primitive.Group
 	Sorts      []interface{}
 	Max        uint
@@ -21,7 +19,7 @@ func (stmt *DeleteStmt) From() *DeleteStmt {
 
 // Where :
 func (stmt *DeleteStmt) Where(fields ...interface{}) *DeleteStmt {
-	stmt.Conditions = expr.And(fields...)
+	// stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 

@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -10,13 +11,15 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"gopkg.in/yaml.v3"
 )
+
+type txCallback func(ctx SessionContext) error
 
 // Database :
 type Database struct {
@@ -25,7 +28,7 @@ type Database struct {
 	pk         string
 	client     *Client
 	driver     sqldriver.Driver
-	dialect    sqldialect.Dialect
+	dialect    dialect.Dialect
 	registry   *codec.Registry
 	logger     logs.Logger
 }
@@ -64,6 +67,30 @@ func (db *Database) Table(name string) *Table {
 	}
 }
 
+func (db *Database) QueryStmt(query interface{}) (*Result, error) {
+	if query == nil {
+		return nil, errors.New("empty query statement")
+	}
+	stmt, err := db.dialect.SelectStmt(query)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := sqldriver.Query(
+		context.Background(),
+		db.driver,
+		stmt,
+		getLogger(db.logger, true),
+	)
+	if err != nil {
+		return nil, err
+	}
+	rslt := new(Result)
+	rslt.registry = db.registry
+	rslt.rows = rows
+	rslt.columns, rslt.err = rows.Columns()
+	return rslt, rslt.err
+}
+
 // BeginTransaction :
 func (db *Database) BeginTransaction() (*Transaction, error) {
 	return db.beginTrans(context.Background(), nil)
@@ -85,8 +112,6 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		registry: db.registry,
 	}, nil
 }
-
-type txCallback func(ctx SessionContext) error
 
 // RunInTransaction :
 func (db *Database) RunInTransaction(cb txCallback, opts ...*options.TransactionOptions) error {

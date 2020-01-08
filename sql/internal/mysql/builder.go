@@ -504,15 +504,15 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt *sqlstmt.Statement, it interface{}) 
 }
 
 func (b *mySQLBuilder) BuildDeleteStmt(stmt *sqlstmt.Statement, it interface{}) error {
-	x := it.(*sql.DeleteStmt)
-	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Max, 0)
+	// x := it.(*sql.DeleteStmt)
+	// stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
+	// if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+	// 	return err
+	// }
+	// if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+	// 	return err
+	// }
+	// b.appendLimitNOffset(stmt, x.Max, 0)
 	return nil
 }
 

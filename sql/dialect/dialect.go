@@ -42,6 +42,7 @@ type Dialect interface {
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)
 	Update(*actions.UpdateActions) (stmt *sqlstmt.Statement, err error)
 	Delete(*actions.DeleteActions) (stmt *sqlstmt.Statement, err error)
+	SelectStmt(query interface{}) (stmt *sqlstmt.Statement, err error)
 	Replace(db, table string, columns []string, query *sql.SelectStmt) (stmt *sqlstmt.Statement, err error)
 }
 

@@ -35,9 +35,9 @@ func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 		switch fields[0].(type) {
 		case primitive.As, *SelectStmt:
 			grp := primitive.Group{}
-			grp.Values = append(grp.Values, expr.Raw("("))
+			grp.Values = append(grp.Values, primitive.Raw{Value: "("})
 			grp.Values = append(grp.Values, fields...)
-			grp.Values = append(grp.Values, expr.Raw(")"))
+			grp.Values = append(grp.Values, primitive.Raw{Value: ")"})
 			stmt.Projections = append(stmt.Projections, grp)
 		default:
 			stmt.Projections = append(stmt.Projections, fields...)
@@ -77,11 +77,6 @@ func (stmt *SelectStmt) From(values ...interface{}) *SelectStmt {
 	}
 	return stmt
 }
-
-// // LeftJoin :
-// func (stmt *SelectStmt) LeftJoin() *SelectStmt {
-// 	return stmt
-// }
 
 // Distinct :
 func (stmt *SelectStmt) Distinct() *SelectStmt {
