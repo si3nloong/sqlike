@@ -13,7 +13,6 @@ import (
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -269,7 +268,11 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 	if err != nil {
 		return err
 	}
-	return tb.alterTable(fields, columns, nil, unsafe)
+	idxs, err := tb.ListIndexes()
+	if err != nil {
+		return err
+	}
+	return tb.alterTable(fields, columns, idxs, unsafe)
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
@@ -294,7 +297,7 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 	return nil
 }
 
-func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []indexes.Index, unsafe bool) error {
+func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []Index, unsafe bool) error {
 	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name

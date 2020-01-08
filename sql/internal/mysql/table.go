@@ -148,7 +148,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		idx     int
@@ -175,6 +175,17 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 		if action == "ADD" && sf.Path == pk {
 			stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pk) + ")")
 			stmt.WriteRune(',')
+		}
+
+		_, ok1 := sf.Tag.LookUp("unique_index")
+		_, ok2 := sf.Tag.LookUp("auto_increment")
+		if ok1 || ok2 {
+			idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
+			if idxs.IndexOf(idx.GetName()) < 0 {
+				stmt.WriteString("ADD")
+				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
+				stmt.WriteRune(',')
+			}
 		}
 		stmt.WriteString(action + " ")
 		col, err = ms.schema.GetColumn(info, sf)
