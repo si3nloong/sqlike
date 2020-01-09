@@ -55,9 +55,9 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.True(t, len(result) > 0)
 		require.Equal(t, sqlike.Index{
-			Name:      idx.GetName(),
-			Type:      "SPATIAL",
-			IsVisible: true,
+			Name:     idx.GetName(),
+			Type:     "SPATIAL",
+			IsUnique: false,
 		}, result[0])
 	}
 

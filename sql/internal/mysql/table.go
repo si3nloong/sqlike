@@ -9,6 +9,7 @@ import (
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
 )
 
 // RenameTable :
@@ -72,13 +73,16 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		if err != nil {
 			return
 		}
-		_, ok := sf.Tag.LookUp("primary_key")
-		if ok || sf.Path == pk {
+		if _, ok := sf.Tag.LookUp("primary_key"); ok || sf.Path == pk {
 			stmt.WriteString("PRIMARY KEY (" + ms.Quote(sf.Path) + ")")
 			stmt.WriteRune(',')
 		}
-		if _, ok := sf.Tag.LookUp("unique_index"); ok {
-			stmt.WriteString("UNIQUE INDEX " + ms.Quote("UX_"+sf.Path) + " (" + ms.Quote(sf.Path) + ")")
+
+		idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
+		_, ok1 := sf.Tag.LookUp("unique_index")
+		_, ok2 := sf.Tag.LookUp("auto_increment")
+		if ok1 || ok2 {
+			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
 			stmt.WriteRune(',')
 		}
 
@@ -143,7 +147,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		idx     int
@@ -168,8 +172,19 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 			cols.Splice(idx)
 		}
 		if action == "ADD" && sf.Path == pk {
-			stmt.WriteString("ADD PRIMARY KEY (`" + pk + "`)")
+			stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pk) + ")")
 			stmt.WriteRune(',')
+		}
+
+		_, ok1 := sf.Tag.LookUp("unique_index")
+		_, ok2 := sf.Tag.LookUp("auto_increment")
+		if ok1 || ok2 {
+			idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
+			if idxs.IndexOf(idx.GetName()) < 0 {
+				stmt.WriteString("ADD")
+				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
+				stmt.WriteRune(',')
+			}
 		}
 		stmt.WriteString(action + " ")
 		col, err = ms.schema.GetColumn(info, sf)

@@ -54,7 +54,7 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 // GetIndexes :
 func (ms MySQL) GetIndexes(dbName, table string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, IS_VISIBLE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
+	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs([]interface{}{dbName, table})
 	return
 }

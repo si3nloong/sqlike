@@ -112,3 +112,11 @@ func find(ctx context.Context, dbName, tbName string, registry *codec.Registry, 
 	csr.columns, csr.err = rows.Columns()
 	return csr
 }
+
+func toResult(rows *sql.Rows, registry *codec.Registry) *Result {
+	rslt := new(Result)
+	rslt.registry = registry
+	rslt.rows = rows
+	rslt.columns, rslt.err = rows.Columns()
+	return rslt
+}

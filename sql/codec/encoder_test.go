@@ -43,6 +43,7 @@ func TestEncodeMap(t *testing.T) {
 		intmap := make(map[int]interface{})
 		it, err = enc.EncodeMap(nil, reflect.ValueOf(intmap))
 		require.Error(t, err)
+		require.Nil(t, it)
 	}
 
 }

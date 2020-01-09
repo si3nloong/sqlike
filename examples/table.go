@@ -47,6 +47,8 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		results, err = table.Columns().List()
 		require.NoError(t, err)
 
+		table.MustMigrate(ns)
+
 		for _, f := range results {
 			columnMap[f.Name] = f
 			columns = append(columns, f.Name)
@@ -60,7 +62,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		require.ElementsMatch(t, []string{
 			"$Key", "Key", "Date", "SID",
 			"Emoji", "FullText", "LongStr", "CustomStrType",
-			"EmptyByte", "Byte", "Bool",
+			"EmptyByte", "Byte", "Bool", "AutoIncInt",
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
 			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
 			"Float32", "Float64", "UFloat32",
@@ -125,6 +127,30 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 
 		err = table.Migrate(generatedStruct{})
 		require.NoError(t, err)
+	}
+
+	temp := db.Table("Temp")
+
+	{
+		err = temp.DropIfExits()
+		require.NoError(t, err)
+		temp.MustMigrate(struct {
+			ID     string `sqlike:"$Key"`
+			Number int64  `sqlike:",auto_increment"`
+		}{})
+	}
+
+	{
+		err = temp.DropIfExits()
+		require.NoError(t, err)
+		temp.MustMigrate(struct {
+			ID     string `sqlike:"$Key"`
+			Number int64
+		}{})
+		temp.MustMigrate(struct {
+			ID     string `sqlike:"$Key"`
+			Number int64  `sqlike:",auto_increment"`
+		}{})
 	}
 }
 

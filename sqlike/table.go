@@ -10,10 +10,9 @@ import (
 	"github.com/si3nloong/sqlike/sql"
 
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -37,7 +36,7 @@ type Table struct {
 	pk       string
 	client   *Client
 	driver   sqldriver.Driver
-	dialect  sqldialect.Dialect
+	dialect  dialect.Dialect
 	registry *codec.Registry
 	logger   logs.Logger
 }
@@ -131,15 +130,14 @@ func (tb *Table) ListIndexes() ([]Index, error) {
 	idxs := make([]Index, 0)
 	for i := 0; rows.Next(); i++ {
 		idx := Index{}
-
 		if err := rows.Scan(
 			&idx.Name,
 			&idx.Type,
-			&idx.IsVisible,
+			&idx.IsUnique,
 		); err != nil {
 			return nil, err
 		}
-
+		idx.IsUnique = !idx.IsUnique
 		idxs = append(idxs, idx)
 	}
 	return idxs, nil
@@ -262,7 +260,11 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 	if err != nil {
 		return err
 	}
-	return tb.alterTable(fields, columns, nil, unsafe)
+	idxs, err := tb.ListIndexes()
+	if err != nil {
+		return err
+	}
+	return tb.alterTable(fields, columns, idxs, unsafe)
 }
 
 func (tb *Table) createTable(fields []*reflext.StructField) error {
@@ -287,7 +289,7 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 	return nil
 }
 
-func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []indexes.Index, unsafe bool) error {
+func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []Index, unsafe bool) error {
 	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name
