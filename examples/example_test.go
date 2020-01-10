@@ -48,6 +48,7 @@ func TestExamples(t *testing.T) {
 		IndexExamples(t, db)
 		InsertExamples(t, db)
 		FindExamples(t, db)
+		QueryExamples(t, db)
 		TransactionExamples(t, db)
 		PaginationExamples(t, client)
 		UpdateExamples(t, db)

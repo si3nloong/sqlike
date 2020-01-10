@@ -3,11 +3,19 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
+
+// SessionContext :
+type SessionContext interface {
+	Table(name string) *Table
+	QueryStmt(query interface{}) (*Result, error)
+}
 
 // Transaction :
 type Transaction struct {
@@ -16,14 +24,9 @@ type Transaction struct {
 	client   *Client
 	context  context.Context
 	driver   *sql.Tx
-	dialect  sqldialect.Dialect
+	dialect  dialect.Dialect
 	registry *codec.Registry
 	logger   logs.Logger
-}
-
-// SessionContext :
-type SessionContext interface {
-	Table(name string) *Table
 }
 
 // Table :
@@ -38,6 +41,30 @@ func (tx *Transaction) Table(name string) *Table {
 		registry: tx.registry,
 		logger:   tx.logger,
 	}
+}
+
+func (tx *Transaction) QueryStmt(query interface{}) (*Result, error) {
+	if query == nil {
+		return nil, errors.New("empty query statement")
+	}
+	stmt, err := tx.dialect.SelectStmt(query)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := driver.Query(
+		tx.context,
+		tx.driver,
+		stmt,
+		getLogger(tx.logger, true),
+	)
+	if err != nil {
+		return nil, err
+	}
+	rslt := new(Result)
+	rslt.registry = tx.registry
+	rslt.rows = rows
+	rslt.columns, rslt.err = rows.Columns()
+	return rslt, rslt.err
 }
 
 // RollbackTransaction :

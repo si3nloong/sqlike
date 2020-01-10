@@ -330,6 +330,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, first.Nested.ID, result.ID)
 		require.True(t, result.Amount > 0)
 	}
+
 }
 
 // FindErrorExamples :

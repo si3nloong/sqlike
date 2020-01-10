@@ -13,6 +13,7 @@ type SelectStmt struct {
 	DistinctOn  bool
 	Tables      []interface{}
 	Projections []interface{}
+	Joins       []interface{}
 	IndexHints  string
 	Conditions  primitive.Group
 	Havings     primitive.Group
@@ -22,15 +23,21 @@ type SelectStmt struct {
 	Skip        uint
 }
 
+// Select :
+func Select(fields ...interface{}) *SelectStmt {
+	stmt := new(SelectStmt)
+	return stmt.Select(fields...)
+}
+
 // Distinct :
 func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 	if len(fields) == 1 {
 		switch fields[0].(type) {
 		case primitive.As, *SelectStmt:
 			grp := primitive.Group{}
-			grp.Values = append(grp.Values, expr.Raw("("))
+			grp.Values = append(grp.Values, primitive.Raw{Value: "("})
 			grp.Values = append(grp.Values, fields...)
-			grp.Values = append(grp.Values, expr.Raw(")"))
+			grp.Values = append(grp.Values, primitive.Raw{Value: ")"})
 			stmt.Projections = append(stmt.Projections, grp)
 		default:
 			stmt.Projections = append(stmt.Projections, fields...)
@@ -112,12 +119,6 @@ func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 		stmt.Skip = num
 	}
 	return stmt
-}
-
-// Select :
-func Select(fields ...interface{}) *SelectStmt {
-	stmt := new(SelectStmt)
-	return stmt.Select(fields...)
 }
 
 func mustString(it interface{}) string {
