@@ -20,14 +20,14 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 ### What we provide apart from native package (database/sql)?
 
-- Support `JSON`
 - Support `Enum`
 - Support `UUID`
+- Support `JSON`
+- Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` for `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
-- Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
 - Prevent toxic query with `Strict Mode` **(in progress)**
 
