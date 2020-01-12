@@ -81,6 +81,16 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 	return c
 }
 
+// CreateDatabase :
+func (c *Client) CreateDatabase(name string) error {
+	return c.createDB(name, true)
+}
+
+// DropDatabase :
+func (c *Client) DropDatabase(name string) error {
+	return c.dropDB(name, true)
+}
+
 // ListDatabases :
 func (c Client) ListDatabases() ([]string, error) {
 	stmt := c.dialect.GetDatabases()
@@ -106,6 +116,10 @@ func (c Client) ListDatabases() ([]string, error) {
 
 // Database :
 func (c *Client) Database(name string) *Database {
+	stmt := c.dialect.UseDatabase(name)
+	if _, err := sqldriver.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
+		panic(err)
+	}
 	return &Database{
 		driverName: c.driverName,
 		name:       name,
@@ -139,4 +153,26 @@ func (c *Client) getVersion() (version *semver.Version) {
 		panic(err)
 	}
 	return
+}
+
+func (c *Client) createDB(name string, checkExists bool) error {
+	stmt := c.dialect.CreateDatabase(name, checkExists)
+	_, err := sqldriver.Execute(
+		context.Background(),
+		c,
+		stmt,
+		c.logger,
+	)
+	return err
+}
+
+func (c *Client) dropDB(name string, checkExists bool) error {
+	stmt := c.dialect.DropDatabase(name, checkExists)
+	_, err := sqldriver.Execute(
+		context.Background(),
+		c,
+		stmt,
+		c.logger,
+	)
+	return err
 }

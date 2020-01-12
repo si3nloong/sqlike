@@ -30,6 +30,7 @@ func (cv *ColumnView) List() ([]Column, error) {
 	return cv.tb.ListColumns()
 }
 
+// Rename :
 func (cv *ColumnView) Rename(oldColName, newColName string) error {
 	_, err := sqldriver.Execute(
 		context.Background(),

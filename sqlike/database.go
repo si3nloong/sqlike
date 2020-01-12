@@ -33,25 +33,15 @@ type Database struct {
 	logger     logs.Logger
 }
 
-// Create :
-func (db *Database) Create() error {
-	return db.createDB(true)
-}
-
-// CreateIfNotExists :
-func (db *Database) CreateIfNotExists() error {
-	return db.createDB(false)
-}
-
 // Drop :
-func (db *Database) Drop() error {
-	return db.dropDB(false)
-}
+// func (db *Database) Drop() error {
+// 	return db.dropDB(false)
+// }
 
-// DropIfExists :
-func (db *Database) DropIfExists() error {
-	return db.dropDB(true)
-}
+// // DropIfExists :
+// func (db *Database) DropIfExists() error {
+// 	return db.dropDB(true)
+// }
 
 // Table :
 func (db *Database) Table(name string) *Table {
@@ -216,28 +206,6 @@ READFILE:
 		}
 	}
 	return nil
-}
-
-func (db *Database) createDB(exists bool) error {
-	stmt := db.dialect.CreateDatabase(db.name, exists)
-	_, err := sqldriver.Execute(
-		context.Background(),
-		db.driver,
-		stmt,
-		db.logger,
-	)
-	return err
-}
-
-func (db *Database) dropDB(exists bool) error {
-	stmt := db.dialect.DropDatabase(db.name, exists)
-	_, err := sqldriver.Execute(
-		context.Background(),
-		db.driver,
-		stmt,
-		db.logger,
-	)
-	return err
 }
 
 func parseIndexType(name string) (idxType indexes.Type) {

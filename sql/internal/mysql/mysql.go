@@ -34,34 +34,3 @@ func (ms MySQL) GetVersion() (stmt *sqlstmt.Statement) {
 	stmt.WriteString("SELECT VERSION();")
 	return
 }
-
-// CreateDatabase :
-func (ms MySQL) CreateDatabase(db string, exists bool) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString("CREATE DATABASE")
-	if !exists {
-		stmt.WriteString(" IF NOT EXISTS")
-	}
-	stmt.WriteByte(' ')
-	stmt.WriteString(ms.Quote(db) + ";")
-	return
-}
-
-// DropDatabase :
-func (ms MySQL) DropDatabase(db string, exists bool) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString("DROP SCHEMA")
-	if exists {
-		stmt.WriteString(" IF EXISTS")
-	}
-	stmt.WriteByte(' ')
-	stmt.WriteString(ms.Quote(db) + ";")
-	return
-}
-
-// GetDatabases :
-func (ms MySQL) GetDatabases() (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString("SHOW DATABASES;")
-	return
-}

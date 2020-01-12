@@ -36,12 +36,9 @@ func TestExamples(t *testing.T) {
 	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 
-	dbs, err := client.ListDatabases()
-	require.True(t, len(dbs) > 0)
-	require.NoError(t, err)
-
-	db := client.SetLogger(Logger{}).
-		Database("sqlike")
+	client.SetLogger(Logger{})
+	DatabaseExamples(t, client)
+	db := client.Database("sqlike")
 
 	{
 		MigrateExamples(t, db)
