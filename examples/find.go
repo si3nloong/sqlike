@@ -244,6 +244,11 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 							expr.Desc("Timestamp"),
 						),
 					),
+					expr.Exists(
+						actions.Find().
+							Select(expr.Raw("1")).
+							From("sqlike", "NormalStruct"),
+					),
 				).
 				OrderBy(
 					expr.Field("Enum", []Enum{
