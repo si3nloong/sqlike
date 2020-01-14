@@ -20,14 +20,6 @@ func As(field interface{}, alias string) (as primitive.As) {
 	return
 }
 
-// Exists :
-func Exists(subquery interface{}) (grp primitive.Group) {
-	grp.Values = append(grp.Values, Raw("EXISTS ("))
-	grp.Values = append(grp.Values, subquery)
-	grp.Values = append(grp.Values, Raw(")"))
-	return
-}
-
 // Column :
 func Column(name string, alias ...string) (c primitive.Column) {
 	if len(alias) > 0 {

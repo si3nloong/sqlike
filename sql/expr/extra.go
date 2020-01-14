@@ -24,6 +24,22 @@ func Union(stmt1 selectStmt, stmt2 selectStmt, others ...selectStmt) (grp primit
 // 	return
 // }
 
+// Exists :
+func Exists(subquery interface{}) (grp primitive.Group) {
+	grp.Values = append(grp.Values, Raw("EXISTS ("))
+	grp.Values = append(grp.Values, subquery)
+	grp.Values = append(grp.Values, Raw(")"))
+	return
+}
+
+// NotExists :
+func NotExists(subquery interface{}) (grp primitive.Group) {
+	grp.Values = append(grp.Values, Raw("NOT EXISTS ("))
+	grp.Values = append(grp.Values, subquery)
+	grp.Values = append(grp.Values, Raw(")"))
+	return
+}
+
 func union(link primitive.Raw, stmts []selectStmt) (grp primitive.Group) {
 	for i, stmt := range stmts {
 		if i > 0 {
