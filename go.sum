@@ -6,12 +6,12 @@ github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8 h1:fRMn4k/mYz
 github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8/go.mod h1:8CV7kYbvgykQs8Io0EDPxUVkQQsXveUpKzLB6tuHV2w=
 github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b h1:slWfe8ZDDVuZDEVqPAi62+sS6rE0o7rIJ4fuA4GGkaU=
 github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b/go.mod h1:8WhrFWLx5svQrZpAq+kYvjRWdRcLj12T1jqy1AHAKZ0=
-github.com/casbin/casbin/v2 v2.1.3-0.20191213023828-3353ce9a5c12 h1:QN+zAcN+i332wmDWieQVRqu9mmIQ+t1tcS93O6DSFEA=
-github.com/casbin/casbin/v2 v2.1.3-0.20191213023828-3353ce9a5c12/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
+github.com/casbin/casbin/v2 v2.1.3-0.20200106080052-ea07e65dbd3f h1:c0vhtCV90HQ//S5vCccxE+dF0OkuK/yAuJ5ip39Q/dI=
+github.com/casbin/casbin/v2 v2.1.3-0.20200106080052-ea07e65dbd3f/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-sql-driver/mysql v1.4.1-0.20191212001955-b66d043e6c89 h1:polOGXa0+qfX/VjkgfW7VylX6rG4hHeD9boI2SHhAdo=
-github.com/go-sql-driver/mysql v1.4.1-0.20191212001955-b66d043e6c89/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
+github.com/go-sql-driver/mysql v1.5.0 h1:ozyZYNQW3x3HtqT1jira07DN2PArx2v7/mN66gGcHOs=
+github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/gogo/protobuf v1.3.0/go.mod h1:SlYgWuQ5SjCEi6WLHjHCa1yvBfUnHcTbrrZtXPKa29o=

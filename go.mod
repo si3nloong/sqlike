@@ -6,8 +6,8 @@ require (
 	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
 	github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b
-	github.com/casbin/casbin/v2 v2.1.3-0.20191213023828-3353ce9a5c12
-	github.com/go-sql-driver/mysql v1.4.1-0.20191212001955-b66d043e6c89
+	github.com/casbin/casbin/v2 v2.1.3-0.20200106080052-ea07e65dbd3f
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.3.3-0.20191022195553-ed6926b37a63
 	github.com/golang/snappy v0.0.1 // indirect
