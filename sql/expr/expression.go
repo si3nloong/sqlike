@@ -162,7 +162,7 @@ func inGroup(field interface{}, op primitive.Operator, values interface{}) (c pr
 	v := reflect.ValueOf(values)
 	k := v.Kind()
 	c.Field = wrapColumn(field)
-	c.Operator = primitive.In
+	c.Operator = op
 	grp := primitive.Group{}
 	grp.Values = append(grp.Values, Raw("("))
 	if k == reflect.Array || k == reflect.Slice {
