@@ -41,6 +41,9 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 	for i, sf := range x.Sorts {
 		fields[i] = sf.(primitive.Sort).Field
 	}
+	if x.Count == 0 {
+		x.Count = 100
+	}
 	return &Paginator{
 		table:  tb,
 		fields: fields,
@@ -117,7 +120,7 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 	}
 	length := len(pg.fields)
 	filters := make([]interface{}, 0, length)
-	fields := make([]interface{}, length, length)
+	fields := make([]interface{}, length)
 	for i, sf := range action.Sorts {
 		var v primitive.C
 		val := toString(pg.values[i])
