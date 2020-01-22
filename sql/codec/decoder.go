@@ -61,6 +61,20 @@ func (dec DefaultDecoders) DecodeRawBytes(it interface{}, v reflect.Value) error
 		x = sql.RawBytes(vi)
 	case sql.RawBytes:
 		x = vi
+	case bool:
+		str := strconv.FormatBool(vi)
+		x = []byte(str)
+	case int64:
+		str := strconv.FormatInt(vi, 10)
+		x = []byte(str)
+	case uint64:
+		str := strconv.FormatUint(vi, 10)
+		x = []byte(str)
+	case float64:
+		str := strconv.FormatFloat(vi, 'e', -1, 64)
+		x = []byte(str)
+	case time.Time:
+		x = []byte(vi.Format(time.RFC3339))
 	case nil:
 	default:
 	}

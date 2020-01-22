@@ -16,6 +16,8 @@ import (
 type SingleResult interface {
 	Scan(dest ...interface{}) error
 	Decode(dest interface{}) error
+	Columns() []string
+	// ColumnTypes() ([]*sql.ColumnType, error)
 	Error() error
 }
 

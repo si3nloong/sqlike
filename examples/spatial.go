@@ -110,6 +110,41 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
+		result := table.FindOne(
+			actions.FindOne().
+				Select(
+					"ID",
+					"Point",
+					"PtrPoint",
+				).
+				Where(
+					expr.Equal("ID", 1),
+				),
+			options.FindOne().SetDebug(true),
+		)
+		// b := new(sql.RawBytes)
+		// var str string
+
+		c1 := new(sql.RawBytes)
+		c2 := new(sql.RawBytes)
+		c3 := new(sql.RawBytes)
+		cols := result.Columns()
+		require.ElementsMatch(t, []string{
+			"ID",
+			"Point",
+			"PtrPoint",
+		}, cols)
+		err = result.Scan(c1, c2, c3)
+		require.NoError(t, err)
+
+		v1 := sql.RawBytes(`1`)
+		require.Equal(t, &v1, c1)
+		// TODO: check column2 value
+		require.Equal(t, &v1, c1)
+		require.Nil(t, *c3)
+	}
+
+	{
 		var o Spatial
 		result := table.FindOne(
 			actions.FindOne().Where(
@@ -117,9 +152,6 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 			),
 			options.FindOne().SetDebug(true),
 		)
-		b := new(sql.RawBytes)
-		err = result.Scan(b)
-		require.NoError(t, err)
 		err = result.Decode(&o)
 		require.NoError(t, err)
 
