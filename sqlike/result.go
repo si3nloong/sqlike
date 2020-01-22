@@ -57,6 +57,9 @@ func (r *Result) values() ([]interface{}, error) {
 
 // Scan :
 func (r *Result) Scan(dests ...interface{}) error {
+	if r.close {
+		defer r.Close()
+	}
 	if r.err != nil {
 		return r.err
 	}
