@@ -17,7 +17,7 @@ type SingleResult interface {
 	Scan(dest ...interface{}) error
 	Decode(dest interface{}) error
 	Columns() []string
-	// ColumnTypes() ([]*sql.ColumnType, error)
+	ColumnTypes() ([]*sql.ColumnType, error)
 	Error() error
 }
 
@@ -111,14 +111,9 @@ func find(ctx context.Context, dbName, tbName string, registry *codec.Registry, 
 		return csr
 	}
 	csr.rows = rows
-	csr.columns, csr.err = rows.Columns()
+	csr.columnTypes, csr.err = rows.ColumnTypes()
+	for _, ct := range csr.columnTypes {
+		csr.columns = append(csr.columns, ct.Name())
+	}
 	return csr
-}
-
-func toResult(rows *sql.Rows, registry *codec.Registry) *Result {
-	rslt := new(Result)
-	rslt.registry = registry
-	rslt.rows = rows
-	rslt.columns, rslt.err = rows.Columns()
-	return rslt
 }

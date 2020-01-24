@@ -2,6 +2,7 @@ package examples
 
 import (
 	"encoding/json"
+	"sort"
 	"testing"
 	"time"
 
@@ -90,15 +91,15 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	// Find one record by primary key
 	{
 		ns = normalStruct{}
-		err = table.FindOne(
+		result := table.FindOne(
 			actions.FindOne().Where(
 				expr.Equal("$Key", uid),
 			),
 			options.FindOne().SetDebug(true),
-		).Decode(&ns)
+		)
 
+		err = result.Decode(&ns)
 		require.NoError(t, err)
-
 		require.Equal(t, uid, ns.ID)
 		require.Equal(t, emoji, ns.Emoji)
 		require.Equal(t, long, ns.LongStr)
@@ -120,6 +121,25 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
+
+		columns := []string{
+			"$Key", "Key", "Date",
+			"SID", "Emoji", "FullText", "LongStr", "CustomStrType",
+			"EmptyByte", "Byte", "Bool",
+			"AutoIncInt", "Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
+			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
+			"Float32", "Float64", "UFloat32",
+			"EmptyStruct", "Struct", "VirtualColumn",
+			"Struct.StoredStr", "JSONRaw", "Map",
+			"DateTime", "Timestamp", "Language", "Languages",
+			"Currency", "Currencies", "Enum",
+			"CreatedAt", "UpdatedAt",
+		}
+		cols := result.Columns()
+		sort.Strings(columns)
+		sort.Strings(cols)
+		require.True(t, len(cols) > 0)
+		require.ElementsMatch(t, columns, cols)
 	}
 
 	// Find one with scan

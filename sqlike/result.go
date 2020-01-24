@@ -19,11 +19,12 @@ var EOF = io.EOF
 
 // Result :
 type Result struct {
-	close    bool
-	rows     *sql.Rows
-	registry *codec.Registry
-	columns  []string
-	err      error
+	close       bool
+	rows        *sql.Rows
+	registry    *codec.Registry
+	columns     []string
+	columnTypes []*sql.ColumnType
+	err         error
 }
 
 // Columns :
@@ -33,7 +34,7 @@ func (r *Result) Columns() []string {
 
 // ColumnTypes :
 func (r *Result) ColumnTypes() ([]*sql.ColumnType, error) {
-	return r.rows.ColumnTypes()
+	return r.columnTypes, nil
 }
 
 func (r *Result) nextValues() ([]interface{}, error) {

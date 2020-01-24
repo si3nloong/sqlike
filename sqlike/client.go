@@ -92,7 +92,7 @@ func (c *Client) DropDatabase(name string) error {
 }
 
 // ListDatabases :
-func (c Client) ListDatabases() ([]string, error) {
+func (c *Client) ListDatabases() ([]string, error) {
 	stmt := c.dialect.GetDatabases()
 	rows, err := sqldriver.Query(
 		context.Background(),

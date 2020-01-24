@@ -91,8 +91,9 @@ func IsNullable(t reflect.Type) bool {
 	return k == reflect.Ptr ||
 		k == reflect.Slice ||
 		k == reflect.Map ||
+		k == reflect.Interface ||
 		k == reflect.Func ||
-		k == reflect.Interface
+		k == reflect.Chan
 }
 
 // IsKind :

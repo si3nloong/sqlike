@@ -33,16 +33,6 @@ type Database struct {
 	logger     logs.Logger
 }
 
-// Drop :
-// func (db *Database) Drop() error {
-// 	return db.dropDB(false)
-// }
-
-// // DropIfExists :
-// func (db *Database) DropIfExists() error {
-// 	return db.dropDB(true)
-// }
-
 // Table :
 func (db *Database) Table(name string) *Table {
 	return &Table{
