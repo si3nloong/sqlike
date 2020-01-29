@@ -112,7 +112,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, registry *codec.
 		return nil, err
 	}
 	return sqldriver.Execute(
-		context.Background(),
+		ctx,
 		driver,
 		stmt,
 		getLogger(logger, opt.Debug),
