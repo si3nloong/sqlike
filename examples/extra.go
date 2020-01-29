@@ -35,6 +35,25 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 		require.NoError(t, err)
 	}
 
+	{
+		tbl := db.Table("PK")
+		var a struct {
+			Key string `sqlike:"$Key"`
+			No  int64
+		}
+
+		err = tbl.DropIfExits()
+		require.NoError(t, err)
+		tbl.MustMigrate(a)
+
+		var b struct {
+			Key string `sqlike:"$Key"`
+			No  int64  `sqlike:",primary_key"`
+		}
+
+		tbl.MustMigrate(b)
+	}
+
 	// MongoDB :
 	// {
 	// 	ctx := context.Background()

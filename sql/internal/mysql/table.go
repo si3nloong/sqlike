@@ -54,6 +54,7 @@ func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
 func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
+		pkk     *reflext.StructField
 		k1, k2  string
 		virtual bool
 		stored  bool
@@ -73,9 +74,13 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		if err != nil {
 			return
 		}
-		if _, ok := sf.Tag.LookUp("primary_key"); ok || sf.Path == pk {
-			stmt.WriteString("PRIMARY KEY (" + ms.Quote(sf.Path) + ")")
-			stmt.WriteRune(',')
+
+		// allow primary_key tag to override
+		if _, ok := sf.Tag.LookUp("primary_key"); ok {
+			pkk = sf
+		}
+		if sf.Path == pk && pkk == nil {
+			pkk = sf
 		}
 
 		idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
@@ -130,6 +135,10 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 			children = append(children, child.Children...)
 		}
 	}
+	if pkk != nil {
+		stmt.WriteRune(',')
+		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
+	}
 	stmt.WriteRune(')')
 	stmt.WriteString(" ENGINE=INNODB")
 	code := string(info.Charset())
@@ -150,6 +159,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
+		pkk     *reflext.StructField
 		idx     int
 		k1, k2  string
 		virtual bool
@@ -171,9 +181,14 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
-		if action == "ADD" && sf.Path == pk {
-			stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pk) + ")")
-			stmt.WriteRune(',')
+		if action == "ADD" {
+			// allow primary_key tag to override
+			if _, ok := sf.Tag.LookUp("primary_key"); ok {
+				pkk = sf
+			}
+			if sf.Path == pk && pkk == nil {
+				pkk = sf
+			}
 		}
 
 		_, ok1 := sf.Tag.LookUp("unique_index")
@@ -246,6 +261,11 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 			children = children[1:]
 			children = append(children, child.Children...)
 		}
+	}
+
+	if pkk != nil {
+		stmt.WriteRune(',')
+		stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
 	}
 
 	if unsafe {

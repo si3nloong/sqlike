@@ -163,21 +163,12 @@ func (d *Date) unmarshal(str string) (err error) {
 }
 
 // ParseDate :
-func ParseDate(str string) (*Date, error) {
+func ParseDate(str string) (Date, error) {
 	t, err := time.Parse("2006-01-02", str)
 	if err != nil {
-		return nil, ErrDateFormat
+		return Date{}, ErrDateFormat
 	}
-	return &Date{
-		Day:   t.Day(),
-		Month: int(t.Month()),
-		Year:  t.Year(),
-	}, nil
-}
-
-// DateFromTime :
-func DateFromTime(t time.Time) (*Date, error) {
-	return &Date{
+	return Date{
 		Day:   t.Day(),
 		Month: int(t.Month()),
 		Year:  t.Year(),

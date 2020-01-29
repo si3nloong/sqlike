@@ -50,10 +50,10 @@ func TestExamples(t *testing.T) {
 		PaginationExamples(t, client)
 		UpdateExamples(t, db)
 		DeleteExamples(t, db)
-		ExtraExamples(t, db, mg)
 		JSONExamples(t, db)
 		CasbinExamples(t, db)
 		SpatialExamples(t, db)
+		ExtraExamples(t, db, mg)
 	}
 
 	// Errors

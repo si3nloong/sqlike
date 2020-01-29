@@ -248,7 +248,7 @@ func newPtrStruct() ptrStruct {
 	ps.NullInt = &i
 	ps.NullInt32 = &i32
 	ps.NullInt64 = &i64
-	ps.NullDate = date
+	ps.NullDate = &date
 	ps.NullUint8 = &u8
 	ps.NullUint64 = &u64
 	ps.NullJSONRaw = &jsonByte
