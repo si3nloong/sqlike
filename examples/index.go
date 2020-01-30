@@ -20,7 +20,7 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 
-		err = table.DropIfExits()
+		err = table.DropIfExists()
 		require.NoError(t, err)
 	}
 

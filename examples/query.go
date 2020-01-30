@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"log"
 	"testing"
 
@@ -42,7 +43,7 @@ func QueryExamples(t *testing.T, db *sqlike.Database) {
 		// err = table.Truncate()
 		// require.NoError(t, err)
 
-		result, err := db.QueryStmt(stmt)
+		result, err := db.QueryStmt(context.Background(), stmt)
 		require.NoError(t, err)
 		defer result.Close()
 

@@ -19,7 +19,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	table := db.Table("normal_struct")
 
 	{
-		err = db.Table("NormalStruct").DropIfExits()
+		err = db.Table("NormalStruct").DropIfExists()
 		require.NoError(t, err)
 	}
 
@@ -77,7 +77,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		err = db.Table("PtrStruct").DropIfExits()
+		err = db.Table("PtrStruct").DropIfExists()
 		require.NoError(t, err)
 	}
 
@@ -89,7 +89,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	// migrate table with generated columns
 	{
 		table := db.Table("GeneratedStruct")
-		err = table.DropIfExits()
+		err = table.DropIfExists()
 		require.NoError(t, err)
 
 		err = table.Migrate(generatedStruct{})
@@ -117,7 +117,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	temp := db.Table("Temp")
 
 	{
-		err = temp.DropIfExits()
+		err = temp.DropIfExists()
 		require.NoError(t, err)
 		temp.MustMigrate(struct {
 			ID     string `sqlike:"$Key"`
@@ -126,7 +126,7 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		err = temp.DropIfExits()
+		err = temp.DropIfExists()
 		require.NoError(t, err)
 		temp.MustMigrate(struct {
 			ID     string `sqlike:"$Key"`

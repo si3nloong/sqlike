@@ -181,8 +181,8 @@ func (tb *Table) Truncate() (err error) {
 	return
 }
 
-// DropIfExits : will drop the table only if it exists
-func (tb Table) DropIfExits() (err error) {
+// DropIfExists : will drop the table only if it exists
+func (tb Table) DropIfExists() (err error) {
 	_, err = sqldriver.Execute(
 		context.Background(),
 		tb.driver,

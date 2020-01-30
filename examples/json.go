@@ -19,7 +19,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("JSON")
-	err = table.DropIfExits()
+	err = table.DropIfExists()
 	require.NoError(t, err)
 
 	// migrate

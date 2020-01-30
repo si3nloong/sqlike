@@ -47,7 +47,7 @@ func (db *Database) Table(name string) *Table {
 	}
 }
 
-func (db *Database) QueryStmt(query interface{}) (*Result, error) {
+func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
@@ -56,7 +56,7 @@ func (db *Database) QueryStmt(query interface{}) (*Result, error) {
 		return nil, err
 	}
 	rows, err := sqldriver.Query(
-		context.Background(),
+		ctx,
 		db.driver,
 		stmt,
 		getLogger(db.logger, true),
@@ -67,7 +67,10 @@ func (db *Database) QueryStmt(query interface{}) (*Result, error) {
 	rslt := new(Result)
 	rslt.registry = db.registry
 	rslt.rows = rows
-	rslt.columns, rslt.err = rows.Columns()
+	rslt.columnTypes, rslt.err = rows.ColumnTypes()
+	for _, c := range rslt.columnTypes {
+		rslt.columns = append(rslt.columns, c.Name())
+	}
 	return rslt, rslt.err
 }
 

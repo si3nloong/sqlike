@@ -22,10 +22,10 @@ func (ms MySQL) CreateDatabase(db string, checkExists bool) (stmt *sqlstmt.State
 }
 
 // DropDatabase :
-func (ms MySQL) DropDatabase(db string, exists bool) (stmt *sqlstmt.Statement) {
+func (ms MySQL) DropDatabase(db string, checkExists bool) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("DROP SCHEMA")
-	if exists {
+	if checkExists {
 		stmt.WriteString(" IF EXISTS")
 	}
 	stmt.WriteByte(' ')

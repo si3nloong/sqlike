@@ -42,7 +42,7 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 			No  int64
 		}
 
-		err = tbl.DropIfExits()
+		err = tbl.DropIfExists()
 		require.NoError(t, err)
 		tbl.MustMigrate(a)
 

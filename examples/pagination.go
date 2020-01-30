@@ -52,7 +52,7 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 	table := db.Table("User")
 
 	{
-		err = table.DropIfExits()
+		err = table.DropIfExists()
 		require.NoError(t, err)
 	}
 

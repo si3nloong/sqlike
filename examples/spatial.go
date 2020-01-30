@@ -37,7 +37,7 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 	point := orb.Point{1, 5}
 
 	{
-		err = table.DropIfExits()
+		err = table.DropIfExists()
 		require.NoError(t, err)
 	}
 

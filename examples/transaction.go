@@ -180,7 +180,7 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	table := db.Table("user")
-	err = table.DropIfExits()
+	err = table.DropIfExists()
 	require.NoError(t, err)
 	table.MustMigrate(new(user))
 
