@@ -22,7 +22,7 @@ type SingleResult interface {
 }
 
 // FindOne :
-func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOneOptions) SingleResult {
+func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, opts ...*options.FindOneOptions) SingleResult {
 	x := new(actions.FindOneActions)
 	if act != nil {
 		*x = *(act.(*actions.FindOneActions))
@@ -33,7 +33,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 	}
 	x.Limit(1)
 	csr := find(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.registry,
@@ -55,7 +55,7 @@ func (tb *Table) FindOne(act actions.SelectOneStatement, opts ...*options.FindOn
 }
 
 // Find :
-func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions) (*Result, error) {
+func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...*options.FindOptions) (*Result, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
@@ -69,7 +69,7 @@ func (tb *Table) Find(act actions.SelectStatement, opts ...*options.FindOptions)
 		x.Limit(100)
 	}
 	csr := find(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.registry,

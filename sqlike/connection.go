@@ -1,6 +1,7 @@
 package sqlike
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log"
@@ -36,12 +37,12 @@ func MustOpen(driver string, opt *options.ConnectOptions) *Client {
 }
 
 // Connect :
-func Connect(driver string, opt *options.ConnectOptions) (client *Client, err error) {
+func Connect(ctx context.Context, driver string, opt *options.ConnectOptions) (client *Client, err error) {
 	client, err = Open(driver, opt)
 	if err != nil {
 		return
 	}
-	err = client.Ping()
+	err = client.PingContext(ctx)
 	if err != nil {
 		client.Close()
 		return
@@ -50,8 +51,8 @@ func Connect(driver string, opt *options.ConnectOptions) (client *Client, err er
 }
 
 // MustConnect will panic if cannot connect to sql server
-func MustConnect(driver string, opt *options.ConnectOptions) *Client {
-	conn, err := Connect(driver, opt)
+func MustConnect(ctx context.Context, driver string, opt *options.ConnectOptions) *Client {
+	conn, err := Connect(ctx, driver, opt)
 	if err != nil {
 		panic(err)
 	}

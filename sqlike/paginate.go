@@ -15,7 +15,7 @@ import (
 var ErrInvalidCursor = errors.New("sqlike: invalid cursor")
 
 // Paginate :
-func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.PaginateOptions) (*Paginator, error) {
+func (tb *Table) Paginate(ctx context.Context, act actions.PaginateStatement, opts ...*options.PaginateOptions) (*Paginator, error) {
 	x := new(actions.PaginateActions)
 	if act != nil {
 		*x = *(act.(*actions.PaginateActions))
@@ -45,6 +45,7 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 		x.Count = 100
 	}
 	return &Paginator{
+		ctx:    ctx,
 		table:  tb,
 		fields: fields,
 		action: x.FindActions,
@@ -54,6 +55,7 @@ func (tb *Table) Paginate(act actions.PaginateStatement, opts ...*options.Pagina
 
 // Paginator :
 type Paginator struct {
+	ctx    context.Context
 	table  *Table
 	fields []interface{}
 	values []interface{}
@@ -62,13 +64,8 @@ type Paginator struct {
 	err    error
 }
 
-// Deprecated: NextPage
-func (pg *Paginator) NextPage(cursor interface{}) (err error) {
-	return pg.NextCursor(cursor)
-}
-
 // NextCursor :
-func (pg *Paginator) NextCursor(cursor interface{}) (err error) {
+func (pg *Paginator) NextCursor(ctx context.Context, cursor interface{}) (err error) {
 	if pg.err != nil {
 		return pg.err
 	}
@@ -80,7 +77,7 @@ func (pg *Paginator) NextCursor(cursor interface{}) (err error) {
 	).(*actions.FindOneActions)
 	fa.Limit(1)
 	result := find(
-		context.Background(),
+		ctx,
 		pg.table.dbName,
 		pg.table.name,
 		pg.table.registry,
@@ -104,7 +101,7 @@ func (pg *Paginator) All(results interface{}) error {
 		return pg.err
 	}
 	result := find(
-		context.Background(),
+		pg.ctx,
 		pg.table.dbName,
 		pg.table.name,
 		pg.table.registry,

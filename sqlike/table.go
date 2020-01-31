@@ -42,9 +42,9 @@ type Table struct {
 }
 
 // Rename : rename the current table name to new table name
-func (tb *Table) Rename(name string) error {
+func (tb *Table) Rename(ctx context.Context, name string) error {
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		tb.dialect.RenameTable(tb.dbName, tb.name, name),
 		tb.logger,
@@ -53,11 +53,11 @@ func (tb *Table) Rename(name string) error {
 }
 
 // Exists : this will return true when the table exists in the database
-func (tb *Table) Exists() bool {
+func (tb *Table) Exists(ctx context.Context) bool {
 	var count int
 	stmt := tb.dialect.HasTable(tb.dbName, tb.name)
 	row := sqldriver.QueryRowContext(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -74,10 +74,10 @@ func (tb *Table) Columns() *ColumnView {
 }
 
 // ListColumns :
-func (tb *Table) ListColumns() ([]Column, error) {
+func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 	stmt := tb.dialect.GetColumns(tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -114,10 +114,10 @@ func (tb *Table) ListColumns() ([]Column, error) {
 }
 
 // ListIndexes :
-func (tb *Table) ListIndexes() ([]Index, error) {
+func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
 	stmt := tb.dialect.GetIndexes(tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -144,36 +144,36 @@ func (tb *Table) ListIndexes() ([]Index, error) {
 }
 
 // MustMigrate : this will ensure the migrate is complete, otherwise it will panic
-func (tb Table) MustMigrate(entity interface{}) {
-	err := tb.Migrate(entity)
+func (tb Table) MustMigrate(ctx context.Context, entity interface{}) {
+	err := tb.Migrate(ctx, entity)
 	if err != nil {
 		panic(err)
 	}
 }
 
 // Migrate : migrate will create a new table follows by the definition of struct tag, alter when the table already exists
-func (tb *Table) Migrate(entity interface{}) error {
-	return tb.migrateOne(entity, false)
+func (tb *Table) Migrate(ctx context.Context, entity interface{}) error {
+	return tb.migrateOne(ctx, entity, false)
 }
 
 // UnsafeMigrate : unsafe migration will delete non-exist
 // index and columns, beware when you use this
-func (tb Table) UnsafeMigrate(entity interface{}) error {
-	return tb.migrateOne(entity, true)
+func (tb Table) UnsafeMigrate(ctx context.Context, entity interface{}) error {
+	return tb.migrateOne(ctx, entity, true)
 }
 
 // MustUnsafeMigrate :
-func (tb Table) MustUnsafeMigrate(entity interface{}) {
-	err := tb.migrateOne(entity, true)
+func (tb Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
+	err := tb.migrateOne(ctx, entity, true)
 	if err != nil {
 		panic(err)
 	}
 }
 
 // Truncate :
-func (tb *Table) Truncate() (err error) {
+func (tb *Table) Truncate(ctx context.Context) (err error) {
 	_, err = sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		tb.dialect.TruncateTable(tb.dbName, tb.name),
 		tb.logger,
@@ -182,9 +182,9 @@ func (tb *Table) Truncate() (err error) {
 }
 
 // DropIfExists : will drop the table only if it exists
-func (tb Table) DropIfExists() (err error) {
+func (tb Table) DropIfExists(ctx context.Context) (err error) {
 	_, err = sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		tb.dialect.DropTable(tb.dbName, tb.name, true),
 		tb.logger,
@@ -193,9 +193,9 @@ func (tb Table) DropIfExists() (err error) {
 }
 
 // Drop : drop the table, but it might throw error when the table is not exists
-func (tb Table) Drop() (err error) {
+func (tb Table) Drop(ctx context.Context) (err error) {
 	_, err = sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		tb.dialect.DropTable(tb.dbName, tb.name, false),
 		tb.logger,
@@ -204,13 +204,13 @@ func (tb Table) Drop() (err error) {
 }
 
 // Replace :
-func (tb *Table) Replace(fields []string, query *sql.SelectStmt) error {
+func (tb *Table) Replace(ctx context.Context, fields []string, query *sql.SelectStmt) error {
 	stmt, err := tb.dialect.Replace(tb.dbName, tb.name, fields, query)
 	if err != nil {
 		return err
 	}
 	_, err = sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -224,8 +224,9 @@ func (tb *Table) Indexes() *IndexView {
 }
 
 // HasIndexByName :
-func (tb *Table) HasIndexByName(name string) (bool, error) {
+func (tb *Table) HasIndexByName(ctx context.Context, name string) (bool, error) {
 	return isIndexExists(
+		ctx,
 		tb.dbName,
 		tb.name,
 		name,
@@ -235,7 +236,7 @@ func (tb *Table) HasIndexByName(name string) (bool, error) {
 	)
 }
 
-func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
+func (tb *Table) migrateOne(ctx context.Context, entity interface{}, unsafe bool) error {
 	v := reflext.ValueOf(entity)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -252,22 +253,22 @@ func (tb *Table) migrateOne(entity interface{}, unsafe bool) error {
 		return ErrEmptyFields
 	}
 
-	if !tb.Exists() {
-		return tb.createTable(fields)
+	if !tb.Exists(ctx) {
+		return tb.createTable(ctx, fields)
 	}
 
-	columns, err := tb.ListColumns()
+	columns, err := tb.ListColumns(ctx)
 	if err != nil {
 		return err
 	}
-	idxs, err := tb.ListIndexes()
+	idxs, err := tb.ListIndexes(ctx)
 	if err != nil {
 		return err
 	}
-	return tb.alterTable(fields, columns, idxs, unsafe)
+	return tb.alterTable(ctx, fields, columns, idxs, unsafe)
 }
 
-func (tb *Table) createTable(fields []*reflext.StructField) error {
+func (tb *Table) createTable(ctx context.Context, fields []*reflext.StructField) error {
 	stmt, err := tb.dialect.CreateTable(
 		tb.dbName,
 		tb.name,
@@ -279,7 +280,7 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 		return err
 	}
 	if _, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
@@ -289,7 +290,7 @@ func (tb *Table) createTable(fields []*reflext.StructField) error {
 	return nil
 }
 
-func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, indexs []Index, unsafe bool) error {
+func (tb *Table) alterTable(ctx context.Context, fields []*reflext.StructField, columns []Column, indexs []Index, unsafe bool) error {
 	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name
@@ -307,7 +308,7 @@ func (tb *Table) alterTable(fields []*reflext.StructField, columns []Column, ind
 		return err
 	}
 	if _, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,

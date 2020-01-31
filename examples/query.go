@@ -12,6 +12,9 @@ import (
 )
 
 func QueryExamples(t *testing.T, db *sqlike.Database) {
+	var (
+		ctx = context.Background()
+	)
 	// table := db.Table("query")
 
 	stmt := expr.Union(
@@ -61,14 +64,16 @@ func QueryExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		if err := db.RunInTransaction(func(ctx sqlike.SessionContext) error {
-			result, err := ctx.QueryStmt(stmt)
-			if err != nil {
-				return err
-			}
-			defer result.Close()
-			return nil
-		}); err != nil {
+		if err := db.RunInTransaction(
+			ctx,
+			func(sess sqlike.SessionContext) error {
+				result, err := sess.QueryStmt(sess, stmt)
+				if err != nil {
+					return err
+				}
+				defer result.Close()
+				return nil
+			}); err != nil {
 			panic(err)
 		}
 	}

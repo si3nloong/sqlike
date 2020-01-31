@@ -16,7 +16,7 @@ import (
 )
 
 // InsertOne :
-func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -51,13 +51,13 @@ func (tb *Table) InsertOne(src interface{}, opts ...*options.InsertOneOptions) (
 }
 
 // Insert :
-func (tb *Table) Insert(src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
+func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
 	opt := new(options.InsertOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
 	}
 	return insertMany(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.pk,

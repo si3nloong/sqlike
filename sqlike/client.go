@@ -82,20 +82,20 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 }
 
 // CreateDatabase :
-func (c *Client) CreateDatabase(name string) error {
-	return c.createDB(name, true)
+func (c *Client) CreateDatabase(ctx context.Context, name string) error {
+	return c.createDB(ctx, name, true)
 }
 
 // DropDatabase :
-func (c *Client) DropDatabase(name string) error {
-	return c.dropDB(name, true)
+func (c *Client) DropDatabase(ctx context.Context, name string) error {
+	return c.dropDB(ctx, name, true)
 }
 
 // ListDatabases :
-func (c *Client) ListDatabases() ([]string, error) {
+func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	stmt := c.dialect.GetDatabases()
 	rows, err := sqldriver.Query(
-		context.Background(),
+		ctx,
 		c.DB,
 		stmt,
 		c.logger,
@@ -155,10 +155,10 @@ func (c *Client) getVersion() (version *semver.Version) {
 	return
 }
 
-func (c *Client) createDB(name string, checkExists bool) error {
+func (c *Client) createDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := c.dialect.CreateDatabase(name, checkExists)
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		c,
 		stmt,
 		c.logger,
@@ -166,10 +166,10 @@ func (c *Client) createDB(name string, checkExists bool) error {
 	return err
 }
 
-func (c *Client) dropDB(name string, checkExists bool) error {
+func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := c.dialect.DropDatabase(name, checkExists)
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		c,
 		stmt,
 		c.logger,

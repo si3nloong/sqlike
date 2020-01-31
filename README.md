@@ -29,6 +29,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
+- Support tracing [OpenTracing](https://github.com/opentracing/opentracing-go) **(in progress)**
 - Prevent toxic query with `Strict Mode` **(in progress)**
 
 ### Missing DOC?

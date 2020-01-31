@@ -75,8 +75,12 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 }
 
 // BeginTransaction :
-func (db *Database) BeginTransaction() (*Transaction, error) {
-	return db.beginTrans(context.Background(), nil)
+func (db *Database) BeginTransaction(ctx context.Context, opts ...*sql.TxOptions) (*Transaction, error) {
+	opt := &sql.TxOptions{}
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+	return db.beginTrans(ctx, opt)
 }
 
 func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transaction, error) {
@@ -85,10 +89,10 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		return nil, err
 	}
 	return &Transaction{
+		Context:  ctx,
 		dbName:   db.name,
 		pk:       db.pk,
 		client:   db.client,
-		context:  ctx,
 		driver:   tx,
 		dialect:  db.dialect,
 		logger:   db.logger,
@@ -97,7 +101,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 }
 
 // RunInTransaction :
-func (db *Database) RunInTransaction(cb txCallback, opts ...*options.TransactionOptions) error {
+func (db *Database) RunInTransaction(ctx context.Context, cb txCallback, opts ...*options.TransactionOptions) error {
 	opt := new(options.TransactionOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -106,9 +110,9 @@ func (db *Database) RunInTransaction(cb txCallback, opts ...*options.Transaction
 	if opt.Duration.Seconds() > 0 {
 		duration = opt.Duration
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), duration)
+	c, cancel := context.WithTimeout(ctx, duration)
 	defer cancel()
-	tx, err := db.beginTrans(ctx, &sql.TxOptions{
+	tx, err := db.beginTrans(c, &sql.TxOptions{
 		Isolation: opt.IsolationLevel,
 		ReadOnly:  opt.ReadOnly,
 	})
@@ -135,7 +139,7 @@ type indexDefinition struct {
 }
 
 // BuildIndexes :
-func (db *Database) BuildIndexes(filepath ...string) error {
+func (db *Database) BuildIndexes(ctx context.Context, filepath ...string) error {
 	var id indexDefinition
 	pwd, _ := os.Getwd()
 	file := pwd + "/index.yaml"
@@ -181,6 +185,7 @@ READFILE:
 		}
 
 		if exists, err := isIndexExists(
+			ctx,
 			db.name,
 			idx.Table,
 			index.GetName(),
@@ -194,7 +199,7 @@ READFILE:
 		}
 
 		iv := db.Table(idx.Table).Indexes()
-		if err := iv.CreateOne(index); err != nil {
+		if err := iv.CreateOne(ctx, index); err != nil {
 			return err
 		}
 	}

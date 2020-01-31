@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -32,26 +33,27 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 		sp    = Spatial{}
 		table = db.Table("spatial")
 		err   error
+		ctx   = context.Background()
 	)
 
 	point := orb.Point{1, 5}
 
 	{
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 	}
 
 	{
-		table.MustMigrate(Spatial{})
-		table.MustUnsafeMigrate(Spatial{})
+		table.MustMigrate(ctx, Spatial{})
+		table.MustUnsafeMigrate(ctx, Spatial{})
 		iv := table.Indexes()
 		idx := indexes.Index{
 			Type:    indexes.Spatial,
 			Columns: indexes.Columns("Point"),
 		}
-		err = iv.CreateOne(idx)
+		err = iv.CreateOne(ctx, idx)
 		require.NoError(t, err)
-		result, err := iv.List()
+		result, err := iv.List(ctx)
 		require.NoError(t, err)
 		require.True(t, len(result) > 0)
 		require.Equal(t, sqlike.Index{
@@ -103,7 +105,9 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 		// 	},
 		// }
 		sps := []Spatial{sp, sp, sp}
-		_, err = table.Insert(&sps,
+		_, err = table.Insert(
+			ctx,
+			&sps,
 			options.Insert().SetDebug(true),
 		)
 		require.NoError(t, err)
@@ -111,6 +115,7 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 
 	{
 		result := table.FindOne(
+			ctx,
 			actions.FindOne().
 				Select(
 					"ID",
@@ -147,9 +152,11 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 	{
 		var o Spatial
 		result := table.FindOne(
-			actions.FindOne().Where(
-				expr.Equal("ID", 1),
-			),
+			ctx,
+			actions.FindOne().
+				Where(
+					expr.Equal("ID", 1),
+				),
 			options.FindOne().SetDebug(true),
 		)
 		err = result.Decode(&o)
@@ -170,6 +177,7 @@ func SpatialExamples(t *testing.T, db *sqlike.Database) {
 			Text  string
 		}
 		err = table.FindOne(
+			ctx,
 			actions.FindOne().
 				Select(
 					expr.As(expr.ST_Distance(expr.Column("Point"), origin), "dist"),

@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sqlike"
@@ -14,25 +15,26 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 		err     error
 		results []sqlike.Column
 		columns []string
+		ctx     = context.Background()
 	)
 
 	table := db.Table("normal_struct")
 
 	{
-		err = db.Table("NormalStruct").DropIfExists()
+		err = db.Table("NormalStruct").DropIfExists(ctx)
 		require.NoError(t, err)
 	}
 
 	// migrate table
 	{
-		err = table.Migrate(ns)
+		err = table.Migrate(ctx, ns)
 		require.NoError(t, err)
 		columnMap := make(map[string]sqlike.Column)
 		columns = make([]string, 0)
-		results, err = table.Columns().List()
+		results, err = table.Columns().List(ctx)
 		require.NoError(t, err)
 
-		table.MustMigrate(ns)
+		table.MustMigrate(ctx, ns)
 
 		for _, f := range results {
 			columnMap[f.Name] = f
@@ -61,42 +63,42 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		err = table.Rename("NormalStruct")
+		err = table.Rename(ctx, "NormalStruct")
 		require.NoError(t, err)
 	}
 
 	{
-		err = db.Table("NormalStruct").Truncate()
+		err = db.Table("NormalStruct").Truncate(ctx)
 		require.NoError(t, err)
 	}
 
 	// Alter table
 	{
-		err = db.Table("NormalStruct").Migrate(normalStruct{})
+		err = db.Table("NormalStruct").Migrate(ctx, normalStruct{})
 		require.NoError(t, err)
 	}
 
 	{
-		err = db.Table("PtrStruct").DropIfExists()
+		err = db.Table("PtrStruct").DropIfExists(ctx)
 		require.NoError(t, err)
 	}
 
 	{
-		err = db.Table("PtrStruct").Migrate(ptrStruct{})
+		err = db.Table("PtrStruct").Migrate(ctx, ptrStruct{})
 		require.NoError(t, err)
 	}
 
 	// migrate table with generated columns
 	{
 		table := db.Table("GeneratedStruct")
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 
-		err = table.Migrate(generatedStruct{})
+		err = table.Migrate(ctx, generatedStruct{})
 		require.NoError(t, err)
 
 		columns = make([]string, 0)
-		results, err = table.Columns().List()
+		results, err = table.Columns().List(ctx)
 		require.NoError(t, err)
 
 		for _, f := range results {
@@ -110,29 +112,31 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 			"Date.CreatedAt", "Date.UpdatedAt",
 		}, columns)
 
-		err = table.Migrate(generatedStruct{})
+		err = table.Migrate(ctx, generatedStruct{})
 		require.NoError(t, err)
 	}
 
 	temp := db.Table("Temp")
 
 	{
-		err = temp.DropIfExists()
+		err = temp.DropIfExists(ctx)
 		require.NoError(t, err)
-		temp.MustMigrate(struct {
-			ID     string `sqlike:"$Key"`
-			Number int64  `sqlike:",auto_increment"`
-		}{})
+		temp.MustMigrate(ctx,
+			struct {
+				ID     string `sqlike:"$Key"`
+				Number int64  `sqlike:",auto_increment"`
+			}{},
+		)
 	}
 
 	{
-		err = temp.DropIfExists()
+		err = temp.DropIfExists(ctx)
 		require.NoError(t, err)
-		temp.MustMigrate(struct {
+		temp.MustMigrate(ctx, struct {
 			ID     string `sqlike:"$Key"`
 			Number int64
 		}{})
-		temp.MustMigrate(struct {
+		temp.MustMigrate(ctx, struct {
 			ID     string `sqlike:"$Key"`
 			Number int64  `sqlike:",auto_increment"`
 		}{})
@@ -143,29 +147,30 @@ func MigrateExamples(t *testing.T, db *sqlike.Database) {
 func MigrateErrorExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		err error
+		ctx = context.Background()
 	)
 
 	{
 		// empty table shouldn't able to migrate
-		err = db.Table("").Migrate(new(normalStruct))
+		err = db.Table("").Migrate(ctx, new(normalStruct))
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(int(1))
+		err = db.Table("NormalStruct").Migrate(ctx, int(1))
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(struct{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, struct{}{})
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(nil)
+		err = db.Table("NormalStruct").Migrate(ctx, nil)
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(bool(false))
+		err = db.Table("NormalStruct").Migrate(ctx, bool(false))
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(map[string]interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, map[string]interface{}{})
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate([]interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, []interface{}{})
 		require.Error(t, err)
 	}
 }

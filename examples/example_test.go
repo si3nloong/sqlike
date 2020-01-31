@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"log"
 	"testing"
 
@@ -22,7 +23,9 @@ func (l Logger) Debug(stmt *sqlstmt.Statement) {
 
 // TestExamples :
 func TestExamples(t *testing.T) {
-	client, err := sqlike.Connect("mysql",
+	client, err := sqlike.Connect(
+		context.Background(),
+		"mysql",
 		options.Connect().
 			SetUsername("root").
 			SetPassword("abcd1234").

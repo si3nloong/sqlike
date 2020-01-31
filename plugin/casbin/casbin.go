@@ -1,6 +1,7 @@
 package casbin
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 
 // Adapter :
 type Adapter struct {
+	ctx      context.Context
 	table    *sqlike.Table
 	filtered bool
 }
@@ -23,8 +25,8 @@ type Adapter struct {
 var _ persist.FilteredAdapter = new(Adapter)
 
 // MustNew :
-func MustNew(table *sqlike.Table) persist.FilteredAdapter {
-	a, err := New(table)
+func MustNew(ctx context.Context, table *sqlike.Table) persist.FilteredAdapter {
+	a, err := New(ctx, table)
 	if err != nil {
 		panic(err)
 	}
@@ -32,25 +34,28 @@ func MustNew(table *sqlike.Table) persist.FilteredAdapter {
 }
 
 // New :
-func New(table *sqlike.Table) (persist.FilteredAdapter, error) {
+func New(ctx context.Context, table *sqlike.Table) (persist.FilteredAdapter, error) {
 	if table == nil {
 		return nil, errors.New("invalid <nil> table")
 	}
 	a := &Adapter{
+		ctx:   ctx,
 		table: table,
 	}
 	if err := a.createTable(); err != nil {
 		return nil, err
 	}
 	if err := a.table.Indexes().
-		CreateOneIfNotExists(indexes.Index{
-			Type: indexes.Primary,
-			Columns: indexes.Columns(
-				"PType",
-				"V0", "V1", "V2",
-				"V3", "V4", "V5",
-			),
-		}); err != nil {
+		CreateOneIfNotExists(
+			a.ctx,
+			indexes.Index{
+				Type: indexes.Primary,
+				Columns: indexes.Columns(
+					"PType",
+					"V0", "V1", "V2",
+					"V3", "V4", "V5",
+				),
+			}); err != nil {
 		return nil, err
 	}
 	return a, nil
@@ -58,7 +63,7 @@ func New(table *sqlike.Table) (persist.FilteredAdapter, error) {
 
 // LoadPolicy :
 func (a *Adapter) LoadPolicy(model model.Model) error {
-	result, err := a.table.Find(nil)
+	result, err := a.table.Find(a.ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -85,6 +90,7 @@ func (a *Adapter) LoadFilteredPolicy(model model.Model, filter interface{}) erro
 	act := new(actions.FindActions)
 	act.Conditions = x
 	result, err := a.table.Find(
+		a.ctx,
 		act,
 		options.Find().
 			SetNoLimit(true).
@@ -121,8 +127,12 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 	}
 
 	if len(policies) > 0 {
-		if _, err := a.table.Insert(&policies, options.Insert().
-			SetMode(options.InsertOnDuplicate)); err != nil {
+		if _, err := a.table.Insert(
+			a.ctx,
+			&policies,
+			options.Insert().
+				SetMode(options.InsertOnDuplicate),
+		); err != nil {
 			return err
 		}
 	}
@@ -132,6 +142,7 @@ func (a *Adapter) SavePolicy(model model.Model) error {
 // AddPolicy : adds a policy policy to the storage. This is part of the Auto-Save feature.
 func (a *Adapter) AddPolicy(sec string, ptype string, rules []string) error {
 	if _, err := a.table.InsertOne(
+		a.ctx,
 		toPolicy(ptype, rules),
 		options.InsertOne().
 			SetMode(options.InsertIgnore),
@@ -145,6 +156,7 @@ func (a *Adapter) AddPolicy(sec string, ptype string, rules []string) error {
 func (a *Adapter) RemovePolicy(sec string, ptype string, rules []string) error {
 	policy := toPolicy(ptype, rules)
 	if _, err := a.table.DeleteOne(
+		a.ctx,
 		actions.DeleteOne().Where(
 			expr.Equal("PType", policy.PType),
 			expr.Equal("V0", policy.V0),
@@ -250,5 +262,5 @@ func toPolicy(ptype string, rules []string) *Policy {
 }
 
 func (a *Adapter) createTable() error {
-	return a.table.UnsafeMigrate(Policy{})
+	return a.table.UnsafeMigrate(a.ctx, Policy{})
 }

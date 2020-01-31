@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -19,6 +20,7 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 		result   sql.Result
 		ns       normalStruct
 		err      error
+		ctx      = context.Background()
 	)
 
 	table := db.Table("NormalStruct")
@@ -26,31 +28,34 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 	// Delete record with primary key
 	{
 		err = table.FindOne(
+			ctx,
 			actions.FindOne().
 				OrderBy(expr.Desc("$Key")),
 		).Decode(&ns)
 		require.NoError(t, err)
-		err = table.DestroyOne(&ns)
+		err = table.DestroyOne(ctx, &ns)
 		require.NoError(t, err)
 	}
 
 	// Single delete
 	{
 		ns := newNormalStruct()
-		result, err = table.InsertOne(&ns,
-			options.InsertOne().
-				SetDebug(true),
+		result, err = table.InsertOne(
+			ctx,
+			&ns,
+			options.InsertOne().SetDebug(true),
 		)
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
 		affected, err = table.DeleteOne(
+			ctx,
 			actions.DeleteOne().
 				Where(
 					expr.Equal("$Key", ns.ID),
-				), options.DeleteOne().
-				SetDebug(true),
+				),
+			options.DeleteOne().SetDebug(true),
 		)
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
@@ -63,7 +68,9 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 			newNormalStruct(),
 			newNormalStruct(),
 		}
-		result, err = table.Insert(&nss,
+		result, err = table.Insert(
+			ctx,
+			&nss,
 			options.Insert().
 				SetDebug(true),
 		)
@@ -72,6 +79,7 @@ func DeleteExamples(t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.Equal(t, int64(3), affected)
 		affected, err = table.Delete(
+			ctx,
 			actions.Delete().
 				Where(
 					expr.In("$Key", []uuid.UUID{

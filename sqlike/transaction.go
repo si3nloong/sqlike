@@ -13,16 +13,17 @@ import (
 
 // SessionContext :
 type SessionContext interface {
+	context.Context
 	Table(name string) *Table
-	QueryStmt(query interface{}) (*Result, error)
+	QueryStmt(ctx context.Context, query interface{}) (*Result, error)
 }
 
 // Transaction :
 type Transaction struct {
+	context.Context
 	dbName   string
 	pk       string
 	client   *Client
-	context  context.Context
 	driver   *sql.Tx
 	dialect  dialect.Dialect
 	registry *codec.Registry
@@ -43,7 +44,7 @@ func (tx *Transaction) Table(name string) *Table {
 	}
 }
 
-func (tx *Transaction) QueryStmt(query interface{}) (*Result, error) {
+func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
@@ -52,7 +53,7 @@ func (tx *Transaction) QueryStmt(query interface{}) (*Result, error) {
 		return nil, err
 	}
 	rows, err := driver.Query(
-		tx.context,
+		ctx,
 		tx.driver,
 		stmt,
 		getLogger(tx.logger, true),

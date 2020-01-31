@@ -16,9 +16,9 @@ import (
 )
 
 // DestroyOne :
-func (tb *Table) DestroyOne(delete interface{}) error {
+func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 	return destroyOne(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.pk,
@@ -75,7 +75,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 }
 
 // DeleteOne :
-func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.DeleteOneOptions) (int64, error) {
+func (tb *Table) DeleteOne(ctx context.Context, act actions.DeleteOneStatement, opts ...*options.DeleteOneOptions) (int64, error) {
 	x := new(actions.DeleteOneActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteOneActions))
@@ -86,7 +86,7 @@ func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.Dele
 	}
 	x.Limit(1)
 	return deleteMany(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.driver,
@@ -98,7 +98,7 @@ func (tb *Table) DeleteOne(act actions.DeleteOneStatement, opts ...*options.Dele
 }
 
 // Delete :
-func (tb *Table) Delete(act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
+func (tb *Table) Delete(ctx context.Context, act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
@@ -108,7 +108,7 @@ func (tb *Table) Delete(act actions.DeleteStatement, opts ...*options.DeleteOpti
 		opt = opts[0]
 	}
 	return deleteMany(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.driver,

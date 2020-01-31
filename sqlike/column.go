@@ -26,14 +26,14 @@ type ColumnView struct {
 }
 
 // List :
-func (cv *ColumnView) List() ([]Column, error) {
-	return cv.tb.ListColumns()
+func (cv *ColumnView) List(ctx context.Context) ([]Column, error) {
+	return cv.tb.ListColumns(ctx)
 }
 
 // Rename :
-func (cv *ColumnView) Rename(oldColName, newColName string) error {
+func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string) error {
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		cv.tb.driver,
 		cv.tb.dialect.RenameColumn(cv.tb.dbName, cv.tb.name, oldColName, newColName),
 		cv.tb.logger,
@@ -42,9 +42,9 @@ func (cv *ColumnView) Rename(oldColName, newColName string) error {
 }
 
 // DropOne :
-func (cv *ColumnView) DropOne(name string) error {
+func (cv *ColumnView) DropOne(ctx context.Context, name string) error {
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		cv.tb.driver,
 		cv.tb.dialect.DropColumn(cv.tb.dbName, cv.tb.name, name),
 		cv.tb.logger,

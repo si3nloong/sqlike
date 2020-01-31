@@ -15,9 +15,9 @@ import (
 )
 
 // ModifyOne :
-func (tb *Table) ModifyOne(update interface{}, opts ...*options.ModifyOneOptions) error {
+func (tb *Table) ModifyOne(ctx context.Context, update interface{}, opts ...*options.ModifyOneOptions) error {
 	return modifyOne(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.pk,
@@ -46,10 +46,6 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 
 	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	// if _, exists := cdc.Names[pk]; !exists {
-	// 	return fmt.Errorf("sqlike: missing primary key field %q", pk)
-	// }
-
 	opt := new(options.ModifyOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -111,7 +107,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 }
 
 // UpdateOne :
-func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
+func (tb *Table) UpdateOne(ctx context.Context, act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
 	x := new(actions.UpdateOneActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateOneActions))
@@ -123,7 +119,7 @@ func (tb *Table) UpdateOne(act actions.UpdateOneStatement, opts ...*options.Upda
 
 	x.Limit(1)
 	return update(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.driver,

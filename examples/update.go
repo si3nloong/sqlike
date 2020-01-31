@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 	"time"
@@ -20,6 +21,7 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		err      error
 		result   sql.Result
 		affected int64
+		ctx      = context.Background()
 	)
 
 	table := db.Table("NormalStruct")
@@ -29,7 +31,9 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		ns = normalStruct{}
 		ns.ID = uid
 		ns.Timestamp = time.Now()
-		result, err = table.InsertOne(&ns,
+		result, err = table.InsertOne(
+			ctx,
+			&ns,
 			options.InsertOne().
 				SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
@@ -49,12 +53,15 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		ns.DateTime = now
 		ns.CreatedAt = now
 		ns.UpdatedAt = now
-		err = table.ModifyOne(&ns,
+		err = table.ModifyOne(
+			ctx,
+			&ns,
 			options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
 
 		ns2 := normalStruct{}
 		err = table.FindOne(
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Equal("$Key", ns.ID),
@@ -81,15 +88,17 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 
 		tbl := db.Table("NewStruct")
 
-		tbl.MustMigrate(newStruct{})
-		err = tbl.Truncate()
+		tbl.MustMigrate(ctx, newStruct{})
+		err = tbl.Truncate(ctx)
 		require.NoError(t, err)
 
 		ns := newStruct{}
 		ns.Key = 8888
 		ns.No = 1500
 		ns.ID = 1
-		result, err = tbl.InsertOne(&ns,
+		result, err = tbl.InsertOne(
+			ctx,
+			&ns,
 			options.InsertOne().
 				SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
@@ -100,12 +109,16 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		ns.Message = "hello world"
 		ns.Flag = true
 		ns.No = 1800
-		err = tbl.ModifyOne(&ns,
-			options.ModifyOne().SetDebug(true))
+		err = tbl.ModifyOne(
+			ctx,
+			&ns,
+			options.ModifyOne().SetDebug(true),
+		)
 		require.NoError(t, err)
 
 		ns2 := newStruct{}
 		err = tbl.FindOne(
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Equal("ID", 1),
@@ -121,6 +134,7 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 	// Update single record
 	{
 		affected, err = table.UpdateOne(
+			ctx,
 			actions.UpdateOne().
 				Where(expr.Equal("$Key", uid)).
 				Set(
@@ -137,6 +151,7 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 	// Advance update query
 	{
 		affected, err = table.UpdateOne(
+			ctx,
 			actions.UpdateOne().
 				Where(expr.Equal("$Key", uid)).
 				Set(
@@ -159,18 +174,19 @@ func UpdateErrorExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		ns  normalStruct
 		err error
+		ctx = context.Background()
 	)
 
 	table := db.Table("NormalStruct")
 
 	{
-		err = table.ModifyOne(nil)
+		err = table.ModifyOne(ctx, nil)
 		require.Error(t, err)
 
-		err = table.ModifyOne(&struct{}{})
+		err = table.ModifyOne(ctx, &struct{}{})
 		require.Error(t, err)
 
-		err = table.ModifyOne(&ns)
+		err = table.ModifyOne(ctx, &ns)
 		require.Equal(t, sqlike.ErrNoRecordAffected, err)
 	}
 }
