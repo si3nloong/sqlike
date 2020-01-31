@@ -64,9 +64,9 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		require.Equal(t, cnp, ns2.Emoji)
 		require.Equal(t, Success, ns2.Enum)
 		require.Equal(t, bigInt, ns2.BigInt)
-		// require.Equal(t, now, ns2.DateTime)
-		require.Equal(t, now, ns2.CreatedAt)
-		require.Equal(t, now, ns2.UpdatedAt)
+		require.NotZero(t, ns2.DateTime)
+		require.NotZero(t, ns2.CreatedAt)
+		require.NotZero(t, ns2.UpdatedAt)
 	}
 
 	{
