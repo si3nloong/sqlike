@@ -2,7 +2,7 @@ package sqlike
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -46,9 +46,9 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 
 	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(t)
-	if _, exists := cdc.Names[pk]; !exists {
-		return fmt.Errorf("sqlike: missing primary key field %q", pk)
-	}
+	// if _, exists := cdc.Names[pk]; !exists {
+	// 	return fmt.Errorf("sqlike: missing primary key field %q", pk)
+	// }
 
 	opt := new(options.ModifyOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
@@ -59,15 +59,30 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 
+	var pkv = [2]interface{}{}
 	for _, sf := range fields {
 		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-		if sf.Path == pk {
-			x.Where(expr.Equal(pk, fv.Interface()))
+		if _, ok := sf.Tag.LookUp("primary_key"); ok {
+			if pkv[0] != nil {
+				x.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))
+			}
+			pkv[0] = sf.Path
+			pkv[1] = fv.Interface()
+			continue
+		}
+		if sf.Path == pk && pkv[0] == nil {
+			pkv[0] = sf.Path
+			pkv[1] = fv.Interface()
 			continue
 		}
 		x.Set(expr.ColumnValue(sf.Path, fv.Interface()))
 	}
 
+	if pkv[0] == nil {
+		return errors.New("sqlike: missing primary key field")
+	}
+
+	x.Where(expr.Equal(pkv[0], pkv[1]))
 	x.Limit(1)
 	x.Table = tbName
 	x.Database = dbName
@@ -76,15 +91,23 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		return err
 	}
 
-	if _, err := sqldriver.Execute(
+	result, err := sqldriver.Execute(
 		ctx,
 		driver,
 		stmt,
 		getLogger(logger, opt.Debug),
-	); err != nil {
+	)
+	if err != nil {
 		return err
 	}
-	return err
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected < 1 {
+		return ErrNoRecordAffected
+	}
+	return nil
 }
 
 // UpdateOne :

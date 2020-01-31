@@ -1,12 +1,10 @@
 #### TODO
 
+- [ ] [BREAKING CHANGE] Support `Open tracing`.
 - [ ] Prevent toxic query.
-- [ ] Support `URL` filter. **(in progress)**
 - [ ] BeforeSave and AfterLoad hook.
-- [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] [BREAKING CHANGE] collate should reside in charset package.
 - [ ] Foreign key.
-- [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
+- [ ] Support `charset` and `collate` on `AlterTable`.
 - [x] Support `Point`.
 - [x] Support `LineString`.
 - [x] Support `primary_key` tag.
@@ -68,7 +66,9 @@
 - [x] Delete single record.
 - [x] Replace into (replace with `Copy` API).
 - [x] Support option tag `unique_index` and `index` on create table.
-- [ ] Support option tag `unique_index` and `index` on alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
+- [ ] Support option tag `unique_index` and `index` on alter table.
 - [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
+- [ ] [BREAKING CHANGE] collate should reside in charset package.
+- [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
 - [ ] Support `Postgres`.

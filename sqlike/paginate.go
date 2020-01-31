@@ -62,6 +62,11 @@ type Paginator struct {
 	err    error
 }
 
+// Deprecated: NextPage
+func (pg *Paginator) NextPage(cursor interface{}) (err error) {
+	return pg.NextCursor(cursor)
+}
+
 // NextCursor :
 func (pg *Paginator) NextCursor(cursor interface{}) (err error) {
 	if pg.err != nil {

@@ -61,6 +61,7 @@ func TestExamples(t *testing.T) {
 		MigrateErrorExamples(t, db)
 		InsertErrorExamples(t, db)
 		FindErrorExamples(t, db)
+		UpdateErrorExamples(t, db)
 	}
 
 }
