@@ -23,6 +23,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		result *sqlike.Result
 		ns     normalStruct
 		err    error
+		ctx    = context.Background()
 	)
 
 	emoji := `🤕`
@@ -86,7 +87,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns.UpdatedAt = now
 
 		_, err = table.InsertOne(
-			context.Background(), &ns,
+			ctx, &ns,
 		)
 		require.NoError(t, err)
 	}
@@ -95,7 +96,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		result := table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Equal("$Key", uid),
@@ -163,7 +164,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 		// Scan with unmatched number of fields
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Select(
 					expr.As(expr.Count("$Key"), "c"),
@@ -178,7 +179,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 		// Scan with fields
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Select(
 					"$Key", "Emoji", "CustomStrType", "Bool",
@@ -198,7 +199,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 
 		// Scan error
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Select(
 					"$Key",
@@ -215,7 +216,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Equal("$Key", "1000"),
@@ -229,7 +230,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		ns = normalStruct{}
 		nss := []normalStruct{}
 		result, err = table.Find(
-			context.Background(),
+			ctx,
 			actions.Find().
 				Where(
 					expr.Between("TinyInt", 1, 100),
@@ -250,7 +251,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		result, err = table.Find(
-			context.Background(),
+			ctx,
 			actions.Find().Select("Emoji"),
 			options.Find().SetDebug(true),
 		)
@@ -271,7 +272,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		result, err = table.Find(
-			context.Background(),
+			ctx,
 			actions.Find().
 				Where(
 					expr.In("$Key", actions.Find().
@@ -311,7 +312,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		symbol := "Hal%o%()#$\\%^&_"
 		ns = normalStruct{}
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Like("FullText", symbol+"%"),
@@ -326,7 +327,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		result, err = table.Find(
-			context.Background(),
+			ctx,
 			actions.Find().
 				Select(
 					expr.As("Enum", "A"),
@@ -364,7 +365,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 			newGeneratedStruct(),
 		}
 		_, err = table.Insert(
-			context.Background(),
+			ctx,
 			&cols,
 			options.Insert().SetDebug(true),
 		)
@@ -374,7 +375,7 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 		var result generatedStruct
 
 		err = table.FindOne(
-			context.Background(),
+			ctx,
 			actions.FindOne().
 				Where(
 					expr.Equal("NestedID", first.Nested.ID),
@@ -392,18 +393,19 @@ func FindExamples(t *testing.T, db *sqlike.Database) {
 func FindErrorExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		err error
+		ctx = context.Background()
 	)
 
 	{
 		_, err = db.Table("unknown_table").Find(
-			context.Background(),
+			ctx,
 			nil,
 			options.Find().SetDebug(true),
 		)
 		require.Error(t, err)
 
 		err = db.Table("NormalStruct").FindOne(
-			context.Background(),
+			ctx,
 			nil,
 			options.FindOne().SetDebug(true),
 		).Decode(nil)

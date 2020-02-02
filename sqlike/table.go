@@ -56,13 +56,12 @@ func (tb *Table) Rename(ctx context.Context, name string) error {
 func (tb *Table) Exists(ctx context.Context) bool {
 	var count int
 	stmt := tb.dialect.HasTable(tb.dbName, tb.name)
-	row := sqldriver.QueryRowContext(
+	if err := sqldriver.QueryRowContext(
 		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
-	)
-	if err := row.Scan(&count); err != nil {
+	).Scan(&count); err != nil {
 		panic(err)
 	}
 	return count > 0

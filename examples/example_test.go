@@ -32,6 +32,7 @@ func TestExamples(t *testing.T) {
 			SetCharset("utf8mb4"),
 	)
 	require.NoError(t, err)
+	defer client.Close()
 
 	mg := connectMongoDB()
 
