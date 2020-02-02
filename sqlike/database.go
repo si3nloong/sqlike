@@ -68,8 +68,11 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	rslt.registry = db.registry
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()
-	for _, c := range rslt.columnTypes {
-		rslt.columns = append(rslt.columns, c.Name())
+	if rslt.err != nil {
+		defer rslt.rows.Close()
+	}
+	for _, col := range rslt.columnTypes {
+		rslt.columns = append(rslt.columns, col.Name())
 	}
 	return rslt, rslt.err
 }

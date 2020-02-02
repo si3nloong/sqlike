@@ -93,12 +93,12 @@ func find(ctx context.Context, dbName, tbName string, registry *codec.Registry, 
 	if act.Table == "" {
 		act.Table = tbName
 	}
-	csr := new(Result)
-	csr.registry = registry
+	rslt := new(Result)
+	rslt.registry = registry
 	stmt, err := dialect.Select(act, lock)
 	if err != nil {
-		csr.err = err
-		return csr
+		rslt.err = err
+		return rslt
 	}
 	rows, err := sqldriver.Query(
 		ctx,
@@ -107,13 +107,16 @@ func find(ctx context.Context, dbName, tbName string, registry *codec.Registry, 
 		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
-		csr.err = err
-		return csr
+		rslt.err = err
+		return rslt
 	}
-	csr.rows = rows
-	csr.columnTypes, csr.err = rows.ColumnTypes()
-	for _, ct := range csr.columnTypes {
-		csr.columns = append(csr.columns, ct.Name())
+	rslt.rows = rows
+	rslt.columnTypes, rslt.err = rows.ColumnTypes()
+	if rslt.err != nil {
+		defer rslt.rows.Close()
 	}
-	return csr
+	for _, col := range rslt.columnTypes {
+		rslt.columns = append(rslt.columns, col.Name())
+	}
+	return rslt
 }
