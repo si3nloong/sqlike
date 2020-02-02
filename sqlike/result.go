@@ -184,7 +184,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 		}
 	}
 	v.Set(slice)
-	return nil
+	return r.rows.Close()
 }
 
 // All :
@@ -240,7 +240,7 @@ func (r *Result) All(results interface{}) error {
 		slice = reflect.Append(slice, vv)
 	}
 	v.Set(slice)
-	return nil
+	return r.rows.Close()
 }
 
 // Error :
