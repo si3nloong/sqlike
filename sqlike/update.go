@@ -131,7 +131,7 @@ func (tb *Table) UpdateOne(ctx context.Context, act actions.UpdateOneStatement, 
 }
 
 // Update :
-func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOptions) (int64, error) {
+func (tb *Table) Update(ctx context.Context, act actions.UpdateStatement, opts ...*options.UpdateOptions) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
@@ -141,7 +141,7 @@ func (tb *Table) Update(act actions.UpdateStatement, opts ...*options.UpdateOpti
 		opt = opts[0]
 	}
 	return update(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.driver,
