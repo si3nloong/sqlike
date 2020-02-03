@@ -7,7 +7,7 @@ import (
 
 // Replace :
 func (ms MySQL) Replace(db, table string, columns []string, query *sql.SelectStmt) (stmt *sqlstmt.Statement, err error) {
-	stmt = new(sqlstmt.Statement)
+	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("REPLACE INTO ")
 	stmt.WriteString(ms.TableName(db, table) + " ")
 	if len(columns) > 0 {
