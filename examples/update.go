@@ -49,8 +49,21 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 		ns.DateTime = now
 		ns.CreatedAt = now
 		ns.UpdatedAt = now
-		err = table.ModifyOne(&ns,
+		err = table.ModifyOne(
+			&ns,
 			options.ModifyOne().SetDebug(true))
+		require.NoError(t, err)
+
+		err = table.ModifyOne(
+			&ns,
+			options.ModifyOne().SetDebug(true))
+		require.Error(t, err)
+
+		err = table.ModifyOne(
+			&ns,
+			options.ModifyOne().
+				SetStrict(false).
+				SetDebug(true))
 		require.NoError(t, err)
 
 		ns2 := normalStruct{}

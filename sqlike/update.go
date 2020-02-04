@@ -100,12 +100,14 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 	if err != nil {
 		return err
 	}
-	affected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected < 1 {
-		return ErrNoRecordAffected
+	if !opt.NoStrict {
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected < 1 {
+			return ErrNoRecordAffected
+		}
 	}
 	return nil
 }
