@@ -59,6 +59,20 @@ func UpdateExamples(t *testing.T, db *sqlike.Database) {
 			options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
 
+		err = table.ModifyOne(
+			ctx,
+			&ns,
+			options.ModifyOne().SetDebug(true))
+		require.Error(t, err)
+
+		err = table.ModifyOne(
+			ctx,
+			&ns,
+			options.ModifyOne().
+				SetStrict(false).
+				SetDebug(true))
+		require.NoError(t, err)
+
 		ns2 := normalStruct{}
 		err = table.FindOne(
 			ctx,
