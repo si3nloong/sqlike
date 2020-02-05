@@ -9,6 +9,7 @@ import (
 // Formatter :
 type Formatter interface {
 	Format(it interface{}) string
+	Var(i int) string
 }
 
 // Statement :
@@ -53,11 +54,10 @@ func (sm Statement) Format(state fmt.State, verb rune) {
 		state.Write([]byte(str))
 		return
 	}
-	// TODO: change variable
 	i := 1
 	args := sm.Args()
 	for {
-		idx := strings.Index(str, "?")
+		idx := strings.Index(str, sm.fmt.Var(i))
 		if idx < 0 {
 			state.Write([]byte(str))
 			break
@@ -68,7 +68,6 @@ func (sm Statement) Format(state fmt.State, verb rune) {
 		args = args[1:]
 		i++
 	}
-	return
 }
 
 // StartTimer :
