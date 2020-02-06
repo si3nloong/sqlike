@@ -1,6 +1,7 @@
 package options
 
 import (
+	"net"
 	"regexp"
 	"strings"
 
@@ -10,10 +11,13 @@ import (
 
 // ConnectOptions :
 type ConnectOptions struct {
+	raw      string
 	Username string
 	Password string
+	Protocol string
 	Host     string
 	Port     string
+	Socket   string
 	Charset  charset.Code
 	Collate  string
 	Logger   logs.Logger
@@ -22,6 +26,17 @@ type ConnectOptions struct {
 // Connect :
 func Connect() *ConnectOptions {
 	return &ConnectOptions{}
+}
+
+// Raw :
+func (opt *ConnectOptions) RawConnStr() string {
+	return opt.raw
+}
+
+// ApplyURI :
+func (opt *ConnectOptions) ApplyURI(uri string) *ConnectOptions {
+	opt.raw = uri
+	return opt
 }
 
 // SetUsername :
@@ -36,8 +51,17 @@ func (opt *ConnectOptions) SetPassword(password string) *ConnectOptions {
 	return opt
 }
 
+// SetProtocol :
+func (opt *ConnectOptions) SetProtocol(network string) *ConnectOptions {
+	opt.Protocol = strings.TrimSpace(network)
+	return opt
+}
+
 // SetHost :
 func (opt *ConnectOptions) SetHost(host string) *ConnectOptions {
+	if ip := net.ParseIP(opt.Host); ip != nil {
+		panic("invalid ip address")
+	}
 	opt.Host = strings.TrimSpace(host)
 	return opt
 }
@@ -48,6 +72,12 @@ func (opt *ConnectOptions) SetPort(port string) *ConnectOptions {
 		panic("invalid port format")
 	}
 	opt.Port = strings.TrimSpace(port)
+	return opt
+}
+
+// SetSocket :
+func (opt *ConnectOptions) SetSocket(sckt string) *ConnectOptions {
+	opt.Socket = strings.TrimSpace(sckt)
 	return opt
 }
 

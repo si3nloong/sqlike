@@ -7,17 +7,35 @@ import (
 
 // Connect :
 func (ms MySQL) Connect(opt *options.ConnectOptions) (connStr string) {
+	if opt.RawConnStr() != "" {
+		connStr = opt.RawConnStr()
+		return
+	}
+
+	if opt.Username == "" {
+		panic("missing username for db connection")
+	}
+
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	blr.WriteString(opt.Username)
 	blr.WriteByte(':')
 	blr.WriteString(opt.Password)
 	blr.WriteByte('@')
-	if opt.Host != "" {
-		blr.WriteString(`tcp(`)
+	if opt.Socket != "" {
+		blr.WriteString(opt.Socket)
+	} else {
+		if opt.Protocol != "" {
+			blr.WriteString(opt.Protocol)
+		} else {
+			blr.WriteString("tcp")
+		}
+		blr.WriteByte('(')
 		blr.WriteString(opt.Host)
-		blr.WriteByte(':')
-		blr.WriteString(opt.Port)
+		if opt.Port != "" {
+			blr.WriteByte(':')
+			blr.WriteString(opt.Port)
+		}
 		blr.WriteByte(')')
 	}
 	blr.WriteByte('/')
