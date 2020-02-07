@@ -54,6 +54,31 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 		tbl.MustMigrate(b)
 	}
 
+	table = db.Table("B")
+
+	// Alter table should add primary key if it's not exists
+	{
+		err = table.DropIfExists()
+		require.NoError(t, err)
+		table.MustMigrate(struct {
+			ID   string
+			Name string
+		}{})
+
+		table.MustMigrate(struct {
+			ID   string `sqlike:",primary_key"`
+			Name string
+		}{})
+
+		idxs, err := table.Indexes().List()
+		require.NoError(t, err)
+		require.Contains(t, idxs, sqlike.Index{
+			Name:     "PRIMARY",
+			Type:     "BTREE",
+			IsUnique: true,
+		})
+	}
+
 	// MongoDB :
 	// {
 	// 	ctx := context.Background()

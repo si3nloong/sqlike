@@ -12,6 +12,16 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 )
 
+// HasPrimaryKey :
+func (ms MySQL) HasPrimaryKey(db, table string) (stmt *sqlstmt.Statement) {
+	stmt = sqlstmt.NewStatement(ms)
+	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
+	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
+	stmt.WriteByte(';')
+	stmt.AppendArgs([]interface{}{db, table})
+	return
+}
+
 // RenameTable :
 func (ms MySQL) RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
@@ -156,7 +166,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
 	var (
 		col     columns.Column
 		pkk     *reflext.StructField
@@ -181,7 +191,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, info driver.Info, fields []*re
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
-		if action == "ADD" {
+		if !hasPk {
 			// allow primary_key tag to override
 			if _, ok := sf.Tag.LookUp("primary_key"); ok {
 				pkk = sf
