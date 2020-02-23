@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sqlike"
@@ -14,39 +15,42 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		err  error
 		idxs []sqlike.Index
 		ok   bool
+		ctx  = context.Background()
 	)
 
 	table := db.Table("Index")
 
 	{
 
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 	}
 
 	// Migrate and create unique index with `unique_index` tag
 	{
-		err = table.Migrate(indexStruct{})
+		err = table.Migrate(ctx, indexStruct{})
 		require.NoError(t, err)
 	}
 
 	// Create one index
 	{
 		idx := table.Indexes()
-		err = idx.CreateOne(indexes.Index{
-			Columns: indexes.Columns("ID"),
-		})
+		err = idx.CreateOne(
+			ctx,
+			indexes.Index{
+				Columns: indexes.Columns("ID"),
+			})
 		require.NoError(t, err)
-		idxs, err = idx.List()
+		idxs, err = idx.List(ctx)
 		require.True(t, len(idxs) > 1)
 		require.NoError(t, err)
 	}
 
 	// Auto build indexes using yaml file
 	{
-		err = db.BuildIndexes()
+		err = db.BuildIndexes(ctx)
 		require.NoError(t, err)
-		idxs, err = db.Table("NormalStruct").Indexes().List()
+		idxs, err = db.Table("NormalStruct").Indexes().List(ctx)
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
 			// Name:      "IX-SID@ASC;Emoji@ASC;Bool@DESC",
@@ -79,13 +83,13 @@ func IndexExamples(t *testing.T, db *sqlike.Database) {
 		}
 
 		iv := table.Indexes()
-		err = iv.Create(idxs)
+		err = iv.Create(ctx, idxs)
 		require.NoError(t, err)
-		ok, _ = table.HasIndexByName("Bool_Int")
+		ok, _ = table.HasIndexByName(ctx, "Bool_Int")
 		require.True(t, ok)
-		ok, _ = table.HasIndexByName("DateTime_Timestamp")
+		ok, _ = table.HasIndexByName(ctx, "DateTime_Timestamp")
 		require.True(t, ok)
-		err = iv.CreateIfNotExists(idxs)
+		err = iv.CreateIfNotExists(ctx, idxs)
 		require.NoError(t, err)
 	}
 

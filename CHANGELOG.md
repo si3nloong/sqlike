@@ -15,3 +15,4 @@
 ### Fixed :bug:
 
 - Fix `ModifyOne` should failed when affected rows is zero
+- Add `primary_key` tag support for `ModifyOne`

@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/casbin/casbin/v2"
@@ -18,14 +19,15 @@ func CasbinExamples(t *testing.T, db *sqlike.Database) {
 		e   *casbin.Enforcer
 		err error
 		ok  bool
+		ctx = context.Background()
 	)
 
 	table := db.Table("AccessPolicy")
 	// Init policy
 	{
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
-		a = plugin.MustNew(table)
+		a = plugin.MustNew(ctx, table)
 		e, err = casbin.NewEnforcer("./rbac_model.conf", a)
 		require.NoError(t, err)
 		err = e.LoadModel()

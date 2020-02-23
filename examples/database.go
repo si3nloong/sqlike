@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sqlike"
@@ -11,12 +12,13 @@ import (
 func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 	var (
 		err error
+		ctx = context.Background()
 	)
 
 	{
-		err = client.DropDatabase("test")
+		err = client.DropDatabase(ctx, "test")
 		require.NoError(t, err)
-		err = client.CreateDatabase("test")
+		err = client.CreateDatabase(ctx, "test")
 		require.NoError(t, err)
 
 		testDB := client.Database("test")
@@ -25,7 +27,7 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 	}
 
 	{
-		dbs, err := client.ListDatabases()
+		dbs, err := client.ListDatabases(ctx)
 		require.True(t, len(dbs) > 0)
 		require.NoError(t, err)
 	}

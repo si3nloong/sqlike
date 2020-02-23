@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"sort"
 	"testing"
 
@@ -16,15 +17,16 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	var (
 		err    error
 		result *sqlike.Result
+		ctx    = context.Background()
 	)
 
 	table := db.Table("JSON")
-	err = table.DropIfExists()
+	err = table.DropIfExists(ctx)
 	require.NoError(t, err)
 
 	// migrate
 	{
-		table.MustMigrate(jsonStruct{})
+		table.MustMigrate(ctx, jsonStruct{})
 	}
 
 	jss := [...]jsonStruct{
@@ -34,7 +36,9 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 	}
 
 	{
-		_, err = table.Insert(&jss,
+		_, err = table.Insert(
+			ctx,
+			&jss,
 			options.Insert().
 				SetDebug(true))
 		require.NoError(t, err)
@@ -50,12 +54,14 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 
 		extr := expr.JSON_EXTRACT(expr.Column("Raw"), "$.message")
 		err = table.FindOne(
-			actions.FindOne().Select(
-				expr.As(expr.JSON_QUOTE(expr.Column("Text")), "Text"),
-				expr.JSON_UNQUOTE(extr),
-				extr,
-				expr.JSON_KEYS(expr.Column("Raw")),
-			),
+			ctx,
+			actions.FindOne().
+				Select(
+					expr.As(expr.JSON_QUOTE(expr.Column("Text")), "Text"),
+					expr.JSON_UNQUOTE(extr),
+					extr,
+					expr.JSON_KEYS(expr.Column("Raw")),
+				),
 			options.FindOne().SetDebug(true),
 		).Scan(&o.Text, &o.Message, &o.QuoteMessage, &o.ObjKeys)
 		require.NoError(t, err)
@@ -77,6 +83,7 @@ func JSONExamples(t *testing.T, db *sqlike.Database) {
 		}
 
 		result, err = table.Find(
+			ctx,
 			actions.Find().
 				Select(
 					expr.As(

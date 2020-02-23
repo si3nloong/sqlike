@@ -26,24 +26,24 @@ type IndexView struct {
 }
 
 // List :
-func (idv *IndexView) List() ([]Index, error) {
-	return idv.tb.ListIndexes()
+func (idv *IndexView) List(ctx context.Context) ([]Index, error) {
+	return idv.tb.ListIndexes(ctx)
 }
 
 // CreateOne :
-func (idv *IndexView) CreateOne(idx indexes.Index) error {
-	return idv.Create([]indexes.Index{idx})
+func (idv *IndexView) CreateOne(ctx context.Context, idx indexes.Index) error {
+	return idv.Create(ctx, []indexes.Index{idx})
 }
 
 // Create :
-func (idv *IndexView) Create(idxs []indexes.Index) error {
+func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
 	for _, idx := range idxs {
 		if len(idx.Columns) < 1 {
 			return ErrNoColumn
 		}
 	}
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		idv.tb.driver,
 		idv.tb.dialect.CreateIndexes(idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc()),
 		idv.tb.logger,
@@ -52,12 +52,12 @@ func (idv *IndexView) Create(idxs []indexes.Index) error {
 }
 
 // CreateOneIfNotExists :
-func (idv *IndexView) CreateOneIfNotExists(idx indexes.Index) error {
-	return idv.CreateIfNotExists([]indexes.Index{idx})
+func (idv *IndexView) CreateOneIfNotExists(ctx context.Context, idx indexes.Index) error {
+	return idv.CreateIfNotExists(ctx, []indexes.Index{idx})
 }
 
 // CreateIfNotExists :
-func (idv *IndexView) CreateIfNotExists(idxs []indexes.Index) error {
+func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Index) error {
 	cols := make([]indexes.Index, 0, len(idxs))
 	for _, idx := range idxs {
 		if len(idx.Columns) < 1 {
@@ -65,7 +65,7 @@ func (idv *IndexView) CreateIfNotExists(idxs []indexes.Index) error {
 		}
 		var count int
 		if err := sqldriver.QueryRowContext(
-			context.Background(),
+			ctx,
 			idv.tb.driver,
 			idv.tb.dialect.HasIndex(idv.tb.dbName, idv.tb.name, idx),
 			idv.tb.logger,
@@ -81,7 +81,7 @@ func (idv *IndexView) CreateIfNotExists(idxs []indexes.Index) error {
 		return nil
 	}
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		idv.tb.driver,
 		idv.tb.dialect.CreateIndexes(idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc()),
 		idv.tb.logger,
@@ -90,9 +90,9 @@ func (idv *IndexView) CreateIfNotExists(idxs []indexes.Index) error {
 }
 
 // DropOne :
-func (idv IndexView) DropOne(name string) error {
+func (idv IndexView) DropOne(ctx context.Context, name string) error {
 	_, err := sqldriver.Execute(
-		context.Background(),
+		ctx,
 		idv.tb.driver,
 		idv.tb.dialect.DropIndex(idv.tb.dbName, idv.tb.name, name),
 		idv.tb.logger,
@@ -113,10 +113,10 @@ func (idv *IndexView) isSupportDesc() bool {
 	return *idv.supportDesc
 }
 
-func isIndexExists(dbName, table, indexName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger) (bool, error) {
+func isIndexExists(ctx context.Context, dbName, table, indexName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger) (bool, error) {
 	var count int
 	if err := sqldriver.QueryRowContext(
-		context.Background(),
+		ctx,
 		driver,
 		dialect.HasIndexByName(dbName, table, indexName),
 		logger,

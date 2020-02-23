@@ -1,6 +1,7 @@
 package sqlike
 
 import (
+	"context"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -13,12 +14,14 @@ func TestPaginate(t *testing.T) {
 	var (
 		err error
 		pg  *Paginator
+		ctx = context.Background()
 	)
 
 	tb := Table{pk: "ID"}
 
 	t.Run("Ascending", func(ti *testing.T) {
 		pg, err = tb.Paginate(
+			ctx,
 			actions.Paginate().
 				Where(
 					expr.Equal("A", "testing"),
@@ -43,6 +46,7 @@ func TestPaginate(t *testing.T) {
 
 	t.Run("Descending", func(ti *testing.T) {
 		pg, err = tb.Paginate(
+			ctx,
 			actions.Paginate().
 				OrderBy(
 					expr.Desc("A"),
@@ -60,6 +64,7 @@ func TestPaginate(t *testing.T) {
 
 	t.Run("Ascending & Descending", func(ti *testing.T) {
 		pg, err = tb.Paginate(
+			ctx,
 			actions.Paginate().
 				OrderBy(
 					expr.Asc("A"),

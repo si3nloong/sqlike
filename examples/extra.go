@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"context"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql"
@@ -13,16 +14,18 @@ import (
 func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 	var (
 		err error
+		ctx = context.Background()
 	)
 
 	table := db.Table("A")
 
 	{
-		table.MustMigrate(normalStruct{})
-		err = table.Truncate()
+		table.MustMigrate(ctx, normalStruct{})
+		err = table.Truncate(ctx)
 		require.NoError(t, err)
 
 		err = table.Replace(
+			ctx,
 			[]string{
 				"$Key", "SID", "Date", "Emoji", "LongStr",
 				"TinyInt", "Float64", "EmptyStruct", "Struct",
@@ -42,35 +45,35 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 			No  int64
 		}
 
-		err = tbl.DropIfExists()
+		err = tbl.DropIfExists(ctx)
 		require.NoError(t, err)
-		tbl.MustMigrate(a)
+		tbl.MustMigrate(ctx, a)
 
 		var b struct {
 			Key string `sqlike:"$Key"`
 			No  int64  `sqlike:",primary_key"`
 		}
 
-		tbl.MustMigrate(b)
+		tbl.MustMigrate(ctx, b)
 	}
 
 	table = db.Table("B")
 
 	// Alter table should add primary key if it's not exists
 	{
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
-		table.MustMigrate(struct {
+		table.MustMigrate(ctx, struct {
 			ID   string
 			Name string
 		}{})
 
-		table.MustMigrate(struct {
+		table.MustMigrate(ctx, struct {
 			ID   string `sqlike:",primary_key"`
 			Name string
 		}{})
 
-		idxs, err := table.Indexes().List()
+		idxs, err := table.Indexes().List(ctx)
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
 			Name:     "PRIMARY",

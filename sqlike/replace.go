@@ -10,7 +10,7 @@ import (
 )
 
 // InsertOne :
-func (tb *Table) ReplaceOne(src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+func (tb *Table) ReplaceOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -31,7 +31,7 @@ func (tb *Table) ReplaceOne(src interface{}, opts ...*options.InsertOneOptions) 
 	arr := reflect.MakeSlice(reflect.SliceOf(t), 0, 1)
 	arr = reflect.Append(arr, v)
 	return insertMany(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.pk,
