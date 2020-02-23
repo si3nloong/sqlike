@@ -52,6 +52,7 @@ import (
     "github.com/si3nloong/sqlike/sqlike/options"
     "github.com/si3nloong/sqlike/sql/expr"
     "github.com/google/uuid"
+    "context"
 )
 
 // UserStatus :
@@ -87,7 +88,10 @@ func newUser() (user User) {
 }
 
 func main() {
-    client := sqlike.MustConnect("mysql",
+    ctx := context.Background()
+    client := sqlike.MustConnect(
+        ctx,
+        "mysql",
         options.Connect().
         SetUsername("root").
         SetPassword("").
@@ -102,18 +106,18 @@ func main() {
     userTable := client.Database("sqlike").Table("User")
 
     // Drop Table
-    userTable.Drop()
+    userTable.Drop(ctx)
 
     // Migrate Table
-    userTable.Migrate(User{})
+    userTable.Migrate(ctx, User{})
 
     // Truncate Table
-    userTable.Truncate()
+    userTable.Truncate(ctx)
 
     // Insert one record
     {
         user := newUser()
-        if _, err := userTable.InsertOne(&user); err != nil {
+        if _, err := userTable.InsertOne(ctx, &user); err != nil {
             panic(err)
         }
     }
@@ -125,7 +129,7 @@ func main() {
             newUser(),
             newUser(),
         }
-        if _, err := userTable.Insert(&users); err != nil {
+        if _, err := userTable.Insert(ctx, &users); err != nil {
             panic(err)
         }
     }
@@ -133,7 +137,7 @@ func main() {
     // Find one record
     {
         user := User{}
-        err := userTable.FindOne(nil).Decode(&user)
+        err := userTable.FindOne(ctx, nil).Decode(&user)
         if err != nil {
             if err != sqlike.ErrNoRows {
                 panic(err)
@@ -146,6 +150,7 @@ func main() {
     {
         users := make([]User, 0)
         result, err := userTable.Find(
+            ctx,
             actions.Find().Where(
                 expr.Equal("ID", result.ID),
             ),
@@ -159,7 +164,7 @@ func main() {
     // Update one record with all fields of struct
     {
         user.Name = `🤖 Hello World!`
-        if err := userTable.ModifyOne(&user); err != nil {
+        if err := userTable.ModifyOne(ctx, &user); err != nil {
             panic(err)
         }
     }
@@ -167,6 +172,7 @@ func main() {
     // Update one record with selected fields
     {
         userTable.UpdateOne(
+            ctx,
             actions.UpdateOne().Where(
                 expr.Equal("ID", 100),
             ).Set(
@@ -179,6 +185,7 @@ func main() {
 
     {
         pg, err := userTable.Paginate(
+            ctx,
             actions.Paginate().
                 OrderBy(
                     expr.Desc("CreatedAt"),
@@ -198,7 +205,7 @@ func main() {
                 break
             }
             cursor := users[len(users)-1].ID
-            if err := pg.NextCursor(cursor); err != nil {
+            if err := pg.NextCursor(ctx, cursor); err != nil {
                 if err == sqlike.ErrInvalidCursor {
                     break
                 }
