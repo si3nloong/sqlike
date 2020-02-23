@@ -61,19 +61,19 @@ func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
 
 	// Alter table should add primary key if it's not exists
 	{
-		err = table.DropIfExists()
+		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
-		table.MustMigrate(struct {
+		table.MustMigrate(ctx, struct {
 			ID   string
 			Name string
 		}{})
 
-		table.MustMigrate(struct {
+		table.MustMigrate(ctx, struct {
 			ID   string `sqlike:",primary_key"`
 			Name string
 		}{})
 
-		idxs, err := table.Indexes().List()
+		idxs, err := table.Indexes().List(ctx)
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
 			Name:     "PRIMARY",
