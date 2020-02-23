@@ -19,6 +19,18 @@ func TestDate(t *testing.T) {
 		err error
 	)
 
+	d, err = ParseDate("2020-13-02")
+	require.Error(t, err)
+
+	d, err = ParseDate("2020-00-02")
+	require.Error(t, err)
+
+	d, err = ParseDate("2020-02-30")
+	require.Error(t, err)
+
+	d, err = ParseDate("2020-04-31")
+	require.Error(t, err)
+
 	t.Run("Date with MarshalJSON", func(it *testing.T) {
 		b, err = d.MarshalJSON()
 		require.NoError(it, err)

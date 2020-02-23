@@ -20,6 +20,10 @@ var ErrDateFormat = errors.New(`invalid date format, it should be "YYYY-MM-DD"`)
 
 const dateRegex = `\d{4}\-\d{2}\-\d{2}`
 
+var months = [...]int{
+	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+}
+
 // Date :
 type Date struct {
 	Year, Month, Day int
@@ -145,7 +149,6 @@ func (d *Date) unmarshal(str string) (err error) {
 	if str == "" {
 		return errors.New("empty date string")
 	}
-	// TODO: verify date is valid date
 	paths := strings.SplitN(str, "-", 3)
 	d.Year, err = strconv.Atoi(paths[0])
 	if err != nil {
@@ -158,6 +161,17 @@ func (d *Date) unmarshal(str string) (err error) {
 	d.Day, err = strconv.Atoi(paths[2])
 	if err != nil {
 		return
+	}
+	if d.Month == 0 || d.Month > 12 {
+		return ErrDateFormat
+	}
+	days := months[d.Month-1]
+	if d.Month == 2 && (d.Year%400 == 0 || (d.Year%100 != 0 && d.Year%4 == 0)) {
+		days = 29
+	}
+
+	if d.Day <= 0 || d.Day > days {
+		return ErrDateFormat
 	}
 	return
 }

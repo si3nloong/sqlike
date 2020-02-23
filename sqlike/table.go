@@ -298,8 +298,17 @@ func (tb *Table) alterTable(ctx context.Context, fields []*reflext.StructField, 
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}
+	var count uint
+	if err := sqldriver.QueryRowContext(
+		context.Background(),
+		tb.driver,
+		tb.dialect.HasPrimaryKey(tb.dbName, tb.name),
+		tb.logger,
+	).Scan(&count); err != nil {
+		return err
+	}
 	stmt, err := tb.dialect.AlterTable(
-		tb.dbName, tb.name, tb.pk,
+		tb.dbName, tb.name, tb.pk, count > 0,
 		tb.client.DriverInfo,
 		fields, cols, idxs, unsafe,
 	)
