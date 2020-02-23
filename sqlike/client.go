@@ -50,7 +50,7 @@ type Client struct {
 	dialect sqldialect.Dialect
 }
 
-func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect, code charset.Code, collate string) (*Client, error) {
+func newClient(ctx context.Context, driver string, db *sql.DB, dialect sqldialect.Dialect, code charset.Code, collate string) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
 		DB:      db,
@@ -61,7 +61,7 @@ func newClient(driver string, db *sql.DB, dialect sqldialect.Dialect, code chars
 	client.driverName = driver
 	client.charSet = code
 	client.collate = collate
-	client.version = client.getVersion()
+	client.version = client.getVersion(ctx)
 	return client, nil
 }
 
@@ -132,14 +132,14 @@ func (c *Client) Database(name string) *Database {
 	}
 }
 
-func (c *Client) getVersion() (version *semver.Version) {
+func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 	var (
 		ver string
 		err error
 	)
 	stmt := c.dialect.GetVersion()
 	err = sqldriver.QueryRowContext(
-		context.Background(),
+		ctx,
 		c.DB,
 		stmt,
 		c.logger,
