@@ -26,6 +26,14 @@ func TestKey(t *testing.T) {
 		require.Equal(t, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), k)
 	})
 
+	t.Run("Clone", func(it *testing.T) {
+		str := `Parent,1288888/Name,'sianloong'`
+		k, err = ParseKey(str)
+		require.NoError(t, err)
+		require.NotNil(t, k)
+		require.Equal(t, k, k.Clone())
+	})
+
 	t.Run("Encode & Decode", func(it *testing.T) {
 		str := `Parent,1288888/Name,'sianloong'`
 		k, err = ParseKey(str)

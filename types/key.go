@@ -76,6 +76,24 @@ func (k *Key) Root() *Key {
 	}
 }
 
+// Clone :
+func (k *Key) Clone() *Key {
+	return copyKey(k)
+}
+
+func copyKey(k *Key) *Key {
+	if k == nil {
+		return nil
+	}
+	nk := new(Key)
+	nk.Namespace = k.Namespace
+	nk.Kind = k.Kind
+	nk.NameID = k.NameID
+	nk.IntID = k.IntID
+	nk.Parent = copyKey(k.Parent)
+	return nk
+}
+
 // Value :
 func (k *Key) Value() (driver.Value, error) {
 	if k == nil {
@@ -112,6 +130,7 @@ func (k *Key) unmarshal(str string) error {
 		k = nil
 		return nil
 	}
+
 	var (
 		idx    int
 		path   string
@@ -120,6 +139,7 @@ func (k *Key) unmarshal(str string) error {
 		value  string
 		err    error
 	)
+
 	for {
 		idx = strings.LastIndex(str, "/")
 		path = str
@@ -279,7 +299,7 @@ func (k *Key) UnmarshalBinary(b []byte) error {
 	if err != nil {
 		return err
 	}
-	k = key
+	*k = *key
 	return nil
 }
 
@@ -315,12 +335,12 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 }
 
 type gobKey struct {
+	Namespace string
+	AppID     string
 	Kind      string
 	StringID  string
 	IntID     int64
 	Parent    *gobKey
-	AppID     string
-	Namespace string
 }
 
 func keyToGobKey(k *Key) *gobKey {
