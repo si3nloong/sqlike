@@ -6,17 +6,17 @@ require (
 	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
 	github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b
-	github.com/casbin/casbin/v2 v2.1.3-0.20200106080052-ea07e65dbd3f
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/casbin/casbin/v2 v2.2.2-0.20200311123227-53116d0ba1f0
+	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.3.3-0.20191022195553-ed6926b37a63
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
-	github.com/google/uuid v1.1.2-0.20190416172445-c2e93f3ae59f
+	github.com/google/uuid v1.1.2-0.20200312013431-7c63a1415326
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/paulmach/orb v0.1.5
+	github.com/paulmach/orb v0.1.6-0.20191030165218-f23a70574f58
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
-	github.com/stretchr/testify v1.4.1-0.20190904163530-85f2b59c4459
+	github.com/stretchr/testify v1.5.2-0.20200311084232-961bfee4b1ca
 	github.com/tidwall/gjson v1.3.2 // indirect
 	github.com/tidwall/sjson v1.0.4
 	github.com/valyala/bytebufferpool v1.0.0
@@ -27,5 +27,5 @@ require (
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/text v0.3.3-0.20190829152558-3d0f7978add9
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20191120175047-4206685974f2
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
