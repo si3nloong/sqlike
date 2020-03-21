@@ -41,6 +41,9 @@ func (tb *Table) Paginate(ctx context.Context, act actions.PaginateStatement, op
 	for i, sf := range x.Sorts {
 		fields[i] = sf.(primitive.Sort).Field
 	}
+	if x.Count == 1 {
+		return nil, errors.New("sqlike: pagination required more than 1 limit")
+	}
 	if x.Count == 0 {
 		x.Count = 100
 	}
@@ -122,23 +125,27 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 	}
 	length := len(pg.fields)
 	filters := make([]interface{}, 0, length)
-	fields := make([]interface{}, length)
+	fields := make([]interface{}, 0)
 	for i, sf := range action.Sorts {
 		var v primitive.C
 		val := toString(pg.values[i])
 		x := sf.(primitive.Sort)
-		if x.Order == primitive.Ascending {
-			if x.Field != pg.table.pk {
-				filters = append(filters, expr.GreaterOrEqual(x.Field, val))
+		if i == length-1 {
+			if x.Order == primitive.Ascending {
+				fields = append(fields, expr.GreaterOrEqual(x.Field, val))
+			} else {
+				fields = append(fields, expr.LesserOrEqual(x.Field, val))
 			}
+			continue
+		}
+		if x.Order == primitive.Ascending {
+			filters = append(filters, expr.GreaterOrEqual(x.Field, val))
 			v = expr.GreaterThan(x.Field, val)
 		} else {
-			if x.Field != pg.table.pk {
-				filters = append(filters, expr.LesserOrEqual(x.Field, val))
-			}
+			filters = append(filters, expr.LesserOrEqual(x.Field, val))
 			v = expr.LesserThan(x.Field, val)
 		}
-		fields[i] = v
+		fields = append(fields, v)
 	}
 	filters = append(filters, expr.Or(fields...))
 	if len(action.Conditions.Values) > 0 {

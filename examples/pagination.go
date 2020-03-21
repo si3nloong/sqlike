@@ -108,7 +108,7 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 				).
 				OrderBy(
 					expr.Desc("Age"),
-				).Limit(1),
+				).Limit(2),
 			options.Paginate().
 				SetDebug(true))
 		require.NoError(t, err)
@@ -125,6 +125,69 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 			if pg.NextCursor(ctx, cursor) != nil {
 				break
 			}
+		}
+	}
+
+	// Paginate with complex query
+	{
+		users = []User{} // reset
+		var result *sqlike.Result
+		result, err := table.Find(
+			ctx,
+			actions.Find().
+				Where(
+					expr.GreaterOrEqual("Age", 16),
+				).
+				OrderBy(
+					expr.Desc("Age"),
+					expr.Desc("ID"),
+				).Limit(100),
+			options.Find().
+				SetDebug(true))
+		require.NoError(t, err)
+		err = result.All(&users)
+		require.NoError(t, err)
+
+		results := []User{}
+		limit := 2
+		pg, err := table.Paginate(
+			ctx,
+			actions.Paginate().
+				Where(
+					expr.GreaterOrEqual("Age", 16),
+				).
+				OrderBy(
+					expr.Desc("Age"),
+				).
+				Limit(uint(limit)),
+			options.Paginate().SetDebug(true),
+		)
+		require.NoError(t, err)
+
+		var (
+			cursor int64
+			i      int
+		)
+
+		for {
+			err = pg.All(&results)
+			if err != nil {
+				require.NoError(t, err)
+			}
+
+			if len(results) == 0 || len(results) < limit {
+				break
+			}
+
+			cursor = results[len(results)-1].ID
+			require.True(t, len(users) > i)
+
+			require.Equal(t, results[0], users[i])
+			if err := pg.NextCursor(ctx, cursor); err != nil {
+				require.NoError(t, err)
+			}
+
+			i++
 		}
 	}
 
@@ -170,8 +233,24 @@ func PaginationExamples(t *testing.T, c *sqlike.Client) {
 		require.Error(t, err)
 	}
 
+	// pagination required more than 1 record
+	{
+		pg, err := table.Paginate(
+			ctx,
+			actions.Paginate().
+				OrderBy(
+					expr.Desc("Age"),
+				).
+				Limit(1),
+			options.Paginate().
+				SetDebug(true))
+		require.Error(t, err)
+		require.Nil(t, pg)
+	}
+
 	// Loop and get result set
 	{
+		users = []User{} // reset
 		for i := 0; i < len(actuals); i++ {
 			users = []User{}
 			err = pg.All(&users)
