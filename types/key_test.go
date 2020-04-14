@@ -46,6 +46,21 @@ func TestKey(t *testing.T) {
 		require.Equal(it, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), pk)
 	})
 
+	t.Run("MarshalerText & UnmarshalText", func(it *testing.T) {
+		pk := IDKey("Parent", 1288888, nil)
+		require.Equal(it, "1288888", pk.ID())
+
+		b, err = pk.MarshalText()
+		require.NoError(it, err)
+		require.Equal(it, b, []byte(`Parent,1288888`))
+
+		str := `EgROYW1lIg1zaWFubG9vbmcvQDkwKhISBlBhcmVudBjQ1deb4Mjr0xU`
+		err = pk.UnmarshalText([]byte(str))
+		require.NoError(it, err)
+		require.Equal(it, "Parent,1560407411636169424/Name,'sianloong%2F@90'", pk.String())
+		require.Equal(it, str, pk.Encode())
+	})
+
 	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())

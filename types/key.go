@@ -125,6 +125,185 @@ func (k *Key) Incomplete() bool {
 	return k.NameID == "" && k.IntID == 0
 }
 
+// // valid returns whether the key is valid.
+// func (k *Key) valid() bool {
+// 	if k == nil {
+// 		return false
+// 	}
+// 	for ; k != nil; k = k.Parent {
+// 		if k.Kind == "" {
+// 			return false
+// 		}
+// 		if k.NameID != "" && k.IntID != 0 {
+// 			return false
+// 		}
+// 		if k.Parent != nil {
+// 			if k.Parent.Incomplete() {
+// 				return false
+// 			}
+// 			if k.Parent.Namespace != k.Namespace {
+// 				return false
+// 			}
+// 		}
+// 	}
+// 	return true
+// }
+
+// Equal reports whether two keys are equal. Two keys are equal if they are
+// both nil, or if their kinds, IDs, names, namespaces and parents are equal.
+func (k *Key) Equal(o *Key) bool {
+	for {
+		if k == nil || o == nil {
+			return k == o // if either is nil, both must be nil
+		}
+		if k.Namespace != o.Namespace || k.NameID != o.NameID || k.IntID != o.IntID || k.Kind != o.Kind {
+			return false
+		}
+		if k.Parent == nil && o.Parent == nil {
+			return true
+		}
+		k = k.Parent
+		o = o.Parent
+	}
+}
+
+// MarshalBinary :
+func (k *Key) MarshalBinary() ([]byte, error) {
+	if k == nil {
+		return []byte(`null`), nil
+	}
+	return []byte(`"` + k.Encode() + `"`), nil
+}
+
+// MarshalText :
+func (k *Key) MarshalText() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	k.marshal(buf, true)
+	return buf.Bytes(), nil
+}
+
+// MarshalJSON :
+func (k *Key) MarshalJSON() ([]byte, error) {
+	if k == nil {
+		return []byte(`null`), nil
+	}
+	return []byte(`"` + k.Encode() + `"`), nil
+}
+
+// MarshalJSONB :
+func (k *Key) MarshalJSONB() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	buf.WriteRune('"')
+	k.marshal(buf, true)
+	buf.WriteRune('"')
+	return buf.Bytes(), nil
+}
+
+// UnmarshalBinary :
+func (k *Key) UnmarshalBinary(b []byte) error {
+	str := string(b)
+	if str == "null" {
+		return nil
+	}
+	key, err := DecodeKey(str)
+	if err != nil {
+		return err
+	}
+	*k = *key
+	return nil
+}
+
+// UnmarshalText :
+func (k *Key) UnmarshalText(b []byte) error {
+	str := string(b)
+	if str == "null" {
+		return nil
+	}
+	key, err := DecodeKey(str)
+	if err != nil {
+		return err
+	}
+	*k = *key
+	return nil
+}
+
+// UnmarshalJSON :
+func (k *Key) UnmarshalJSON(b []byte) error {
+	length := len(b)
+	if length < 2 {
+		return errors.New("types: invalid key json value")
+	}
+	str := string(b)
+	if str == "null" {
+		return nil
+	}
+	str = string(b[1 : length-1])
+	key, err := DecodeKey(str)
+	if err != nil {
+		return err
+	}
+	*k = *key
+	return nil
+}
+
+// UnmarshalJSONB :
+func (k *Key) UnmarshalJSONB(b []byte) error {
+	length := len(b)
+	if length < 2 {
+		return errors.New("types: invalid key json value")
+	}
+	str := string(b)
+	if str == "null" {
+		return nil
+	}
+	str = string(b[1 : length-1])
+	return k.unmarshal(str)
+}
+
+// MarshalBSONValue :
+func (k *Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
+}
+
+// UnmarshalBSONValue :
+func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
+	if k == nil {
+		return errors.New("types: invalid key value <nil>")
+	}
+	v, _, ok := bsoncore.ReadString(b)
+	if !ok {
+		return errors.New("types: invalid bson string value")
+	}
+	return k.unmarshal(v)
+}
+
+// String returns a string representation of the key.
+func (k *Key) String() string {
+	if k == nil {
+		return ""
+	}
+	b := bytes.NewBuffer(make([]byte, 0, 512))
+	k.marshal(b, false)
+	return b.String()
+}
+
+// marshal marshals the key's string representation to the buffer.
+func (k *Key) marshal(w writer, escape bool) {
+	if k.Parent != nil {
+		k.Parent.marshal(w, escape)
+		w.WriteByte('/')
+	}
+	w.WriteString(k.Kind)
+	w.WriteByte(',')
+	if k.NameID != "" {
+		w.WriteByte('\'')
+		w.WriteString(url.PathEscape(k.NameID))
+		w.WriteByte('\'')
+	} else {
+		w.WriteString(strconv.FormatInt(k.IntID, 10))
+	}
+}
+
 func (k *Key) unmarshal(str string) error {
 	if str == "null" {
 		k = nil
@@ -181,157 +360,6 @@ func (k *Key) unmarshal(str string) error {
 		}
 		k = k.Parent
 	}
-}
-
-// // valid returns whether the key is valid.
-// func (k *Key) valid() bool {
-// 	if k == nil {
-// 		return false
-// 	}
-// 	for ; k != nil; k = k.Parent {
-// 		if k.Kind == "" {
-// 			return false
-// 		}
-// 		if k.NameID != "" && k.IntID != 0 {
-// 			return false
-// 		}
-// 		if k.Parent != nil {
-// 			if k.Parent.Incomplete() {
-// 				return false
-// 			}
-// 			if k.Parent.Namespace != k.Namespace {
-// 				return false
-// 			}
-// 		}
-// 	}
-// 	return true
-// }
-
-// Equal reports whether two keys are equal. Two keys are equal if they are
-// both nil, or if their kinds, IDs, names, namespaces and parents are equal.
-func (k *Key) Equal(o *Key) bool {
-	for {
-		if k == nil || o == nil {
-			return k == o // if either is nil, both must be nil
-		}
-		if k.Namespace != o.Namespace || k.NameID != o.NameID || k.IntID != o.IntID || k.Kind != o.Kind {
-			return false
-		}
-		if k.Parent == nil && o.Parent == nil {
-			return true
-		}
-		k = k.Parent
-		o = o.Parent
-	}
-}
-
-// marshal marshals the key's string representation to the buffer.
-func (k *Key) marshal(w writer, escape bool) {
-	if k.Parent != nil {
-		k.Parent.marshal(w, escape)
-		w.WriteByte('/')
-	}
-	w.WriteString(k.Kind)
-	w.WriteByte(',')
-	if k.NameID != "" {
-		w.WriteByte('\'')
-		w.WriteString(url.PathEscape(k.NameID))
-		w.WriteByte('\'')
-	} else {
-		w.WriteString(strconv.FormatInt(k.IntID, 10))
-	}
-}
-
-// MarshalJSON :
-func (k *Key) MarshalJSON() ([]byte, error) {
-	if k == nil {
-		return []byte(`null`), nil
-	}
-	return []byte(`"` + k.Encode() + `"`), nil
-}
-
-// MarshalBinary :
-func (k *Key) MarshalBinary() ([]byte, error) {
-	if k == nil {
-		return []byte(`null`), nil
-	}
-	return []byte(`"` + k.Encode() + `"`), nil
-}
-
-// MarshalText :
-func (k *Key) MarshalText() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	k.marshal(buf, true)
-	return buf.Bytes(), nil
-}
-
-// MarshalJSONB :
-func (k *Key) MarshalJSONB() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	buf.WriteRune('"')
-	k.marshal(buf, true)
-	buf.WriteRune('"')
-	return buf.Bytes(), nil
-}
-
-// UnmarshalJSON :
-func (k *Key) UnmarshalJSON(b []byte) error {
-	length := len(b)
-	if length < 2 {
-		return errors.New("types: invalid key json value")
-	}
-	str := string(b)
-	if str == "null" {
-		return nil
-	}
-	str = string(b[1 : length-1])
-	key, err := DecodeKey(str)
-	if err != nil {
-		return err
-	}
-	*k = *key
-	return nil
-}
-
-// UnmarshalBinary :
-func (k *Key) UnmarshalBinary(b []byte) error {
-	key, err := DecodeKey(string(b))
-	if err != nil {
-		return err
-	}
-	*k = *key
-	return nil
-}
-
-// UnmarshalJSONB :
-func (k *Key) UnmarshalJSONB(b []byte) error {
-	length := len(b)
-	if length < 2 {
-		return errors.New("types: invalid key json value")
-	}
-	str := string(b)
-	if str == "null" {
-		return nil
-	}
-	str = string(b[1 : length-1])
-	return k.unmarshal(str)
-}
-
-// MarshalBSONValue :
-func (k *Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
-	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
-}
-
-// UnmarshalBSONValue :
-func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
-	if k == nil {
-		return errors.New("types: invalid key value <nil>")
-	}
-	v, _, ok := bsoncore.ReadString(b)
-	if !ok {
-		return errors.New("types: invalid bson string value")
-	}
-	return k.unmarshal(v)
 }
 
 type gobKey struct {
@@ -409,16 +437,6 @@ func DecodeKey(encoded string) (*Key, error) {
 	}
 
 	return protoToKey(k), nil
-}
-
-// String returns a string representation of the key.
-func (k *Key) String() string {
-	if k == nil {
-		return ""
-	}
-	b := bytes.NewBuffer(make([]byte, 0, 512))
-	k.marshal(b, false)
-	return b.String()
 }
 
 // GobEncode marshals the key into a sequence of bytes

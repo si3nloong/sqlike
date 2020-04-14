@@ -202,7 +202,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 		if sf.Name != "" && !sf.Embedded {
 			codec.Names[sf.Path] = sf
 			prnt := sf.ParentByTraversal(func(f *StructField) bool {
-				return f.Embedded == false
+				return !f.Embedded
 			})
 			if len(sf.Index) > 1 &&
 				sf.Parent != nil && prnt != nil {
