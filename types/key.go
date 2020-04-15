@@ -126,7 +126,7 @@ func (k *Key) Incomplete() bool {
 }
 
 // // valid returns whether the key is valid.
-// func (k *Key) valid() bool {
+// func (k *Key) IsZero() bool {
 // 	if k == nil {
 // 		return false
 // 	}

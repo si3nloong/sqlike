@@ -138,7 +138,8 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 	charset := "utf8mb4"
 	collation := charsetMap[charset]
 	dflt := ""
-	if cs, ok := sf.Tag.LookUp("charset"); ok {
+	cs, ok1 := sf.Tag.LookUp("charset")
+	if ok1 {
 		charset = strings.ToLower(cs)
 		collation = charsetMap[charset]
 	}
@@ -151,6 +152,12 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
 			panic("invalid enum formats")
+		}
+
+		// if charset is not set, default is using latin1 for better performance
+		if !ok1 {
+			charset = "latin1"
+			collation = "latin1_bin"
 		}
 
 		blr := util.AcquireString()

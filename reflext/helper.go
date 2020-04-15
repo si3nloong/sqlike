@@ -4,6 +4,10 @@ import (
 	"reflect"
 )
 
+type Zeroer interface {
+	IsZero() bool
+}
+
 // Init :
 func Init(v reflect.Value) reflect.Value {
 	if v.Kind() == reflect.Ptr && v.IsNil() {
@@ -103,6 +107,12 @@ func IsKind(t reflect.Type, k reflect.Kind) bool {
 
 // IsZero :
 func IsZero(v reflect.Value) bool {
+	it := v.Interface()
+	x, ok := it.(Zeroer)
+	if ok {
+		return x.IsZero()
+	}
+
 	switch v.Kind() {
 	case reflect.Func, reflect.Map:
 		return v.IsNil()
@@ -124,9 +134,10 @@ func IsZero(v reflect.Value) bool {
 		}
 		return z
 	}
+
 	// Compare other types directly:
 	z := reflect.Zero(v.Type())
-	return v.Interface() == z.Interface()
+	return it == z.Interface()
 }
 
 // Set :
