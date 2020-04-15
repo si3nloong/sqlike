@@ -46,6 +46,18 @@ func TestKey(t *testing.T) {
 		require.Equal(it, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), pk)
 	})
 
+	t.Run("Encode & Decode Unicode", func(it *testing.T) {
+		str := `Parent,1288888/Name,'🤔ヤマト'`
+		k, err = ParseKey(str)
+		require.NoError(it, err)
+		require.Equal(it, `EgROYW1lIg3wn6SU44Ok44Oe44OIKgwSBlBhcmVudBi41U4`, k.Encode())
+
+		var pk *Key
+		pk, err = DecodeKey(`EgROYW1lIg3wn6SU44Ok44Oe44OIKgwSBlBhcmVudBi41U4`)
+		require.NoError(it, err)
+		require.Equal(it, NameKey("Name", "🤔ヤマト", IDKey("Parent", 1288888, nil)), pk)
+	})
+
 	t.Run("MarshalerText & UnmarshalText", func(it *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())
