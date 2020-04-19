@@ -11,10 +11,9 @@ import (
 )
 
 // ExtraExamples :
-func ExtraExamples(t *testing.T, db *sqlike.Database, mg *mongo.Database) {
+func ExtraExamples(t *testing.T, ctx context.Context, db *sqlike.Database, mg *mongo.Database) {
 	var (
 		err error
-		ctx = context.Background()
 	)
 
 	table := db.Table("A")

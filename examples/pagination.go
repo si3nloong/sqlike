@@ -43,11 +43,10 @@ func (usrs Users) Swap(i, j int) {
 }
 
 // PaginationExamples :
-func PaginationExamples(t *testing.T, c *sqlike.Client) {
+func PaginationExamples(t *testing.T, ctx context.Context, c *sqlike.Client) {
 	var (
 		// result *sqlike.Result
 		err error
-		ctx = context.Background()
 	)
 
 	db := c.SetPrimaryKey("ID").Database("sqlike")

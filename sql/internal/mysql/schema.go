@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
+	"golang.org/x/text/currency"
 )
 
 var charsetMap = map[string]string{
@@ -39,6 +41,7 @@ func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.MultiLineString, s.SpatialDataType("MULTILINESTRING"))
 	sb.SetTypeBuilder(sqltype.MultiPolygon, s.SpatialDataType("MULTIPOLYGON"))
 	sb.SetTypeBuilder(sqltype.String, s.StringDataType)
+	sb.SetTypeBuilder(sqltype.Char, s.CharDataType)
 	sb.SetTypeBuilder(sqltype.Bool, s.BoolDataType)
 	sb.SetTypeBuilder(sqltype.Int, s.IntDataType)
 	sb.SetTypeBuilder(sqltype.Int8, s.IntDataType)
@@ -181,7 +184,7 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 		if _, err := strconv.Atoi(char); err != nil {
 			panic("invalid value for char data type")
 		}
-		col.DataType = "CHAR(" + char + ")"
+		col.DataType = "CHAR"
 		col.Type = "CHAR(" + char + ")"
 		return
 	} else if _, ok := sf.Tag.LookUp("longtext"); ok {
@@ -201,6 +204,27 @@ func (s mySQLSchema) StringDataType(sf *reflext.StructField) (col columns.Column
 
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(" + strconv.Itoa(charLen) + ")"
+	return
+}
+
+func (s mySQLSchema) CharDataType(sf *reflext.StructField) (col columns.Column) {
+	dflt := ""
+	switch sf.Type {
+	case reflect.TypeOf(currency.Unit{}):
+		charset, collation := string(charset.Latin1), "latin1_bin"
+		col.Type = "CHAR(3)"
+		col.Charset = &charset
+		col.Collation = &collation
+	default:
+		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
+		col.Type = "CHAR(191)"
+		col.Charset = &charset
+		col.Collation = &collation
+	}
+	col.Name = sf.Path
+	col.DataType = "CHAR"
+	col.Nullable = sf.IsNullable
+	col.DefaultValue = &dflt
 	return
 }
 

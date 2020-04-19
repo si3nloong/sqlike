@@ -9,6 +9,16 @@ import (
 // DefaultMapper :
 var DefaultMapper = NewMapperFunc("sqlike", nil)
 
+// StructMapper :
+type StructMapper interface {
+	FieldByName(v reflect.Value, name string) reflect.Value
+	LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool)
+	FieldByIndexes(v reflect.Value, idxs []int) reflect.Value
+	FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value
+	TraversalsByName(t reflect.Type, names []string) (idxs [][]int)
+	TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int)
+}
+
 // MapFunc :
 type MapFunc func(*StructField) (skip bool)
 
@@ -22,6 +32,8 @@ type Mapper struct {
 	cache   map[reflect.Type]*Struct
 	fmtFunc FormatFunc
 }
+
+var _ StructMapper = (*Mapper)(nil)
 
 // NewMapperFunc :
 func NewMapperFunc(tag string, fmtFunc FormatFunc) *Mapper {

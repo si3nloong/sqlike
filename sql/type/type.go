@@ -6,6 +6,7 @@ type Type int
 // types :
 const (
 	String Type = iota
+	Char
 	Bool
 	Byte
 	Int

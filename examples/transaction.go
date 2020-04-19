@@ -23,7 +23,7 @@ type user struct {
 }
 
 // TransactionExamples :
-func TransactionExamples(t *testing.T, db *sqlike.Database) {
+func TransactionExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		uid      uuid.UUID
 		ns       normalStruct
@@ -31,7 +31,6 @@ func TransactionExamples(t *testing.T, db *sqlike.Database) {
 		affected int64
 		err      error
 		tx       *sqlike.Transaction
-		ctx      = context.Background()
 	)
 
 	// Commit Transaction

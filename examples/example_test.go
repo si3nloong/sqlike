@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/semver"
 	_ "github.com/go-sql-driver/mysql"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
@@ -23,8 +24,12 @@ func (l Logger) Debug(stmt *sqlstmt.Statement) {
 
 // TestExamples :
 func TestExamples(t *testing.T) {
+	var (
+		ctx = context.Background()
+	)
+
 	client, err := sqlike.Connect(
-		context.Background(),
+		ctx,
 		"mysql",
 		options.Connect().
 			SetUsername("root").
@@ -45,19 +50,19 @@ func TestExamples(t *testing.T) {
 	db := client.Database("sqlike")
 
 	{
-		MigrateExamples(t, db)
-		IndexExamples(t, db)
-		InsertExamples(t, db)
-		FindExamples(t, db)
-		QueryExamples(t, db)
-		TransactionExamples(t, db)
-		PaginationExamples(t, client)
-		UpdateExamples(t, db)
-		DeleteExamples(t, db)
-		JSONExamples(t, db)
-		CasbinExamples(t, db)
-		SpatialExamples(t, db)
-		ExtraExamples(t, db, mg)
+		MigrateExamples(t, ctx, db)
+		IndexExamples(t, ctx, db)
+		InsertExamples(t, ctx, db)
+		FindExamples(t, ctx, db)
+		QueryExamples(t, ctx, db)
+		TransactionExamples(t, ctx, db)
+		PaginationExamples(t, ctx, client)
+		UpdateExamples(t, ctx, db)
+		DeleteExamples(t, ctx, db)
+		JSONExamples(t, ctx, db)
+		CasbinExamples(t, ctx, db)
+		SpatialExamples(t, ctx, db)
+		ExtraExamples(t, ctx, db, mg)
 	}
 
 	// Errors

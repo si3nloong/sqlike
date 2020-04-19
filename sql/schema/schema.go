@@ -89,7 +89,7 @@ func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf(uuid.UUID{}), sqltype.UUID)
 	sb.SetType(reflect.TypeOf(gouuid.UUID{}), sqltype.UUID)
 	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
-	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.String)
+	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.Char)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)
 	sb.SetType(reflect.TypeOf(json.RawMessage{}), sqltype.JSON)
 	sb.SetType(reflect.TypeOf(orb.Point{}), sqltype.Point)

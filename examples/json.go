@@ -13,11 +13,10 @@ import (
 )
 
 // JSONExamples :
-func JSONExamples(t *testing.T, db *sqlike.Database) {
+func JSONExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		err    error
 		result *sqlike.Result
-		ctx    = context.Background()
 	)
 
 	table := db.Table("JSON")

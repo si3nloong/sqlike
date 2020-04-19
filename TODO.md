@@ -1,9 +1,15 @@
 #### TODO
 
-- [ ] [BREAKING CHANGE] Support `Open tracing`.
+- [ ] Support `Open tracing`.
+- [ ] Support `JSON_SET` or else.
+- [ ] Support index with files instead of single file (index.yaml).
+- [ ] Support foreign key.
+- [ ] Support migration like `django`.
+- [ ] Change default collation for `currency.Unit` and `language.Tag` for better performance.
+- [ ] Support insert with map.
+- [ ] Mapper as an interface and enable to set in `Client` object.
 - [ ] Prevent toxic query.
 - [ ] BeforeSave and AfterLoad hook.
-- [ ] Foreign key.
 - [ ] Support `charset` and `collate` on `AlterTable`.
 - [x] Support `Point`.
 - [x] Support `LineString`.

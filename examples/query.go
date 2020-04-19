@@ -11,11 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func QueryExamples(t *testing.T, db *sqlike.Database) {
-	var (
-		ctx = context.Background()
-	)
-	// table := db.Table("query")
+func QueryExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	stmt := expr.Union(
 		sql.Select().

@@ -28,12 +28,11 @@ type Spatial struct {
 }
 
 // SpatialExamples :
-func SpatialExamples(t *testing.T, db *sqlike.Database) {
+func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		sp    = Spatial{}
 		table = db.Table("spatial")
 		err   error
-		ctx   = context.Background()
 	)
 
 	point := orb.Point{1, 5}

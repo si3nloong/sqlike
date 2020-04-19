@@ -11,12 +11,11 @@ import (
 )
 
 // InsertExamples :
-func InsertExamples(t *testing.T, db *sqlike.Database) {
+func InsertExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		err      error
 		result   sql.Result
 		affected int64
-		ctx      = context.Background()
 	)
 
 	table := db.Table("NormalStruct")

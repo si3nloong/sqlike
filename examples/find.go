@@ -17,13 +17,12 @@ import (
 )
 
 // FindExamples :
-func FindExamples(t *testing.T, db *sqlike.Database) {
+func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		// result sql.Result
 		result *sqlike.Result
 		ns     normalStruct
 		err    error
-		ctx    = context.Background()
 	)
 
 	emoji := `🤕`

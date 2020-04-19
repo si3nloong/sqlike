@@ -9,13 +9,12 @@ import (
 )
 
 // MigrateExamples :
-func MigrateExamples(t *testing.T, db *sqlike.Database) {
+func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		ns      *normalStruct
 		err     error
 		results []sqlike.Column
 		columns []string
-		ctx     = context.Background()
 	)
 
 	table := db.Table("normal_struct")

@@ -15,13 +15,12 @@ import (
 )
 
 // UpdateExamples :
-func UpdateExamples(t *testing.T, db *sqlike.Database) {
+func UpdateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		ns       normalStruct
 		err      error
 		result   sql.Result
 		affected int64
-		ctx      = context.Background()
 	)
 
 	table := db.Table("NormalStruct")

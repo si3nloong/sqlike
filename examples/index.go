@@ -10,12 +10,11 @@ import (
 )
 
 // IndexExamples :
-func IndexExamples(t *testing.T, db *sqlike.Database) {
+func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		err  error
 		idxs []sqlike.Index
 		ok   bool
-		ctx  = context.Background()
 	)
 
 	table := db.Table("Index")

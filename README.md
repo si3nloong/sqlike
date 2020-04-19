@@ -6,7 +6,7 @@
 go get github.com/si3nloong/sqlike
 ```
 
-Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`
+Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
 
 ### Minimum Requirements
 
@@ -23,6 +23,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `Enum`
 - Support `UUID`
 - Support `JSON`
+- Support `descending index` for mysql 8.0
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` for `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
@@ -216,3 +217,5 @@ func main() {
     }
 }
 ```
+
+Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).

@@ -14,13 +14,12 @@ import (
 )
 
 // DeleteExamples :
-func DeleteExamples(t *testing.T, db *sqlike.Database) {
+func DeleteExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	var (
 		affected int64
 		result   sql.Result
 		ns       normalStruct
 		err      error
-		ctx      = context.Background()
 	)
 
 	table := db.Table("NormalStruct")

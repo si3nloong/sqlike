@@ -10,7 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
-// Open : connect to sql server with connection string
+// Open : open connection to sql server with connection string
 func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (client *Client, err error) {
 	if opt == nil {
 		return nil, errors.New("sqlike: invalid connection options <nil>")
@@ -36,7 +36,7 @@ func MustOpen(ctx context.Context, driver string, opt *options.ConnectOptions) *
 	return client
 }
 
-// Connect :
+// Connect : connect and ping the sql server, throw error when unable to ping
 func Connect(ctx context.Context, driver string, opt *options.ConnectOptions) (client *Client, err error) {
 	client, err = Open(ctx, driver, opt)
 	if err != nil {
