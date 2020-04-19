@@ -35,7 +35,7 @@ func (tb *Table) ReplaceOne(ctx context.Context, src interface{}, opts ...*optio
 		tb.dbName,
 		tb.name,
 		tb.pk,
-		tb.registry,
+		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,

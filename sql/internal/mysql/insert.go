@@ -12,7 +12,7 @@ import (
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, registry *codec.Registry, fields []*reflext.StructField, v reflect.Value, opt *options.InsertOptions) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, cdc codec.Codecer, fields []*reflext.StructField, v reflect.Value, opt *options.InsertOptions) (stmt *sqlstmt.Statement, err error) {
 	records := v.Len()
 	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("INSERT")
@@ -44,7 +44,7 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, registr
 			// first record only find encoders
 			fv := mapper.FieldByIndexesReadOnly(vi, sf.Index)
 			if i == 0 {
-				encoders[j], err = findEncoder(mapper, registry, sf, fv)
+				encoders[j], err = findEncoder(mapper, cdc, sf, fv)
 				if err != nil {
 					return nil, err
 				}
@@ -81,11 +81,11 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, registr
 	return
 }
 
-func findEncoder(mapper *reflext.Mapper, registry *codec.Registry, sf *reflext.StructField, v reflect.Value) (codec.ValueEncoder, error) {
+func findEncoder(mapper *reflext.Mapper, c codec.Codecer, sf *reflext.StructField, v reflect.Value) (codec.ValueEncoder, error) {
 	if _, ok := sf.Tag.LookUp("auto_increment"); ok && reflext.IsZero(v) {
 		return codec.NilEncoder, nil
 	}
-	encoder, err := registry.LookupEncoder(v)
+	encoder, err := c.LookupEncoder(v)
 	if err != nil {
 		return nil, err
 	}

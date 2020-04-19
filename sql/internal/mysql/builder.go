@@ -34,12 +34,12 @@ var operatorMap = map[primitive.Operator]string{
 }
 
 type mySQLBuilder struct {
-	registry *codec.Registry
+	registry codec.Codecer
 	builder  *sqlstmt.StatementBuilder
 	sqlutil.MySQLUtil
 }
 
-func (b mySQLBuilder) SetRegistryAndBuilders(rg *codec.Registry, blr *sqlstmt.StatementBuilder) {
+func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.StatementBuilder) {
 	if rg == nil {
 		panic("missing required registry")
 	}

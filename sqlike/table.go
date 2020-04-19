@@ -30,14 +30,14 @@ var ErrEmptyFields = errors.New("empty fields")
 
 // Table :
 type Table struct {
-	dbName   string
-	name     string
-	pk       string
-	client   *Client
-	driver   sqldriver.Driver
-	dialect  dialect.Dialect
-	registry *codec.Registry
-	logger   logs.Logger
+	dbName  string
+	name    string
+	pk      string
+	client  *Client
+	driver  sqldriver.Driver
+	dialect dialect.Dialect
+	codec   codec.Codecer
+	logger  logs.Logger
 }
 
 // Rename : rename the current table name to new table name

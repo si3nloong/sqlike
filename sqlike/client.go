@@ -8,8 +8,8 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -47,10 +47,11 @@ type Client struct {
 	*sql.DB
 	pk      string
 	logger  logs.Logger
-	dialect sqldialect.Dialect
+	codec   codec.Codecer
+	dialect dialect.Dialect
 }
 
-func newClient(ctx context.Context, driver string, db *sql.DB, dialect sqldialect.Dialect, code charset.Code, collate string) (*Client, error) {
+func newClient(ctx context.Context, driver string, db *sql.DB, dialect dialect.Dialect, code charset.Code, collate string) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
 		DB:      db,
@@ -61,6 +62,7 @@ func newClient(ctx context.Context, driver string, db *sql.DB, dialect sqldialec
 	client.driverName = driver
 	client.charSet = code
 	client.collate = collate
+	client.codec = codec.DefaultRegistry
 	client.version = client.getVersion(ctx)
 	return client, nil
 }
@@ -81,6 +83,12 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 	return c
 }
 
+// SetCodec :
+func (c *Client) SetCodec(cdc codec.Codecer) *Client {
+	c.codec = cdc
+	return c
+}
+
 // CreateDatabase :
 func (c *Client) CreateDatabase(ctx context.Context, name string) error {
 	return c.createDB(ctx, name, true)
@@ -94,7 +102,7 @@ func (c *Client) DropDatabase(ctx context.Context, name string) error {
 // ListDatabases :
 func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	stmt := c.dialect.GetDatabases()
-	rows, err := sqldriver.Query(
+	rows, err := driver.Query(
 		ctx,
 		c.DB,
 		stmt,
@@ -117,7 +125,7 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 // Database :
 func (c *Client) Database(name string) *Database {
 	stmt := c.dialect.UseDatabase(name)
-	if _, err := sqldriver.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
+	if _, err := driver.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
 		panic(err)
 	}
 	return &Database{
@@ -128,7 +136,7 @@ func (c *Client) Database(name string) *Database {
 		dialect:    c.dialect,
 		driver:     c.DB,
 		logger:     c.logger,
-		registry:   codec.DefaultRegistry,
+		codec:      c.codec,
 	}
 }
 
@@ -138,7 +146,7 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 		err error
 	)
 	stmt := c.dialect.GetVersion()
-	err = sqldriver.QueryRowContext(
+	err = driver.QueryRowContext(
 		ctx,
 		c.DB,
 		stmt,
@@ -157,7 +165,7 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 
 func (c *Client) createDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := c.dialect.CreateDatabase(name, checkExists)
-	_, err := sqldriver.Execute(
+	_, err := driver.Execute(
 		ctx,
 		c,
 		stmt,
@@ -168,7 +176,7 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 
 func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := c.dialect.DropDatabase(name, checkExists)
-	_, err := sqldriver.Execute(
+	_, err := driver.Execute(
 		ctx,
 		c,
 		stmt,

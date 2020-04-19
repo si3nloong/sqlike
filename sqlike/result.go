@@ -21,7 +21,7 @@ var EOF = io.EOF
 type Result struct {
 	close       bool
 	rows        *sql.Rows
-	registry    *codec.Registry
+	codec       codec.Codecer
 	columns     []string
 	columnTypes []*sql.ColumnType
 	err         error
@@ -82,7 +82,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 		}
 		t := fv.Elem().Type()
 		vv := reflext.Zero(t)
-		decoder, err := r.registry.LookupDecoder(t)
+		decoder, err := r.codec.LookupDecoder(t)
 		if err != nil {
 			return err
 		}
@@ -131,7 +131,7 @@ func (r *Result) Decode(dst interface{}) error {
 			continue
 		}
 		fv := mapper.FieldByIndexes(vv, idx)
-		decoder, err := r.registry.LookupDecoder(fv.Type())
+		decoder, err := r.codec.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 		}
 		slice = reflect.Append(slice, reflext.Zero(t))
 		fv := slice.Index(i)
-		decoder, err := r.registry.LookupDecoder(fv.Type())
+		decoder, err := r.codec.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -227,7 +227,7 @@ func (r *Result) All(results interface{}) error {
 			}
 			fv := mapper.FieldByIndexes(vv, idx)
 			if i < 1 {
-				decoder, err := r.registry.LookupDecoder(fv.Type())
+				decoder, err := r.codec.LookupDecoder(fv.Type())
 				if err != nil {
 					return err
 				}

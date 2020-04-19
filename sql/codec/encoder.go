@@ -21,7 +21,7 @@ import (
 
 // DefaultEncoders :
 type DefaultEncoders struct {
-	registry *Registry
+	codec *Registry
 }
 
 // EncodeByte :
@@ -135,7 +135,7 @@ func (enc *DefaultEncoders) EncodePtr(sf *reflext.StructField, v reflect.Value) 
 		return nil, nil
 	}
 	v = v.Elem()
-	encoder, err := enc.registry.LookupEncoder(v)
+	encoder, err := enc.codec.LookupEncoder(v)
 	if err != nil {
 		return nil, err
 	}

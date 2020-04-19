@@ -21,26 +21,26 @@ type SessionContext interface {
 // Transaction :
 type Transaction struct {
 	context.Context
-	dbName   string
-	pk       string
-	client   *Client
-	driver   *sql.Tx
-	dialect  dialect.Dialect
-	registry *codec.Registry
-	logger   logs.Logger
+	dbName  string
+	pk      string
+	client  *Client
+	driver  *sql.Tx
+	dialect dialect.Dialect
+	codec   codec.Codecer
+	logger  logs.Logger
 }
 
 // Table :
 func (tx *Transaction) Table(name string) *Table {
 	return &Table{
-		dbName:   tx.dbName,
-		name:     name,
-		pk:       tx.pk,
-		client:   tx.client,
-		driver:   tx.driver,
-		dialect:  tx.dialect,
-		registry: tx.registry,
-		logger:   tx.logger,
+		dbName:  tx.dbName,
+		name:    name,
+		pk:      tx.pk,
+		client:  tx.client,
+		driver:  tx.driver,
+		dialect: tx.dialect,
+		codec:   tx.codec,
+		logger:  tx.logger,
 	}
 }
 
@@ -62,7 +62,7 @@ func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Resul
 		return nil, err
 	}
 	rslt := new(Result)
-	rslt.registry = tx.registry
+	rslt.codec = tx.codec
 	rslt.rows = rows
 	rslt.columns, rslt.err = rows.Columns()
 	return rslt, rslt.err

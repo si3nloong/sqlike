@@ -22,7 +22,7 @@ import (
 
 // DefaultDecoders :
 type DefaultDecoders struct {
-	registry *Registry
+	codec *Registry
 }
 
 // DecodeByte :
@@ -168,6 +168,8 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 		if err != nil {
 			return err
 		}
+	case int64:
+		x = time.Unix(vi, 0)
 	case nil:
 	}
 	// convert back to UTC
@@ -251,6 +253,10 @@ func (dec DefaultDecoders) DecodeString(it interface{}, v reflect.Value) error {
 		x = strconv.FormatInt(vi, 10)
 	case uint64:
 		x = strconv.FormatUint(vi, 10)
+	case float64:
+		x = strconv.FormatFloat(vi, 'f', -1, 64)
+	case bool:
+		x = strconv.FormatBool(vi)
 	case nil:
 	}
 	v.SetString(x)
@@ -311,6 +317,8 @@ func (dec DefaultDecoders) DecodeInt(it interface{}, v reflect.Value) error {
 		x = vi
 	case uint64:
 		x = int64(vi)
+	case float64:
+		x = int64(vi)
 	case nil:
 	}
 	if v.OverflowInt(x) {
@@ -341,6 +349,10 @@ func (dec DefaultDecoders) DecodeUint(it interface{}, v reflect.Value) error {
 		x = uint64(vi)
 	case uint64:
 		x = vi
+	case float64:
+		if vi > 0 {
+			x = uint64(vi)
+		}
 	case nil:
 	}
 	if v.OverflowUint(x) {
@@ -391,7 +403,7 @@ func (dec *DefaultDecoders) DecodePtr(it interface{}, v reflect.Value) error {
 		return nil
 	}
 	t = t.Elem()
-	decoder, err := dec.registry.LookupDecoder(t)
+	decoder, err := dec.codec.LookupDecoder(t)
 	if err != nil {
 		return err
 	}

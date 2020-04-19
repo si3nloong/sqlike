@@ -40,7 +40,7 @@ type Dialect interface {
 	DropIndexes(db, table string, idxs []string) (stmt *sqlstmt.Statement)
 	CreateTable(db, table, pk string, info driver.Info, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error)
 	AlterTable(db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error)
-	InsertInto(db, table, pk string, mapper *reflext.Mapper, registry *codec.Registry, fields []*reflext.StructField, values reflect.Value, opts *options.InsertOptions) (stmt *sqlstmt.Statement, err error)
+	InsertInto(db, table, pk string, mapper *reflext.Mapper, codec codec.Codecer, fields []*reflext.StructField, values reflect.Value, opts *options.InsertOptions) (stmt *sqlstmt.Statement, err error)
 	Select(*actions.FindActions, options.LockMode) (stmt *sqlstmt.Statement, err error)
 	Update(*actions.UpdateActions) (stmt *sqlstmt.Statement, err error)
 	Delete(*actions.DeleteActions) (stmt *sqlstmt.Statement, err error)

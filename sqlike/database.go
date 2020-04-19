@@ -13,7 +13,7 @@ import (
 
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -28,23 +28,23 @@ type Database struct {
 	name       string
 	pk         string
 	client     *Client
-	driver     sqldriver.Driver
+	driver     driver.Driver
 	dialect    dialect.Dialect
-	registry   *codec.Registry
+	codec      codec.Codecer
 	logger     logs.Logger
 }
 
 // Table :
 func (db *Database) Table(name string) *Table {
 	return &Table{
-		dbName:   db.name,
-		name:     name,
-		pk:       db.pk,
-		client:   db.client,
-		driver:   db.driver,
-		dialect:  db.dialect,
-		registry: db.registry,
-		logger:   db.logger,
+		dbName:  db.name,
+		name:    name,
+		pk:      db.pk,
+		client:  db.client,
+		driver:  db.driver,
+		dialect: db.dialect,
+		codec:   db.codec,
+		logger:  db.logger,
 	}
 }
 
@@ -56,7 +56,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if err != nil {
 		return nil, err
 	}
-	rows, err := sqldriver.Query(
+	rows, err := driver.Query(
 		ctx,
 		db.driver,
 		stmt,
@@ -66,7 +66,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 		return nil, err
 	}
 	rslt := new(Result)
-	rslt.registry = db.registry
+	rslt.codec = db.codec
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()
 	if rslt.err != nil {
@@ -93,14 +93,14 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		return nil, err
 	}
 	return &Transaction{
-		Context:  ctx,
-		dbName:   db.name,
-		pk:       db.pk,
-		client:   db.client,
-		driver:   tx,
-		dialect:  db.dialect,
-		logger:   db.logger,
-		registry: db.registry,
+		Context: ctx,
+		dbName:  db.name,
+		pk:      db.pk,
+		client:  db.client,
+		driver:  tx,
+		dialect: db.dialect,
+		logger:  db.logger,
+		codec:   db.codec,
 	}, nil
 }
 

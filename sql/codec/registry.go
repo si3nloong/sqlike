@@ -16,13 +16,23 @@ import (
 	"golang.org/x/text/language"
 )
 
+type Codecer interface {
+	SetTypeCoder(t reflect.Type, enc ValueEncoder, dec ValueDecoder)
+	SetTypeEncoder(t reflect.Type, enc ValueEncoder)
+	SetTypeDecoder(t reflect.Type, dec ValueDecoder)
+	SetKindEncoder(k reflect.Kind, enc ValueEncoder)
+	SetKindDecoder(k reflect.Kind, dec ValueDecoder)
+	LookupEncoder(v reflect.Value) (ValueEncoder, error)
+	LookupDecoder(t reflect.Type) (ValueDecoder, error)
+}
+
 // DefaultMapper :
 var (
 	DefaultRegistry = buildDefaultRegistry()
 	sqlScanner      = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
 )
 
-func buildDefaultRegistry() *Registry {
+func buildDefaultRegistry() Codecer {
 	rg := NewRegistry()
 	dec := DefaultDecoders{rg}
 	enc := DefaultEncoders{rg}
@@ -68,6 +78,8 @@ type Registry struct {
 	kindEncoders map[reflect.Kind]ValueEncoder
 	kindDecoders map[reflect.Kind]ValueDecoder
 }
+
+var _ Codecer = (*Registry)(nil)
 
 // NewRegistry creates a new empty Registry.
 func NewRegistry() *Registry {
