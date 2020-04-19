@@ -186,6 +186,7 @@ func (enc *DefaultEncoder) EncodeInterface(w *Writer, v reflect.Value) error {
 func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 	t := v.Type()
 	k := t.Key()
+	// TODO: support map key with data type implement `TextMarshaler`
 	if k.Kind() != reflect.String {
 		return fmt.Errorf("jsonb: unsupported data type %q for map key, it must be string", k.Kind())
 	}
@@ -198,6 +199,7 @@ func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 		w.WriteByte('}')
 		return nil
 	}
+	// Question: do we really need to sort the key before encode?
 	keys := reflext.MapKeys(v.MapKeys())
 	sort.Sort(keys)
 	length := len(keys)

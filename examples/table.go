@@ -60,7 +60,7 @@ func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			"JSONRaw", "Map",
 			"DateTime", "Timestamp",
 			"Language", "Languages", "Currency", "Currencies",
-			"Enum", "CreatedAt", "UpdatedAt",
+			"Enum", "Set", "CreatedAt", "UpdatedAt",
 		}, columns)
 	}
 

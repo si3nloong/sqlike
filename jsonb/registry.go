@@ -18,6 +18,7 @@ var (
 	jsonbUnmarshaler = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
 	jsonUnmarshaler  = reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
 	textUnmarshaler  = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
+	textMarshaler    = reflect.TypeOf((*encoding.TextMarshaler)(nil)).Elem()
 )
 
 // ValueDecoder :

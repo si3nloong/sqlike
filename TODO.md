@@ -2,16 +2,17 @@
 
 - [ ] Support `Open tracing`.
 - [ ] Support `JSON_SET` or else.
-- [x] Support index with files instead of single file (index.yaml).
 - [ ] Support foreign key.
 - [ ] Support migration like `django`.
 - [x] Change default collation for `currency.Unit` and `language.Tag` for better performance.
 - [ ] Support insert with map.
-- [ ] `Struct Mapper` as an interface and enable to set in `Client` object.
-- [x] `Codec` as an interface and enable to set in `Client` object.
 - [ ] Prevent toxic query.
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
+- [ ] `Struct Mapper` as an interface and enable to set in `Client` object.
+- [x] Support index with files instead of single file (index.yaml).
+- [x] `Codec` as an interface and enable to set in `Client` object.
+- [x] Support unmarshal map key using `TextUnmarshaler` interface.
 - [x] Support `Point`.
 - [x] Support `LineString`.
 - [x] Support `primary_key` tag.
@@ -71,11 +72,10 @@
 - [x] Delete single record using primary key.
 - [x] Delete multiple record.
 - [x] Delete single record.
-- [x] Replace into (replace with `Copy` API).
+- [x] Replace into API.
 - [x] Support option tag `unique_index` and `index` on create table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [ ] Support option tag `unique_index` and `index` on alter table.
 - [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
-- [ ] (jsonb) Support `map` key with custom interface `MarshalMapKey` and `UnmarshalMapKey`.
 - [ ] Support `Postgres`.

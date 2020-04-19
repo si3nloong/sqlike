@@ -12,6 +12,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 )
@@ -82,6 +83,7 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		ns.Timestamp = ts
 		ns.Language = lang
 		ns.Languages = langs
+		ns.Set = append(ns.Set, "A", "A", "B")
 		ns.CreatedAt = now
 		ns.UpdatedAt = now
 
@@ -125,6 +127,7 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)
+		require.ElementsMatch(t, types.Set{"A", "B"}, ns.Set)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 
 		columns := []string{
@@ -137,7 +140,8 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			"EmptyStruct", "Struct", "VirtualColumn",
 			"Struct.StoredStr", "JSONRaw", "Map",
 			"DateTime", "Timestamp", "Language", "Languages",
-			"Currency", "Currencies", "Enum",
+			"Currency", "Currencies",
+			"Enum", "Set",
 			"CreatedAt", "UpdatedAt",
 		}
 		cols := result.Columns()

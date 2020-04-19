@@ -30,6 +30,8 @@ const (
 	Slice
 	Map
 	JSON
+	Enum
+	Set
 	UUID
 	Point
 	LineString

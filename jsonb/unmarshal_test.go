@@ -67,6 +67,15 @@ type testStruct struct {
 	Bool        bool
 }
 
+type customKey struct {
+	value string
+}
+
+func (c *customKey) UnmarshalText(b []byte) error {
+	*c = customKey{value: string(b)}
+	return nil
+}
+
 func TestUnmarshal(t *testing.T) {
 	var (
 		strval       = `hello world !!!!!!`
@@ -347,6 +356,22 @@ func TestUnmarshal(t *testing.T) {
 			[]string{"Java", "JavaScript", "TypeScript"},
 			[]string{"Rust", "GoLang"},
 		}}, threeDArr)
+	})
+
+	t.Run("Unmarshal Map", func(it *testing.T) {
+		data := make(map[customKey]string)
+
+		err = Unmarshal([]byte(`{"test":"hello" ,  "test2": "world"}`), &data)
+		require.NoError(t, err)
+
+		k1 := customKey{value: "test"}
+		k2 := customKey{value: "test2"}
+
+		require.Contains(t, data, k1)
+		require.Contains(t, data, k2)
+
+		require.Equal(t, data[k1], "hello")
+		require.Equal(t, data[k2], "world")
 	})
 
 	t.Run("Unmarshal Struct", func(it *testing.T) {

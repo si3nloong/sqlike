@@ -3,30 +3,21 @@ module github.com/si3nloong/sqlike
 go 1.13
 
 require (
-	github.com/DataDog/zstd v1.4.4 // indirect
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
-	github.com/brianvoe/gofakeit v1.2.1-0.20190801214117-a7bd2de3740b
-	github.com/casbin/casbin/v2 v2.2.2-0.20200311123227-53116d0ba1f0
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/casbin/casbin/v2 v2.2.2
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
-	github.com/go-stack/stack v1.8.0 // indirect
-	github.com/golang/protobuf v1.3.3-0.20191022195553-ed6926b37a63
-	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.3.1 // indirect
+	github.com/golang/protobuf v1.4.0
 	github.com/google/uuid v1.1.2-0.20200312013431-7c63a1415326
-	github.com/kr/pretty v0.1.0 // indirect
-	github.com/paulmach/orb v0.1.6-0.20191030165218-f23a70574f58
+	github.com/paulmach/orb v0.1.6
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/stretchr/testify v1.5.2-0.20200311084232-961bfee4b1ca
-	github.com/tidwall/gjson v1.3.2 // indirect
-	github.com/tidwall/sjson v1.0.4
+	github.com/tidwall/sjson v1.1.1
 	github.com/valyala/bytebufferpool v1.0.0
-	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
-	go.mongodb.org/mongo-driver v1.2.1-0.20191219222723-b10214111f81
-	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
-	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
+	go.mongodb.org/mongo-driver v1.3.2
+	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904 // indirect
+	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
 	golang.org/x/text v0.3.3-0.20190829152558-3d0f7978add9
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
