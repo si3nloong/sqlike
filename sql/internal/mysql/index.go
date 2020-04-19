@@ -93,11 +93,21 @@ func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDes
 }
 
 // DropIndex :
-func (ms MySQL) DropIndex(db, table, idxName string) (stmt *sqlstmt.Statement) {
+func (ms MySQL) DropIndexes(db, table string, idxs []string) (stmt *sqlstmt.Statement) {
 	stmt = sqlstmt.NewStatement(ms)
-	stmt.WriteString("DROP INDEX ")
-	stmt.WriteString(ms.Quote(idxName))
-	stmt.WriteString(" ON " + ms.TableName(db, table))
+	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
+	for i, idx := range idxs {
+		if idx == "PRIMARY" {
+			// stmt.WriteString("DROP PRIMARY KEY")
+			continue
+		}
+		if i > 0 {
+			stmt.WriteByte(',')
+		}
+
+		stmt.WriteString("DROP INDEX ")
+		stmt.WriteString(ms.Quote(idx))
+	}
 	stmt.WriteRune(';')
 	return
 }

@@ -38,7 +38,6 @@ type normalStruct struct {
 	Bool          bool
 	priv          int
 	Skip          interface{} `sqlike:"-"`
-	AutoIncInt    int64       `sqlike:",auto_increment"`
 	Int           int
 	TinyInt       int8
 	SmallInt      int16
@@ -69,6 +68,13 @@ type normalStruct struct {
 	Currencies []currency.Unit
 	Enum       Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 	Model
+}
+
+type simpleStruct struct {
+	ID    int64 `sqlike:",auto_increment"`
+	Email string
+	Name  string
+	Age   uint16
 }
 
 type jsonStruct struct {

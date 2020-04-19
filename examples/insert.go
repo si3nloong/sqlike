@@ -52,6 +52,7 @@ func InsertExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
+		// upsert affected is 2 instead of 1
 		require.Equal(t, int64(2), affected)
 	}
 

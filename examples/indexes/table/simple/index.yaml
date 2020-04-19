@@ -1,0 +1,24 @@
+indexes:
+  - table: SimpleStruct
+    type: unique
+    columns:
+      - name: Email
+
+  - table: SimpleStruct
+    columns:
+      - name: Name
+
+  - table: SimpleStruct
+    columns:
+      - name: Age
+
+  - table: SimpleStruct
+    columns:
+      - name: Name
+      - name: Age
+
+  - table: SimpleStruct
+    columns:
+      - name: Email
+      - name: Name
+      - name: Age

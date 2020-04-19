@@ -131,7 +131,7 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			"$Key", "Key", "Date",
 			"SID", "Emoji", "FullText", "LongStr", "CustomStrType",
 			"EmptyByte", "Byte", "Bool",
-			"AutoIncInt", "Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
+			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
 			"Uint", "TinyUint", "SmallUint", "MediumUint", "BigUint",
 			"Float32", "Float64", "UFloat32",
 			"EmptyStruct", "Struct", "VirtualColumn",

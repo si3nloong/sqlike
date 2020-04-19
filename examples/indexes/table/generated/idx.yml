@@ -1,0 +1,7 @@
+indexes:
+  # Composite primary key
+  - table: TempGeneratedStruct
+    type: primary
+    columns:
+      - name: NestedID
+      - name: id

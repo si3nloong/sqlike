@@ -88,15 +88,14 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		// allow primary_key tag to override
 		if _, ok := sf.Tag.LookUp("primary_key"); ok {
 			pkk = sf
-		}
-		if sf.Path == pk && pkk == nil {
+		} else if _, ok := sf.Tag.LookUp("auto_increment"); ok {
+			pkk = sf
+		} else if sf.Path == pk && pkk == nil {
 			pkk = sf
 		}
 
 		idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
-		_, ok1 := sf.Tag.LookUp("unique_index")
-		_, ok2 := sf.Tag.LookUp("auto_increment")
-		if ok1 || ok2 {
+		if _, ok := sf.Tag.LookUp("unique_index"); ok {
 			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
 			stmt.WriteRune(',')
 		}

@@ -24,6 +24,7 @@ require (
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.2.1-0.20191219222723-b10214111f81
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
+	golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/text v0.3.3-0.20190829152558-3d0f7978add9
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect

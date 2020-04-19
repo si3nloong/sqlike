@@ -94,10 +94,31 @@ func (idv IndexView) DropOne(ctx context.Context, name string) error {
 	_, err := sqldriver.Execute(
 		ctx,
 		idv.tb.driver,
-		idv.tb.dialect.DropIndex(idv.tb.dbName, idv.tb.name, name),
+		idv.tb.dialect.DropIndexes(idv.tb.dbName, idv.tb.name, []string{name}),
 		idv.tb.logger,
 	)
 	return err
+}
+
+// DropAll :
+func (idv *IndexView) DropAll(ctx context.Context) error {
+	idxs, err := idv.List(ctx)
+	if err != nil {
+		return err
+	}
+	names := make([]string, 0)
+	for _, idx := range idxs {
+		names = append(names, idx.Name)
+	}
+	if _, err := sqldriver.Execute(
+		ctx,
+		idv.tb.driver,
+		idv.tb.dialect.DropIndexes(idv.tb.dbName, idv.tb.name, names),
+		idv.tb.logger,
+	); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (idv *IndexView) isSupportDesc() bool {

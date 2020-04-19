@@ -47,9 +47,15 @@ func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	// Auto build indexes using yaml file
 	{
+		table := db.Table("NormalStruct")
+		err = table.DropIfExists(ctx)
+		require.NoError(t, err)
+
+		table.MustMigrate(ctx, normalStruct{})
+
 		err = db.BuildIndexes(ctx)
 		require.NoError(t, err)
-		idxs, err = db.Table("NormalStruct").Indexes().List(ctx)
+		idxs, err = table.Indexes().List(ctx)
 		require.NoError(t, err)
 		require.Contains(t, idxs, sqlike.Index{
 			// Name:      "IX-SID@ASC;Emoji@ASC;Bool@DESC",
@@ -62,6 +68,36 @@ func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			Type:     "BTREE",
 			IsUnique: false,
 		})
+	}
+
+	// Auto build indexes using folder
+	{
+		table1 := db.Table("SimpleStruct")
+		table2 := db.Table("TempGeneratedStruct")
+
+		err = table1.DropIfExists(ctx)
+		require.NoError(t, err)
+		err = table2.DropIfExists(ctx)
+		require.NoError(t, err)
+
+		table1.MustMigrate(ctx, simpleStruct{})
+		table2.MustMigrate(ctx, generatedStruct{})
+
+		err = table1.Indexes().DropAll(ctx)
+		require.NoError(t, err)
+
+		err = table2.Indexes().DropAll(ctx)
+		require.NoError(t, err)
+
+		err = db.BuildIndexes(ctx, "./indexes")
+		require.NoError(t, err)
+		idxs, err = table1.Indexes().List(ctx)
+		require.NoError(t, err)
+		require.True(t, len(idxs) == 6)
+
+		idxs, err = table2.Indexes().List(ctx)
+		require.NoError(t, err)
+		require.True(t, len(idxs) == 1)
 	}
 
 	table = db.Table("NormalStruct")

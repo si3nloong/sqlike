@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -142,23 +143,63 @@ type indexDefinition struct {
 }
 
 // BuildIndexes :
-func (db *Database) BuildIndexes(ctx context.Context, filepath ...string) error {
-	var id indexDefinition
-	pwd, _ := os.Getwd()
-	file := pwd + "/index.yaml"
-	if len(filepath) > 0 {
-		file = filepath[0]
-		goto READFILE
-	}
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		file = pwd + "/index.yml"
-		if _, err := os.Stat(file); os.IsNotExist(err) {
+func (db *Database) BuildIndexes(ctx context.Context, paths ...string) error {
+	var (
+		path string
+		err  error
+		fi   os.FileInfo
+	)
+	if len(paths) > 0 {
+		path = paths[0]
+		fi, err = os.Stat(path)
+		if err != nil {
+			return err
+		}
+	} else {
+		pwd, _ := os.Getwd()
+		files := []string{pwd + "/index.yml", pwd + "/index.yaml"}
+		for _, f := range files {
+			fi, err = os.Stat(f)
+			if !os.IsNotExist(err) {
+				path = f
+				break
+			}
+		}
+		if err != nil {
 			return err
 		}
 	}
 
-READFILE:
-	b, err := ioutil.ReadFile(file)
+	switch v := fi.Mode(); {
+	case v.IsDir():
+		if err := filepath.Walk(path, func(fp string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+
+			ext := filepath.Ext(info.Name())
+			// only interested on yaml and yml files
+			if ext != ".yaml" && ext != ".yml" {
+				return nil
+			}
+
+			return db.readAndBuildIndexes(ctx, fp)
+		}); err != nil {
+			return err
+		}
+
+	case v.IsRegular():
+		if err := db.readAndBuildIndexes(ctx, path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (db *Database) readAndBuildIndexes(ctx context.Context, path string) error {
+	var id indexDefinition
+	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
