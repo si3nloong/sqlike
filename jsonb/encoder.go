@@ -186,22 +186,52 @@ func (enc *DefaultEncoder) EncodeInterface(w *Writer, v reflect.Value) error {
 func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 	t := v.Type()
 	k := t.Key()
-	// TODO: support map key with data type implement `TextMarshaler`
-	if k.Kind() != reflect.String {
-		return fmt.Errorf("jsonb: unsupported data type %q for map key, it must be string", k.Kind())
-	}
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
 	}
+
 	w.WriteByte('{')
 	if v.Len() == 0 {
 		w.WriteByte('}')
 		return nil
 	}
+
+	keys := v.MapKeys()
+	var encode ValueEncoder
+	// TODO: support map key with data type implement `TextMarshaler`
+	switch k.Kind() {
+	case reflect.String:
+		sort.SliceStable(keys, func(i, j int) bool {
+			return keys[i].String() < keys[j].String()
+		})
+		encode = enc.registry.kindEncoders[reflect.String]
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		sort.SliceStable(keys, func(i, j int) bool {
+			return keys[i].Int() < keys[j].Int()
+		})
+		encode = func(ww *Writer, vv reflect.Value) error {
+			w.WriteByte('"')
+			w.WriteString(strconv.FormatInt(vv.Int(), 10))
+			w.WriteByte('"')
+			return nil
+		}
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		sort.SliceStable(keys, func(i, j int) bool {
+			return keys[i].Uint() < keys[j].Uint()
+		})
+		encode = func(ww *Writer, vv reflect.Value) error {
+			w.WriteByte('"')
+			w.WriteString(strconv.FormatUint(vv.Uint(), 10))
+			w.WriteByte('"')
+			return nil
+		}
+	default:
+		return fmt.Errorf("jsonb: unsupported data type %q for map key, it must be string", k.Kind())
+	}
+
 	// Question: do we really need to sort the key before encode?
-	keys := reflext.MapKeys(v.MapKeys())
-	sort.Sort(keys)
+
 	length := len(keys)
 	for i := 0; i < length; i++ {
 		if i > 0 {
@@ -209,9 +239,9 @@ func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 		}
 		k := keys[i]
 		vv := v.MapIndex(k)
-		w.WriteRune('"')
-		escapeString(w, k.String())
-		w.WriteRune('"')
+		if err := encode(w, k); err != nil {
+			return err
+		}
 		w.WriteByte(':')
 		encoder, err := enc.registry.LookupEncoder(vv)
 		if err != nil {

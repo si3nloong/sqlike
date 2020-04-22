@@ -165,6 +165,57 @@ func TestMarshal(t *testing.T) {
 		require.Equal(t, dataByte, b)
 		require.NoError(t, err)
 	}
+
+	t.Run("Test Map's Key with Int, Uint data type", func(it *testing.T) {
+		var (
+			intMap map[int]string
+			b      []byte
+			err    error
+		)
+
+		b, err = Marshal(intMap)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`null`), b)
+
+		intMap = make(map[int]string)
+		intMap[0] = "hello"
+		intMap[100] = "🤖🤖"
+		intMap[-1] = "negative"
+
+		b, err = Marshal(intMap)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`{"-1":"negative","0":"hello","100":"🤖🤖"}`), b)
+
+		var outMap map[int]string
+		err = Unmarshal(b, &outMap)
+		require.NoError(t, err)
+		require.Equal(t, "hello", outMap[0])
+		require.Equal(t, "🤖🤖", outMap[100])
+		require.Equal(t, "negative", outMap[-1])
+
+		var (
+			uint8Map map[uint8]string
+		)
+
+		b, err = Marshal(uint8Map)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`null`), b)
+
+		uint8Map = make(map[uint8]string)
+		uint8Map[0] = "zero (\"initial value\")"
+		uint8Map[100] = "🤖🤖"
+		uint8Map[88] = "Long sentences here .............."
+		b, err = Marshal(uint8Map)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`{"0":"zero (\"initial value\")","88":"Long sentences here ..............","100":"🤖🤖"}`), b)
+
+		var uoutMap map[uint8]string
+		err = Unmarshal(b, &uoutMap)
+		require.NoError(t, err)
+		require.Equal(t, `zero ("initial value")`, uoutMap[0])
+		require.Equal(t, "🤖🤖", uoutMap[100])
+		require.Equal(t, "Long sentences here ..............", uoutMap[88])
+	})
 }
 
 func BenchmarkJSONMarshal(b *testing.B) {

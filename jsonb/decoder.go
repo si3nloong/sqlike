@@ -144,37 +144,65 @@ func (dec DefaultDecoder) DecodeBool(r *Reader, v reflect.Value) error {
 }
 
 // DecodeInt :
-func (dec DefaultDecoder) DecodeInt(r *Reader, v reflect.Value) error {
-	num, err := r.ReadNumber()
-	if err != nil {
-		return err
+func (dec DefaultDecoder) DecodeInt(quote bool) ValueDecoder {
+	return func(r *Reader, v reflect.Value) error {
+		var (
+			str string
+			err error
+		)
+		if quote {
+			str, err = r.ReadString()
+			if err != nil {
+				return err
+			}
+		} else {
+			num, err := r.ReadNumber()
+			if err != nil {
+				return err
+			}
+			str = num.String()
+		}
+		x, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			return err
+		}
+		if v.OverflowInt(x) {
+			return errors.New("integer overflow")
+		}
+		v.SetInt(x)
+		return nil
 	}
-	x, err := strconv.ParseInt(num.String(), 10, 64)
-	if err != nil {
-		return err
-	}
-	if v.OverflowInt(x) {
-		return errors.New("integer overflow")
-	}
-	v.SetInt(x)
-	return nil
 }
 
 // DecodeUint :
-func (dec DefaultDecoder) DecodeUint(r *Reader, v reflect.Value) error {
-	num, err := r.ReadNumber()
-	if err != nil {
-		return err
+func (dec DefaultDecoder) DecodeUint(quote bool) ValueDecoder {
+	return func(r *Reader, v reflect.Value) error {
+		var (
+			str string
+			err error
+		)
+		if quote {
+			str, err = r.ReadString()
+			if err != nil {
+				return err
+			}
+		} else {
+			num, err := r.ReadNumber()
+			if err != nil {
+				return err
+			}
+			str = num.String()
+		}
+		x, err := strconv.ParseUint(str, 10, 64)
+		if err != nil {
+			return err
+		}
+		if v.OverflowUint(x) {
+			return errors.New("unsigned integer overflow")
+		}
+		v.SetUint(x)
+		return nil
 	}
-	x, err := strconv.ParseUint(num.String(), 10, 64)
-	if err != nil {
-		return err
-	}
-	if v.OverflowUint(x) {
-		return errors.New("unsigned integer overflow")
-	}
-	v.SetUint(x)
-	return nil
 }
 
 // DecodeFloat :
@@ -289,18 +317,22 @@ func (dec *DefaultDecoder) DecodeMap(r *Reader, v reflect.Value) error {
 		v.Set(reflect.Zero(v.Type()))
 		return r.skipNull()
 	}
+
 	var (
 		decodeKey ValueDecoder
 		err       error
 		t         = v.Type()
+		kind      = t.Key().Kind()
 	)
 
-	if t.Key().Kind() == reflect.String {
-		decodeKey, err = dec.registry.LookupDecoder(t.Key())
-		if err != nil {
-			return err
-		}
-	} else {
+	switch kind {
+	case reflect.String:
+		decodeKey = dec.registry.kindDecoders[reflect.String]
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		decodeKey = dec.DecodeInt(true)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		decodeKey = dec.DecodeUint(true)
+	default:
 		key := t.Key()
 		if key.Kind() != reflect.Ptr {
 			key = reflect.PtrTo(key)
