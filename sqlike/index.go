@@ -6,6 +6,7 @@ import (
 	"github.com/Masterminds/semver"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
@@ -42,10 +43,13 @@ func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
 			return ErrNoColumn
 		}
 	}
+	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc())
 	_, err := sqldriver.Execute(
 		ctx,
 		idv.tb.driver,
-		idv.tb.dialect.CreateIndexes(idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc()),
+		stmt,
 		idv.tb.logger,
 	)
 	return err
@@ -59,15 +63,19 @@ func (idv *IndexView) CreateOneIfNotExists(ctx context.Context, idx indexes.Inde
 // CreateIfNotExists :
 func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Index) error {
 	cols := make([]indexes.Index, 0, len(idxs))
+	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
 	for _, idx := range idxs {
+		stmt.Reset()
 		if len(idx.Columns) < 1 {
 			return ErrNoColumn
 		}
+		idv.tb.dialect.HasIndex(stmt, idv.tb.dbName, idv.tb.name, idx)
 		var count int
 		if err := sqldriver.QueryRowContext(
 			ctx,
 			idv.tb.driver,
-			idv.tb.dialect.HasIndex(idv.tb.dbName, idv.tb.name, idx),
+			stmt,
 			idv.tb.logger,
 		).Scan(&count); err != nil {
 			return err
@@ -80,10 +88,12 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 	if len(cols) < 1 {
 		return nil
 	}
+	stmt.Reset()
+	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc())
 	_, err := sqldriver.Execute(
 		ctx,
 		idv.tb.driver,
-		idv.tb.dialect.CreateIndexes(idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc()),
+		stmt,
 		idv.tb.logger,
 	)
 	return err
@@ -91,10 +101,13 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 
 // DropOne :
 func (idv IndexView) DropOne(ctx context.Context, name string) error {
+	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, []string{name})
 	_, err := sqldriver.Execute(
 		ctx,
 		idv.tb.driver,
-		idv.tb.dialect.DropIndexes(idv.tb.dbName, idv.tb.name, []string{name}),
+		stmt,
 		idv.tb.logger,
 	)
 	return err
@@ -110,10 +123,13 @@ func (idv *IndexView) DropAll(ctx context.Context) error {
 	for _, idx := range idxs {
 		names = append(names, idx.Name)
 	}
+	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, names)
 	if _, err := sqldriver.Execute(
 		ctx,
 		idv.tb.driver,
-		idv.tb.dialect.DropIndexes(idv.tb.dbName, idv.tb.name, names),
+		stmt,
 		idv.tb.logger,
 	); err != nil {
 		return err
@@ -135,11 +151,14 @@ func (idv *IndexView) isSupportDesc() bool {
 }
 
 func isIndexExists(ctx context.Context, dbName, table, indexName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger) (bool, error) {
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	dialect.HasIndexByName(stmt, dbName, table, indexName)
 	var count int
 	if err := sqldriver.QueryRowContext(
 		ctx,
 		driver,
-		dialect.HasIndexByName(dbName, table, indexName),
+		stmt,
 		logger,
 	).Scan(&count); err != nil {
 		return false, err

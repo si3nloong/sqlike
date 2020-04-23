@@ -12,6 +12,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -42,10 +43,13 @@ type Table struct {
 
 // Rename : rename the current table name to new table name
 func (tb *Table) Rename(ctx context.Context, name string) error {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.RenameTable(stmt, tb.dbName, tb.name, name)
 	_, err := sqldriver.Execute(
 		ctx,
 		tb.driver,
-		tb.dialect.RenameTable(tb.dbName, tb.name, name),
+		stmt,
 		tb.logger,
 	)
 	return err
@@ -54,7 +58,9 @@ func (tb *Table) Rename(ctx context.Context, name string) error {
 // Exists : this will return true when the table exists in the database
 func (tb *Table) Exists(ctx context.Context) bool {
 	var count int
-	stmt := tb.dialect.HasTable(tb.dbName, tb.name)
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.HasTable(stmt, tb.dbName, tb.name)
 	if err := sqldriver.QueryRowContext(
 		ctx,
 		tb.driver,
@@ -73,7 +79,9 @@ func (tb *Table) Columns() *ColumnView {
 
 // ListColumns :
 func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
-	stmt := tb.dialect.GetColumns(tb.dbName, tb.name)
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.GetColumns(stmt, tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
 		ctx,
 		tb.driver,
@@ -113,7 +121,9 @@ func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 
 // ListIndexes :
 func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
-	stmt := tb.dialect.GetIndexes(tb.dbName, tb.name)
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.GetIndexes(stmt, tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
 		ctx,
 		tb.driver,
@@ -170,10 +180,13 @@ func (tb Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
 
 // Truncate :
 func (tb *Table) Truncate(ctx context.Context) (err error) {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.TruncateTable(stmt, tb.dbName, tb.name)
 	_, err = sqldriver.Execute(
 		ctx,
 		tb.driver,
-		tb.dialect.TruncateTable(tb.dbName, tb.name),
+		stmt,
 		tb.logger,
 	)
 	return
@@ -181,10 +194,13 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 
 // DropIfExists : will drop the table only if it exists
 func (tb Table) DropIfExists(ctx context.Context) (err error) {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true)
 	_, err = sqldriver.Execute(
 		ctx,
 		tb.driver,
-		tb.dialect.DropTable(tb.dbName, tb.name, true),
+		stmt,
 		tb.logger,
 	)
 	return
@@ -192,10 +208,13 @@ func (tb Table) DropIfExists(ctx context.Context) (err error) {
 
 // Drop : drop the table, but it might throw error when the table is not exists
 func (tb Table) Drop(ctx context.Context) (err error) {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.DropTable(stmt, tb.dbName, tb.name, false)
 	_, err = sqldriver.Execute(
 		ctx,
 		tb.driver,
-		tb.dialect.DropTable(tb.dbName, tb.name, false),
+		stmt,
 		tb.logger,
 	)
 	return
@@ -267,14 +286,16 @@ func (tb *Table) migrateOne(ctx context.Context, entity interface{}, unsafe bool
 }
 
 func (tb *Table) createTable(ctx context.Context, fields []*reflext.StructField) error {
-	stmt, err := tb.dialect.CreateTable(
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := tb.dialect.CreateTable(
+		stmt,
 		tb.dbName,
 		tb.name,
 		tb.pk,
 		tb.client.DriverInfo,
 		fields,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 	if _, err := sqldriver.Execute(
@@ -297,21 +318,25 @@ func (tb *Table) alterTable(ctx context.Context, fields []*reflext.StructField, 
 	for i, idx := range indexs {
 		idxs[i] = idx.Name
 	}
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.HasPrimaryKey(stmt, tb.dbName, tb.name)
 	var count uint
 	if err := sqldriver.QueryRowContext(
-		context.Background(),
+		ctx,
 		tb.driver,
-		tb.dialect.HasPrimaryKey(tb.dbName, tb.name),
+		stmt,
 		tb.logger,
 	).Scan(&count); err != nil {
 		return err
 	}
-	stmt, err := tb.dialect.AlterTable(
+	stmt.Reset()
+	if err := tb.dialect.AlterTable(
+		stmt,
 		tb.dbName, tb.name, tb.pk, count > 0,
 		tb.client.DriverInfo,
 		fields, cols, idxs, unsafe,
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 	if _, err := sqldriver.Execute(

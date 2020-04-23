@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/types"
 )
 
@@ -32,10 +33,13 @@ func (cv *ColumnView) List(ctx context.Context) ([]Column, error) {
 
 // Rename :
 func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string) error {
+	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	cv.tb.dialect.RenameColumn(stmt, cv.tb.dbName, cv.tb.name, oldColName, newColName)
 	_, err := sqldriver.Execute(
 		ctx,
 		cv.tb.driver,
-		cv.tb.dialect.RenameColumn(cv.tb.dbName, cv.tb.name, oldColName, newColName),
+		stmt,
 		cv.tb.logger,
 	)
 	return err
@@ -43,10 +47,13 @@ func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string)
 
 // DropOne :
 func (cv *ColumnView) DropOne(ctx context.Context, name string) error {
+	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	cv.tb.dialect.DropColumn(stmt, cv.tb.dbName, cv.tb.name, name)
 	_, err := sqldriver.Execute(
 		ctx,
 		cv.tb.driver,
-		cv.tb.dialect.DropColumn(cv.tb.dbName, cv.tb.name, name),
+		stmt,
 		cv.tb.logger,
 	)
 	return err

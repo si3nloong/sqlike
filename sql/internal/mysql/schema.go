@@ -303,7 +303,7 @@ func (s mySQLSchema) ArrayDataType(sf *reflext.StructField) (col columns.Column)
 	return
 }
 
-func (ms MySQL) buildSchemaByColumn(stmt *sqlstmt.Statement, col columns.Column) {
+func (ms MySQL) buildSchemaByColumn(stmt sqlstmt.Stmt, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
 	if col.Charset != nil {

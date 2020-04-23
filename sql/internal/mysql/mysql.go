@@ -29,8 +29,6 @@ func New() *MySQL {
 }
 
 // GetVersion :
-func (ms MySQL) GetVersion() (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) GetVersion(stmt sqlstmt.Stmt) {
 	stmt.WriteString("SELECT VERSION();")
-	return
 }
