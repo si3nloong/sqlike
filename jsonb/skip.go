@@ -66,48 +66,57 @@ func (r *Reader) skipBoolean() {
 		r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'})
 		return
 	}
-	return
 }
 
-func (r *Reader) skipObject() {
-	level := 1
+func (r *Reader) skipObject() error {
 	c := r.nextToken()
 	if c != '{' {
-		return
+		return errors.New("object should start with {")
 	}
 
-	// TODO : index out of range
-	for level > 0 {
+loop:
+	for {
 		c = r.nextToken()
+
+		// key: value
 		switch c {
-		case '"':
-		case '{':
-			level++
 		case '}':
-			level--
+			break loop
+
+		case '"': // expect key
+			r.unreadByte()
+			if err := r.skipString(); err != nil {
+				return errors.New("object key must be string")
+			}
+
+			c = r.nextToken()
+			if c != ':' {
+				return errors.New("character : must place within key and value")
+			}
+
+			// skip anything
+			if err := r.skip(); err != nil {
+				return err
+			}
+
+			c = r.nextToken()
+			switch c {
+			case '}':
+				break loop
+			case ',':
+				continue
+			default:
+				return fmt.Errorf("expected , or } after object value")
+			}
+
+		default:
+			return fmt.Errorf("invalid character %s in object", string(c))
 		}
 	}
 
-	// for i := r.pos; i < r.len; i++ {
-	// 	switch r.b[i] {
-	// 	case '"': // If inside string, skip it
-	// 		// iter.head = i + 1
-	// 		r.pos = i
-	// 		r.skipString()
-	// 		i = r.pos + 1
-	// 		// i = iter.head - 1 // it will be i++ soon
-	// 	case '{': // If open symbol, increase level
-	// 		level++
-	// 	case '}': // If close symbol, increase level
-	// 		level--
-	// 		log.Println("Pos", i)
+	if r.b[r.pos] != '}' {
+		return errors.New("invalid char on end of object")
+	}
 
-	// 		// If we have returned to the original level, we're done
-	// 		if level == 0 {
-	// 			r.pos = i + 1
-	// 			log.Println(r.pos, r.peekType())
-	// 			return
-	// 		}
-	// 	}
-	// }
+	return nil
 }

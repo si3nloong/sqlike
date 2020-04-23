@@ -134,10 +134,12 @@ func TestUnmarshal(t *testing.T) {
 		`
 
 		var symbolstr string
-		Unmarshal([]byte(`"`+symbolstrval+`"`), &symbolstr)
+		err = Unmarshal([]byte(`"`+symbolstrval+`"`), &symbolstr)
+		require.NoError(t, err)
 		require.Equal(it, output, symbolstr)
 
-		Unmarshal(nullval, &str)
+		err = Unmarshal(nullval, &str)
+		require.NoError(t, err)
 		require.Equal(it, "", str)
 
 		var uinitstr *string
@@ -150,9 +152,12 @@ func TestUnmarshal(t *testing.T) {
 
 	t.Run("Unmarshal Boolean", func(it *testing.T) {
 		var flag bool
-		Unmarshal([]byte(`true`), &flag)
+		err = Unmarshal([]byte(`true`), &flag)
+		require.NoError(t, err)
 		require.Equal(it, true, flag)
-		Unmarshal([]byte(`false`), &flag)
+
+		err = Unmarshal([]byte(`false`), &flag)
+		require.NoError(t, err)
 		require.Equal(it, false, flag)
 
 		err = Unmarshal(nullval, &flag)
@@ -169,18 +174,28 @@ func TestUnmarshal(t *testing.T) {
 			i   int
 		)
 
-		Unmarshal([]byte(`10`), &i8)
+		err = Unmarshal([]byte(`10`), &i8)
+		require.NoError(t, err)
 		require.Equal(it, int8(10), i8)
-		Unmarshal([]byte(`-10`), &i8)
+
+		err = Unmarshal([]byte(`-10`), &i8)
+		require.NoError(t, err)
 		require.Equal(it, int8(-10), i8)
-		Unmarshal(nullval, &i8)
+
+		err = Unmarshal(nullval, &i8)
+		require.NoError(t, err)
 		require.Equal(it, int8(0), i8)
 
-		Unmarshal([]byte(`128`), &i16)
+		err = Unmarshal([]byte(`128`), &i16)
+		require.NoError(t, err)
 		require.Equal(it, int16(128), i16)
-		Unmarshal([]byte(`-128`), &i16)
+
+		err = Unmarshal([]byte(`-128`), &i16)
+		require.NoError(t, err)
 		require.Equal(it, int16(-128), i16)
-		Unmarshal(nullval, &i16)
+
+		err = Unmarshal(nullval, &i16)
+		require.NoError(t, err)
 		require.Equal(it, int16(0), i16)
 
 		Unmarshal([]byte(`1354677198`), &i32)
@@ -325,9 +340,9 @@ func TestUnmarshal(t *testing.T) {
 			[0, 100, 1000, 10000, 100000]
 		]`), &twoDArr)
 		require.ElementsMatch(t, [][]int{
-			[]int{2, 8, 32, 64, 128},
-			[]int{1, 3, 5, 7},
-			[]int{0, 100, 1000, 10000, 100000},
+			{2, 8, 32, 64, 128},
+			{1, 3, 5, 7},
+			{0, 100, 1000, 10000, 100000},
 		}, twoDArr)
 
 		Unmarshal([]byte(`[
@@ -382,6 +397,7 @@ func TestUnmarshal(t *testing.T) {
 			var a struct{}
 			err = Unmarshal(b, &a)
 			require.NoError(it, err)
+			require.Equal(t, struct{}{}, a)
 		}
 
 		{

@@ -298,6 +298,7 @@ func (dec *DefaultDecoder) DecodeSlice(r *Reader, v reflect.Value) error {
 		v.Set(reflect.Zero(t))
 		return r.skipNull()
 	}
+
 	v.Set(reflect.MakeSlice(t, 0, 0))
 	t = t.Elem()
 	return r.ReadArray(func(it *Reader) error {

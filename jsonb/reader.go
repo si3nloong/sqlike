@@ -26,7 +26,7 @@ type Reader struct {
 // NewReader :
 func NewReader(b []byte) *Reader {
 	length := len(b)
-	copier := make([]byte, length, length)
+	copier := make([]byte, length)
 	copy(copier, b)
 	return &Reader{b: copier, len: length}
 }
@@ -41,14 +41,14 @@ func (r *Reader) Bytes() []byte {
 	return r.b
 }
 
-// ReadNext :
+// nextToken : nextToken will skip all whitespace and stop on a char
 func (r *Reader) nextToken() byte {
 	var c byte
 	for i := r.pos; i < r.len; i++ {
 		c = r.b[i]
 		if _, ok := whiteSpaceMap[c]; ok {
 			r.b = append(r.b[:i], r.b[i+1:]...)
-			r.len = r.len - 1
+			r.len = len(r.b)
 			i--
 			continue
 		}
@@ -185,15 +185,19 @@ func (r *Reader) ReadBoolean() (bool, error) {
 	c := r.nextToken()
 	r.unreadByte()
 	if c == 'n' {
-		r.skipBytes([]byte{'n', 'u', 'l', 'l'})
+		if err := r.skipBytes([]byte{'n', 'u', 'l', 'l'}); err != nil {
+			return false, err
+		}
 		return false, nil
-	}
-	if c == 't' {
-		r.skipBytes([]byte{'t', 'r', 'u', 'e'})
+	} else if c == 't' {
+		if err := r.skipBytes([]byte{'t', 'r', 'u', 'e'}); err != nil {
+			return false, err
+		}
 		return true, nil
-	}
-	if c == 'f' {
-		r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'})
+	} else if c == 'f' {
+		if err := r.skipBytes([]byte{'f', 'a', 'l', 's', 'e'}); err != nil {
+			return false, err
+		}
 		return false, nil
 	}
 	return false, errors.New("invalid boolean value")

@@ -7,6 +7,7 @@ import (
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/language"
 )
 
 type CustomString string
@@ -317,6 +318,7 @@ func TestDecodeMap(t *testing.T) {
 		err = dec.DecodeMap(r, v.Elem())
 		require.Error(ti, err)
 	})
+
 }
 
 func TestDecodeArray(t *testing.T) {
@@ -335,5 +337,101 @@ func TestDecodeArray(t *testing.T) {
 			"京都着物レンタル夢館",
 			"aBcdEfgHiJklmnO",
 		}, arr)
+	})
+
+	t.Run("Decode to []int", func(ti *testing.T) {
+		arr := []int{}
+		err = Unmarshal([]byte(`[1, "xdd", 3]`), &arr)
+		require.Error(ti, err)
+
+		err = Unmarshal([]byte(`[1, 88, 3, -1992, 9999]`), &arr)
+		require.NoError(ti, err)
+		require.ElementsMatch(t, []int{1, 88, 3, -1992, 9999}, arr)
+	})
+
+	t.Run("Decode to []struct{}", func(it *testing.T) {
+		type Region struct {
+			DialingCode int
+			CountryCode string
+		}
+
+		type Contact struct {
+			Name        string
+			LangCode    language.Tag
+			PhoneNumber string
+			IsPrimary   bool
+			Region      Region
+		}
+
+		type Address struct {
+			Remark         string
+			Address        string
+			Contact        Contact
+			FloorNumber    string
+			BuildingNumber string
+			EntranceNumber string
+		}
+
+		addrs := []Address{}
+		b := []byte(`{hsh:""}`)
+		err = Unmarshal(b, &addrs)
+		require.Error(t, err)
+
+		b = []byte(`[
+			{
+				"Remark": "One Utama, 1 UTAMA SHOPPING CENTRE,  LEBUH BANDAR UTAMA,  BANDAR UTAMA",
+				"Address": "1 UTAMA SHOPPING CENTRE,  LEBUH BANDAR UTAMA,  BANDAR UTAMA, KOTA DAMANSARA PETALING JAYA, 47800, Petaling Jaya, Selangor, Malaysia",
+				"Contact": {
+					"Name": "One Utama",
+					"PhoneNumber": "60176473298"
+				},
+				"FloorNumber": "",
+				"BuildingNumber": "",
+				"EntranceNumber": ""
+			},
+			{
+				"Remark": "",
+				"Address": "Gugusan Melur, Kota Damansara, 47810, Petaling Jaya, Selangor, Malaysia",
+				"Contact": {
+					"Name": "Mohamed Yussuf",
+					"PhoneNumber": "60176473298",
+					"IsPrimary": true,
+					"Region": {
+						"DialingCode": 60,
+						"CountryCode": "MY"
+					}
+				},
+				"FloorNumber": "",
+				"BuildingNumber": "",
+				"EntranceNumber": ""
+			}
+		]`)
+
+		addrs = []Address{} // reset address
+		err = Unmarshal(b, &addrs)
+		require.NoError(t, err)
+
+		require.ElementsMatch(t, []Address{
+			{
+				Address: "1 UTAMA SHOPPING CENTRE,  LEBUH BANDAR UTAMA,  BANDAR UTAMA, KOTA DAMANSARA PETALING JAYA, 47800, Petaling Jaya, Selangor, Malaysia",
+				Remark:  "One Utama, 1 UTAMA SHOPPING CENTRE,  LEBUH BANDAR UTAMA,  BANDAR UTAMA",
+				Contact: Contact{
+					Name:        "One Utama",
+					PhoneNumber: "60176473298",
+				},
+			},
+			{
+				Address: "Gugusan Melur, Kota Damansara, 47810, Petaling Jaya, Selangor, Malaysia",
+				Contact: Contact{
+					Name:        "Mohamed Yussuf",
+					PhoneNumber: "60176473298",
+					IsPrimary:   true,
+					Region: Region{
+						DialingCode: 60,
+						CountryCode: "MY",
+					},
+				},
+			},
+		}, addrs)
 	})
 }
