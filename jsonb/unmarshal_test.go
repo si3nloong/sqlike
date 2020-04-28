@@ -371,6 +371,65 @@ func TestUnmarshal(t *testing.T) {
 			[]string{"Java", "JavaScript", "TypeScript"},
 			[]string{"Rust", "GoLang"},
 		}}, threeDArr)
+
+		b := []byte(`[{"Name":   "John", 
+		"Email": "john@hotmail.com"   ,
+		"Age" : 20,
+		},  {"Name":   " 😃 😄 😅 😆 😉 😊 😋 😎 😍", 
+		"Email": "test@hotmail.com"   ,
+		"Age" : 88,
+		"UUID": "daa68da0-8890-11ea-bc55-0242ac130003"
+		}]`)
+
+		users := []User{}
+		Unmarshal(b, &users)
+		id := uuid.MustParse("daa68da0-8890-11ea-bc55-0242ac130003")
+		require.ElementsMatch(t, []User{
+			{Name: "John", Email: "john@hotmail.com", Age: 20},
+			{Name: " 😃 😄 😅 😆 😉 😊 😋 😎 😍", Email: "test@hotmail.com", Age: 88, UUID: id},
+		}, users)
+
+		type recursiveNestedStruct struct {
+			Unicode   string
+			String    string
+			Boolean   bool
+			Integer   int
+			Level     uint
+			Recursive *recursiveNestedStruct
+			Float     float64
+			Time      time.Time
+			Nested    *struct {
+				Name     string
+				No       int
+				StrSlice []string
+			}
+		}
+
+		b = []byte(`
+		[{
+			"Unicode" : "中国★",
+			"String": "hello world",
+				"Level" : 1,
+			"Time": "2017-02-05T03:46:15Z",
+			"Recursive": {},
+			"Nested": {
+				"No" : 2,
+				"StrSlice": ["a", "b", "c"],
+			}
+		}]
+		`)
+
+		structs := []recursiveNestedStruct{}
+		err = Unmarshal(b, &structs)
+		require.NoError(t, err)
+
+		f := structs[0]
+		require.NotNil(t, f.Nested)
+		require.Equal(t, "中国★", f.Unicode)
+		require.Equal(t, uint(1), f.Level)
+		require.Equal(t, "hello world", f.String)
+		require.Equal(t, 2, f.Nested.No)
+		require.ElementsMatch(t, []string{"a", "b", "c"}, f.Nested.StrSlice)
 	})
 
 	t.Run("Unmarshal Map", func(it *testing.T) {
@@ -452,8 +511,8 @@ func TestUnmarshal(t *testing.T) {
 			require.Equal(t, int(6000), o.Integer)
 			require.Equal(t, float64(100.111), o.BigDecimal)
 			require.ElementsMatch(t, []User{
-				User{Name: "SianLoong", Age: 18},
-				User{Name: "Junkai"},
+				{Name: "SianLoong", Age: 18},
+				{Name: "Junkai"},
 			}, o.Users)
 			require.ElementsMatch(t, []string{"a", "b", "c", "d"}, o.StrSlice)
 		}

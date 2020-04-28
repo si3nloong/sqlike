@@ -4,12 +4,14 @@
 - [ ] Support `JSON_SET` or else.
 - [ ] Support foreign key.
 - [ ] Support migration like `django`.
+- [ ] Support `sqldump`.
 - [x] Change default collation for `currency.Unit` and `language.Tag` for better performance.
 - [ ] Support insert with map.
 - [ ] Prevent toxic query.
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] `Struct Mapper` as an interface and enable to set in `Client` object.
+- [ ] `StructMapper` as an interface and enable to set in `Client` object.
+- [ ] Change `StructField` to `interface{}`.
 - [x] Support index with files instead of single file (index.yaml).
 - [x] `Codec` as an interface and enable to set in `Client` object.
 - [x] Support unmarshal map key using `TextUnmarshaler` interface.
