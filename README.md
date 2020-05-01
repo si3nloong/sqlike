@@ -30,7 +30,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support third-party plugin [Casbin](https://github.com/casbin/casbin)
-- Support tracing [OpenTracing](https://github.com/opentracing/opentracing-go) **(in progress)**
+- Support tracing [OpenTracing](https://github.com/opentracing/opentracing-go)
 - Prevent toxic query with `Strict Mode` **(in progress)**
 
 ### Missing DOC?
@@ -44,6 +44,8 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 - join (eg. left join, outer join, inner join)
 - left wildcard search using Like is not allow
 - bidirectional sorting is not allow (except mysql 8.0)
+
+### General APIs
 
 ```go
 import (
@@ -215,6 +217,43 @@ func main() {
         }
 
     }
+}
+```
+
+### Integrate with OpenTracing
+
+```go
+import (
+    "context"
+    "github.com/go-sql-driver/mysql"
+    "github.com/si3nloong/sqlike/plugin/opentracing"
+	"github.com/si3nloong/sqlike/sql/instrumented"
+
+	"github.com/si3nloong/sqlike/sqlike"
+)
+
+func main() {
+    ctx := context.Background()
+    driver := "mysql"
+    cfg := mysql.NewConfig()
+	cfg.User = "root"
+	cfg.Passwd = "abcd1234"
+	cfg.ParseTime = true
+	conn, err := mysql.NewConnector(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	itpr := new(opentracing.OpenTracingInterceptor)
+	itpr.Driver = driver
+    client, err := sqlike.ConnectDB(
+        ctx, driver,
+        instrumented.WrapConnector(conn, itpr),
+    )
+    if err != nil {
+        panic(err)
+    }
+    defer client.Close()
 }
 ```
 

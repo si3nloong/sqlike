@@ -167,7 +167,7 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 	stmt := c.dialect.CreateDatabase(name, checkExists)
 	_, err := driver.Execute(
 		ctx,
-		c,
+		c.DB,
 		stmt,
 		c.logger,
 	)
@@ -178,7 +178,7 @@ func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) erro
 	stmt := c.dialect.DropDatabase(name, checkExists)
 	_, err := driver.Execute(
 		ctx,
-		c,
+		c.DB,
 		stmt,
 		c.logger,
 	)

@@ -5,64 +5,63 @@ import (
 	"database/sql/driver"
 )
 
-type WrappedStmt struct {
-	stmt driver.Stmt
+type Stmt interface {
+	driver.Stmt
+	driver.StmtExecContext
+	driver.StmtQueryContext
 }
 
-var (
-	_ driver.Stmt             = (*WrappedStmt)(nil)
-	_ driver.StmtExecContext  = (*WrappedStmt)(nil)
-	_ driver.StmtQueryContext = (*WrappedStmt)(nil)
-)
+type wrappedStmt struct {
+	ctx   context.Context
+	itpr  Interceptor
+	query string
+	stmt  Stmt
+}
+
+var _ Stmt = (*wrappedStmt)(nil)
 
 // Exec :
-func (w WrappedStmt) Exec(args []driver.Value) (driver.Result, error) {
+func (w wrappedStmt) Exec(args []driver.Value) (driver.Result, error) {
 	result, err := w.stmt.Exec(args)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return wrappedResult{ctx: w.ctx, itpr: w.itpr, result: result}, nil
 }
 
 // ExecContext :
-func (w WrappedStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
-	x, ok := w.stmt.(driver.StmtExecContext)
-	if ok {
-		result, err := x.ExecContext(ctx, args)
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
+func (w wrappedStmt) ExecContext(ctx context.Context, args []driver.NamedValue) (driver.Result, error) {
+	result, err := w.itpr.StmtExecContext(ctx, w.stmt, w.query, args)
+	if err != nil {
+		return nil, err
 	}
-	// TODO: convert NamedValue to Value
-	return w.Exec(nil)
-}
-
-// QueryContext :
-func (w WrappedStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
-	x, ok := w.stmt.(driver.StmtQueryContext)
-	if ok {
-		result, err := x.QueryContext(ctx, args)
-		if err != nil {
-			return nil, err
-		}
-		return result, nil
-	}
-	// TODO: convert NamedValue to Value
-	return w.Query(nil)
+	return wrappedResult{ctx: ctx, itpr: w.itpr, result: result}, nil
 }
 
 // Query :
-func (w WrappedStmt) Query(args []driver.Value) (driver.Rows, error) {
-	return w.stmt.Query(args)
+func (w wrappedStmt) Query(args []driver.Value) (driver.Rows, error) {
+	rows, err := w.stmt.Query(args)
+	if err != nil {
+		return nil, err
+	}
+	return wrappedRows{ctx: w.ctx, itpr: w.itpr, rows: rows}, nil
+}
+
+// QueryContext :
+func (w wrappedStmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {
+	rows, err := w.itpr.StmtQueryContext(ctx, w.stmt, w.query, args)
+	if err != nil {
+		return nil, err
+	}
+	return wrappedRows{ctx: ctx, itpr: w.itpr, rows: rows}, nil
 }
 
 // NumInput :
-func (w WrappedStmt) NumInput() int {
+func (w wrappedStmt) NumInput() int {
 	return w.stmt.NumInput()
 }
 
 // Close :
-func (w WrappedStmt) Close() error {
-	return w.stmt.Close()
+func (w wrappedStmt) Close() error {
+	return w.itpr.StmtClose(w.ctx, w.stmt)
 }

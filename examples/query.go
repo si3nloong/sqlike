@@ -2,7 +2,6 @@ package examples
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql"
@@ -56,7 +55,6 @@ func QueryExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		}
 
 		// TODO: add test
-		log.Println(gss)
 	}
 
 	{
