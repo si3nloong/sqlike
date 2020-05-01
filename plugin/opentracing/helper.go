@@ -45,7 +45,8 @@ func (ot *OpenTracingInterceptor) logArgs(span opentracing.Span, args []driver.N
 }
 
 func (ot *OpenTracingInterceptor) logError(span opentracing.Span, err error) {
-	if err != driver.ErrSkip {
+	if err != nil && err != driver.ErrSkip {
+		// we didn't want to log driver.ErrSkip, because the native sql package will handle
 		ext.LogError(span, err)
 	}
 }
