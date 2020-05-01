@@ -7,12 +7,16 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 )
 
-func (ot *OpenTracingInterceptor) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) error {
-	span := ot.StartSpan(ctx, "rows_next")
-	defer span.Finish()
-	if err := rows.Next(dest); err != nil {
-		ext.LogError(span, err)
-		return err
+func (ot *OpenTracingInterceptor) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) (err error) {
+	if ot.opts.RowsNext {
+		span := ot.StartSpan(ctx, "rows_next")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return nil
+	err = rows.Next(dest)
+	return
 }

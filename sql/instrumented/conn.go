@@ -86,7 +86,11 @@ func (w wrappedConn) QueryContext(ctx context.Context, query string, args []driv
 	if err != nil {
 		return nil, err
 	}
-	return wrappedRows{ctx: ctx, itpr: w.itpr, rows: rows}, nil
+	x, ok := rows.(Rows)
+	if !ok {
+		return nil, driver.ErrSkip
+	}
+	return wrappedRows{ctx: ctx, itpr: w.itpr, rows: x}, nil
 }
 
 // Close :

@@ -5,11 +5,17 @@ import (
 	"database/sql/driver"
 )
 
+type Result interface {
+	driver.Result
+}
+
 type wrappedResult struct {
 	ctx    context.Context
 	itpr   Interceptor
 	result driver.Result
 }
+
+var _ Result = (*wrappedResult)(nil)
 
 // LastInsertId :
 func (w wrappedResult) LastInsertId() (int64, error) {

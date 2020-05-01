@@ -11,6 +11,15 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 )
 
+// Resulter :
+type Resulter interface {
+	Scan(dests ...interface{}) error
+	Columns() []string
+	Next() bool
+	NextResultSet() bool
+	Close() error
+}
+
 // ErrNoRows :
 var ErrNoRows = sql.ErrNoRows
 
@@ -26,6 +35,8 @@ type Result struct {
 	columnTypes []*sql.ColumnType
 	err         error
 }
+
+var _ Resulter = (*Result)(nil)
 
 // Columns :
 func (r *Result) Columns() []string {
@@ -254,6 +265,11 @@ func (r *Result) Error() error {
 // Next :
 func (r *Result) Next() bool {
 	return r.rows.Next()
+}
+
+// NextResultSet :
+func (r *Result) NextResultSet() bool {
+	return r.rows.NextResultSet()
 }
 
 // Close :

@@ -44,7 +44,11 @@ func (w wrappedStmt) Query(args []driver.Value) (driver.Rows, error) {
 	if err != nil {
 		return nil, err
 	}
-	return wrappedRows{ctx: w.ctx, itpr: w.itpr, rows: rows}, nil
+	x, ok := rows.(Rows)
+	if !ok {
+		return nil, driver.ErrSkip
+	}
+	return wrappedRows{ctx: w.ctx, itpr: w.itpr, rows: x}, nil
 }
 
 // QueryContext :
@@ -53,7 +57,11 @@ func (w wrappedStmt) QueryContext(ctx context.Context, args []driver.NamedValue)
 	if err != nil {
 		return nil, err
 	}
-	return wrappedRows{ctx: ctx, itpr: w.itpr, rows: rows}, nil
+	x, ok := rows.(Rows)
+	if !ok {
+		return nil, driver.ErrSkip
+	}
+	return wrappedRows{ctx: ctx, itpr: w.itpr, rows: x}, nil
 }
 
 // NumInput :

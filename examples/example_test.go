@@ -39,9 +39,12 @@ func TestExamples(t *testing.T) {
 		panic(err)
 	}
 
-	itpr := new(opentracing.OpenTracingInterceptor)
-	itpr.Database = ""
-	itpr.Driver = "mysql"
+	itpr := opentracing.Interceptor(
+		opentracing.WithDBInstance("sqlike"),
+		opentracing.WithDBUser("root"),
+		opentracing.WithExec(true),
+		opentracing.WithQuery(true),
+	)
 	client, err := sqlike.ConnectDB(ctx, "mysql", instrumented.WrapConnector(conn, itpr))
 	require.NoError(t, err)
 	defer client.Close()

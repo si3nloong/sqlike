@@ -8,62 +8,84 @@ import (
 )
 
 // ConnPing :
-func (ot *OpenTracingInterceptor) ConnPing(ctx context.Context, conn driver.Pinger) error {
-	span := ot.StartSpan(ctx, "conn_ping")
-	defer span.Finish()
-	if err := conn.Ping(ctx); err != nil {
-		ext.LogError(span, err)
-		return err
+func (ot *OpenTracingInterceptor) ConnPing(ctx context.Context, conn driver.Pinger) (err error) {
+	if ot.opts.Ping {
+		span := ot.StartSpan(ctx, "ping")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return nil
+	err = conn.Ping(ctx)
+	return
 }
 
 // ConnPing :
-func (ot *OpenTracingInterceptor) ConnBeginTx(ctx context.Context, conn driver.ConnBeginTx, opts driver.TxOptions) (driver.Tx, error) {
-	span := ot.StartSpan(ctx, "conn_begin_transaction")
-	defer span.Finish()
-	tx, err := conn.BeginTx(ctx, opts)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) ConnBeginTx(ctx context.Context, conn driver.ConnBeginTx, opts driver.TxOptions) (tx driver.Tx, err error) {
+	if ot.opts.BeginTx {
+		span := ot.StartSpan(ctx, "begin_tx")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return tx, nil
+	tx, err = conn.BeginTx(ctx, opts)
+	return
 }
 
 // ConnPrepareContext :
-func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn driver.ConnPrepareContext, query string) (driver.Stmt, error) {
-	span := ot.StartSpan(ctx, "conn_prepare")
-	defer span.Finish()
-	ext.DBStatement.Set(span, query)
-	stmt, err := conn.PrepareContext(ctx, query)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn driver.ConnPrepareContext, query string) (stmt driver.Stmt, err error) {
+	if ot.opts.Prepare {
+		span := ot.StartSpan(ctx, "prepare")
+		ext.DBStatement.Set(span, query)
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return stmt, nil
+	stmt, err = conn.PrepareContext(ctx, query)
+	return
 }
 
 // ConnExecContext :
-func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driver.ExecerContext, query string, args []driver.NamedValue) (driver.Result, error) {
-	span := ot.StartSpan(ctx, "conn_exec")
-	defer span.Finish()
-	ext.DBStatement.Set(span, query)
-	result, err := conn.ExecContext(ctx, query, args)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driver.ExecerContext, query string, args []driver.NamedValue) (result driver.Result, err error) {
+	if ot.opts.Exec {
+		span := ot.StartSpan(ctx, "exec")
+		ext.DBStatement.Set(span, query)
+		if ot.opts.Args {
+			logArgs(span, args)
+		}
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return result, nil
+	result, err = conn.ExecContext(ctx, query, args)
+	return
 }
 
-func (ot *OpenTracingInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (driver.Rows, error) {
-	span := ot.StartSpan(ctx, "conn_query")
-	defer span.Finish()
-	ext.DBStatement.Set(span, query)
-	rows, err := conn.QueryContext(ctx, query, args)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
+	if ot.opts.Query {
+		span := ot.StartSpan(ctx, "query")
+		ext.DBStatement.Set(span, query)
+		if ot.opts.Args {
+			logArgs(span, args)
+		}
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return rows, nil
+	rows, err = conn.QueryContext(ctx, query, args)
+	return
 }

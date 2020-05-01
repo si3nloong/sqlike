@@ -8,23 +8,31 @@ import (
 )
 
 // TxCommit :
-func (ot *OpenTracingInterceptor) TxCommit(ctx context.Context, tx driver.Tx) error {
-	span := ot.StartSpan(ctx, "tx_commit")
-	defer span.Finish()
-	if err := tx.Commit(); err != nil {
-		ext.LogError(span, err)
-		return err
+func (ot *OpenTracingInterceptor) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
+	if ot.opts.TxCommit {
+		span := ot.StartSpan(ctx, "tx_commit")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return nil
+	err = tx.Commit()
+	return
 }
 
 // TxRollback :
-func (ot *OpenTracingInterceptor) TxRollback(ctx context.Context, tx driver.Tx) error {
-	span := ot.StartSpan(ctx, "tx_rollback")
-	defer span.Finish()
-	if err := tx.Rollback(); err != nil {
-		ext.LogError(span, err)
-		return err
+func (ot *OpenTracingInterceptor) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
+	if ot.opts.TxRollback {
+		span := ot.StartSpan(ctx, "tx_rollback")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return nil
+	err = tx.Rollback()
+	return
 }

@@ -8,38 +8,54 @@ import (
 )
 
 // StmtExecContext :
-func (ot *OpenTracingInterceptor) StmtExecContext(ctx context.Context, conn driver.StmtExecContext, query string, args []driver.NamedValue) (driver.Result, error) {
-	span := ot.StartSpan(ctx, "exec")
-	defer span.Finish()
-	ext.DBStatement.Set(span, query)
-	rows, err := conn.ExecContext(ctx, args)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) StmtExecContext(ctx context.Context, conn driver.StmtExecContext, query string, args []driver.NamedValue) (result driver.Result, err error) {
+	if ot.opts.Exec {
+		span := ot.StartSpan(ctx, "exec")
+		ext.DBStatement.Set(span, query)
+		if ot.opts.Args {
+			logArgs(span, args)
+		}
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return rows, nil
+	result, err = conn.ExecContext(ctx, args)
+	return
 }
 
 // StmtQueryContext :
-func (ot *OpenTracingInterceptor) StmtQueryContext(ctx context.Context, conn driver.StmtQueryContext, query string, args []driver.NamedValue) (driver.Rows, error) {
-	span := ot.StartSpan(ctx, "query_context")
-	defer span.Finish()
-	ext.DBStatement.Set(span, query)
-	rows, err := conn.QueryContext(ctx, args)
-	if err != nil {
-		ext.LogError(span, err)
-		return nil, err
+func (ot *OpenTracingInterceptor) StmtQueryContext(ctx context.Context, conn driver.StmtQueryContext, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
+	if ot.opts.Query {
+		span := ot.StartSpan(ctx, "query")
+		ext.DBStatement.Set(span, query)
+		if ot.opts.Args {
+			logArgs(span, args)
+		}
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
-	return rows, nil
+	rows, err = conn.QueryContext(ctx, args)
+	return
 }
 
 // StmtClose :
-func (ot *OpenTracingInterceptor) StmtClose(ctx context.Context, conn driver.Stmt) error {
-	span := ot.StartSpan(ctx, "close")
-	defer span.Finish()
-	if err := conn.Close(); err != nil {
-		ext.LogError(span, err)
-		return err
+func (ot *OpenTracingInterceptor) StmtClose(ctx context.Context, conn driver.Stmt) (err error) {
+	if ot.opts.RowsClose {
+		span := ot.StartSpan(ctx, "close")
+		defer func() {
+			if err != nil {
+				ext.LogError(span, err)
+			}
+			span.Finish()
+		}()
 	}
+	err = conn.Close()
 	return nil
 }
