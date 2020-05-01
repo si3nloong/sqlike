@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql/driver"
 
-	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 )
 
@@ -15,11 +14,9 @@ func (ot *OpenTracingInterceptor) ResultLastInsertId(ctx context.Context, result
 			log.Int64("last_insert_id", id),
 		)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
+			span.Finish()
 		}()
-		span.Finish()
 	}
 	id, err = result.LastInsertId()
 	return
@@ -32,9 +29,7 @@ func (ot *OpenTracingInterceptor) ResultRowsAffected(ctx context.Context, result
 			log.Int64("rows_affected", affected),
 		)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}

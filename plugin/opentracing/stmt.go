@@ -12,13 +12,9 @@ func (ot *OpenTracingInterceptor) StmtExecContext(ctx context.Context, conn driv
 	if ot.opts.Exec {
 		span := ot.StartSpan(ctx, "exec")
 		ext.DBStatement.Set(span, query)
-		if ot.opts.Args {
-			logArgs(span, args)
-		}
+		ot.logArgs(span, args)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -31,13 +27,9 @@ func (ot *OpenTracingInterceptor) StmtQueryContext(ctx context.Context, conn dri
 	if ot.opts.Query {
 		span := ot.StartSpan(ctx, "query")
 		ext.DBStatement.Set(span, query)
-		if ot.opts.Args {
-			logArgs(span, args)
-		}
+		ot.logArgs(span, args)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -50,9 +42,7 @@ func (ot *OpenTracingInterceptor) StmtClose(ctx context.Context, conn driver.Stm
 	if ot.opts.RowsClose {
 		span := ot.StartSpan(ctx, "close")
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}

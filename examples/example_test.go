@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/Masterminds/semver"
-	"github.com/go-sql-driver/mysql"
+
+	_ "github.com/go-sql-driver/mysql"
+	mysql "github.com/go-sql-driver/mysql"
 
 	"github.com/si3nloong/sqlike/plugin/opentracing"
 	"github.com/si3nloong/sqlike/sql/instrumented"
@@ -30,10 +32,16 @@ func TestExamples(t *testing.T) {
 		ctx = context.Background()
 	)
 
+	driver := "mysql"
+	username := "root"
+
 	cfg := mysql.NewConfig()
-	cfg.User = "root"
+	// log.Println(cfg)
+	cfg.User = username
+	cfg.Params = map[string]string{"charset": "utf8mb4"}
 	cfg.Passwd = "abcd1234"
 	cfg.ParseTime = true
+	// cfg.InterpolateParams = true
 	conn, err := mysql.NewConnector(cfg)
 	if err != nil {
 		panic(err)
@@ -41,15 +49,15 @@ func TestExamples(t *testing.T) {
 
 	itpr := opentracing.Interceptor(
 		opentracing.WithDBInstance("sqlike"),
-		opentracing.WithDBUser("root"),
+		opentracing.WithDBUser(username),
+		opentracing.WithDBType(driver),
 		opentracing.WithExec(true),
 		opentracing.WithQuery(true),
 	)
-	client, err := sqlike.ConnectDB(ctx, "mysql", instrumented.WrapConnector(conn, itpr))
-	require.NoError(t, err)
+	client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
 	defer client.Close()
 
-	// client, err := sqlike.Connect(
+	// client := sqlike.MustConnect(
 	// 	ctx,
 	// 	"mysql",
 	// 	options.Connect().

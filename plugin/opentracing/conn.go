@@ -12,9 +12,7 @@ func (ot *OpenTracingInterceptor) ConnPing(ctx context.Context, conn driver.Ping
 	if ot.opts.Ping {
 		span := ot.StartSpan(ctx, "ping")
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -27,9 +25,7 @@ func (ot *OpenTracingInterceptor) ConnBeginTx(ctx context.Context, conn driver.C
 	if ot.opts.BeginTx {
 		span := ot.StartSpan(ctx, "begin_tx")
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -43,9 +39,7 @@ func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn d
 		span := ot.StartSpan(ctx, "prepare")
 		ext.DBStatement.Set(span, query)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -58,13 +52,9 @@ func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driv
 	if ot.opts.Exec {
 		span := ot.StartSpan(ctx, "exec")
 		ext.DBStatement.Set(span, query)
-		if ot.opts.Args {
-			logArgs(span, args)
-		}
+		ot.logArgs(span, args)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}
@@ -76,13 +66,9 @@ func (ot *OpenTracingInterceptor) ConnQueryContext(ctx context.Context, conn dri
 	if ot.opts.Query {
 		span := ot.StartSpan(ctx, "query")
 		ext.DBStatement.Set(span, query)
-		if ot.opts.Args {
-			logArgs(span, args)
-		}
+		ot.logArgs(span, args)
 		defer func() {
-			if err != nil {
-				ext.LogError(span, err)
-			}
+			ot.logError(span, err)
 			span.Finish()
 		}()
 	}

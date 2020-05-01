@@ -7,10 +7,15 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 )
 
-func logArgs(span opentracing.Span, args []driver.NamedValue) {
+func (ot *OpenTracingInterceptor) logArgs(span opentracing.Span, args []driver.NamedValue) {
+	if !ot.opts.Args {
+		return
+	}
+
 	fields := make([]log.Field, len(args))
 	for i, arg := range args {
 		switch v := arg.Value.(type) {
@@ -37,4 +42,10 @@ func logArgs(span opentracing.Span, args []driver.NamedValue) {
 		}
 	}
 	span.LogFields(fields...)
+}
+
+func (ot *OpenTracingInterceptor) logError(span opentracing.Span, err error) {
+	if err != driver.ErrSkip {
+		ext.LogError(span, err)
+	}
 }
