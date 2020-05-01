@@ -2,6 +2,7 @@ package sqlstmt
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"time"
 )
@@ -10,6 +11,13 @@ import (
 type Formatter interface {
 	Format(it interface{}) string
 	Var(i int) string
+}
+
+type Stmt interface {
+	fmt.Stringer
+	io.StringWriter
+	io.ByteWriter
+	AppendArgs([]interface{})
 }
 
 // Statement :
@@ -86,4 +94,11 @@ func (sm *Statement) TimeElapsed() time.Duration {
 		sm.StopTimer()
 	}
 	return sm.elapsed
+}
+
+// Reset : implement resetter as strings.Builer
+func (sm *Statement) Reset() {
+	sm.args = []interface{}{}
+	sm.Builder.Reset()
+	sm.fmt = nil
 }

@@ -6,15 +6,13 @@ import (
 )
 
 // HasIndexByName :
-func (ms MySQL) HasIndexByName(dbName, table, indexName string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) HasIndexByName(stmt sqlstmt.Stmt, dbName, table, indexName string) {
 	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`)
 	stmt.AppendArgs([]interface{}{dbName, table, indexName})
-	return
 }
 
 // HasIndex :
-func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt.Statement) {
+func (ms MySQL) HasIndex(stmt sqlstmt.Stmt, dbName, table string, idx indexes.Index) {
 	nonUnique, idxType := true, "BTREE"
 	switch idx.Type {
 	case indexes.Unique:
@@ -27,7 +25,6 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 		nonUnique = false
 	}
 	args := []interface{}{dbName, table, idxType, nonUnique}
-	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("SELECT COUNT(1) FROM (")
 	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c FROM INFORMATION_SCHEMA.STATISTICS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? ")
@@ -48,24 +45,20 @@ func (ms MySQL) HasIndex(dbName, table string, idx indexes.Index) (stmt *sqlstmt
 	stmt.WriteString(") AS temp WHERE temp.c = ?")
 	stmt.WriteByte(';')
 	stmt.AppendArgs(append(args, int64(len(idx.Columns))))
-	return
 }
 
 // GetIndexes :
-func (ms MySQL) GetIndexes(dbName, table string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) GetIndexes(stmt sqlstmt.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs([]interface{}{dbName, table})
-	return
 }
 
 // CreateIndexes :
-func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDesc bool) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexes.Index, supportDesc bool) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 
 		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type))
@@ -76,7 +69,7 @@ func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDes
 		stmt.WriteString(" (")
 		for j, col := range idx.Columns {
 			if j > 0 {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			stmt.WriteString(ms.Quote(col.Name))
 			if !supportDesc {
@@ -86,15 +79,13 @@ func (ms MySQL) CreateIndexes(db, table string, idxs []indexes.Index, supportDes
 				stmt.WriteString(" DESC")
 			}
 		}
-		stmt.WriteRune(')')
+		stmt.WriteByte(')')
 	}
-	stmt.WriteRune(';')
-	return
+	stmt.WriteByte(';')
 }
 
 // DropIndex :
-func (ms MySQL) DropIndexes(db, table string, idxs []string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 	for i, idx := range idxs {
 		if idx == "PRIMARY" {
@@ -108,8 +99,7 @@ func (ms MySQL) DropIndexes(db, table string, idxs []string) (stmt *sqlstmt.Stat
 		stmt.WriteString("DROP INDEX ")
 		stmt.WriteString(ms.Quote(idx))
 	}
-	stmt.WriteRune(';')
-	return
+	stmt.WriteByte(';')
 }
 
 func (ms MySQL) getIndexByType(k indexes.Type) (idx string) {

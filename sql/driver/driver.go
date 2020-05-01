@@ -25,39 +25,39 @@ type Driver interface {
 
 // Execute :
 func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (result sql.Result, err error) {
-	if logger != nil {
-		stmt.StartTimer()
-		defer func() {
-			stmt.StopTimer()
-			logger.Debug(stmt)
-		}()
-	}
+	// if logger != nil {
+	// 	stmt.StartTimer()
+	// 	defer func() {
+	// 		stmt.StopTimer()
+	// 		logger.Debug(stmt)
+	// 	}()
+	// }
 	result, err = driver.ExecContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }
 
 // Query :
 func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (rows *sql.Rows, err error) {
-	if logger != nil {
-		stmt.StartTimer()
-		defer func() {
-			stmt.StopTimer()
-			logger.Debug(stmt)
-		}()
-	}
+	// if logger != nil {
+	// 	stmt.StartTimer()
+	// 	defer func() {
+	// 		stmt.StopTimer()
+	// 		logger.Debug(stmt)
+	// 	}()
+	// }
 	rows, err = driver.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }
 
 // QueryRowContext :
 func QueryRowContext(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (row *sql.Row) {
-	if logger != nil {
-		stmt.StartTimer()
-		defer func() {
-			stmt.StopTimer()
-			logger.Debug(stmt)
-		}()
-	}
+	// if logger != nil {
+	// 	stmt.StartTimer()
+	// 	defer func() {
+	// 		stmt.StopTimer()
+	// 		logger.Debug(stmt)
+	// 	}()
+	// }
 	row = driver.QueryRowContext(ctx, stmt.String(), stmt.Args()...)
 	return
 }

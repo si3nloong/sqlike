@@ -11,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
@@ -98,7 +99,10 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cdc codec.Codece
 		return nil, ErrEmptyFields
 	}
 
-	stmt, err := dialect.InsertInto(
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.InsertInto(
+		stmt,
 		dbName,
 		tbName,
 		pk,
@@ -107,8 +111,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cdc codec.Codece
 		fields,
 		v,
 		opt,
-	)
-	if err != nil {
+	); err != nil {
 		return nil, err
 	}
 	return sqldriver.Execute(

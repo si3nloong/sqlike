@@ -13,55 +13,45 @@ import (
 )
 
 // HasPrimaryKey :
-func (ms MySQL) HasPrimaryKey(db, table string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) HasPrimaryKey(stmt sqlstmt.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
 	stmt.WriteByte(';')
 	stmt.AppendArgs([]interface{}{db, table})
-	return
 }
 
 // RenameTable :
-func (ms MySQL) RenameTable(db, oldName, newName string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) RenameTable(stmt sqlstmt.Stmt, db, oldName, newName string) {
 	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(" TO ")
 	stmt.WriteString(ms.TableName(db, newName))
 	stmt.WriteByte(';')
-	return
 }
 
 // DropTable :
-func (ms MySQL) DropTable(db, table string, exists bool) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) DropTable(stmt sqlstmt.Stmt, db, table string, exists bool) {
 	stmt.WriteString("DROP TABLE")
 	if exists {
 		stmt.WriteString(" IF EXISTS")
 	}
 	stmt.WriteByte(' ')
 	stmt.WriteString(ms.TableName(db, table) + ";")
-	return
 }
 
 // TruncateTable :
-func (ms MySQL) TruncateTable(db, table string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) TruncateTable(stmt sqlstmt.Stmt, db, table string) {
 	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
-	return
 }
 
 // HasTable :
-func (ms MySQL) HasTable(dbName, table string) (stmt *sqlstmt.Statement) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms MySQL) HasTable(stmt sqlstmt.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs([]interface{}{dbName, table})
-	return
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*reflext.StructField) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []*reflext.StructField) (err error) {
 	var (
 		col     columns.Column
 		pkk     *reflext.StructField
@@ -70,14 +60,13 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		stored  bool
 	)
 
-	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("CREATE TABLE " + ms.TableName(db, table) + " ")
-	stmt.WriteRune('(')
+	stmt.WriteByte('(')
 
 	// Main columns :
 	for i, sf := range fields {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 
 		col, err = ms.schema.GetColumn(info, sf)
@@ -97,7 +86,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
 		if _, ok := sf.Tag.LookUp("unique_index"); ok {
 			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
@@ -114,7 +103,7 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 			k1, virtual = child.Tag.LookUp("virtual_column")
 			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
@@ -145,10 +134,10 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 		}
 	}
 	if pkk != nil {
-		stmt.WriteRune(',')
+		stmt.WriteByte(',')
 		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
 	}
-	stmt.WriteRune(')')
+	stmt.WriteByte(')')
 	stmt.WriteString(" ENGINE=INNODB")
 	code := string(info.Charset())
 	if code == "" {
@@ -160,12 +149,12 @@ func (ms MySQL) CreateTable(db, table, pk string, info driver.Info, fields []*re
 			stmt.WriteString(" COLLATE " + info.Collate())
 		}
 	}
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (stmt *sqlstmt.Statement, err error) {
+func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
 	var (
 		col     columns.Column
 		pkk     *reflext.StructField
@@ -176,12 +165,11 @@ func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, 
 	)
 
 	suffix := "FIRST"
-	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 
 	for i, sf := range fields {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 
 		action := "ADD"
@@ -207,7 +195,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, 
 			if idxs.IndexOf(idx.GetName()) < 0 {
 				stmt.WriteString("ADD")
 				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 		}
 		stmt.WriteString(action + " ")
@@ -231,7 +219,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, 
 			k1, virtual = child.Tag.LookUp("virtual_column")
 			k2, stored = child.Tag.LookUp("stored_column")
 			if virtual || stored {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(info, child)
 				if err != nil {
 					return
@@ -273,7 +261,7 @@ func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, 
 	}
 
 	if pkk != nil {
-		stmt.WriteRune(',')
+		stmt.WriteByte(',')
 		stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
 	}
 
@@ -286,9 +274,9 @@ func (ms *MySQL) AlterTable(db, table, pk string, hasPk bool, info driver.Info, 
 	}
 
 	// TODO: character set
-	// stmt.WriteRune(',')
+	// stmt.WriteByte(',')
 	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)
 	// stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return
 }

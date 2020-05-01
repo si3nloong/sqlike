@@ -10,6 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -101,7 +102,9 @@ func (c *Client) DropDatabase(ctx context.Context, name string) error {
 
 // ListDatabases :
 func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
-	stmt := c.dialect.GetDatabases()
+	stmt := sqlstmt.AcquireStmt(c.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	c.dialect.GetDatabases(stmt)
 	rows, err := driver.Query(
 		ctx,
 		c.DB,
@@ -124,7 +127,9 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 
 // Database :
 func (c *Client) Database(name string) *Database {
-	stmt := c.dialect.UseDatabase(name)
+	stmt := sqlstmt.AcquireStmt(c.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	c.dialect.UseDatabase(stmt, name)
 	if _, err := driver.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
 		panic(err)
 	}
@@ -145,7 +150,9 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 		ver string
 		err error
 	)
-	stmt := c.dialect.GetVersion()
+	stmt := sqlstmt.AcquireStmt(c.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	c.dialect.GetVersion(stmt)
 	err = driver.QueryRowContext(
 		ctx,
 		c.DB,
@@ -164,7 +171,9 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 }
 
 func (c *Client) createDB(ctx context.Context, name string, checkExists bool) error {
-	stmt := c.dialect.CreateDatabase(name, checkExists)
+	stmt := sqlstmt.AcquireStmt(c.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	c.dialect.CreateDatabase(stmt, name, checkExists)
 	_, err := driver.Execute(
 		ctx,
 		c.DB,
@@ -175,7 +184,9 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 }
 
 func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) error {
-	stmt := c.dialect.DropDatabase(name, checkExists)
+	stmt := sqlstmt.AcquireStmt(c.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	c.dialect.DropDatabase(stmt, name, checkExists)
 	_, err := driver.Execute(
 		ctx,
 		c.DB,

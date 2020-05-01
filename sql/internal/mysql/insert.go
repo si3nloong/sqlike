@@ -12,9 +12,8 @@ import (
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, cdc codec.Codecer, fields []*reflext.StructField, v reflect.Value, opt *options.InsertOptions) (stmt *sqlstmt.Statement, err error) {
+func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *reflext.Mapper, cdc codec.Codecer, fields []*reflext.StructField, v reflect.Value, opt *options.InsertOptions) (err error) {
 	records := v.Len()
-	stmt = sqlstmt.NewStatement(ms)
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
@@ -22,7 +21,7 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, cdc cod
 	stmt.WriteString(" INTO " + ms.TableName(db, table) + " (")
 	for i, f := range fields {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 		stmt.WriteString(ms.Quote(f.Path))
 	}
@@ -33,32 +32,32 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, cdc cod
 	encoders := make([]codec.ValueEncoder, length)
 	for i := 0; i < records; i++ {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
-		stmt.WriteRune('(')
+		stmt.WriteByte('(')
 		vi := reflext.Indirect(v.Index(i))
 		for j, sf := range fields {
 			if j > 0 {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			// first record only find encoders
 			fv := mapper.FieldByIndexesReadOnly(vi, sf.Index)
 			if i == 0 {
 				encoders[j], err = findEncoder(mapper, cdc, sf, fv)
 				if err != nil {
-					return nil, err
+					return err
 				}
 			}
 
 			val, err := encoders[j](sf, fv)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			convertSpatial(stmt, val)
 
 		}
-		stmt.WriteRune(')')
+		stmt.WriteByte(')')
 		// stmt.WriteString(binds)
 	}
 	if opt.Mode == options.InsertOnDuplicate {
@@ -70,14 +69,14 @@ func (ms MySQL) InsertInto(db, table, pk string, mapper *reflext.Mapper, cdc cod
 				continue
 			}
 			if next {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			c := ms.Quote(f.Path)
 			stmt.WriteString(c + "=VALUES(" + c + ")")
 			next = true
 		}
 	}
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return
 }
 
@@ -92,7 +91,7 @@ func findEncoder(mapper *reflext.Mapper, c codec.Codecer, sf *reflext.StructFiel
 	return encoder, nil
 }
 
-func convertSpatial(stmt *sqlstmt.Statement, val interface{}) {
+func convertSpatial(stmt sqlstmt.Stmt, val interface{}) {
 	switch vi := val.(type) {
 	case spatial.Geometry:
 		switch vi.Type {
@@ -115,11 +114,11 @@ func convertSpatial(stmt *sqlstmt.Statement, val interface{}) {
 		if vi.SRID > 0 {
 			stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
 		}
-		stmt.WriteRune(')')
-		stmt.AppendArg(vi.WKT)
+		stmt.WriteByte(')')
+		stmt.AppendArgs([]interface{}{vi.WKT})
 
 	default:
-		stmt.WriteRune('?')
-		stmt.AppendArg(val)
+		stmt.WriteByte('?')
+		stmt.AppendArgs([]interface{}{val})
 	}
 }
