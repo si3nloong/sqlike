@@ -24,16 +24,19 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 		if c == '}' {
 			break
 		}
+
 		if c != '"' {
 			return ErrInvalidJSON{
 				callback: "ReadObject",
 				message:  "expect \" for object key",
 			}
 		}
+
 		k, err = r.unreadByte().ReadString()
 		if err != nil {
 			return err
 		}
+
 		c = r.nextToken()
 		if c != ':' {
 			return ErrInvalidJSON{
@@ -41,14 +44,17 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 				message:  "expect : after object key",
 			}
 		}
+
 		v, err := r.ReadBytes()
 		if err != nil {
 			return err
 		}
+
 		it := NewReader(v)
 		if err := cb(it, k); err != nil {
 			return err
 		}
+
 		c = r.nextToken()
 		if c != ',' {
 			break
@@ -88,11 +94,14 @@ keyLoop:
 				message:  "expect \" for object key",
 			}
 		}
+
 		key, err = r.unreadByte().ReadString()
 		if err != nil {
 			return err
 		}
+
 		paths = append(paths, key)
+
 		c = r.nextToken()
 		if c != ':' {
 			return ErrInvalidJSON{
@@ -112,6 +121,7 @@ keyLoop:
 			if err != nil {
 				return err
 			}
+
 			k := strings.Join(paths, ".")
 			it := NewReader(v)
 			if err := cb(it, k); err != nil {

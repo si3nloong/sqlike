@@ -6,11 +6,13 @@ import (
 	"testing"
 
 	"github.com/Masterminds/semver"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
+
+	"github.com/si3nloong/sqlike/plugin/opentracing"
+	"github.com/si3nloong/sqlike/sql/instrumented"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 
 	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,16 +30,30 @@ func TestExamples(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	client, err := sqlike.Connect(
-		ctx,
-		"mysql",
-		options.Connect().
-			SetUsername("root").
-			SetPassword("abcd1234").
-			SetCharset("utf8mb4"),
-	)
+	cfg := mysql.NewConfig()
+	cfg.User = "root"
+	cfg.Passwd = "abcd1234"
+	cfg.ParseTime = true
+	conn, err := mysql.NewConnector(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	itpr := new(opentracing.OpenTracingInterceptor)
+	itpr.Database = ""
+	itpr.Driver = "mysql"
+	client, err := sqlike.ConnectDB(ctx, "mysql", instrumented.WrapConnector(conn, itpr))
 	require.NoError(t, err)
 	defer client.Close()
+
+	// client, err := sqlike.Connect(
+	// 	ctx,
+	// 	"mysql",
+	// 	options.Connect().
+	// 		SetUsername("root").
+	// 		SetPassword("abcd1234").
+	// 		SetCharset("utf8mb4"),
+	// )
 
 	mg := connectMongoDB()
 
@@ -45,13 +61,14 @@ func TestExamples(t *testing.T) {
 	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 
-	client.SetLogger(Logger{})
+	// client.SetLogger(Logger{})
 	DatabaseExamples(t, client)
 	db := client.Database("sqlike")
 
 	{
 		MigrateExamples(t, ctx, db)
 		IndexExamples(t, ctx, db)
+
 		InsertExamples(t, ctx, db)
 		FindExamples(t, ctx, db)
 		QueryExamples(t, ctx, db)

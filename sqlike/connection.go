@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"log"
 
@@ -15,15 +16,15 @@ func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (clie
 	if opt == nil {
 		return nil, errors.New("sqlike: invalid connection options <nil>")
 	}
-	var conn *sql.DB
+	var db *sql.DB
 	dialect := sqldialect.GetDialectByDriver(driver)
 	connStr := dialect.Connect(opt)
 	log.Println("Connect to :", connStr)
-	conn, err = sql.Open(driver, connStr)
+	db, err = sql.Open(driver, connStr)
 	if err != nil {
 		return
 	}
-	client, err = newClient(ctx, driver, conn, dialect, opt.Charset, opt.Collate)
+	client, err = newClient(ctx, driver, db, dialect, opt.Charset, opt.Collate)
 	return
 }
 
@@ -57,4 +58,27 @@ func MustConnect(ctx context.Context, driver string, opt *options.ConnectOptions
 		panic(err)
 	}
 	return conn
+}
+
+// ConnectDB :
+func ConnectDB(ctx context.Context, driver string, conn driver.Connector) (*Client, error) {
+	db := sql.OpenDB(conn)
+	dialect := sqldialect.GetDialectByDriver(driver)
+	client, err := newClient(ctx, driver, db, dialect, "", "")
+	if err != nil {
+		return nil, err
+	}
+	if err := client.PingContext(ctx); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// MustConnectDB :
+func MustConnectDB(ctx context.Context, driver string, conn driver.Connector) *Client {
+	client, err := ConnectDB(ctx, driver, conn)
+	if err != nil {
+		panic(err)
+	}
+	return client
 }
