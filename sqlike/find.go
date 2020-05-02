@@ -7,6 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -95,8 +96,10 @@ func find(ctx context.Context, dbName, tbName string, cdc codec.Codecer, driver 
 	}
 	rslt := new(Result)
 	rslt.codec = cdc
-	stmt, err := dialect.Select(act, lock)
-	if err != nil {
+
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Select(stmt, act, lock); err != nil {
 		rslt.err = err
 		return rslt
 	}

@@ -14,9 +14,8 @@ import (
 
 func TestSelect(t *testing.T) {
 	var (
-		now  = time.Now()
-		err  error
-		stmt *sqlstmt.Statement
+		now = time.Now()
+		err error
 	)
 
 	invalids := []interface{}{
@@ -39,7 +38,10 @@ func TestSelect(t *testing.T) {
 
 	// Complex select statement
 	{
-		stmt, err = New().Select(
+		stmt := sqlstmt.AcquireStmt(MySQL{})
+		defer sqlstmt.ReleaseStmt(stmt)
+		err = New().Select(
+			stmt,
 			actions.Find().From("A", "Test").
 				Where(
 					expr.And(filters...),

@@ -10,6 +10,7 @@ import (
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -55,8 +56,10 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 	fv := mapper.FieldByIndexesReadOnly(v, f.Index)
 	x.Where(expr.Equal(f.Path, fv.Interface()))
 	x.Limit(1)
-	stmt, err := dialect.Delete(x)
-	if err != nil {
+
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Delete(stmt, x); err != nil {
 		return err
 	}
 	result, err := sqldriver.Execute(
@@ -129,8 +132,10 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 	if len(act.Conditions) < 1 {
 		return 0, errors.New("sqlike: empty condition is not allow for delete, please use truncate instead")
 	}
-	stmt, err := dialect.Delete(act)
-	if err != nil {
+
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Delete(stmt, act); err != nil {
 		return 0, err
 	}
 	result, err := sqldriver.Execute(

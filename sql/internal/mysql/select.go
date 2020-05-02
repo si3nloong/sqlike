@@ -7,8 +7,7 @@ import (
 )
 
 // Select :
-func (ms *MySQL) Select(f *actions.FindActions, lck options.LockMode) (stmt *sqlstmt.Statement, err error) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms *MySQL) Select(stmt sqlstmt.Stmt, f *actions.FindActions, lck options.LockMode) (err error) {
 	err = ms.parser.BuildStatement(stmt, f)
 	if err != nil {
 		return
@@ -19,22 +18,21 @@ func (ms *MySQL) Select(f *actions.FindActions, lck options.LockMode) (stmt *sql
 	case options.LockForRead:
 		stmt.WriteString(" LOCK IN SHARE MODE")
 	}
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return
 }
 
 // SelectStmt :
-func (ms *MySQL) SelectStmt(query interface{}) (stmt *sqlstmt.Statement, err error) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms *MySQL) SelectStmt(stmt sqlstmt.Stmt, query interface{}) (err error) {
 	err = ms.parser.BuildStatement(stmt, query)
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return
 }
 
-func buildStatement(stmt *sqlstmt.Statement, parser *sqlstmt.StatementBuilder, f interface{}) error {
+func buildStatement(stmt sqlstmt.Stmt, parser *sqlstmt.StatementBuilder, f interface{}) error {
 	if err := parser.BuildStatement(stmt, f); err != nil {
 		return err
 	}
-	stmt.WriteRune(';')
+	stmt.WriteByte(';')
 	return nil
 }

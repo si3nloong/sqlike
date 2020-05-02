@@ -9,6 +9,7 @@ import (
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -82,8 +83,10 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 	x.Limit(1)
 	x.Table = tbName
 	x.Database = dbName
-	stmt, err := dialect.Update(x)
-	if err != nil {
+
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Update(stmt, x); err != nil {
 		return err
 	}
 

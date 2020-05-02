@@ -14,6 +14,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -52,8 +53,9 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
-	stmt, err := db.dialect.SelectStmt(query)
-	if err != nil {
+	stmt := sqlstmt.AcquireStmt(db.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := db.dialect.SelectStmt(stmt, query); err != nil {
 		return nil, err
 	}
 	rows, err := driver.Query(

@@ -5,6 +5,7 @@ import (
 
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -66,8 +67,9 @@ func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver,
 	if len(act.Values) < 1 {
 		return 0, ErrNoValueUpdate
 	}
-	stmt, err := dialect.Update(act)
-	if err != nil {
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Update(stmt, act); err != nil {
 		return 0, err
 	}
 	result, err := sqldriver.Execute(

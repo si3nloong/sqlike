@@ -6,8 +6,7 @@ import (
 )
 
 // Delete :
-func (ms *MySQL) Delete(f *actions.DeleteActions) (stmt *sqlstmt.Statement, err error) {
-	stmt = sqlstmt.NewStatement(ms)
+func (ms *MySQL) Delete(stmt sqlstmt.Stmt, f *actions.DeleteActions) (err error) {
 	err = buildStatement(stmt, ms.parser, f)
 	if err != nil {
 		return

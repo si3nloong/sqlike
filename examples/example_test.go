@@ -13,6 +13,7 @@ import (
 	"github.com/si3nloong/sqlike/plugin/opentracing"
 	"github.com/si3nloong/sqlike/sql/instrumented"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/sqlike/options"
 
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/stretchr/testify/require"
@@ -32,49 +33,56 @@ func TestExamples(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	driver := "mysql"
-	username := "root"
-
-	cfg := mysql.NewConfig()
-	// log.Println(cfg)
-	cfg.User = username
-	cfg.Params = map[string]string{"charset": "utf8mb4"}
-	cfg.Passwd = "abcd1234"
-	cfg.ParseTime = true
-	// cfg.InterpolateParams = true
-	conn, err := mysql.NewConnector(cfg)
-	if err != nil {
-		panic(err)
+	// normal connect
+	{
+		client := sqlike.MustConnect(
+			ctx,
+			"mysql",
+			options.Connect().
+				SetUsername("root").
+				SetPassword("abcd1234").
+				SetCharset("utf8mb4"),
+		)
+		testCase(t, ctx, client)
 	}
 
-	itpr := opentracing.Interceptor(
-		opentracing.WithDBInstance("sqlike"),
-		opentracing.WithDBUser(username),
-		opentracing.WithDBType(driver),
-		opentracing.WithExec(true),
-		opentracing.WithQuery(true),
-	)
-	client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
-	defer client.Close()
+	// with tracing (OpenTracing)
+	{
+		driver := "mysql"
+		username := "root"
 
-	// client := sqlike.MustConnect(
-	// 	ctx,
-	// 	"mysql",
-	// 	options.Connect().
-	// 		SetUsername("root").
-	// 		SetPassword("abcd1234").
-	// 		SetCharset("utf8mb4"),
-	// )
+		cfg := mysql.NewConfig()
+		cfg.User = username
+		cfg.Params = map[string]string{"charset": "utf8mb4"}
+		cfg.Passwd = "abcd1234"
+		cfg.ParseTime = true
+		conn, err := mysql.NewConnector(cfg)
+		if err != nil {
+			panic(err)
+		}
 
-	mg := connectMongoDB()
+		itpr := opentracing.Interceptor(
+			opentracing.WithDBInstance("sqlike"),
+			opentracing.WithDBUser(username),
+			opentracing.WithDBType(driver),
+			opentracing.WithExec(true),
+			opentracing.WithQuery(true),
+		)
+		client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
+		defer client.Close()
+		testCase(t, ctx, client)
+	}
 
+}
+
+func testCase(t *testing.T, ctx context.Context, client *sqlike.Client) {
 	v := client.Version()
 	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
-
-	// client.SetLogger(Logger{})
+	client.SetLogger(Logger{})
 	DatabaseExamples(t, client)
 	db := client.Database("sqlike")
+	mg := connectMongoDB()
 
 	{
 		MigrateExamples(t, ctx, db)
@@ -100,5 +108,4 @@ func TestExamples(t *testing.T) {
 		FindErrorExamples(t, db)
 		UpdateErrorExamples(t, db)
 	}
-
 }

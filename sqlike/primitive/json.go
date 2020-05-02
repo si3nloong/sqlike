@@ -2,31 +2,41 @@ package primitive
 
 type jsonFunction int
 
-func (f jsonFunction) String() string {
-	switch f {
-	case JSONContains:
-		return "JSON_CONTAINS"
-	case JSONExtract:
-		return "JSON_EXTRACT"
-	case JSONQuote:
-		return "JSON_QUOTE"
-	case JSONUnquote:
-		return "JSON_UNQUOTE"
-	case JSONValid:
-		return "JSON_VALID"
-	case JSONKeys:
-		return "JSON_KEYS"
-	}
-	return "Unknown JSON Function"
-}
-
 // sql functions :
 const (
-	JSONContains jsonFunction = iota + 1
-	JSONPretty
-	JSONExtract
-	JSONQuote
-	JSONKeys
-	JSONUnquote
-	JSONValid
+	JSON_CONTAINS jsonFunction = iota + 1
+	JSON_PRETTY
+	JSON_KEYS
+	JSON_TYPE
+	JSON_VALID
+	JSON_QUOTE
+	JSON_UNQUOTE
+	JSON_SET
+	JSON_EXTRACT
+	JSON_INSERT
+	JSON_REPLACE
+	JSON_REMOVE
 )
+
+var jsonFuncNames = [...]string{
+	"JSON_CONTAINS",
+	"JSON_PRETTY",
+	"JSON_KEYS",
+	"JSON_TYPE",
+	"JSON_VALID",
+	"JSON_QUOTE",
+	"JSON_UNQUOTE",
+	"JSON_SET",
+	"JSON_EXTRACT",
+	"JSON_INSERT",
+	"JSON_REPLACE",
+	"JSON_REMOVE",
+}
+
+func (f jsonFunction) String() string {
+	id := int(f) - 1
+	if id > len(jsonFuncNames) {
+		return "Unknown JSON Function"
+	}
+	return jsonFuncNames[id]
+}

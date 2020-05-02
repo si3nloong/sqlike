@@ -1,13 +1,11 @@
 #### TODO
 
-- [ ] Support `Open tracing`.
-- [ ] Support `JSON_SET` or else.
+- [x] Support `Open tracing`.
+- [x] Change default collation to `latin1` for `currency.Unit` and `language.Tag` for better performance.
+- [x] Support `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` or else.
 - [ ] Support foreign key.
 - [ ] Support migration like `django`.
 - [ ] Support `sqldump`.
-- [x] Change default collation for `currency.Unit` and `language.Tag` for better performance.
-- [ ] Support insert with map.
-- [ ] Prevent toxic query.
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
 - [ ] `StructMapper` as an interface and enable to set in `Client` object.
@@ -59,7 +57,7 @@
 - [x] Custom `JSON` decoder.
 - [x] [Bug] `UnmarshalJSONB` into `[]byte`.
 - [x] [Feature] Single database `Migration`.
-- [x] [Feature] Support `generated_column` for `Migration` (`virtual_column` or `stored_column`)
+- [x] [Feature] Support `generated_column` for `Migration` (`virtual_column` or stored_column`)
 - [x] Support `UnsafeMigrate`.
 - [x] Support `MustUnsafeMigrate`.
 - [x] [Feature] `InsertIgnore` & `Upsert`.
@@ -75,9 +73,10 @@
 - [x] Delete multiple record.
 - [x] Delete single record.
 - [x] Replace into API.
-- [x] Support option tag `unique_index` and `index` on create table.
+- [x] Support option tag `unique_index` with create table.
+- [x] Support option tag `unique_index` with alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
-- [ ] Support option tag `unique_index` and `index` on alter table.
+- [ ] Support insert with map.
+- [ ] Strict mode. (prevent toxic query)
 - [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
-- [ ] Support `Postgres`.

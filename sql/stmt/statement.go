@@ -7,17 +7,19 @@ import (
 	"time"
 )
 
-// Formatter :
-type Formatter interface {
-	Format(it interface{}) string
-	Var(i int) string
-}
-
+// Stmt :
 type Stmt interface {
 	fmt.Stringer
 	io.StringWriter
 	io.ByteWriter
-	AppendArgs([]interface{})
+	AppendArg(arg interface{})
+	AppendArgs(args []interface{})
+}
+
+// Formatter :
+type Formatter interface {
+	Format(it interface{}) string
+	Var(i int) string
 }
 
 // Statement :
@@ -43,10 +45,9 @@ func (sm *Statement) Args() []interface{} {
 }
 
 // AppendArg :
-func (sm *Statement) AppendArg(arg interface{}) *Statement {
+func (sm *Statement) AppendArg(arg interface{}) {
 	sm.args = append(sm.args, arg)
 	sm.c = len(sm.args)
-	return sm
 }
 
 // AppendArgs :

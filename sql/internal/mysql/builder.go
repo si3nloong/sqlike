@@ -77,7 +77,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	b.builder = blr
 }
 
-func (b *mySQLBuilder) BuildCastAs(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildCastAs(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.CastAs)
 	stmt.WriteString("CAST(")
 	if err := b.builder.BuildStatement(stmt, x.Value); err != nil {
@@ -94,7 +94,7 @@ func (b *mySQLBuilder) BuildCastAs(stmt *sqlstmt.Statement, it interface{}) erro
 	return nil
 }
 
-func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Func)
 	stmt.WriteString(x.Name)
 	stmt.WriteByte('(')
@@ -110,7 +110,7 @@ func (b *mySQLBuilder) BuildFunction(stmt *sqlstmt.Statement, it interface{}) er
 	return nil
 }
 
-func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildJSONFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.JSONFunc)
 	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
@@ -126,13 +126,13 @@ func (b *mySQLBuilder) BuildJSONFunction(stmt *sqlstmt.Statement, it interface{}
 	return nil
 }
 
-func (b *mySQLBuilder) BuildString(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildString(stmt sqlstmt.Stmt, it interface{}) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(b.Quote(v.String()))
 	return nil
 }
 
-func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.L)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -178,7 +178,7 @@ func (b *mySQLBuilder) BuildLike(stmt *sqlstmt.Statement, it interface{}) error 
 	return nil
 }
 
-func (b *mySQLBuilder) BuildField(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildField(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Field)
 	stmt.WriteString("FIELD")
 	stmt.WriteByte('(')
@@ -193,7 +193,7 @@ func (b *mySQLBuilder) BuildField(stmt *sqlstmt.Statement, it interface{}) error
 	return nil
 }
 
-func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Value)
 	v := reflext.ValueOf(x.Raw)
 	if !v.IsValid() {
@@ -217,7 +217,7 @@ func (b *mySQLBuilder) BuildValue(stmt *sqlstmt.Statement, it interface{}) (err 
 }
 
 // BuildColumn :
-func (b *mySQLBuilder) BuildColumn(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildColumn(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Column)
 	if x.Table != "" {
 		stmt.WriteString(b.Quote(x.Table))
@@ -228,7 +228,7 @@ func (b *mySQLBuilder) BuildColumn(stmt *sqlstmt.Statement, it interface{}) erro
 }
 
 // BuildJSONColumn :
-func (b *mySQLBuilder) BuildJSONColumn(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildJSONColumn(stmt sqlstmt.Stmt, it interface{}) error {
 	/*
 		Expected columns ( JSON_EXTRACT )
 		Column : Address
@@ -261,7 +261,7 @@ func (b *mySQLBuilder) BuildJSONColumn(stmt *sqlstmt.Statement, it interface{}) 
 	return nil
 }
 
-func (b *mySQLBuilder) BuildNil(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildNil(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Nil)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -274,13 +274,13 @@ func (b *mySQLBuilder) BuildNil(stmt *sqlstmt.Statement, it interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) BuildRaw(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildRaw(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Raw)
 	stmt.WriteString(x.Value)
 	return nil
 }
 
-func (b *mySQLBuilder) BuildAs(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildAs(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.As)
 	if err := b.getValue(stmt, x.Field); err != nil {
 		return err
@@ -290,7 +290,7 @@ func (b *mySQLBuilder) BuildAs(stmt *sqlstmt.Statement, it interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) BuildAggregate(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildAggregate(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Aggregate)
 	switch x.By {
 	case primitive.Sum:
@@ -317,15 +317,15 @@ func (b *mySQLBuilder) BuildAggregate(stmt *sqlstmt.Statement, it interface{}) e
 	return nil
 }
 
-func (b *mySQLBuilder) BuildOperator(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildOperator(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Operator)
-	stmt.WriteRune(' ')
+	stmt.WriteByte(' ')
 	stmt.WriteString(operatorMap[x])
-	stmt.WriteRune(' ')
+	stmt.WriteByte(' ')
 	return nil
 }
 
-func (b *mySQLBuilder) BuildClause(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildClause(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.C)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -343,38 +343,38 @@ func (b *mySQLBuilder) BuildClause(stmt *sqlstmt.Statement, it interface{}) erro
 	return nil
 }
 
-func (b *mySQLBuilder) BuildSort(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildSort(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Sort)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
 	}
 	if x.Order == primitive.Descending {
-		stmt.WriteRune(' ')
+		stmt.WriteByte(' ')
 		stmt.WriteString("DESC")
 	}
 	return nil
 }
 
-func (b *mySQLBuilder) BuildKeyValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildKeyValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.KV)
 	stmt.WriteString(b.Quote(string(x.Field)))
 	stmt.WriteString(" = ")
 	return b.getValue(stmt, x.Value)
 }
 
-func (b *mySQLBuilder) BuildMath(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildMath(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Math)
 	stmt.WriteString(b.Quote(string(x.Field)) + " ")
 	if x.Mode == primitive.Add {
-		stmt.WriteRune('+')
+		stmt.WriteByte('+')
 	} else {
-		stmt.WriteRune('-')
+		stmt.WriteByte('-')
 	}
 	stmt.WriteString(" " + strconv.Itoa(x.Value))
 	return
 }
 
-func (b *mySQLBuilder) BuildSpatialFunc(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildSpatialFunc(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(spatial.Func)
 	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
@@ -390,7 +390,7 @@ func (b *mySQLBuilder) BuildSpatialFunc(stmt *sqlstmt.Statement, it interface{})
 	return
 }
 
-func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) getValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	v := reflext.ValueOf(it)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
@@ -420,7 +420,7 @@ func (b *mySQLBuilder) getValue(stmt *sqlstmt.Statement, it interface{}) (err er
 	return
 }
 
-func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildGroup(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Group)
 	for len(x.Values) > 0 {
 		if err := b.getValue(stmt, x.Values[0]); err != nil {
@@ -431,7 +431,7 @@ func (b *mySQLBuilder) BuildGroup(stmt *sqlstmt.Statement, it interface{}) (err 
 	return
 }
 
-func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.R)
 	v := reflext.ValueOf(x.From)
 	encoder, err := b.registry.LookupEncoder(v)
@@ -454,13 +454,13 @@ func (b *mySQLBuilder) BuildRange(stmt *sqlstmt.Statement, it interface{}) (err 
 		return err
 	}
 	stmt.AppendArg(arg)
-	stmt.WriteRune('?')
+	stmt.WriteByte('?')
 	stmt.WriteString(" AND ")
-	stmt.WriteRune('?')
+	stmt.WriteByte('?')
 	return
 }
 
-func (b *mySQLBuilder) BuildSelectStmt(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildSelectStmt(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(*sql.SelectStmt)
 	stmt.WriteString("SELECT ")
 	if x.DistinctOn {
@@ -487,7 +487,7 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt *sqlstmt.Statement, it interface{}) 
 	return nil
 }
 
-func (b *mySQLBuilder) BuildUpdateStmt(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildUpdateStmt(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(*sql.UpdateStmt)
 	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
 	if err := b.appendSet(stmt, x.Values); err != nil {
@@ -503,7 +503,7 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt *sqlstmt.Statement, it interface{}) 
 	return nil
 }
 
-func (b *mySQLBuilder) BuildDeleteStmt(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildDeleteStmt(stmt sqlstmt.Stmt, it interface{}) error {
 	// x := it.(*sql.DeleteStmt)
 	// stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
 	// if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
@@ -516,7 +516,7 @@ func (b *mySQLBuilder) BuildDeleteStmt(stmt *sqlstmt.Statement, it interface{}) 
 	return nil
 }
 
-func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildFindActions(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(*actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
@@ -544,7 +544,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt *sqlstmt.Statement, it interface{})
 	return nil
 }
 
-func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildUpdateActions(stmt sqlstmt.Stmt, it interface{}) error {
 	x, ok := it.(*actions.UpdateActions)
 	if !ok {
 		return errors.New("data type not match")
@@ -563,7 +563,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt *sqlstmt.Statement, it interface{
 	return nil
 }
 
-func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{}) error {
+func (b *mySQLBuilder) BuildDeleteActions(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(*actions.DeleteActions)
 	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
@@ -576,12 +576,12 @@ func (b *mySQLBuilder) BuildDeleteActions(stmt *sqlstmt.Statement, it interface{
 	return nil
 }
 
-func (b *mySQLBuilder) appendSelect(stmt *sqlstmt.Statement, pjs []interface{}) error {
+func (b *mySQLBuilder) appendSelect(stmt sqlstmt.Stmt, pjs []interface{}) error {
 	if len(pjs) > 0 {
 		length := len(pjs)
 		for i := 0; i < length; i++ {
 			if i > 0 {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			if err := b.builder.BuildStatement(stmt, pjs[i]); err != nil {
 				return err
@@ -593,12 +593,12 @@ func (b *mySQLBuilder) appendSelect(stmt *sqlstmt.Statement, pjs []interface{}) 
 	return nil
 }
 
-func (b *mySQLBuilder) appendTable(stmt *sqlstmt.Statement, fields []interface{}) error {
+func (b *mySQLBuilder) appendTable(stmt sqlstmt.Stmt, fields []interface{}) error {
 	length := len(fields)
 	if length > 0 {
 		for i := 0; i < length; i++ {
 			if i > 0 {
-				stmt.WriteRune(' ')
+				stmt.WriteByte(' ')
 			}
 			if err := b.builder.BuildStatement(stmt, fields[i]); err != nil {
 				return err
@@ -608,7 +608,7 @@ func (b *mySQLBuilder) appendTable(stmt *sqlstmt.Statement, fields []interface{}
 	return nil
 }
 
-func (b *mySQLBuilder) appendWhere(stmt *sqlstmt.Statement, conds []interface{}) error {
+func (b *mySQLBuilder) appendWhere(stmt sqlstmt.Stmt, conds []interface{}) error {
 	length := len(conds)
 	if length > 0 {
 		stmt.WriteString(" WHERE ")
@@ -621,13 +621,13 @@ func (b *mySQLBuilder) appendWhere(stmt *sqlstmt.Statement, conds []interface{})
 	return nil
 }
 
-func (b *mySQLBuilder) appendGroupBy(stmt *sqlstmt.Statement, fields []interface{}) error {
+func (b *mySQLBuilder) appendGroupBy(stmt sqlstmt.Stmt, fields []interface{}) error {
 	length := len(fields)
 	if length > 0 {
 		stmt.WriteString(" GROUP BY ")
 		for i := 0; i < length; i++ {
 			if i > 0 {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			if err := b.builder.BuildStatement(stmt, fields[i]); err != nil {
 				return err
@@ -637,7 +637,7 @@ func (b *mySQLBuilder) appendGroupBy(stmt *sqlstmt.Statement, fields []interface
 	return nil
 }
 
-func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{}) error {
+func (b *mySQLBuilder) appendOrderBy(stmt sqlstmt.Stmt, sorts []interface{}) error {
 	length := len(sorts)
 	if length < 1 {
 		return nil
@@ -645,7 +645,7 @@ func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{
 	stmt.WriteString(" ORDER BY ")
 	for i := 0; i < length; i++ {
 		if i > 0 {
-			stmt.WriteRune(',')
+			stmt.WriteByte(',')
 		}
 		if err := b.builder.BuildStatement(stmt, sorts[i]); err != nil {
 			return err
@@ -654,7 +654,7 @@ func (b *mySQLBuilder) appendOrderBy(stmt *sqlstmt.Statement, sorts []interface{
 	return nil
 }
 
-func (b *mySQLBuilder) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset uint) {
+func (b *mySQLBuilder) appendLimitNOffset(stmt sqlstmt.Stmt, limit, offset uint) {
 	if limit > 0 {
 		stmt.WriteString(" LIMIT " + strconv.FormatUint(uint64(limit), 10))
 	}
@@ -663,13 +663,13 @@ func (b *mySQLBuilder) appendLimitNOffset(stmt *sqlstmt.Statement, limit, offset
 	}
 }
 
-func (b *mySQLBuilder) appendSet(stmt *sqlstmt.Statement, values []primitive.KV) error {
+func (b *mySQLBuilder) appendSet(stmt sqlstmt.Stmt, values []primitive.KV) error {
 	length := len(values)
 	if length > 0 {
 		stmt.WriteString("SET ")
 		for i := 0; i < length; i++ {
 			if i > 0 {
-				stmt.WriteRune(',')
+				stmt.WriteByte(',')
 			}
 			if err := b.builder.BuildStatement(stmt, values[i]); err != nil {
 				return err

@@ -8,6 +8,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 )
 
@@ -48,8 +49,9 @@ func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Resul
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
-	stmt, err := tx.dialect.SelectStmt(query)
-	if err != nil {
+	stmt := sqlstmt.AcquireStmt(tx.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := tx.dialect.SelectStmt(stmt, query); err != nil {
 		return nil, err
 	}
 	rows, err := driver.Query(
