@@ -9,11 +9,11 @@ import (
 
 // Stmt :
 type Stmt interface {
-	fmt.Stringer
 	io.StringWriter
 	io.ByteWriter
-	AppendArg(arg interface{})
-	AppendArgs(args []interface{})
+	fmt.Stringer
+	Args() []interface{}
+	AppendArgs(args ...interface{})
 }
 
 // Formatter :
@@ -44,20 +44,19 @@ func (sm *Statement) Args() []interface{} {
 	return sm.args
 }
 
-// AppendArg :
-func (sm *Statement) AppendArg(arg interface{}) {
-	sm.args = append(sm.args, arg)
-	sm.c = len(sm.args)
-}
-
 // AppendArgs :
-func (sm *Statement) AppendArgs(args []interface{}) {
+func (sm *Statement) AppendArgs(args ...interface{}) {
 	sm.args = append(sm.args, args...)
 	sm.c = len(sm.args)
 }
 
 // Format :
-func (sm Statement) Format(state fmt.State, verb rune) {
+func (sm *Statement) Format(state fmt.State, verb rune) {
+	if sm.fmt == nil {
+		state.Write([]byte(`missing formatter, unable to debug`))
+		return
+	}
+
 	str := sm.String()
 	if !state.Flag('+') {
 		state.Write([]byte(str))
@@ -101,5 +100,4 @@ func (sm *Statement) TimeElapsed() time.Duration {
 func (sm *Statement) Reset() {
 	sm.args = []interface{}{}
 	sm.Builder.Reset()
-	sm.fmt = nil
 }

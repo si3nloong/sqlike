@@ -66,7 +66,6 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	for _, idx := range idxs {
-		stmt.Reset()
 		if len(idx.Columns) < 1 {
 			return ErrNoColumn
 		}
@@ -80,6 +79,7 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 		).Scan(&count); err != nil {
 			return err
 		}
+		stmt.Reset()
 		if count > 0 {
 			continue
 		}
@@ -88,7 +88,6 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 	if len(cols) < 1 {
 		return nil
 	}
-	stmt.Reset()
 	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc())
 	_, err := sqldriver.Execute(
 		ctx,

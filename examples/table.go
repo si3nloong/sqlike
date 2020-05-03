@@ -138,6 +138,7 @@ func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			ID     string `sqlike:"$Key"`
 			Number int64
 		}{})
+
 		temp.MustMigrate(ctx, struct {
 			ID     string `sqlike:"$Key"`
 			Number int64  `sqlike:",auto_increment"`

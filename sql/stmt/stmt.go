@@ -22,7 +22,8 @@ func AcquireStmt(fmt Formatter) *Statement {
 // ReleaseStmt :
 func ReleaseStmt(x *Statement) {
 	if x != nil {
-		defer stmtPool.Put(x)
 		x.Reset()
+		x.fmt = nil
+		defer stmtPool.Put(x)
 	}
 }

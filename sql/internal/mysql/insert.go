@@ -115,10 +115,10 @@ func convertSpatial(stmt sqlstmt.Stmt, val interface{}) {
 			stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
 		}
 		stmt.WriteByte(')')
-		stmt.AppendArgs([]interface{}{vi.WKT})
+		stmt.AppendArgs(vi.WKT)
 
 	default:
 		stmt.WriteByte('?')
-		stmt.AppendArgs([]interface{}{val})
+		stmt.AppendArgs(val)
 	}
 }

@@ -17,7 +17,7 @@ func (ms MySQL) HasPrimaryKey(stmt sqlstmt.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
 	stmt.WriteByte(';')
-	stmt.AppendArgs([]interface{}{db, table})
+	stmt.AppendArgs(db, table)
 }
 
 // RenameTable :
@@ -47,7 +47,7 @@ func (ms MySQL) TruncateTable(stmt sqlstmt.Stmt, db, table string) {
 // HasTable :
 func (ms MySQL) HasTable(stmt sqlstmt.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs([]interface{}{dbName, table})
+	stmt.AppendArgs(dbName, table)
 }
 
 // CreateTable :

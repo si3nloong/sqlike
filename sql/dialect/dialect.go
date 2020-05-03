@@ -46,6 +46,7 @@ type Dialect interface {
 	SelectStmt(stmt sqlstmt.Stmt, query interface{}) (err error)
 	Replace(db, table string, columns []string, query *sql.SelectStmt) (stmt *sqlstmt.Statement, err error)
 	Var(i int) string
+	Quote(n string) string
 	Format(v interface{}) (val string)
 }
 

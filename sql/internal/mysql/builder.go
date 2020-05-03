@@ -147,7 +147,7 @@ func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	v := reflext.ValueOf(x.Value)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
-		stmt.AppendArg(nil)
+		stmt.AppendArgs(nil)
 		return nil
 	}
 
@@ -174,7 +174,7 @@ func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	case []byte:
 		vv = escapeWildCard(string(vi))
 	}
-	stmt.AppendArg(vv)
+	stmt.AppendArgs(vv)
 	return nil
 }
 
@@ -198,7 +198,7 @@ func (b *mySQLBuilder) BuildValue(stmt sqlstmt.Stmt, it interface{}) (err error)
 	v := reflext.ValueOf(x.Raw)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
-		stmt.AppendArg(nil)
+		stmt.AppendArgs(nil)
 		return
 	}
 
@@ -212,7 +212,7 @@ func (b *mySQLBuilder) BuildValue(stmt sqlstmt.Stmt, it interface{}) (err error)
 	}
 	convertSpatial(stmt, vv)
 	// stmt.WriteRune('?')
-	// stmt.AppendArg(vv)
+	// stmt.AppendArgs(vv)
 	return nil
 }
 
@@ -394,7 +394,7 @@ func (b *mySQLBuilder) getValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	v := reflext.ValueOf(it)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
-		stmt.AppendArg(nil)
+		stmt.AppendArgs(nil)
 		return
 	}
 
@@ -415,7 +415,7 @@ func (b *mySQLBuilder) getValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 		return err
 	}
 	// stmt.WriteByte('?')
-	// stmt.AppendArg(vv)
+	// stmt.AppendArgs(vv)
 	convertSpatial(stmt, vv)
 	return
 }
@@ -442,7 +442,7 @@ func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error)
 	if err != nil {
 		return err
 	}
-	stmt.AppendArg(arg)
+	stmt.AppendArgs(arg)
 
 	v = reflext.ValueOf(x.To)
 	encoder, err = b.registry.LookupEncoder(v)
@@ -453,7 +453,7 @@ func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error)
 	if err != nil {
 		return err
 	}
-	stmt.AppendArg(arg)
+	stmt.AppendArgs(arg)
 	stmt.WriteByte('?')
 	stmt.WriteString(" AND ")
 	stmt.WriteByte('?')
