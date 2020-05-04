@@ -42,7 +42,7 @@ func (ot *OpenTracingInterceptor) StmtQueryContext(ctx context.Context, conn dri
 // StmtClose :
 func (ot *OpenTracingInterceptor) StmtClose(ctx context.Context, conn driver.Stmt) (err error) {
 	if ot.opts.RowsClose {
-		span, _ := ot.MaybeStartSpanFromContext(ctx, "close")
+		span, _ := ot.MaybeStartSpanFromContext(ctx, "stmt_close")
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()
