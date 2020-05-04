@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/Masterminds/semver v1.4.3-0.20190911182330-3c3e3c79b8d8
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.2.3-0.20200430062504-b799e1c53ec4
+	github.com/casbin/casbin/v2 v2.2.3
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/golang/protobuf v1.4.1-0.20200419202630-fa093f59480c
 	github.com/google/uuid v1.1.2-0.20200331015317-bd451584982e

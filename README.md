@@ -20,17 +20,18 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 
 ### What we provide apart from native package (database/sql)?
 
-- Support `Enum`
+- Support `ENUM` and `SET`
 - Support `UUID`
 - Support `JSON`
+- Support `sqldump` for backup purpose
 - Support `descending index` for mysql 8.0
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` for `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
-- Support third-party plugin [Casbin](https://github.com/casbin/casbin)
-- Support tracing [OpenTracing](https://github.com/opentracing/opentracing-go)
+- Support authorization plugin [Casbin](https://github.com/casbin/casbin)
+- Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
 - Prevent toxic query with `Strict Mode` **(in progress)**
 
 ### Missing DOC?
