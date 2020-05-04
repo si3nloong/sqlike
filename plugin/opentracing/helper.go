@@ -16,7 +16,7 @@ func (ot *OpenTracingInterceptor) logQuery(span opentracing.Span, query string) 
 		return
 	}
 
-	span.LogKV(
+	span.LogFields(
 		log.String(string(ext.DBStatement), query),
 	)
 }
