@@ -55,7 +55,7 @@ func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn d
 func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driver.ExecerContext, query string, args []driver.NamedValue) (result driver.Result, err error) {
 	if ot.opts.Exec {
 		var span opentracing.Span
-		span, ctx = ot.MaybeStartSpanFromContext(ctx, "exec")
+		span, ctx = ot.MaybeStartSpanFromContext(ctx, "conn_exec")
 		ot.logQuery(span, query)
 		ot.logArgs(span, args)
 		defer func() {
@@ -70,7 +70,7 @@ func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driv
 func (ot *OpenTracingInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	if ot.opts.Query {
 		var span opentracing.Span
-		span, ctx = ot.MaybeStartSpanFromContext(ctx, "query")
+		span, ctx = ot.MaybeStartSpanFromContext(ctx, "conn_query")
 		ot.logQuery(span, query)
 		ot.logArgs(span, args)
 		defer func() {
