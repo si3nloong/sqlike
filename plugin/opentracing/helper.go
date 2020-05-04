@@ -11,8 +11,18 @@ import (
 	"github.com/opentracing/opentracing-go/log"
 )
 
+func (ot *OpenTracingInterceptor) logQuery(span opentracing.Span, query string) {
+	if span == nil {
+		return
+	}
+
+	span.LogKV(
+		log.String(string(ext.DBStatement), query),
+	)
+}
+
 func (ot *OpenTracingInterceptor) logArgs(span opentracing.Span, args []driver.NamedValue) {
-	if !ot.opts.Args {
+	if span == nil || !ot.opts.Args {
 		return
 	}
 

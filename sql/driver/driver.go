@@ -16,6 +16,10 @@ type Info interface {
 	Collate() string
 }
 
+type Queryer interface {
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+}
+
 // Driver :
 type Driver interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)

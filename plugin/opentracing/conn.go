@@ -3,8 +3,6 @@ package opentracing
 import (
 	"context"
 	"database/sql/driver"
-
-	"github.com/opentracing/opentracing-go/ext"
 )
 
 // ConnPing :
@@ -37,7 +35,8 @@ func (ot *OpenTracingInterceptor) ConnBeginTx(ctx context.Context, conn driver.C
 func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn driver.ConnPrepareContext, query string) (stmt driver.Stmt, err error) {
 	if ot.opts.Prepare {
 		span := ot.MaybeStartSpanFromContext(ctx, "prepare")
-		ext.DBStatement.Set(span, query)
+		// ext.DBStatement.Set(span, query)
+		ot.logQuery(span, query)
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()
@@ -51,7 +50,7 @@ func (ot *OpenTracingInterceptor) ConnPrepareContext(ctx context.Context, conn d
 func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driver.ExecerContext, query string, args []driver.NamedValue) (result driver.Result, err error) {
 	if ot.opts.Exec {
 		span := ot.MaybeStartSpanFromContext(ctx, "exec")
-		ext.DBStatement.Set(span, query)
+		ot.logQuery(span, query)
 		ot.logArgs(span, args)
 		defer func() {
 			ot.logError(span, err)
@@ -65,7 +64,7 @@ func (ot *OpenTracingInterceptor) ConnExecContext(ctx context.Context, conn driv
 func (ot *OpenTracingInterceptor) ConnQueryContext(ctx context.Context, conn driver.QueryerContext, query string, args []driver.NamedValue) (rows driver.Rows, err error) {
 	if ot.opts.Query {
 		span := ot.MaybeStartSpanFromContext(ctx, "query")
-		ext.DBStatement.Set(span, query)
+		ot.logQuery(span, query)
 		ot.logArgs(span, args)
 		defer func() {
 			ot.logError(span, err)
