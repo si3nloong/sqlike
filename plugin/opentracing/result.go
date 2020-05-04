@@ -9,7 +9,7 @@ import (
 
 func (ot *OpenTracingInterceptor) ResultLastInsertId(ctx context.Context, result driver.Result) (id int64, err error) {
 	if ot.opts.LastInsertID {
-		span := ot.StartSpan(ctx, "last_insert_id")
+		span := ot.MaybeStartSpanFromContext(ctx, "last_insert_id")
 		span.LogFields(
 			log.Int64("last_insert_id", id),
 		)
@@ -24,7 +24,7 @@ func (ot *OpenTracingInterceptor) ResultLastInsertId(ctx context.Context, result
 
 func (ot *OpenTracingInterceptor) ResultRowsAffected(ctx context.Context, result driver.Result) (affected int64, err error) {
 	if ot.opts.RowsAffected {
-		span := ot.StartSpan(ctx, "rows_affected")
+		span := ot.MaybeStartSpanFromContext(ctx, "rows_affected")
 		span.LogFields(
 			log.Int64("rows_affected", affected),
 		)

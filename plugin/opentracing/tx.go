@@ -8,7 +8,7 @@ import (
 // TxCommit :
 func (ot *OpenTracingInterceptor) TxCommit(ctx context.Context, tx driver.Tx) (err error) {
 	if ot.opts.TxCommit {
-		span := ot.StartSpan(ctx, "tx_commit")
+		span := ot.MaybeStartSpanFromContext(ctx, "tx_commit")
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()
@@ -21,7 +21,7 @@ func (ot *OpenTracingInterceptor) TxCommit(ctx context.Context, tx driver.Tx) (e
 // TxRollback :
 func (ot *OpenTracingInterceptor) TxRollback(ctx context.Context, tx driver.Tx) (err error) {
 	if ot.opts.TxRollback {
-		span := ot.StartSpan(ctx, "tx_rollback")
+		span := ot.MaybeStartSpanFromContext(ctx, "tx_rollback")
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()

@@ -59,7 +59,10 @@ type OpenTracingInterceptor struct {
 // TraceOption :
 type TraceOption func(*TraceOptions)
 
-var _ instrumented.Interceptor = (*OpenTracingInterceptor)(nil)
+var (
+	noopTracer                          = &opentracing.NoopTracer{}
+	_          instrumented.Interceptor = (*OpenTracingInterceptor)(nil)
+)
 
 // Interceptor :
 func Interceptor(opts ...TraceOption) instrumented.Interceptor {
@@ -72,9 +75,14 @@ func Interceptor(opts ...TraceOption) instrumented.Interceptor {
 	return it
 }
 
-// StartSpan :
-func (ot *OpenTracingInterceptor) StartSpan(ctx context.Context, operationName string) opentracing.Span {
-	span, _ := opentracing.StartSpanFromContext(ctx, operationName)
+// MaybeStartSpanFromContext :
+func (ot *OpenTracingInterceptor) MaybeStartSpanFromContext(ctx context.Context, operationName string) opentracing.Span {
+	var span opentracing.Span
+	if span := opentracing.SpanFromContext(ctx); span != nil {
+		span, _ = opentracing.StartSpanFromContext(ctx, operationName)
+	} else {
+		span = noopTracer.StartSpan(operationName)
+	}
 	ext.DBInstance.Set(span, ot.opts.DBInstance)
 	ext.DBType.Set(span, ot.opts.DBType)
 	ext.DBUser.Set(span, ot.opts.DBUser)
