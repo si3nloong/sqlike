@@ -78,7 +78,7 @@ func Interceptor(opts ...TraceOption) instrumented.Interceptor {
 // MaybeStartSpanFromContext :
 func (ot *OpenTracingInterceptor) MaybeStartSpanFromContext(ctx context.Context, operationName string) opentracing.Span {
 	var span opentracing.Span
-	if span := opentracing.SpanFromContext(ctx); span != nil {
+	if sp := opentracing.SpanFromContext(ctx); sp != nil {
 		span, _ = opentracing.StartSpanFromContext(ctx, operationName)
 	} else {
 		span = noopTracer.StartSpan(operationName)
