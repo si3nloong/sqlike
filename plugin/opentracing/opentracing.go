@@ -76,10 +76,11 @@ func Interceptor(opts ...TraceOption) instrumented.Interceptor {
 }
 
 // MaybeStartSpanFromContext :
-func (ot *OpenTracingInterceptor) MaybeStartSpanFromContext(ctx context.Context, operationName string) opentracing.Span {
+func (ot *OpenTracingInterceptor) MaybeStartSpanFromContext(ctx context.Context, operationName string) (opentracing.Span, context.Context) {
 	var span opentracing.Span
+	opentracing.StartSpanFromContext(ctx, operationName)
 	if sp := opentracing.SpanFromContext(ctx); sp != nil {
-		span, _ = opentracing.StartSpanFromContext(ctx, operationName)
+		span, ctx = opentracing.StartSpanFromContext(ctx, operationName)
 	} else {
 		span = noopTracer.StartSpan(operationName)
 	}
@@ -87,5 +88,5 @@ func (ot *OpenTracingInterceptor) MaybeStartSpanFromContext(ctx context.Context,
 	ext.DBType.Set(span, ot.opts.DBType)
 	ext.DBUser.Set(span, ot.opts.DBUser)
 	ext.Component.Set(span, ot.opts.Component)
-	return span
+	return span, ctx
 }
