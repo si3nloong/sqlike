@@ -11,16 +11,17 @@ var DefaultMapper = NewMapperFunc("sqlike", nil)
 
 // StructMapper :
 type StructMapper interface {
+	CodecByType(t reflect.Type) Structer
 	FieldByName(v reflect.Value, name string) reflect.Value
-	LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool)
 	FieldByIndexes(v reflect.Value, idxs []int) reflect.Value
 	FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value
+	LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool)
 	TraversalsByName(t reflect.Type, names []string) (idxs [][]int)
 	TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int)
 }
 
 // MapFunc :
-type MapFunc func(*StructField) (skip bool)
+type MapFunc func(StructFielder) (skip bool)
 
 // FormatFunc :
 type FormatFunc func(string) string
@@ -45,7 +46,7 @@ func NewMapperFunc(tag string, fmtFunc FormatFunc) *Mapper {
 }
 
 // CodecByType :
-func (m *Mapper) CodecByType(t reflect.Type) *Struct {
+func (m *Mapper) CodecByType(t reflect.Type) Structer {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	mapping, ok := m.cache[t]
@@ -62,24 +63,11 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	mustBe(v, reflect.Struct)
 
 	tm := m.CodecByType(v.Type())
-	fi, ok := tm.Names[name]
+	fi, ok := tm.LookUpFieldByName(name)
 	if !ok {
 		return v
 	}
-	return FieldByIndexes(v, fi.Index)
-}
-
-// LookUpFieldByName :
-func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
-	v = Indirect(v)
-	mustBe(v, reflect.Struct)
-
-	tm := m.CodecByType(v.Type())
-	fi, ok := tm.Names[name]
-	if !ok {
-		return v, false
-	}
-	return FieldByIndexes(v, fi.Index), true
+	return FieldByIndexes(v, fi.Index())
 }
 
 // FieldByIndexes :
@@ -90,6 +78,19 @@ func (m *Mapper) FieldByIndexes(v reflect.Value, idxs []int) reflect.Value {
 // FieldByIndexesReadOnly :
 func (m *Mapper) FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexesReadOnly(v, idxs)
+}
+
+// LookUpFieldByName :
+func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
+	v = Indirect(v)
+	mustBe(v, reflect.Struct)
+
+	tm := m.CodecByType(v.Type())
+	fi, ok := tm.LookUpFieldByName(name)
+	if !ok {
+		return v, false
+	}
+	return FieldByIndexes(v, fi.Index()), true
 }
 
 // TraversalsByName :
@@ -113,9 +114,9 @@ func (m *Mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(in
 	idxs = make([][]int, 0, len(names))
 	cdc := m.CodecByType(t)
 	for i, name := range names {
-		sf, ok := cdc.Names[name]
+		sf, ok := cdc.LookUpFieldByName(name)
 		if ok {
-			fn(i, sf.Index)
+			fn(i, sf.Index())
 		} else {
 			fn(i, nil)
 		}

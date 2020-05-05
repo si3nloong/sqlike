@@ -66,24 +66,24 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		sp.Point4326 = point
 		sp.Point = point
 		sp.LineString = []orb.Point{
-			orb.Point{0, 0},
-			orb.Point{1, 1},
+			{0, 0},
+			{1, 1},
 		}
 		sp.LineString2 = []orb.Point{
-			orb.Point{0, 0},
-			orb.Point{1, 1},
-			orb.Point{2, 2},
+			{0, 0},
+			{1, 1},
+			{2, 2},
 		}
 		sp.LineString3 = []orb.Point{
-			orb.Point{0, 0},
-			orb.Point{1, 1},
-			orb.Point{2, 2},
-			orb.Point{3, 3},
-			orb.Point{4, 4},
+			{0, 0},
+			{1, 1},
+			{2, 2},
+			{3, 3},
+			{4, 4},
 		}
 		sp.LineString4326 = []orb.Point{
-			orb.Point{88, 0},
-			orb.Point{1, 10},
+			{88, 0},
+			{1, 10},
 		}
 		// sp.Polygon = orb.Polygon{
 		// 	// (0 0,10 0,10 10,0 10,0 0)

@@ -41,7 +41,7 @@ func QueryExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		// err = table.Truncate()
 		// require.NoError(t, err)
 
-		result, err := db.QueryStmt(context.Background(), stmt)
+		result, err := db.QueryStmt(ctx, stmt)
 		require.NoError(t, err)
 		defer result.Close()
 

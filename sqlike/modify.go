@@ -52,27 +52,27 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		opt = opts[0]
 	}
 
-	fields := skipColumns(cdc.Properties, opt.Omits)
+	fields := skipColumns(cdc.Properties(), opt.Omits)
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 
 	var pkv = [2]interface{}{}
 	for _, sf := range fields {
-		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
-		if _, ok := sf.Tag.LookUp("primary_key"); ok {
+		fv := mapper.FieldByIndexesReadOnly(v, sf.Index())
+		if _, ok := sf.Tag().LookUp("primary_key"); ok {
 			if pkv[0] != nil {
 				x.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))
 			}
-			pkv[0] = sf.Path
+			pkv[0] = sf.Name()
 			pkv[1] = fv.Interface()
 			continue
 		}
-		if sf.Path == pk && pkv[0] == nil {
-			pkv[0] = sf.Path
+		if sf.Name() == pk && pkv[0] == nil {
+			pkv[0] = sf.Name()
 			pkv[1] = fv.Interface()
 			continue
 		}
-		x.Set(expr.ColumnValue(sf.Path, fv.Interface()))
+		x.Set(expr.ColumnValue(sf.Name(), fv.Interface()))
 	}
 
 	if pkv[0] == nil {

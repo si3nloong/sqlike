@@ -38,10 +38,11 @@ func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*option
 	arr := reflect.MakeSlice(reflect.SliceOf(t), 0, 1)
 	arr = reflect.Append(arr, v)
 	return insertMany(
-		context.Background(),
+		ctx,
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.client.cache,
 		tb.codec,
 		tb.driver,
 		tb.dialect,
@@ -62,6 +63,7 @@ func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.I
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.client.cache,
 		tb.codec,
 		tb.driver,
 		tb.dialect,
@@ -71,7 +73,7 @@ func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.I
 	)
 }
 
-func insertMany(ctx context.Context, dbName, tbName, pk string, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
+func insertMany(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
 	v := reflext.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput
@@ -92,9 +94,8 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cdc codec.Codece
 		return nil, ErrUnaddressableEntity
 	}
 
-	mapper := reflext.DefaultMapper
-	def := mapper.CodecByType(t)
-	fields := skipColumns(def.Properties, opt.Omits)
+	def := cache.CodecByType(t)
+	fields := skipColumns(def.Properties(), opt.Omits)
 	if len(fields) < 1 {
 		return nil, ErrEmptyFields
 	}
@@ -106,7 +107,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cdc codec.Codece
 		dbName,
 		tbName,
 		pk,
-		mapper,
+		cache,
 		cdc,
 		fields,
 		v,

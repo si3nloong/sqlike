@@ -23,6 +23,7 @@ func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.client.cache,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -30,7 +31,7 @@ func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 	)
 }
 
-func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -43,9 +44,8 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 		return ErrNilEntity
 	}
 
-	mapper := reflext.DefaultMapper
-	cdc := mapper.CodecByType(t)
-	f, exists := cdc.Names[pk]
+	cdc := cache.CodecByType(t)
+	f, exists := cdc.LookUpFieldByName(pk)
 	if !exists {
 		return fmt.Errorf("sqlike: missing primary key field %q", pk)
 	}
@@ -53,8 +53,8 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, driver sqldriver
 	x := new(actions.DeleteActions)
 	x.Database = dbName
 	x.Table = tbName
-	fv := mapper.FieldByIndexesReadOnly(v, f.Index)
-	x.Where(expr.Equal(f.Path, fv.Interface()))
+	fv := cache.FieldByIndexesReadOnly(v, f.Index())
+	x.Where(expr.Equal(f.Name(), fv.Interface()))
 	x.Limit(1)
 
 	stmt := sqlstmt.AcquireStmt(dialect)

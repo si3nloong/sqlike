@@ -30,13 +30,13 @@ type Date struct {
 }
 
 // DataType :
-func (d Date) DataType(_ sqldriver.Info, sf *reflext.StructField) columns.Column {
+func (d Date) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	// mysql have no function for date default value
 	return columns.Column{
-		Name:     sf.Path,
+		Name:     sf.Name(),
 		DataType: "DATE",
 		Type:     "DATE",
-		Nullable: sf.IsNullable,
+		Nullable: sf.IsNullable(),
 	}
 }
 

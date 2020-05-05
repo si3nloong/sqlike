@@ -7,6 +7,25 @@ import (
 	"strings"
 )
 
+type Structer interface {
+	Fields() []StructFielder
+	Properties() []StructFielder
+	LookUpFieldByName(name string) (StructFielder, bool)
+	GetByTraversal(index []int) StructFielder
+}
+
+type StructFielder interface {
+	Name() string // New name of struct field
+	Type() reflect.Type
+	Index() []int
+	Tag() StructTag
+	Parent() StructFielder
+	ParentByTraversal(cb func(StructFielder) bool) StructFielder
+	Children() []StructFielder
+	IsNullable() bool
+	IsEmbedded() bool
+}
+
 // StructTag :
 type StructTag struct {
 	originalName string
@@ -37,72 +56,130 @@ func (st StructTag) LookUp(key string) (val string, exist bool) {
 
 // StructField :
 type StructField struct {
-	ID         string
-	Index      []int
-	Name       string
-	Path       string
-	Type       reflect.Type
-	IsNullable bool
-	Tag        StructTag
-	Embedded   bool
-	Parent     *StructField
-	Children   []*StructField
+	id       string
+	idx      []int
+	name     string
+	path     string
+	t        reflect.Type
+	null     bool
+	tag      StructTag
+	embed    bool
+	parent   StructFielder
+	children []StructFielder
+}
+
+var _ StructFielder = (*StructField)(nil)
+
+// Name :
+func (sf *StructField) Name() string {
+	return sf.path
+}
+
+// Type :
+func (sf *StructField) Type() reflect.Type {
+	return sf.t
+}
+
+// Tag :
+func (sf *StructField) Tag() StructTag {
+	return sf.tag
+}
+
+// Index :
+func (sf *StructField) Index() []int {
+	return sf.idx
+}
+
+// Parent :
+func (sf *StructField) Parent() StructFielder {
+	return sf.parent
+}
+
+func (sf *StructField) Children() []StructFielder {
+	return sf.children
+}
+
+func (sf *StructField) IsNullable() bool {
+	return sf.null
+}
+
+func (sf *StructField) IsEmbedded() bool {
+	return sf.embed
 }
 
 // ParentByTraversal :
-func (sf *StructField) ParentByTraversal(cb func(*StructField) bool) *StructField {
-	prnt := sf.Parent
+func (sf *StructField) ParentByTraversal(cb func(StructFielder) bool) StructFielder {
+	prnt := sf.parent
 	for prnt != nil {
 		if cb(prnt) {
 			break
 		}
-		prnt = prnt.Parent
+		prnt = prnt.Parent()
 	}
 	return prnt
 }
 
 // Struct :
 type Struct struct {
-	Tree       *StructField
-	Fields     Fields // all fields belong to this struct
-	Properties Fields // available properties in sequence
-	Indexes    map[string]*StructField
-	Names      map[string]*StructField
+	tree       StructFielder
+	fields     Fields // all fields belong to this struct
+	properties Fields // available properties in sequence
+	indexes    map[string]StructFielder
+	names      map[string]StructFielder
+}
+
+var _ Structer = (*Struct)(nil)
+
+// Fields :
+func (s *Struct) Fields() []StructFielder {
+	return s.fields
+}
+
+// Properties :
+func (s *Struct) Properties() []StructFielder {
+	return s.properties
+}
+
+// LookUpFieldByName :
+func (s *Struct) LookUpFieldByName(name string) (StructFielder, bool) {
+	x, ok := s.names[name]
+	return x, ok
 }
 
 // GetByTraversal :
-func (s Struct) GetByTraversal(index []int) *StructField {
+func (s *Struct) GetByTraversal(index []int) StructFielder {
 	if len(index) == 0 {
 		return nil
 	}
 
-	tree := s.Tree
+	tree := s.tree
 	for _, i := range index {
-		if i >= len(tree.Children) || tree.Children[i] == nil {
+		children := tree.Children()
+		if i >= len(children) || children[i] == nil {
 			return nil
 		}
-		tree = tree.Children[i]
+		tree = children[i]
 	}
 	return tree
 }
 
 // Fields :
-type Fields []*StructField
+type Fields []StructFielder
 
 func (x Fields) Len() int { return len(x) }
 
 func (x Fields) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
 
 func (x Fields) Less(i, j int) bool {
-	for k, xik := range x[i].Index {
-		if k >= len(x[j].Index) {
+	for k, xik := range x[i].Index() {
+		if k >= len(x[j].Index()) {
 			return false
 		}
-		if xik != x[j].Index[k] {
-			return xik < x[j].Index[k]
+		if xik != x[j].Index()[k] {
+			return xik < x[j].Index()[k]
 		}
 	}
-	return len(x[i].Index) < len(x[j].Index)
+	return len(x[i].Index()) < len(x[j].Index())
 }
 
 type typeQueue struct {
@@ -112,7 +189,7 @@ type typeQueue struct {
 }
 
 func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
-	fields := make([]*StructField, 0)
+	fields := make([]StructFielder, 0)
 
 	root := &StructField{}
 	queue := []typeQueue{}
@@ -120,7 +197,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 
 	for len(queue) > 0 {
 		q := queue[0]
-		q.sf.Children = make([]*StructField, 0)
+		q.sf.children = make([]StructFielder, 0)
 
 		for i := 0; i < q.t.NumField(); i++ {
 			f := q.t.Field(i)
@@ -136,31 +213,31 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 			}
 
 			sf := &StructField{
-				ID:         strings.TrimLeft(q.sf.ID+"."+strconv.Itoa(i), "."),
-				Name:       f.Name,
-				Path:       tag.name,
-				IsNullable: q.sf.IsNullable || IsNullable(f.Type),
-				Type:       f.Type,
-				Tag:        tag,
-				Children:   make([]*StructField, 0),
+				id:       strings.TrimLeft(q.sf.id+"."+strconv.Itoa(i), "."),
+				name:     f.Name,
+				path:     tag.name,
+				null:     q.sf.null || IsNullable(f.Type),
+				t:        f.Type,
+				tag:      tag,
+				children: make([]StructFielder, 0),
 			}
 
-			if len(q.sf.Index) > 0 {
-				sf.Parent = q.sf
+			if len(q.sf.Index()) > 0 {
+				sf.parent = q.sf
 			}
 
-			if sf.Path == "" {
-				sf.Path = sf.Tag.name
+			if sf.path == "" {
+				sf.path = sf.tag.name
 			}
 
 			if q.pp != "" {
-				sf.Path = q.pp + "." + sf.Path
+				sf.path = q.pp + "." + sf.path
 			}
 
 			ft := Deref(f.Type)
-			q.sf.Children = append(q.sf.Children, sf)
-			sf.Index = appendSlice(q.sf.Index, i)
-			sf.Embedded = ft.Kind() == reflect.Struct && f.Anonymous
+			q.sf.children = append(q.sf.children, sf)
+			sf.idx = appendSlice(q.sf.idx, i)
+			sf.embed = ft.Kind() == reflect.Struct && f.Anonymous
 
 			if ft.Kind() == reflect.Struct {
 				// check recursive, prevent infinite loop
@@ -169,9 +246,9 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				}
 
 				// embedded struct
-				path := sf.Path
+				path := sf.path
 				if f.Anonymous {
-					if sf.Tag.OriginalName() == "" {
+					if sf.tag.OriginalName() == "" {
 						path = q.pp
 					}
 					// queue = append(queue, typeQueue{ft, sf, path})
@@ -188,28 +265,28 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 	}
 
 	codec := &Struct{
-		Tree:       root,
-		Fields:     fields,
-		Properties: make([]*StructField, 0, len(fields)),
-		Indexes:    make(map[string]*StructField),
-		Names:      make(map[string]*StructField),
+		tree:       root,
+		fields:     fields,
+		properties: make([]StructFielder, 0, len(fields)),
+		indexes:    make(map[string]StructFielder),
+		names:      make(map[string]StructFielder),
 	}
 
-	sort.Sort(codec.Fields)
+	sort.Sort(codec.fields)
 
-	for _, sf := range codec.Fields {
-		codec.Indexes[sf.ID] = sf
-		if sf.Name != "" && !sf.Embedded {
-			codec.Names[sf.Path] = sf
-			prnt := sf.ParentByTraversal(func(f *StructField) bool {
-				return !f.Embedded
+	for _, sf := range codec.fields {
+		codec.indexes[sf.(*StructField).id] = sf
+		if sf.Name() != "" && !sf.IsEmbedded() {
+			codec.names[sf.Name()] = sf
+			prnt := sf.ParentByTraversal(func(f StructFielder) bool {
+				return !f.IsEmbedded()
 			})
-			if len(sf.Index) > 1 &&
-				sf.Parent != nil && prnt != nil {
+			if len(sf.Index()) > 1 &&
+				sf.Parent() != nil && prnt != nil {
 				continue
 			}
 			// not nested embedded struct or embedded struct
-			codec.Properties = append(codec.Properties, sf)
+			codec.properties = append(codec.properties, sf)
 		}
 	}
 

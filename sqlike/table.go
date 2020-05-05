@@ -161,18 +161,18 @@ func (tb Table) MustMigrate(ctx context.Context, entity interface{}) {
 
 // Migrate : migrate will create a new table follows by the definition of struct tag, alter when the table already exists
 func (tb *Table) Migrate(ctx context.Context, entity interface{}) error {
-	return tb.migrateOne(ctx, entity, false)
+	return tb.migrateOne(ctx, tb.client.cache, entity, false)
 }
 
 // UnsafeMigrate : unsafe migration will delete non-exist
 // index and columns, beware when you use this
-func (tb Table) UnsafeMigrate(ctx context.Context, entity interface{}) error {
-	return tb.migrateOne(ctx, entity, true)
+func (tb *Table) UnsafeMigrate(ctx context.Context, entity interface{}) error {
+	return tb.migrateOne(ctx, tb.client.cache, entity, true)
 }
 
 // MustUnsafeMigrate :
-func (tb Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
-	err := tb.migrateOne(ctx, entity, true)
+func (tb *Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
+	err := tb.migrateOne(ctx, tb.client.cache, entity, true)
 	if err != nil {
 		panic(err)
 	}
@@ -222,17 +222,27 @@ func (tb Table) Drop(ctx context.Context) (err error) {
 
 // Replace :
 func (tb *Table) Replace(ctx context.Context, fields []string, query *sql.SelectStmt) error {
-	stmt, err := tb.dialect.Replace(tb.dbName, tb.name, fields, query)
-	if err != nil {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := tb.dialect.Replace(
+		stmt,
+		tb.dbName,
+		tb.name,
+		fields,
+		query,
+	); err != nil {
 		return err
 	}
-	_, err = sqldriver.Execute(
+
+	if _, err := sqldriver.Execute(
 		ctx,
 		tb.driver,
 		stmt,
 		tb.logger,
-	)
-	return err
+	); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Indexes :
@@ -253,7 +263,7 @@ func (tb *Table) HasIndexByName(ctx context.Context, name string) (bool, error) 
 	)
 }
 
-func (tb *Table) migrateOne(ctx context.Context, entity interface{}, unsafe bool) error {
+func (tb *Table) migrateOne(ctx context.Context, cache reflext.StructMapper, entity interface{}, unsafe bool) error {
 	v := reflext.ValueOf(entity)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -264,8 +274,8 @@ func (tb *Table) migrateOne(ctx context.Context, entity interface{}, unsafe bool
 		return ErrExpectedStruct
 	}
 
-	cdc := reflext.DefaultMapper.CodecByType(t)
-	fields := skipColumns(cdc.Properties, nil)
+	cdc := cache.CodecByType(t)
+	fields := skipColumns(cdc.Properties(), nil)
 	if len(fields) < 1 {
 		return ErrEmptyFields
 	}
@@ -285,7 +295,7 @@ func (tb *Table) migrateOne(ctx context.Context, entity interface{}, unsafe bool
 	return tb.alterTable(ctx, fields, columns, idxs, unsafe)
 }
 
-func (tb *Table) createTable(ctx context.Context, fields []*reflext.StructField) error {
+func (tb *Table) createTable(ctx context.Context, fields []reflext.StructFielder) error {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	if err := tb.dialect.CreateTable(
@@ -309,7 +319,7 @@ func (tb *Table) createTable(ctx context.Context, fields []*reflext.StructField)
 	return nil
 }
 
-func (tb *Table) alterTable(ctx context.Context, fields []*reflext.StructField, columns []Column, indexs []Index, unsafe bool) error {
+func (tb *Table) alterTable(ctx context.Context, fields []reflext.StructFielder, columns []Column, indexs []Index, unsafe bool) error {
 	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name

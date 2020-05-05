@@ -46,19 +46,19 @@ func TestCodec(t *testing.T) {
 		typeof = reflect.TypeOf(i)
 		codec = getCodec(typeof, "sqlike", nil)
 
-		require.Equal(t, len(codec.Fields), 13)
-		require.Equal(t, len(codec.Properties), 4)
-		require.NotNil(t, codec.Names["Name"])
-		require.NotNil(t, codec.Names["Nested.Enum"])
+		require.Equal(t, len(codec.fields), 13)
+		require.Equal(t, len(codec.properties), 4)
+		require.NotNil(t, codec.names["Name"])
+		require.NotNil(t, codec.names["Nested.Enum"])
 	}
 
 	{
 		typeof = reflect.TypeOf(recursiveStruct{})
 		codec = getCodec(typeof, "sqlike", nil)
 
-		require.Equal(t, len(codec.Fields), 2)
-		require.Equal(t, len(codec.Properties), 2)
-		require.NotNil(t, codec.Names["Name"])
-		require.NotNil(t, codec.Names["Recursive"])
+		require.Equal(t, len(codec.fields), 2)
+		require.Equal(t, len(codec.properties), 2)
+		require.NotNil(t, codec.names["Name"])
+		require.NotNil(t, codec.names["Recursive"])
 	}
 }

@@ -13,10 +13,10 @@ import (
 type Set []string
 
 // DataType :
-func (s Set) DataType(t sqldriver.Info, sf *reflext.StructField) columns.Column {
+func (s Set) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
-	val, ok := sf.Tag.LookUp("set")
+	val, ok := sf.Tag().LookUp("set")
 	var def *string
 	blr.WriteString("SET(")
 	blr.WriteByte('\'')
@@ -31,10 +31,10 @@ func (s Set) DataType(t sqldriver.Info, sf *reflext.StructField) columns.Column 
 	blr.WriteByte('\'')
 	blr.WriteByte(')')
 	return columns.Column{
-		Name:         sf.Path,
+		Name:         sf.Name(),
 		Type:         blr.String(),
 		DataType:     "SET",
-		Nullable:     reflext.IsNullable(sf.Type),
+		Nullable:     reflext.IsNullable(sf.Type()),
 		Charset:      &latin1,
 		Collation:    &latin1Bin,
 		DefaultValue: def,

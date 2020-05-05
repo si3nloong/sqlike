@@ -51,10 +51,10 @@ func (ms MySQL) HasTable(stmt sqlstmt.Stmt, dbName, table string) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []*reflext.StructField) (err error) {
+func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error) {
 	var (
 		col     columns.Column
-		pkk     *reflext.StructField
+		pkk     reflext.StructFielder
 		k1, k2  string
 		virtual bool
 		stored  bool
@@ -74,34 +74,36 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 			return
 		}
 
+		tag := sf.Tag()
 		// allow primary_key tag to override
-		if _, ok := sf.Tag.LookUp("primary_key"); ok {
+		if _, ok := tag.LookUp("primary_key"); ok {
 			pkk = sf
-		} else if _, ok := sf.Tag.LookUp("auto_increment"); ok {
+		} else if _, ok := tag.LookUp("auto_increment"); ok {
 			pkk = sf
-		} else if sf.Path == pk && pkk == nil {
+		} else if sf.Name() == pk && pkk == nil {
 			pkk = sf
 		}
 
-		idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
-		if _, ok := sf.Tag.LookUp("unique_index"); ok {
-			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
+		idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
+		if _, ok := sf.Tag().LookUp("unique_index"); ok {
+			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
 			stmt.WriteByte(',')
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
 
 		// Generated columns :
-		t := reflext.Deref(sf.Type)
+		t := reflext.Deref(sf.Type())
 		if t.Kind() != reflect.Struct {
 			continue
 		}
 
-		children := sf.Children
+		children := sf.Children()
 		for len(children) > 0 {
 			child := children[0]
-			k1, virtual = child.Tag.LookUp("virtual_column")
-			k2, stored = child.Tag.LookUp("stored_column")
+			tg := child.Tag()
+			k1, virtual = tg.LookUp("virtual_column")
+			k2, stored = tg.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(info, child)
@@ -119,9 +121,9 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 
 				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
 				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Path) + "->>'$." + path + "')")
+				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
 				if stored {
 					stmt.WriteString(" STORED")
 				}
@@ -130,12 +132,12 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 				}
 			}
 			children = children[1:]
-			children = append(children, child.Children...)
+			children = append(children, child.Children()...)
 		}
 	}
 	if pkk != nil {
 		stmt.WriteByte(',')
-		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
+		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Name()) + ")")
 	}
 	stmt.WriteByte(')')
 	stmt.WriteString(" ENGINE=INNODB")
@@ -154,10 +156,10 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
+func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
 	var (
 		col     columns.Column
-		pkk     *reflext.StructField
+		pkk     reflext.StructFielder
 		idx     int
 		k1, k2  string
 		virtual bool
@@ -173,28 +175,29 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 
 		action := "ADD"
-		idx = cols.IndexOf(sf.Path)
+		idx = cols.IndexOf(sf.Name())
 		if idx > -1 {
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
 		if !hasPk {
 			// allow primary_key tag to override
-			if _, ok := sf.Tag.LookUp("primary_key"); ok {
+			if _, ok := sf.Tag().LookUp("primary_key"); ok {
 				pkk = sf
 			}
-			if sf.Path == pk && pkk == nil {
+			if sf.Name() == pk && pkk == nil {
 				pkk = sf
 			}
 		}
 
-		_, ok1 := sf.Tag.LookUp("unique_index")
-		_, ok2 := sf.Tag.LookUp("auto_increment")
+		tag := sf.Tag()
+		_, ok1 := tag.LookUp("unique_index")
+		_, ok2 := tag.LookUp("auto_increment")
 		if ok1 || ok2 {
-			idx := indexes.Index{Columns: indexes.Columns(sf.Path)}
+			idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
 				stmt.WriteString("ADD")
-				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Path) + ")")
+				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
 				stmt.WriteByte(',')
 			}
 		}
@@ -205,19 +208,20 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 		ms.buildSchemaByColumn(stmt, col)
 		stmt.WriteString(" " + suffix)
-		suffix = "AFTER " + ms.Quote(sf.Path)
+		suffix = "AFTER " + ms.Quote(sf.Name())
 
 		// Generated columns :
-		t := reflext.Deref(sf.Type)
+		t := reflext.Deref(sf.Type())
 		if t.Kind() != reflect.Struct {
 			continue
 		}
 
-		children := sf.Children
+		children := sf.Children()
 		for len(children) > 0 {
 			child := children[0]
-			k1, virtual = child.Tag.LookUp("virtual_column")
-			k2, stored = child.Tag.LookUp("stored_column")
+			tg := child.Tag()
+			k1, virtual = tg.LookUp("virtual_column")
+			k2, stored = tg.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(info, child)
@@ -243,9 +247,9 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 				stmt.WriteString(action + " ")
 				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Path, sf.Path), ".")
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
 				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Path) + "->>'$." + path + "')")
+				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
 				if stored {
 					stmt.WriteString(" STORED")
 				}
@@ -256,13 +260,13 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 				suffix = "AFTER " + ms.Quote(name)
 			}
 			children = children[1:]
-			children = append(children, child.Children...)
+			children = append(children, child.Children()...)
 		}
 	}
 
 	if pkk != nil {
 		stmt.WriteByte(',')
-		stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pkk.Path) + ")")
+		stmt.WriteString("ADD PRIMARY KEY (" + ms.Quote(pkk.Name()) + ")")
 	}
 
 	if unsafe {

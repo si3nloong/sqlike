@@ -20,11 +20,11 @@ import (
 
 // DataTyper :
 type DataTyper interface {
-	DataType(info driver.Info, sf *reflext.StructField) columns.Column
+	DataType(info driver.Info, sf reflext.StructFielder) columns.Column
 }
 
 // DataTypeFunc :
-type DataTypeFunc func(sf *reflext.StructField) columns.Column
+type DataTypeFunc func(sf reflext.StructFielder) columns.Column
 
 // Builder :
 type Builder struct {
@@ -65,8 +65,8 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 }
 
 // GetColumn :
-func (sb *Builder) GetColumn(info driver.Info, sf *reflext.StructField) (columns.Column, error) {
-	t := reflext.Deref(sf.Type)
+func (sb *Builder) GetColumn(info driver.Info, sf reflext.StructFielder) (columns.Column, error) {
+	t := reflext.Deref(sf.Type())
 	v := reflect.New(t)
 	if x, ok := v.Interface().(DataTyper); ok {
 		return x.DataType(info, sf), nil

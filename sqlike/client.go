@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver"
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
@@ -48,6 +49,7 @@ type Client struct {
 	*sql.DB
 	pk      string
 	logger  logs.Logger
+	cache   reflext.StructMapper
 	codec   codec.Codecer
 	dialect dialect.Dialect
 }
@@ -63,6 +65,7 @@ func newClient(ctx context.Context, driver string, db *sql.DB, dialect dialect.D
 	client.driverName = driver
 	client.charSet = code
 	client.collate = collate
+	client.cache = reflext.DefaultMapper
 	client.codec = codec.DefaultRegistry
 	client.version = client.getVersion(ctx)
 	return client, nil
@@ -87,6 +90,12 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 // SetCodec :
 func (c *Client) SetCodec(cdc codec.Codecer) *Client {
 	c.codec = cdc
+	return c
+}
+
+// SetStructMapper :
+func (c *Client) SetStructMapper(mapper reflext.StructMapper) *Client {
+	c.cache = mapper
 	return c
 }
 

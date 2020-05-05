@@ -12,7 +12,7 @@ import (
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *reflext.Mapper, cdc codec.Codecer, fields []*reflext.StructField, v reflect.Value, opt *options.InsertOptions) (err error) {
+func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
 	records := v.Len()
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
@@ -23,7 +23,7 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *refl
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
-		stmt.WriteString(ms.Quote(f.Path))
+		stmt.WriteString(ms.Quote(f.Name()))
 	}
 	stmt.WriteString(") VALUES ")
 	length := len(fields)
@@ -41,9 +41,9 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *refl
 				stmt.WriteByte(',')
 			}
 			// first record only find encoders
-			fv := mapper.FieldByIndexesReadOnly(vi, sf.Index)
+			fv := cache.FieldByIndexesReadOnly(vi, sf.Index())
 			if i == 0 {
-				encoders[j], err = findEncoder(mapper, cdc, sf, fv)
+				encoders[j], err = findEncoder(cdc, sf, fv)
 				if err != nil {
 					return err
 				}
@@ -64,14 +64,14 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *refl
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
 		for _, f := range fields {
-			if f.Path == pk {
+			if f.Name() == pk {
 				next = false
 				continue
 			}
 			if next {
 				stmt.WriteByte(',')
 			}
-			c := ms.Quote(f.Path)
+			c := ms.Quote(f.Name())
 			stmt.WriteString(c + "=VALUES(" + c + ")")
 			next = true
 		}
@@ -80,8 +80,8 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *refl
 	return
 }
 
-func findEncoder(mapper *reflext.Mapper, c codec.Codecer, sf *reflext.StructField, v reflect.Value) (codec.ValueEncoder, error) {
-	if _, ok := sf.Tag.LookUp("auto_increment"); ok && reflext.IsZero(v) {
+func findEncoder(c codec.Codecer, sf reflext.StructFielder, v reflect.Value) (codec.ValueEncoder, error) {
+	if _, ok := sf.Tag().LookUp("auto_increment"); ok && reflext.IsZero(v) {
 		return codec.NilEncoder, nil
 	}
 	encoder, err := c.LookupEncoder(v)

@@ -10,7 +10,7 @@ import (
 type ValueDecoder func(interface{}, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(*reflext.StructField, reflect.Value) (interface{}, error)
+type ValueEncoder func(reflext.StructFielder, reflect.Value) (interface{}, error)
 
 // ValueCodec :
 type ValueCodec interface {

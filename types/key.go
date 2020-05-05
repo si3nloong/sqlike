@@ -2,9 +2,13 @@ package types
 
 import (
 	"bytes"
+	"database/sql"
 	"database/sql/driver"
+	"encoding"
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
+	"fmt"
 	"io"
 	"math/rand"
 	"net/url"
@@ -46,13 +50,21 @@ type Key struct {
 	Parent    *Key
 }
 
+var (
+	_ driver.Valuer          = (*Key)(nil)
+	_ sql.Scanner            = (*Key)(nil)
+	_ fmt.Stringer           = (*Key)(nil)
+	_ encoding.TextMarshaler = (*Key)(nil)
+	_ json.Marshaler         = (*Key)(nil)
+)
+
 // DataType :
-func (k Key) DataType(t sqldriver.Info, sf *reflext.StructField) columns.Column {
+func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	return columns.Column{
-		Name:      sf.Path,
+		Name:      sf.Name(),
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(512)",
-		Nullable:  reflext.IsNullable(sf.Type),
+		Nullable:  reflext.IsNullable(sf.Type()),
 		Charset:   &latin1,
 		Collation: &latin1Bin,
 	}

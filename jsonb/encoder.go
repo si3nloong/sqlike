@@ -123,13 +123,13 @@ func (enc *DefaultEncoder) EncodeStruct(w *Writer, v reflect.Value) error {
 	w.WriteRune('{')
 	mapper := reflext.DefaultMapper
 	cdc := mapper.CodecByType(v.Type())
-	for i, sf := range cdc.Properties {
+	for i, sf := range cdc.Properties() {
 		if i > 0 {
 			w.WriteRune(',')
 		}
-		w.WriteString(strconv.Quote(sf.Path))
+		w.WriteString(strconv.Quote(sf.Name()))
 		w.WriteRune(':')
-		fv := mapper.FieldByIndexesReadOnly(v, sf.Index)
+		fv := mapper.FieldByIndexesReadOnly(v, sf.Index())
 		encoder, err := enc.registry.LookupEncoder(fv)
 		if err != nil {
 			return err

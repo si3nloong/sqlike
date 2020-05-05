@@ -2,6 +2,7 @@ package dialect
 
 import (
 	"reflect"
+	"strings"
 	"sync"
 
 	"github.com/si3nloong/sqlike/reflext"
@@ -16,8 +17,16 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
+type SQLDialect interface {
+	TableName(db, table string) string
+	Var(i int) string
+	Quote(n string) string
+	Format(v interface{}) (val string)
+}
+
 // Dialect :
 type Dialect interface {
+	SQLDialect
 	Connect(opt *options.ConnectOptions) (connStr string)
 	UseDatabase(stmt sqlstmt.Stmt, db string)
 	GetVersion(stmt sqlstmt.Stmt)
@@ -37,17 +46,14 @@ type Dialect interface {
 	GetIndexes(stmt sqlstmt.Stmt, db, table string)
 	CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexes.Index, supportDesc bool)
 	DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string)
-	CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []*reflext.StructField) (err error)
-	AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []*reflext.StructField, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (err error)
-	InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper *reflext.Mapper, codec codec.Codecer, fields []*reflext.StructField, values reflect.Value, opts *options.InsertOptions) (err error)
+	CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error)
+	AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (err error)
+	InsertInto(stmt sqlstmt.Stmt, db, table, pk string, mapper reflext.StructMapper, codec codec.Codecer, fields []reflext.StructFielder, values reflect.Value, opts *options.InsertOptions) (err error)
 	Select(stmt sqlstmt.Stmt, act *actions.FindActions, mode options.LockMode) (err error)
 	Update(stmt sqlstmt.Stmt, act *actions.UpdateActions) (err error)
 	Delete(stmt sqlstmt.Stmt, act *actions.DeleteActions) (err error)
 	SelectStmt(stmt sqlstmt.Stmt, query interface{}) (err error)
-	Replace(db, table string, columns []string, query *sql.SelectStmt) (stmt *sqlstmt.Statement, err error)
-	Var(i int) string
-	Quote(n string) string
-	Format(v interface{}) (val string)
+	Replace(stmt sqlstmt.Stmt, db, table string, columns []string, query *sql.SelectStmt) (err error)
 }
 
 var (
@@ -70,5 +76,6 @@ func RegisterDialect(driver string, dialect Dialect) {
 
 // GetDialectByDriver :
 func GetDialectByDriver(driver string) Dialect {
+	driver = strings.TrimSpace(strings.ToLower(driver))
 	return dialects[driver]
 }

@@ -45,6 +45,7 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 - join (eg. left join, outer join, inner join)
 - left wildcard search using Like is not allow
 - bidirectional sorting is not allow (except mysql 8.0)
+- currently only support `mysql`
 
 ### General APIs
 
