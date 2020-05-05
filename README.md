@@ -23,16 +23,20 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `ENUM` and `SET`
 - Support `UUID`
 - Support `JSON`
-- Support `sqldump` for backup purpose
 - Support `descending index` for mysql 8.0
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` for `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
+- Support `Transactions`
+- Support cursor based pagination.
+- Support advance and complex query statement
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support authorization plugin [Casbin](https://github.com/casbin/casbin)
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
-- Prevent toxic query with `Strict Mode` **(in progress)**
+- Support `sqldump` for backup purpose **(in progress)**
+- Developer friendly, (query is highly similar to native sql query)
+- Prevent toxic query with `Strict Mode` **(upcoming)**
 
 ### Missing DOC?
 
@@ -42,10 +46,11 @@ You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/exam
 
 Our main objective is anti toxic query, that why some functionality we doesn't offer
 
+- eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
 - join (eg. left join, outer join, inner join)
-- left wildcard search using Like is not allow
+- left wildcard search using Like is not allow (you may use Raw to bypass)
 - bidirectional sorting is not allow (except mysql 8.0)
-- currently only support `mysql`
+- currently only support `mysql` driver
 
 ### General APIs
 
@@ -106,7 +111,7 @@ func main() {
 
     client.SetPrimaryKey("ID") // Change default primary key name
     version := client.Version() // Display driver version
-    dbs, _ := client.ListDatabases() // List databases
+    dbs, _ := client.ListDatabases(ctx) // List databases
 
     userTable := client.Database("sqlike").Table("User")
 
@@ -156,9 +161,13 @@ func main() {
         users := make([]User, 0)
         result, err := userTable.Find(
             ctx,
-            actions.Find().Where(
-                expr.Equal("ID", result.ID),
-            ),
+            actions.Find().
+                Where(
+                    expr.Equal("ID", result.ID),
+                ).
+                OrderBy(
+                    expr.Desc("UpdatedAt"),
+                ),
         )
         if err != nil {
             panic(err)

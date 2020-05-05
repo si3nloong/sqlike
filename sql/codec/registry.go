@@ -17,11 +17,11 @@ import (
 )
 
 type Codecer interface {
-	SetTypeCoder(t reflect.Type, enc ValueEncoder, dec ValueDecoder)
-	SetTypeEncoder(t reflect.Type, enc ValueEncoder)
-	SetTypeDecoder(t reflect.Type, dec ValueDecoder)
-	SetKindEncoder(k reflect.Kind, enc ValueEncoder)
-	SetKindDecoder(k reflect.Kind, dec ValueDecoder)
+	RegisterTypeCodec(t reflect.Type, enc ValueEncoder, dec ValueDecoder)
+	RegisterTypeEncoder(t reflect.Type, enc ValueEncoder)
+	RegisterTypeDecoder(t reflect.Type, dec ValueDecoder)
+	RegisterKindEncoder(k reflect.Kind, enc ValueEncoder)
+	RegisterKindDecoder(k reflect.Kind, dec ValueDecoder)
 	LookupEncoder(v reflect.Value) (ValueEncoder, error)
 	LookupDecoder(t reflect.Type) (ValueDecoder, error)
 }
@@ -36,37 +36,37 @@ func buildDefaultRegistry() Codecer {
 	rg := NewRegistry()
 	dec := DefaultDecoders{rg}
 	enc := DefaultEncoders{rg}
-	rg.SetTypeCoder(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
-	rg.SetTypeCoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
-	rg.SetTypeCoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
-	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
-	rg.SetTypeCoder(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
-	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
-	rg.SetTypeCoder(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
-	rg.SetTypeCoder(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString), dec.DecodeLineString)
-	// rg.SetTypeCoder(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon), dec.DecodePolygon)
-	// rg.SetTypeCoder(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint), dec.DecodeMultiPoint)
-	// rg.SetTypeCoder(reflect.TypeOf(orb.MultiLineString{}), enc.EncodeSpatial(spatial.MultiLineString), dec.DecodeMultiLineString)
-	// rg.SetTypeCoder(reflect.TypeOf(orb.MultiPolygon{}), enc.EncodeSpatial(spatial.MultiPolygon), dec.DecodeMultiPolygon)
-	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
-	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
-	rg.SetKindCoder(reflect.Int, enc.EncodeInt, dec.DecodeInt)
-	rg.SetKindCoder(reflect.Int8, enc.EncodeInt, dec.DecodeInt)
-	rg.SetKindCoder(reflect.Int16, enc.EncodeInt, dec.DecodeInt)
-	rg.SetKindCoder(reflect.Int32, enc.EncodeInt, dec.DecodeInt)
-	rg.SetKindCoder(reflect.Int64, enc.EncodeInt, dec.DecodeInt)
-	rg.SetKindCoder(reflect.Uint, enc.EncodeUint, dec.DecodeUint)
-	rg.SetKindCoder(reflect.Uint8, enc.EncodeUint, dec.DecodeUint)
-	rg.SetKindCoder(reflect.Uint16, enc.EncodeUint, dec.DecodeUint)
-	rg.SetKindCoder(reflect.Uint32, enc.EncodeUint, dec.DecodeUint)
-	rg.SetKindCoder(reflect.Uint64, enc.EncodeUint, dec.DecodeUint)
-	rg.SetKindCoder(reflect.Float32, enc.EncodeFloat, dec.DecodeFloat)
-	rg.SetKindCoder(reflect.Float64, enc.EncodeFloat, dec.DecodeFloat)
-	rg.SetKindCoder(reflect.Ptr, enc.EncodePtr, dec.DecodePtr)
-	rg.SetKindCoder(reflect.Struct, enc.EncodeStruct, dec.DecodeStruct)
-	rg.SetKindCoder(reflect.Array, enc.EncodeArray, dec.DecodeArray)
-	rg.SetKindCoder(reflect.Slice, enc.EncodeArray, dec.DecodeArray)
-	rg.SetKindCoder(reflect.Map, enc.EncodeMap, dec.DecodeMap)
+	rg.RegisterTypeCodec(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
+	rg.RegisterTypeCodec(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
+	rg.RegisterTypeCodec(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
+	rg.RegisterTypeCodec(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
+	rg.RegisterTypeCodec(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
+	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.RegisterTypeCodec(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
+	rg.RegisterTypeCodec(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString), dec.DecodeLineString)
+	// rg.RegisterTypeCodec(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon), dec.DecodePolygon)
+	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint), dec.DecodeMultiPoint)
+	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiLineString{}), enc.EncodeSpatial(spatial.MultiLineString), dec.DecodeMultiLineString)
+	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPolygon{}), enc.EncodeSpatial(spatial.MultiPolygon), dec.DecodeMultiPolygon)
+	rg.RegisterKindCodec(reflect.String, enc.EncodeString, dec.DecodeString)
+	rg.RegisterKindCodec(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
+	rg.RegisterKindCodec(reflect.Int, enc.EncodeInt, dec.DecodeInt)
+	rg.RegisterKindCodec(reflect.Int8, enc.EncodeInt, dec.DecodeInt)
+	rg.RegisterKindCodec(reflect.Int16, enc.EncodeInt, dec.DecodeInt)
+	rg.RegisterKindCodec(reflect.Int32, enc.EncodeInt, dec.DecodeInt)
+	rg.RegisterKindCodec(reflect.Int64, enc.EncodeInt, dec.DecodeInt)
+	rg.RegisterKindCodec(reflect.Uint, enc.EncodeUint, dec.DecodeUint)
+	rg.RegisterKindCodec(reflect.Uint8, enc.EncodeUint, dec.DecodeUint)
+	rg.RegisterKindCodec(reflect.Uint16, enc.EncodeUint, dec.DecodeUint)
+	rg.RegisterKindCodec(reflect.Uint32, enc.EncodeUint, dec.DecodeUint)
+	rg.RegisterKindCodec(reflect.Uint64, enc.EncodeUint, dec.DecodeUint)
+	rg.RegisterKindCodec(reflect.Float32, enc.EncodeFloat, dec.DecodeFloat)
+	rg.RegisterKindCodec(reflect.Float64, enc.EncodeFloat, dec.DecodeFloat)
+	rg.RegisterKindCodec(reflect.Ptr, enc.EncodePtr, dec.DecodePtr)
+	rg.RegisterKindCodec(reflect.Struct, enc.EncodeStruct, dec.DecodeStruct)
+	rg.RegisterKindCodec(reflect.Array, enc.EncodeArray, dec.DecodeArray)
+	rg.RegisterKindCodec(reflect.Slice, enc.EncodeArray, dec.DecodeArray)
+	rg.RegisterKindCodec(reflect.Map, enc.EncodeMap, dec.DecodeMap)
 	return rg
 }
 
@@ -91,45 +91,45 @@ func NewRegistry() *Registry {
 	}
 }
 
-// SetTypeCoder :
-func (r *Registry) SetTypeCoder(t reflect.Type, enc ValueEncoder, dec ValueDecoder) {
+// RegisterTypeCodec :
+func (r *Registry) RegisterTypeCodec(t reflect.Type, enc ValueEncoder, dec ValueDecoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
 	r.typeDecoders[t] = dec
 }
 
-// SetTypeEncoder :
-func (r *Registry) SetTypeEncoder(t reflect.Type, enc ValueEncoder) {
+// RegisterTypeEncoder :
+func (r *Registry) RegisterTypeEncoder(t reflect.Type, enc ValueEncoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
 }
 
-// SetTypeDecoder :
-func (r *Registry) SetTypeDecoder(t reflect.Type, dec ValueDecoder) {
+// RegisterTypeDecoder :
+func (r *Registry) RegisterTypeDecoder(t reflect.Type, dec ValueDecoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.typeDecoders[t] = dec
 }
 
-// SetKindCoder :
-func (r *Registry) SetKindCoder(k reflect.Kind, enc ValueEncoder, dec ValueDecoder) {
+// RegisterKindCodec :
+func (r *Registry) RegisterKindCodec(k reflect.Kind, enc ValueEncoder, dec ValueDecoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
 	r.kindDecoders[k] = dec
 }
 
-// SetKindEncoder :
-func (r *Registry) SetKindEncoder(k reflect.Kind, enc ValueEncoder) {
+// RegisterKindEncoder :
+func (r *Registry) RegisterKindEncoder(k reflect.Kind, enc ValueEncoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
 }
 
-// SetKindDecoder :
-func (r *Registry) SetKindDecoder(k reflect.Kind, dec ValueDecoder) {
+// RegisterKindDecoder :
+func (r *Registry) RegisterKindDecoder(k reflect.Kind, dec ValueDecoder) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	r.kindDecoders[k] = dec

@@ -3,13 +3,14 @@
 - [x] Support `Open tracing`.
 - [x] Change default collation to `latin1` for `currency.Unit` and `language.Tag` for better performance.
 - [x] Support `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` or else.
+- [x] Support `sqldump`.
 - [ ] Support foreign key.
 - [ ] Support migration like `django`.
-- [ ] Support `sqldump`.
+- [ ] Support default value for `StructField`.
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] `StructMapper` as an interface and enable to set in `Client` object.
-- [ ] Change `StructField` to `interface{}`.
+- [x] `StructMapper` as an interface and enable to set in `Client` object.
+- [x] Change `StructField` to `interface{}`.
 - [x] Support index with files instead of single file (index.yaml).
 - [x] `Codec` as an interface and enable to set in `Client` object.
 - [x] Support unmarshal map key using `TextUnmarshaler` interface.

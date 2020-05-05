@@ -16,10 +16,11 @@ type Set []string
 func (s Set) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
-	val, ok := sf.Tag().LookUp("set")
 	var def *string
 	blr.WriteString("SET(")
 	blr.WriteByte('\'')
+
+	val, ok := sf.Tag().LookUp("set")
 	if ok {
 		paths := strings.Split(val, "|")
 		if len(paths) >= 64 {

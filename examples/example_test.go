@@ -85,6 +85,7 @@ func testCase(t *testing.T, ctx context.Context, client *sqlike.Client) {
 	mg := connectMongoDB()
 
 	{
+		SQLDumpExamples(t, ctx, client)
 		MigrateExamples(t, ctx, db)
 		IndexExamples(t, ctx, db)
 
