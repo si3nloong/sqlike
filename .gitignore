@@ -3,3 +3,4 @@ main.go
 vendor/*
 .idea/
 .vscode/*
+*.sql
