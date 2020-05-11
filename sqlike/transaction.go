@@ -21,8 +21,13 @@ type SessionContext interface {
 
 // Transaction :
 type Transaction struct {
+	// transaction context
 	context.Context
-	dbName  string
+
+	// database name
+	dbName string
+
+	// default primary key
 	pk      string
 	client  *Client
 	driver  *sql.Tx
@@ -64,6 +69,7 @@ func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Resul
 		return nil, err
 	}
 	rslt := new(Result)
+	rslt.cache = tx.client.cache
 	rslt.codec = tx.codec
 	rslt.rows = rows
 	rslt.columns, rslt.err = rows.Columns()

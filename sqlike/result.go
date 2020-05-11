@@ -20,10 +20,10 @@ type Resulter interface {
 	Close() error
 }
 
-// ErrNoRows :
+// ErrNoRows : is an alias for no record found
 var ErrNoRows = sql.ErrNoRows
 
-// EOF :
+// EOF : is an alias for end of file
 var EOF = io.EOF
 
 // Result :
@@ -31,6 +31,7 @@ type Result struct {
 	close       bool
 	rows        *sql.Rows
 	codec       codec.Codecer
+	cache       reflext.StructMapper
 	columns     []string
 	columnTypes []*sql.ColumnType
 	err         error
@@ -67,7 +68,7 @@ func (r *Result) values() ([]interface{}, error) {
 	return values, nil
 }
 
-// Scan :
+// Scan : will behave as similar as sql.Scan.
 func (r *Result) Scan(dests ...interface{}) error {
 	if r.close {
 		defer r.Close()
@@ -105,7 +106,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 	return nil
 }
 
-// Decode will decode the current document into val.
+// Decode will decode the current document into val, this will only accepting pointer of struct as an input.
 func (r *Result) Decode(dst interface{}) error {
 	if r.close {
 		defer r.Close()
@@ -130,8 +131,7 @@ func (r *Result) Decode(dst interface{}) error {
 		return errors.New("sqlike: it must be a struct to decode")
 	}
 
-	mapper := reflext.DefaultMapper
-	idxs := mapper.TraversalsByName(t, r.columns)
+	idxs := r.cache.TraversalsByName(t, r.columns)
 	values, err := r.values()
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (r *Result) Decode(dst interface{}) error {
 		if idx == nil {
 			continue
 		}
-		fv := mapper.FieldByIndexes(vv, idx)
+		fv := r.cache.FieldByIndexes(vv, idx)
 		decoder, err := r.codec.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
@@ -198,7 +198,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 	return r.rows.Close()
 }
 
-// All :
+// All : this will map all the records from sql to a slice of struct.
 func (r *Result) All(results interface{}) error {
 	defer r.Close()
 	if r.err != nil {
@@ -223,8 +223,7 @@ func (r *Result) All(results interface{}) error {
 	length := len(r.columns)
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
-	mapper := reflext.DefaultMapper
-	idxs := mapper.TraversalsByName(t, r.columns)
+	idxs := r.cache.TraversalsByName(t, r.columns)
 	decoders := make([]codec.ValueDecoder, length)
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()
@@ -236,7 +235,7 @@ func (r *Result) All(results interface{}) error {
 			if idx == nil {
 				continue
 			}
-			fv := mapper.FieldByIndexes(vv, idx)
+			fv := r.cache.FieldByIndexes(vv, idx)
 			if i < 1 {
 				decoder, err := r.codec.LookupDecoder(fv.Type())
 				if err != nil {

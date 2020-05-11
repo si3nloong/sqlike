@@ -25,20 +25,28 @@ var ErrExpectedStruct = errors.New("expected struct as a source")
 // ErrEmptyFields :
 var ErrEmptyFields = errors.New("empty fields")
 
-// INSERT INTO Table (X1, X2) VALUES (?,?)
-// - required >> table: string, columns: []string, arguments :[][]interface{}
-// - options >> omitFields: []string, set upsert
-
 // Table :
 type Table struct {
-	dbName  string
-	name    string
-	pk      string
-	client  *Client
-	driver  sqldriver.Driver
+	// current database name
+	dbName string
+
+	// table name
+	name string
+
+	// default primary key
+	pk string
+
+	client *Client
+
+	// sql driver
+	driver sqldriver.Driver
+
+	// sql dialect
 	dialect dialect.Dialect
-	codec   codec.Codecer
-	logger  logs.Logger
+
+	// encoder and decoder for the value
+	codec  codec.Codecer
+	logger logs.Logger
 }
 
 // Rename : rename the current table name to new table name
@@ -77,7 +85,7 @@ func (tb *Table) Columns() *ColumnView {
 	return &ColumnView{tb: tb}
 }
 
-// ListColumns :
+// ListColumns : list all the column of the table.
 func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -119,7 +127,7 @@ func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 	return columns, nil
 }
 
-// ListIndexes :
+// ListIndexes : list all the index of the table.
 func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -164,13 +172,12 @@ func (tb *Table) Migrate(ctx context.Context, entity interface{}) error {
 	return tb.migrateOne(ctx, tb.client.cache, entity, false)
 }
 
-// UnsafeMigrate : unsafe migration will delete non-exist
-// index and columns, beware when you use this
+// UnsafeMigrate : unsafe migration will delete non-exist index and columns, beware when you use this
 func (tb *Table) UnsafeMigrate(ctx context.Context, entity interface{}) error {
 	return tb.migrateOne(ctx, tb.client.cache, entity, true)
 }
 
-// MustUnsafeMigrate :
+// MustUnsafeMigrate : this will panic if it get error on unsafe migrate
 func (tb *Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
 	err := tb.migrateOne(ctx, tb.client.cache, entity, true)
 	if err != nil {
@@ -178,7 +185,7 @@ func (tb *Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
 	}
 }
 
-// Truncate :
+// Truncate : delete all the table data.
 func (tb *Table) Truncate(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -192,7 +199,7 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 	return
 }
 
-// DropIfExists : will drop the table only if it exists
+// DropIfExists : will drop the table only if it exists.
 func (tb Table) DropIfExists(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)

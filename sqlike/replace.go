@@ -9,7 +9,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
-// InsertOne :
+// ReplaceOne :
 func (tb *Table) ReplaceOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {

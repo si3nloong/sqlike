@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
-	"log"
 
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sqlike/options"
@@ -19,7 +18,6 @@ func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (clie
 	var db *sql.DB
 	dialect := sqldialect.GetDialectByDriver(driver)
 	connStr := dialect.Connect(opt)
-	log.Println("Connect to :", connStr)
 	db, err = sql.Open(driver, connStr)
 	if err != nil {
 		return
@@ -28,7 +26,7 @@ func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (clie
 	return
 }
 
-// MustOpen :
+// MustOpen : must open will panic if it cannot establish a connection to sql server
 func MustOpen(ctx context.Context, driver string, opt *options.ConnectOptions) *Client {
 	client, err := Open(ctx, driver, opt)
 	if err != nil {

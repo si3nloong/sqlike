@@ -68,6 +68,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 		return nil, err
 	}
 	rslt := new(Result)
+	rslt.cache = db.client.cache
 	rslt.codec = db.codec
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -13,7 +14,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
-// SingleResult :
+// SingleResult : single result is an interface implementing apis as similar as driver.Result
 type SingleResult interface {
 	Scan(dest ...interface{}) error
 	Decode(dest interface{}) error
@@ -22,7 +23,7 @@ type SingleResult interface {
 	Error() error
 }
 
-// FindOne :
+// FindOne : find single record on the table, you should alway check the return error to ensure it have result return.
 func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, opts ...*options.FindOneOptions) SingleResult {
 	x := new(actions.FindOneActions)
 	if act != nil {
@@ -37,6 +38,7 @@ func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, op
 		ctx,
 		tb.dbName,
 		tb.name,
+		tb.client.cache,
 		tb.codec,
 		tb.driver,
 		tb.dialect,
@@ -55,7 +57,7 @@ func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, op
 	return csr
 }
 
-// Find :
+// Find : find multiple records on the table.
 func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...*options.FindOptions) (*Result, error) {
 	x := new(actions.FindActions)
 	if act != nil {
@@ -73,6 +75,7 @@ func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...
 		ctx,
 		tb.dbName,
 		tb.name,
+		tb.client.cache,
 		tb.codec,
 		tb.driver,
 		tb.dialect,
@@ -87,7 +90,7 @@ func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...
 	return csr, nil
 }
 
-func find(ctx context.Context, dbName, tbName string, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
+func find(ctx context.Context, dbName, tbName string, cache reflext.StructMapper, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
 	if act.Database == "" {
 		act.Database = dbName
 	}
@@ -95,6 +98,7 @@ func find(ctx context.Context, dbName, tbName string, cdc codec.Codecer, driver 
 		act.Table = tbName
 	}
 	rslt := new(Result)
+	rslt.cache = cache
 	rslt.codec = cdc
 
 	stmt := sqlstmt.AcquireStmt(dialect)

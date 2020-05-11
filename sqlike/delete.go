@@ -16,7 +16,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
-// DestroyOne :
+// DestroyOne : hard delete a record on the table using primary key. You should alway have primary key defined in your struct in order to use this api.
 func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 	return destroyOne(
 		ctx,
@@ -31,53 +31,7 @@ func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 	)
 }
 
-func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
-	v := reflext.ValueOf(delete)
-	if !v.IsValid() {
-		return ErrInvalidInput
-	}
-	t := v.Type()
-	if !reflext.IsKind(t, reflect.Ptr) {
-		return ErrUnaddressableEntity
-	}
-	if v.IsNil() {
-		return ErrNilEntity
-	}
-
-	cdc := cache.CodecByType(t)
-	f, exists := cdc.LookUpFieldByName(pk)
-	if !exists {
-		return fmt.Errorf("sqlike: missing primary key field %q", pk)
-	}
-
-	x := new(actions.DeleteActions)
-	x.Database = dbName
-	x.Table = tbName
-	fv := cache.FieldByIndexesReadOnly(v, f.Index())
-	x.Where(expr.Equal(f.Name(), fv.Interface()))
-	x.Limit(1)
-
-	stmt := sqlstmt.AcquireStmt(dialect)
-	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Delete(stmt, x); err != nil {
-		return err
-	}
-	result, err := sqldriver.Execute(
-		ctx,
-		driver,
-		stmt,
-		logger,
-	)
-	if err != nil {
-		return err
-	}
-	if affected, _ := result.RowsAffected(); affected <= 0 {
-		return errors.New("sqlike: unable to delete entity")
-	}
-	return err
-}
-
-// DeleteOne :
+// DeleteOne : delete single record on the table using where clause.
 func (tb *Table) DeleteOne(ctx context.Context, act actions.DeleteOneStatement, opts ...*options.DeleteOneOptions) (int64, error) {
 	x := new(actions.DeleteOneActions)
 	if act != nil {
@@ -100,7 +54,7 @@ func (tb *Table) DeleteOne(ctx context.Context, act actions.DeleteOneStatement, 
 	)
 }
 
-// Delete :
+// Delete : delete multiple record on the table using where clause. If you didn't provided any where clause, it will throw error. For multiple record deletion without where clause, you should use `Truncate` instead.
 func (tb *Table) Delete(ctx context.Context, act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
@@ -148,4 +102,50 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
+	v := reflext.ValueOf(delete)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+	t := v.Type()
+	if !reflext.IsKind(t, reflect.Ptr) {
+		return ErrUnaddressableEntity
+	}
+	if v.IsNil() {
+		return ErrNilEntity
+	}
+
+	cdc := cache.CodecByType(t)
+	f, exists := cdc.LookUpFieldByName(pk)
+	if !exists {
+		return fmt.Errorf("sqlike: missing primary key field %q", pk)
+	}
+
+	x := new(actions.DeleteActions)
+	x.Database = dbName
+	x.Table = tbName
+	fv := cache.FieldByIndexesReadOnly(v, f.Index())
+	x.Where(expr.Equal(f.Name(), fv.Interface()))
+	x.Limit(1)
+
+	stmt := sqlstmt.AcquireStmt(dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	if err := dialect.Delete(stmt, x); err != nil {
+		return err
+	}
+	result, err := sqldriver.Execute(
+		ctx,
+		driver,
+		stmt,
+		logger,
+	)
+	if err != nil {
+		return err
+	}
+	if affected, _ := result.RowsAffected(); affected <= 0 {
+		return errors.New("sqlike: unable to delete entity")
+	}
+	return err
 }

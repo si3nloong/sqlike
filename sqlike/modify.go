@@ -22,6 +22,7 @@ func (tb *Table) ModifyOne(ctx context.Context, update interface{}, opts ...*opt
 		tb.dbName,
 		tb.name,
 		tb.pk,
+		tb.client.cache,
 		tb.dialect,
 		tb.driver,
 		tb.logger,
@@ -30,7 +31,7 @@ func (tb *Table) ModifyOne(ctx context.Context, update interface{}, opts ...*opt
 	)
 }
 
-func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput
@@ -45,8 +46,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 		return ErrNilEntity
 	}
 
-	mapper := reflext.DefaultMapper
-	cdc := mapper.CodecByType(t)
+	cdc := cache.CodecByType(t)
 	opt := new(options.ModifyOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -58,7 +58,7 @@ func modifyOne(ctx context.Context, dbName, tbName, pk string, dialect sqldialec
 
 	var pkv = [2]interface{}{}
 	for _, sf := range fields {
-		fv := mapper.FieldByIndexesReadOnly(v, sf.Index())
+		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
 		if _, ok := sf.Tag().LookUp("primary_key"); ok {
 			if pkv[0] != nil {
 				x.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))

@@ -16,7 +16,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
-// InsertOne :
+// InsertOne : insert single record. You should always pass in the address of input.
 func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
@@ -52,7 +52,7 @@ func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*option
 	)
 }
 
-// Insert :
+// Insert : insert multiple records. You should always pass in the address of the slice.
 func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
 	opt := new(options.InsertOptions)
 	if len(opts) > 0 && opts[0] != nil {

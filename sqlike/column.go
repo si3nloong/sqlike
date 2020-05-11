@@ -8,17 +8,29 @@ import (
 	"github.com/si3nloong/sqlike/types"
 )
 
-// Column :
+// Column : contains sql column information
 type Column struct {
-	Name         string
-	Position     int
-	Type         string
-	DataType     string
-	IsNullable   types.Boolean
+	// column name
+	Name string
+
+	// column position in sql database
+	Position int
+
+	// column data type with precision or size, eg. VARCHAR(20)
+	Type string
+
+	// column data type without precision and size, eg. VARCHAR
+	DataType string
+
+	// whether column is nullable or not
+	IsNullable types.Boolean
+
+	// default value of the column
 	DefaultValue *string
-	Charset      *string
-	Collation    *string
-	Extra        string
+
+	Charset   *string
+	Collation *string
+	Extra     string
 }
 
 // ColumnView :
@@ -26,12 +38,12 @@ type ColumnView struct {
 	tb *Table
 }
 
-// List :
+// List : list all the column from current table
 func (cv *ColumnView) List(ctx context.Context) ([]Column, error) {
 	return cv.tb.ListColumns(ctx)
 }
 
-// Rename :
+// Rename : rename your column name
 func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string) error {
 	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -45,7 +57,7 @@ func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string)
 	return err
 }
 
-// DropOne :
+// DropOne : drop column with name
 func (cv *ColumnView) DropOne(ctx context.Context, name string) error {
 	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)

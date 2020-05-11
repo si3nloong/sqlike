@@ -2,7 +2,7 @@ package sqlike
 
 import "errors"
 
-// errors :
+// errors : common error of sqlike
 var (
 	ErrNoValueUpdate = errors.New("sqlike: no value to update")
 	// ErrInvalidInput :

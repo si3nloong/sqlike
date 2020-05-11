@@ -43,7 +43,7 @@ func (d *DriverInfo) Collate() string {
 	return d.collate
 }
 
-// Client :
+// Client : sqlike client is a client embedded with *sql.DB, so you may use any apis of *sql.DB
 type Client struct {
 	*DriverInfo
 	*sql.DB
@@ -54,6 +54,7 @@ type Client struct {
 	dialect dialect.Dialect
 }
 
+// newClient : create a new client struct by providing driver, *sql.DB, dialect etc
 func newClient(ctx context.Context, driver string, db *sql.DB, dialect dialect.Dialect, code charset.Code, collate string) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
@@ -71,8 +72,7 @@ func newClient(ctx context.Context, driver string, db *sql.DB, dialect dialect.D
 	return client, nil
 }
 
-// SetLogger : this is to set the logger for debugging, it will panic
-// if the logger input is nil
+// SetLogger : this is to set the logger for debugging, it will panic if the logger input is nil
 func (c *Client) SetLogger(logger logs.Logger) *Client {
 	if logger == nil {
 		panic("logger cannot be nil")
@@ -81,35 +81,37 @@ func (c *Client) SetLogger(logger logs.Logger) *Client {
 	return c
 }
 
-// SetPrimaryKey :
+// SetPrimaryKey : this will set a default primary key for subsequent operation such as Insert, InsertOne, ModifyOne
 func (c *Client) SetPrimaryKey(pk string) *Client {
 	c.pk = pk
 	return c
 }
 
-// SetCodec :
+// SetCodec : Codec is a component which handling the :
+// 1. encoding between input data and driver.Valuer
+// 2. decoding between output data and sql.Scanner
 func (c *Client) SetCodec(cdc codec.Codecer) *Client {
 	c.codec = cdc
 	return c
 }
 
-// SetStructMapper :
+// SetStructMapper : StructMapper is a mapper to reflect a struct on runtime and provide struct info
 func (c *Client) SetStructMapper(mapper reflext.StructMapper) *Client {
 	c.cache = mapper
 	return c
 }
 
-// CreateDatabase :
+// CreateDatabase : create database with name
 func (c *Client) CreateDatabase(ctx context.Context, name string) error {
 	return c.createDB(ctx, name, true)
 }
 
-// DropDatabase :
+// DropDatabase : drop the selected database
 func (c *Client) DropDatabase(ctx context.Context, name string) error {
 	return c.dropDB(ctx, name, true)
 }
 
-// ListDatabases :
+// ListDatabases : list all the database on current connection
 func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -134,7 +136,7 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	return dbs, nil
 }
 
-// Database :
+// Database : this api will execute `USE database`, which will point your current connection to selected database
 func (c *Client) Database(name string) *Database {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -154,6 +156,7 @@ func (c *Client) Database(name string) *Database {
 	}
 }
 
+// getVersion is a internal function to get sql driver's version
 func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 	var (
 		ver string
@@ -179,6 +182,7 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 	return
 }
 
+// createDB is a internal function for create a database
 func (c *Client) createDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
@@ -192,6 +196,7 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 	return err
 }
 
+// dropDB is a internal function for drop a database
 func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) error {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
