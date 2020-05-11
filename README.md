@@ -8,17 +8,17 @@ go get github.com/si3nloong/sqlike
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
 
-### Minimum Requirements
+## Minimum Requirements
 
 - **mysql 5.7** and above
 - **Golang 1.13** and above
 
-### Why another ORM?
+## Why another ORM?
 
 - We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us
 - We want to get rid from _toxic query_
 
-### What we provide apart from native package (database/sql)?
+## What we provide apart from native package (database/sql)?
 
 - Support `ENUM` and `SET`
 - Support `UUID`
@@ -38,11 +38,11 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Developer friendly, (query is highly similar to native sql query)
 - Prevent toxic query with `Strict Mode` **(upcoming)**
 
-### Missing DOC?
+## Missing DOC?
 
 You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
 
-### Limitation
+## Limitation
 
 Our main objective is anti toxic query, that why some functionality we doesn't offer
 
@@ -52,7 +52,7 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 - bidirectional sorting is not allow (except mysql 8.0)
 - currently only support `mysql` driver
 
-### General APIs
+## General APIs
 
 ```go
 import (
@@ -231,9 +231,9 @@ func main() {
 }
 ```
 
-### Integrate with [OpenTracing](https://github.com/opentracing/opentracing-go)
+## Integrate with [OpenTracing](https://github.com/opentracing/opentracing-go)
 
-Tracing is become more and more common in practice. And you may integrate your `OpenTracing` as such :
+Tracing is become very common in practice. And you may integrate your `OpenTracing` as such :
 
 ```go
 import (
@@ -275,3 +275,7 @@ func main() {
 ```
 
 Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).
+
+## License
+
+[MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
