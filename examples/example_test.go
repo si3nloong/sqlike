@@ -82,7 +82,7 @@ func testCase(t *testing.T, ctx context.Context, client *sqlike.Client) {
 	client.SetLogger(Logger{})
 	DatabaseExamples(t, client)
 	db := client.Database("sqlike")
-	mg := connectMongoDB()
+	mg := connectMongoDB(ctx)
 
 	{
 		SQLDumpExamples(t, ctx, client)

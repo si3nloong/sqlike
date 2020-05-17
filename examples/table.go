@@ -120,6 +120,7 @@ func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	temp := db.Table("Temp")
 
+	// migrate with auto_increment field
 	{
 		err = temp.DropIfExists(ctx)
 		require.NoError(t, err)
@@ -131,6 +132,7 @@ func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		)
 	}
 
+	// migrate with auto_increment field
 	{
 		err = temp.DropIfExists(ctx)
 		require.NoError(t, err)

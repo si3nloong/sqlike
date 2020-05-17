@@ -109,6 +109,7 @@ func CasbinExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	}
 
+	// Query Policy with where conditions
 	{
 		e.ClearPolicy()
 		err = e.LoadFilteredPolicy(

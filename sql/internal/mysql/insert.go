@@ -81,6 +81,7 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 }
 
 func findEncoder(c codec.Codecer, sf reflext.StructFielder, v reflect.Value) (codec.ValueEncoder, error) {
+	// auto_increment field should pass nil if it's empty
 	if _, ok := sf.Tag().LookUp("auto_increment"); ok && reflext.IsZero(v) {
 		return codec.NilEncoder, nil
 	}

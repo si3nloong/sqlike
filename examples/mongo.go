@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func connectMongoDB() *mongo.Database {
+func connectMongoDB(ctx context.Context) *mongo.Database {
 	client, err := mongo.NewClient(
 		options.Client().
 			ApplyURI("mongodb://localhost:27017").
@@ -18,7 +18,7 @@ func connectMongoDB() *mongo.Database {
 	if err != nil {
 		panic(err)
 	}
-	if err := client.Connect(context.Background()); err != nil {
+	if err := client.Connect(ctx); err != nil {
 		panic(err)
 	}
 	return client.Database("sqlike")

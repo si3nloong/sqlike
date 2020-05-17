@@ -163,11 +163,6 @@ type generatedStruct struct {
 	Model `sqlike:"Date"`
 }
 
-// type mongoStruct struct {
-// 	Key  *types.Key
-// 	Name string
-// }
-
 func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}

@@ -105,12 +105,12 @@ func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 	// Create multiple indexes
 	{
 		idxs := []indexes.Index{
-			indexes.Index{
+			{
 				Name:    "Bool_Int",
 				Type:    indexes.BTree,
 				Columns: indexes.Columns("Bool", "Int"),
 			},
-			indexes.Index{
+			{
 				Name:    "DateTime_Timestamp",
 				Type:    indexes.BTree,
 				Columns: indexes.Columns("DateTime", "Timestamp"),

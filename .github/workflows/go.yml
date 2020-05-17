@@ -34,7 +34,7 @@ jobs:
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Get dependencies
         run: |
@@ -44,12 +44,18 @@ jobs:
             dep ensure
           fi
 
+      - name: Test
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.6
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
       # - name: Golint
       #   run: |
       #     curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.2
       #     go get -u golang.org/x/lint/golint
       #     golangci-lint run
       #     golint -set_exit_status
-
-      - name: Test
-        run: go test ./... -v
+      # - name: Test
+      #   run: go test ./... -v

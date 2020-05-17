@@ -63,15 +63,15 @@ func PaginationExamples(t *testing.T, ctx context.Context, c *sqlike.Client) {
 	}
 
 	data := []User{
-		User{10, "User A", 18, statusActive, time.Now().UTC()},
-		User{88, "User B", 12, statusActive, time.Now().UTC()},
-		User{8, "User F", 20, statusActive, time.Now().UTC()},
-		User{27, "User C", 16, statusSuspend, time.Now().UTC()},
-		User{20, "User C", 16, statusActive, time.Now().UTC()},
-		User{100, "User G", 10, statusSuspend, time.Now().UTC()},
-		User{21, "User C", 16, statusActive, time.Now().UTC()},
-		User{50, "User D", 23, statusActive, time.Now().UTC()},
-		User{5, "User E", 30, statusSuspend, time.Now().UTC()},
+		{10, "User A", 18, statusActive, time.Now().UTC()},
+		{88, "User B", 12, statusActive, time.Now().UTC()},
+		{8, "User F", 20, statusActive, time.Now().UTC()},
+		{27, "User C", 16, statusSuspend, time.Now().UTC()},
+		{20, "User C", 16, statusActive, time.Now().UTC()},
+		{100, "User G", 10, statusSuspend, time.Now().UTC()},
+		{21, "User C", 16, statusActive, time.Now().UTC()},
+		{50, "User D", 23, statusActive, time.Now().UTC()},
+		{5, "User E", 30, statusSuspend, time.Now().UTC()},
 	}
 
 	{

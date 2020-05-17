@@ -29,7 +29,7 @@ type Date struct {
 	Year, Month, Day int
 }
 
-// DataType :
+// DataType : sql data type of Date
 func (d Date) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	// mysql have no function for date default value
 	return columns.Column{
@@ -40,7 +40,7 @@ func (d Date) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Colum
 	}
 }
 
-// IsZero :
+// IsZero : check date is zero value
 func (d *Date) IsZero() bool {
 	return d.Day == 0 && d.Month == 0 && d.Year == 0
 }
@@ -176,7 +176,7 @@ func (d *Date) unmarshal(str string) (err error) {
 	return
 }
 
-// ParseDate :
+// ParseDate : parse string and convert to date
 func ParseDate(str string) (Date, error) {
 	t, err := time.Parse("2006-01-02", str)
 	if err != nil {
