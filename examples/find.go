@@ -165,6 +165,14 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		}
 		ns = normalStruct{}
 
+		/*
+			SELECT
+				COUNT(`$Key`) AS `c`
+			FROM `sqlike`.`NormalStruct`
+			WHERE
+				`$Key` = "e7977246-910a-11e9-844d-6c96cfd87a51"
+			LIMIT 1;
+		*/
 		// Scan with unmatched number of fields
 		err = table.FindOne(
 			ctx,
@@ -180,6 +188,14 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.True(t, i.count > 0)
 
+		/*
+			SELECT
+				`$Key`,`Emoji`,`CustomStrType`,`Bool`,`JSONRaw`,`Map`,`Language`
+			FROM `sqlike`.`NormalStruct`
+			WHERE
+				`$Key` = "e7977246-910a-11e9-844d-6c96cfd87a51"
+			LIMIT 1;
+		*/
 		// Scan with fields
 		err = table.FindOne(
 			ctx,
@@ -217,6 +233,12 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	// Find one record by primary key
 	{
+		/*
+			SELECT * FROM `sqlike`.`NormalStruct`
+			WHERE
+				`$Key` = "1000"
+			LIMIT 1;
+		*/
 		ns = normalStruct{}
 		err = table.FindOne(
 			ctx,
@@ -226,10 +248,20 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 				),
 		).Decode(&ns)
 		require.Equal(t, err, sqlike.ErrNoRows)
+
 	}
 
 	// Find multiple records by where condition
 	{
+		/*
+			SELECT * FROM `sqlike`.`NormalStruct`
+			WHERE
+				(
+					`TinyInt` BETWEEN 1 AND 100 AND
+					`Enum` IN ("SUCCESS","FAILED","UNKNOWN")
+				)
+			LIMIT 100;
+		*/
 		ns = normalStruct{}
 		nss := []normalStruct{}
 		result, err = table.Find(
@@ -248,15 +280,18 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.NoError(t, err)
 		err = result.All(&nss)
 		require.NoError(t, err)
+
 	}
 
 	// Find with scan slice
 	{
+		/*
+			SELECT `Emoji` FROM `sqlike`.`NormalStruct` LIMIT 100;
+		*/
 		ns = normalStruct{}
 		result, err = table.Find(
 			ctx,
 			actions.Find().Select("Emoji"),
-			options.Find().SetDebug(true),
 		)
 		require.NoError(t, err)
 		var emojis []string
@@ -273,6 +308,19 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	// Find with subquery
 	{
+		/*
+			SELECT * FROM `sqlike`.`NormalStruct`
+			WHERE (
+				`$Key` IN (
+					SELECT `$Key` FROM `sqlike`.`NormalStruct`
+					WHERE `Tinyint` BETWEEN 1 AND 100
+					ORDER BY `Timestamp` DESC
+				) AND
+				EXISTS (SELECT 1 FROM `sqlike`.`NormalStruct`)
+			)
+			ORDER BY FIELD(`Enum`,"SUCCESS","FAILED","UNKNOWN")
+			LIMIT 100;
+		*/
 		ns = normalStruct{}
 		result, err = table.Find(
 			ctx,
@@ -312,6 +360,11 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	// Query with Like expression
 	{
+		/*
+			SELECT * FROM `sqlike`.`NormalStruct`
+			WHERE `FullText` LIKE "Hal\\%o\\%()#$\\\\\\%^&\\_%"
+			LIMIT 1;
+		*/
 		symbol := "Hal%o%()#$\\%^&_"
 		ns = normalStruct{}
 		err = table.FindOne(
@@ -328,6 +381,20 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 
 	// Aggregation
 	{
+		/*
+			SELECT
+				`Enum` AS `A`,
+				COUNT(`$Key`) AS `B`,
+				AVG(`MediumInt`),
+				COALESCE(SUM(`SmallInt`),0) AS `C`,
+				MAX(`BigInt`),
+				MIN(`BigInt`) AS `D`
+			FROM `sqlike`.`NormalStruct`
+			GROUP BY
+				`Enum`,
+				`$Key`
+			ORDER BY `$Key` DESC;
+		*/
 		ns = normalStruct{}
 		result, err = table.Find(
 			ctx,
@@ -356,7 +423,8 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			[]string{
 				"A", "B", "AVG(`MediumInt`)",
 				"C", "MAX(`BigInt`)", "D",
-			}, result.Columns())
+			}, result.Columns(),
+		)
 	}
 
 	{

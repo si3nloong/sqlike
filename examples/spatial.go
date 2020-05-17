@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -42,6 +43,7 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// create spatial index
 	{
 		table.MustMigrate(ctx, Spatial{})
 		table.MustUnsafeMigrate(ctx, Spatial{})
@@ -62,6 +64,7 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		}, result[0])
 	}
 
+	// insert spatial record
 	{
 		sp.Point4326 = point
 		sp.Point = point
@@ -112,6 +115,7 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// find spatial record
 	{
 		result := table.FindOne(
 			ctx,
@@ -120,34 +124,44 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 					"ID",
 					"Point",
 					"PtrPoint",
+					"LineString",
+					"PtrLineString",
 				).
 				Where(
 					expr.Equal("ID", 1),
 				),
 			options.FindOne().SetDebug(true),
 		)
-		// b := new(sql.RawBytes)
-		// var str string
 
-		c1 := new(sql.RawBytes)
-		c2 := new(sql.RawBytes)
-		c3 := new(sql.RawBytes)
+		var (
+			c1 = new(sql.RawBytes)
+			c2 = orb.Point{}
+			c3 = orb.Point{}
+			c4 = orb.LineString{}
+			c5 *orb.LineString
+		)
+
 		cols := result.Columns()
 		require.ElementsMatch(t, []string{
 			"ID",
 			"Point",
 			"PtrPoint",
+			"LineString",
+			"PtrLineString",
 		}, cols)
-		err = result.Scan(c1, c2, c3)
+		err = result.Scan(c1, wkb.Scanner(&c2), wkb.Scanner(&c3), &c4, &c5)
 		require.NoError(t, err)
 
 		v1 := sql.RawBytes(`1`)
+		nilLineString := orb.LineString(nil)
 		require.Equal(t, &v1, c1)
-		// TODO: check column2 value
 		require.Equal(t, &v1, c1)
-		require.Nil(t, *c3)
+		require.Equal(t, orb.Point{}, c3)
+		require.Equal(t, orb.LineString{{0, 0}, {1, 1}}, c4)
+		require.Equal(t, &nilLineString, c5)
 	}
 
+	// find spatial record and verify the output
 	{
 		var o Spatial
 		result := table.FindOne(
@@ -166,6 +180,7 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 		require.Equal(t, orb.Point{5, 1}, o.Point4326)
 	}
 
+	// get distance between two point
 	{
 		origin := orb.Point{20, 10}
 		p1 := orb.Point{1, 3}
@@ -175,6 +190,17 @@ func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			Dist2 float64
 			Text  string
 		}
+		/*
+			SELECT
+				ST_Distance(`Point`,ST_PointFromText("POINT(20 10)")) AS `dist`,
+				ST_Distance(ST_GeomFromText("POINT(1 3)",4326),ST_GeomFromText("POINT(4 18)",4326)),ST_AsText(`Point`)
+			FROM `sqlike`.`spatial`
+			WHERE (
+				`ID` = 1 AND
+				ST_Equals(ST_PointFromText("POINT(20 10)"),ST_PointFromText("POINT(20 10)"))
+			)
+			ORDER BY `dist` DESC LIMIT 1;
+		*/
 		err = table.FindOne(
 			ctx,
 			actions.FindOne().

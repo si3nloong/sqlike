@@ -179,6 +179,12 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 
 // DecodeSpatial :
 func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
+	var p orb.Point
+	if it == nil {
+		v.Set(reflect.ValueOf(p))
+		return nil
+	}
+
 	data, ok := it.([]byte)
 	if !ok {
 		return errors.New("point must be []byte")
@@ -193,7 +199,6 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 		data = dst
 	}
 
-	p := orb.Point{}
 	scanner := wkb.Scanner(&p)
 	// if len(data) == 21 {
 	// 	// the length of a point type in WKB
@@ -223,6 +228,12 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 
 // DecodeLineString :
 func (dec DefaultDecoders) DecodeLineString(it interface{}, v reflect.Value) error {
+	var ls orb.LineString
+	if it == nil {
+		v.Set(reflect.ValueOf(ls))
+		return nil
+	}
+
 	data, ok := it.([]byte)
 	if !ok {
 		return errors.New("line string must be []byte")
@@ -232,12 +243,12 @@ func (dec DefaultDecoders) DecodeLineString(it interface{}, v reflect.Value) err
 		return nil
 	}
 
-	p := orb.LineString{}
-	scanner := wkb.Scanner(&p)
+	scanner := wkb.Scanner(&ls)
 	if err := scanner.Scan(data[4:]); err != nil {
 		return err
 	}
-	v.Set(reflect.ValueOf(p))
+
+	v.Set(reflect.ValueOf(ls))
 	return nil
 }
 

@@ -92,16 +92,14 @@ func (r *Result) Scan(dests ...interface{}) error {
 		if fv.Kind() != reflect.Ptr {
 			return ErrUnaddressableEntity
 		}
-		t := fv.Elem().Type()
-		vv := reflext.Zero(t)
-		decoder, err := r.codec.LookupDecoder(t)
+		fv = reflext.IndirectInit(fv)
+		decoder, err := r.codec.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
-		if err := decoder(v, vv); err != nil {
+		if err := decoder(v, fv); err != nil {
 			return err
 		}
-		fv.Elem().Set(vv)
 	}
 	return nil
 }

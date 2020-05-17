@@ -4,11 +4,11 @@
 - [x] Change default collation to `latin1` for `currency.Unit` and `language.Tag` for better performance.
 - [x] Support `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` or else.
 - [x] Support `sqldump`.
-- [ ] Support foreign key.
-- [ ] Support migration like `django`.
+- [ ] Support spatial `Polygon`.
 - [ ] Support default value for `StructField`.
-- [ ] BeforeSave and AfterLoad hook.
 - [ ] Support `charset` and `collate` on `AlterTable`.
+- [ ] BeforeSave and AfterLoad hook.
+- [ ] Support migration like `django`.
 - [x] `StructMapper` as an interface and enable to set in `Client` object.
 - [x] Change `StructField` to `interface{}`.
 - [x] Support index with files instead of single file (index.yaml).
@@ -78,6 +78,7 @@
 - [x] Support option tag `unique_index` with alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [ ] Support insert with map.
+- [ ] Support foreign key.
 - [ ] Strict mode. (prevent toxic query)
 - [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
