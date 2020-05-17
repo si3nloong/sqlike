@@ -11,7 +11,7 @@ var (
 	DDMMYYYYHHMMSS = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
 )
 
-// DecodeTime :
+// DecodeTime : this will decode time by using multiple format
 func DecodeTime(str string) (t time.Time, err error) {
 	switch {
 	case DDMMYYYY.MatchString(str):

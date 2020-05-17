@@ -1,6 +1,9 @@
 # Sequel ORM
 
 [![Build Status](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions)
+[![codecov](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
+[![Go Report Card](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
+[![License](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
 
 ```bash
 go get github.com/si3nloong/sqlike
