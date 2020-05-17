@@ -57,7 +57,7 @@ func (m *Mapper) CodecByType(t reflect.Type) Structer {
 	return mapping
 }
 
-// FieldByName :
+// FieldByName : get reflect.Value from struct by field name
 func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	v = Indirect(v)
 	mustBe(v, reflect.Struct)
@@ -70,17 +70,17 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	return FieldByIndexes(v, fi.Index())
 }
 
-// FieldByIndexes :
+// FieldByIndexes : get reflect.Value from struct by indexes. If the reflect.Value is nil, it will get initialized
 func (m *Mapper) FieldByIndexes(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexes(v, idxs)
 }
 
-// FieldByIndexesReadOnly :
+// FieldByIndexesReadOnly : get reflect.Value from struct by indexes without initialized
 func (m *Mapper) FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexesReadOnly(v, idxs)
 }
 
-// LookUpFieldByName :
+// LookUpFieldByName : lookup reflect.Value from struct by field name
 func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
 	v = Indirect(v)
 	mustBe(v, reflect.Struct)
@@ -124,7 +124,7 @@ func (m *Mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(in
 	return idxs
 }
 
-// FieldByIndexes :
+// FieldByIndexes : get reflect.Value from struct by indexes. If the reflect.Value is nil, it will get initialized
 func FieldByIndexes(v reflect.Value, indexes []int) reflect.Value {
 	for _, i := range indexes {
 		v = Indirect(v).Field(i)
@@ -133,7 +133,7 @@ func FieldByIndexes(v reflect.Value, indexes []int) reflect.Value {
 	return v
 }
 
-// FieldByIndexesReadOnly :
+// FieldByIndexesReadOnly : get reflect.Value from struct by indexes without initialized
 func FieldByIndexesReadOnly(v reflect.Value, indexes []int) reflect.Value {
 	for _, i := range indexes {
 		if v.Kind() == reflect.Ptr && v.IsNil() {

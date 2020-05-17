@@ -1,9 +1,19 @@
-# Sequel ORM
-
 [![Build Status](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions)
 [![codecov](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
 [![Go Report Card](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
 [![License](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+
+<p align="center">
+    <a href="https://github.com/si3nloong/sqlike/actions"><img src="https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master" alt="build status" title="build status"/></a>
+    <a href="https://github.com/si3nloong/sqlike/releases"><img src="https://img.shields.io/github/v/tag/si3nloong/sqlike" alt="semver tag" title="semver tag"/></a>
+    <a href="hhttps://goreportcard.com/report/github.com/si3nloong/sqlike"><img src="https://goreportcard.com/badge/github.com/si3nloong/sqlike" alt="go report card" title="go report card"/></a>
+    <a href="https://codecov.io/gh/si3nloong/sqlike"><img src="https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg" alt="coverage status" title="coverage status"/></a>
+    <a href="https://github.com/si3nloong/sqlike/blob/master/LICENSE"><img src="https://img.shields.io/github/license/si3nloong/sqlike" alt="license" title="license"/></a>
+</p>
+
+# Sequel ORM
+
+## Installation
 
 ```bash
 go get github.com/si3nloong/sqlike

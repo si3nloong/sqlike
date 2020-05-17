@@ -8,7 +8,7 @@ type Zeroer interface {
 	IsZero() bool
 }
 
-// Init :
+// Init : initialise the first level of reflect.Value
 func Init(v reflect.Value) reflect.Value {
 	if v.Kind() == reflect.Ptr && v.IsNil() {
 		v.Set(reflect.New(v.Type().Elem()))
@@ -22,7 +22,7 @@ func Init(v reflect.Value) reflect.Value {
 	return v
 }
 
-// IndirectInit :
+// IndirectInit : initialise reflect.Value till the deep level
 func IndirectInit(v reflect.Value) reflect.Value {
 	for v.Kind() == reflect.Ptr {
 		if v.IsNil() {
@@ -68,8 +68,12 @@ func Indirect(v reflect.Value) reflect.Value {
 	return v
 }
 
-// IsNull :
+// IsNull : determine the reflect.Value is null or not
 func IsNull(v reflect.Value) bool {
+	if !v.IsValid() {
+		return true
+	}
+
 	k := v.Kind()
 	return (k == reflect.Ptr ||
 		k == reflect.Slice ||
@@ -89,8 +93,12 @@ func Zero(t reflect.Type) (v reflect.Value) {
 	return v.Elem()
 }
 
-// IsNullable :
+// IsNullable : determine whether is nullable data type
 func IsNullable(t reflect.Type) bool {
+	if t == nil {
+		return true
+	}
+
 	k := t.Kind()
 	return k == reflect.Ptr ||
 		k == reflect.Slice ||
@@ -100,13 +108,24 @@ func IsNullable(t reflect.Type) bool {
 		k == reflect.Chan
 }
 
-// IsKind :
+// IsKind : compare and check the respective reflect.Kind
 func IsKind(t reflect.Type, k reflect.Kind) bool {
 	return t.Kind() == k
 }
 
-// IsZero :
+/*
+IsZero : determine is zero value
+1. string => empty string
+2. bool => false
+3. function => nil
+4. map => nil (uninitialized map)
+5. slice => nil (uninitialized slice)
+*/
 func IsZero(v reflect.Value) bool {
+	if !v.IsValid() {
+		return true
+	}
+
 	it := v.Interface()
 	x, ok := it.(Zeroer)
 	if ok {
@@ -114,9 +133,9 @@ func IsZero(v reflect.Value) bool {
 	}
 
 	switch v.Kind() {
-	case reflect.Func, reflect.Map:
+	case reflect.Interface, reflect.Func:
 		return v.IsNil()
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map:
 		return v.IsNil() || v.Len() == 0
 	case reflect.Array:
 		if v.Len() == 0 {
