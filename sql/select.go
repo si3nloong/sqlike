@@ -84,16 +84,19 @@ func (stmt *SelectStmt) Distinct() *SelectStmt {
 	return stmt
 }
 
+// Where :
 func (stmt *SelectStmt) Where(fields ...interface{}) *SelectStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 
+// Having :
 func (stmt *SelectStmt) Having(fields ...interface{}) *SelectStmt {
 	stmt.Havings = expr.And(fields...)
 	return stmt
 }
 
+// OrderBy :
 func (stmt *SelectStmt) OrderBy(fields ...interface{}) *SelectStmt {
 	stmt.Sorts = fields
 	return stmt

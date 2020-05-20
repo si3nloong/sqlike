@@ -43,7 +43,7 @@ func TestExamples(t *testing.T) {
 				SetPassword("abcd1234").
 				SetCharset("utf8mb4"),
 		)
-		testCase(t, ctx, client)
+		testCase(ctx, t, client)
 	}
 
 	// with tracing (OpenTracing)
