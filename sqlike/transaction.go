@@ -50,6 +50,7 @@ func (tx *Transaction) Table(name string) *Table {
 	}
 }
 
+// QueryStmt : support complex and advance query statement
 func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("empty query statement")

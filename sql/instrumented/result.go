@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 )
 
+// Result :
 type Result interface {
 	driver.Result
 }

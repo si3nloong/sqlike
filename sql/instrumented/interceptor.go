@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 )
 
+// Interceptor :
 type Interceptor interface {
 	// Connection interceptors
 	ConnPing(context.Context, driver.Pinger) error

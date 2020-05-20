@@ -49,6 +49,7 @@ func (db *Database) Table(name string) *Table {
 	}
 }
 
+// QueryStmt :
 func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("empty query statement")

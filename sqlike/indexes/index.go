@@ -81,7 +81,7 @@ func Column(name string) Col {
 	}
 }
 
-// Column :
+// Col :
 type Col struct {
 	Name      string
 	Direction Direction

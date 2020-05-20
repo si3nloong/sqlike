@@ -61,7 +61,7 @@ func TestExamples(t *testing.T) {
 			panic(err)
 		}
 
-		itpr := opentracing.Interceptor(
+		itpr := opentracing.NewInterceptor(
 			opentracing.WithDBInstance("sqlike"),
 			opentracing.WithDBUser(username),
 			opentracing.WithDBType(driver),
@@ -70,12 +70,12 @@ func TestExamples(t *testing.T) {
 		)
 		client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
 		defer client.Close()
-		testCase(t, ctx, client)
+		testCase(ctx, t, client)
 	}
 
 }
 
-func testCase(t *testing.T, ctx context.Context, client *sqlike.Client) {
+func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	v := client.Version()
 	require.Equal(t, "mysql", client.DriverName())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))

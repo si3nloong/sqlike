@@ -4,7 +4,8 @@ import (
 	"time"
 )
 
-type Stringer func([]byte) string
+// Parser :
+type Parser func([]byte) string
 
 func byteToString(data []byte) string {
 	return string(data)

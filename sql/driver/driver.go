@@ -16,6 +16,7 @@ type Info interface {
 	Collate() string
 }
 
+// Queryer :
 type Queryer interface {
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 }

@@ -24,7 +24,7 @@ type Dumper struct {
 	sync.Mutex
 	driver string
 	conn   driver.Queryer
-	mapper map[string]Stringer
+	mapper map[string]Parser
 }
 
 // NewDumper :
@@ -32,7 +32,7 @@ func NewDumper(driver string, conn driver.Queryer) *Dumper {
 	dumper := new(Dumper)
 	dumper.driver = strings.TrimSpace(strings.ToLower(driver))
 	dumper.conn = conn
-	dumper.mapper = map[string]Stringer{
+	dumper.mapper = map[string]Parser{
 		"INT":       byteToString,
 		"TINYINT":   byteToString,
 		"SMALLINT":  byteToString,
@@ -46,16 +46,17 @@ func NewDumper(driver string, conn driver.Queryer) *Dumper {
 	return dumper
 }
 
-// RegisterDataTypeStringer :
-func (dump *Dumper) RegisterDataTypeStringer(dataType string, toStr Stringer) {
-	if toStr == nil {
-		panic("convert function cannot be nil")
+// RegisterParser :
+func (dump *Dumper) RegisterParser(dataType string, parser Parser) {
+	if parser == nil {
+		panic("parser cannot be nil")
 	}
 	dump.Lock()
 	defer dump.Unlock()
-	dump.mapper[dataType] = toStr
+	dump.mapper[dataType] = parser
 }
 
+// BackupTo :
 func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) (affected int64, err error) {
 	w := bufio.NewWriter(wr)
 

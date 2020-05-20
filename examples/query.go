@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// QueryExamples :
 func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	stmt := expr.Union(

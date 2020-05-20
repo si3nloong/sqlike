@@ -85,7 +85,7 @@ func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexe
 	stmt.WriteByte(';')
 }
 
-// DropIndex :
+// DropIndexes :
 func (ms MySQL) DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 	for i, idx := range idxs {

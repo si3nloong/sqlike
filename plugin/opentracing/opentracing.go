@@ -8,6 +8,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/instrumented"
 )
 
+// TraceOptions :
 type TraceOptions struct {
 	// Component is a component name in opentracing
 	// component: value
@@ -64,8 +65,8 @@ var (
 	_          instrumented.Interceptor = (*OpenTracingInterceptor)(nil)
 )
 
-// Interceptor :
-func Interceptor(opts ...TraceOption) instrumented.Interceptor {
+// NewInterceptor :
+func NewInterceptor(opts ...TraceOption) instrumented.Interceptor {
 	it := new(OpenTracingInterceptor)
 	it.opts.Component = "database/sql"
 	it.opts.DBType = "sql"

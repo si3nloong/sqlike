@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 )
 
+// RowsNext :
 func (ot *OpenTracingInterceptor) RowsNext(ctx context.Context, rows driver.Rows, dest []driver.Value) (err error) {
 	if ot.opts.RowsNext {
 		span, _ := ot.MaybeStartSpanFromContext(ctx, "rows_next")

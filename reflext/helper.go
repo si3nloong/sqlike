@@ -4,6 +4,7 @@ import (
 	"reflect"
 )
 
+// Zeroer :
 type Zeroer interface {
 	IsZero() bool
 }

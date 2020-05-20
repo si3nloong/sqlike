@@ -7,6 +7,7 @@ import (
 	"github.com/opentracing/opentracing-go/log"
 )
 
+// ResultLastInsertId :
 func (ot *OpenTracingInterceptor) ResultLastInsertId(ctx context.Context, result driver.Result) (id int64, err error) {
 	if ot.opts.LastInsertID {
 		span, _ := ot.MaybeStartSpanFromContext(ctx, "last_insert_id")
@@ -22,6 +23,7 @@ func (ot *OpenTracingInterceptor) ResultLastInsertId(ctx context.Context, result
 	return
 }
 
+// ResultRowsAffected :
 func (ot *OpenTracingInterceptor) ResultRowsAffected(ctx context.Context, result driver.Result) (affected int64, err error) {
 	if ot.opts.RowsAffected {
 		span, _ := ot.MaybeStartSpanFromContext(ctx, "rows_affected")

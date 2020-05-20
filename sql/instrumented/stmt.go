@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 )
 
+// Stmt :
 type Stmt interface {
 	driver.Stmt
 	driver.StmtExecContext

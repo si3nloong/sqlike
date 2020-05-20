@@ -28,7 +28,7 @@ func Connect() *ConnectOptions {
 	return &ConnectOptions{}
 }
 
-// Raw :
+// RawConnStr :
 func (opt *ConnectOptions) RawConnStr() string {
 	return opt.raw
 }

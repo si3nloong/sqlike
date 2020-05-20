@@ -12,6 +12,7 @@ func init() {
 	ToSQL(nil)
 }
 
+// ToSQL :
 func ToSQL(src interface{}) error {
 	ms := dialect.GetDialectByDriver("mysql").(*mysql.MySQL)
 	stmt := sqlstmt.NewStatement(ms)

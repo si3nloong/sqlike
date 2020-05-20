@@ -48,6 +48,7 @@ type dumpStruct struct {
 	PtrTimestamp *types.Timestamp
 }
 
+// SQLDumpExamples :
 func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 
 	db := client.Database("sqlike")

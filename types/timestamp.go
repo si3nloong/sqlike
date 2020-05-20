@@ -28,6 +28,7 @@ func (ts Timestamp) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns
 	}
 }
 
+// Value :
 func (ts Timestamp) Value() (driver.Value, error) {
 	t := time.Time(ts)
 	if t.IsZero() {

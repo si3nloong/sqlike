@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 )
 
+// Conn :
 type Conn interface {
 	driver.Conn
 	driver.Pinger

@@ -15,6 +15,7 @@ func WrapConnector(conn driver.Connector, itpr Interceptor) driver.Connector {
 	return wrappedConnector{conn: conn, itpr: itpr}
 }
 
+// Connect :
 func (w wrappedConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	conn, err := w.conn.Connect(ctx)
 	if err != nil {
@@ -27,6 +28,7 @@ func (w wrappedConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	return wrappedConn{conn: c, itpr: w.itpr}, nil
 }
 
+// Driver :
 func (w wrappedConnector) Driver() driver.Driver {
 	return wrappedDriver{dvr: w.conn.Driver(), itpr: w.itpr}
 }

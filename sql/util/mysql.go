@@ -10,6 +10,7 @@ func (util MySQLUtil) TableName(db, table string) string {
 	return "`" + db + "`.`" + table + "`"
 }
 
+// Var :
 func (util MySQLUtil) Var(i int) string {
 	return "?"
 }
