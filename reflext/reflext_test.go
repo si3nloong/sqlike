@@ -15,7 +15,7 @@ type recursiveStruct struct {
 }
 
 type tagStruct struct {
-	ID   int64  `sqlike:"id"`
+	ID   int64  `sqlike:"id,omitempty,default=40"`
 	Skip string `sqlike:"-"`
 }
 
@@ -93,6 +93,8 @@ func TestStructField(t *testing.T) {
 
 	require.Equal(t, []int{0, 5}, sf.Index())
 	require.Equal(t, reflect.TypeOf("str"), sf.Type())
+	require.Nil(t, sf.Children())
+	require.Nil(t, sf.Parent())
 	require.False(t, sf.IsNullable())
 	require.False(t, sf.IsEmbedded())
 }

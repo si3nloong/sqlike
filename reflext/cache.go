@@ -65,7 +65,7 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	tm := m.CodecByType(v.Type())
 	fi, ok := tm.LookUpFieldByName(name)
 	if !ok {
-		return v
+		panic("field not exists")
 	}
 	return FieldByIndexes(v, fi.Index())
 }
