@@ -18,20 +18,29 @@ func TestKey(t *testing.T) {
 		err error
 	)
 
+	t.Run("Empty Key", func(it *testing.T) {
+		k := new(Key)
+		require.True(it, k.Incomplete())
+		require.Equal(it, k, k.Root())
+		require.Nil(it, k.Parent)
+	})
+
 	t.Run("ParseKey", func(it *testing.T) {
 		str := `Parent,1288888/Name,'sianloong'`
 		k, err = ParseKey(str)
-		require.NoError(t, err)
-		require.NotNil(t, k)
-		require.Equal(t, NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil)), k)
+		require.NoError(it, err)
+		require.NotNil(it, k)
+		nk := NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil))
+		require.Equal(it, nk, k)
+		require.True(it, nk.Equal(k))
 	})
 
 	t.Run("Clone", func(it *testing.T) {
 		str := `Parent,1288888/Name,'sianloong'`
 		k, err = ParseKey(str)
-		require.NoError(t, err)
-		require.NotNil(t, k)
-		require.Equal(t, k, k.Clone())
+		require.NoError(it, err)
+		require.NotNil(it, k)
+		require.Equal(it, k, k.Clone())
 	})
 
 	t.Run("Encode & Decode", func(it *testing.T) {
@@ -156,4 +165,16 @@ func TestKey(t *testing.T) {
 		require.NoError(it, err)
 		require.Equal(it, &Key{}, k3)
 	})
+
+	nk := NewNameKey("Name", nil)
+	require.NotEmpty(t, nk.NameID)
+	require.Equal(t, "Name", nk.Kind)
+	require.Empty(t, nk.IntID)
+	require.Nil(t, nk.Parent)
+
+	idk := NewIDKey("ID", nil)
+	require.Empty(t, idk.NameID)
+	require.Equal(t, "ID", idk.Kind)
+	require.NotEmpty(t, idk.IntID)
+	require.Nil(t, idk.Parent)
 }

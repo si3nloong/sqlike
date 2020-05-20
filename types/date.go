@@ -47,9 +47,6 @@ func (d *Date) IsZero() bool {
 
 // Value :
 func (d Date) Value() (driver.Value, error) {
-	// if d == nil {
-	// 	return nil, nil
-	// }
 	return d.String(), nil
 }
 
@@ -96,6 +93,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON :
 func (d *Date) UnmarshalJSON(b []byte) (err error) {
 	if b == nil || util.UnsafeString(b) == "null" {
+		*d = Date{} // reset value
 		return nil
 	}
 
@@ -117,6 +115,7 @@ func (d Date) MarshalText() ([]byte, error) {
 // UnmarshalText :
 func (d *Date) UnmarshalText(b []byte) error {
 	if b == nil || util.UnsafeString(b) == "null" {
+		*d = Date{} // reset value
 		return nil
 	}
 

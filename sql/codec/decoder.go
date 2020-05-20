@@ -7,13 +7,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"reflect"
+	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/jsonb"
-	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
@@ -159,12 +159,12 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	case time.Time:
 		x = vi
 	case string:
-		x, err = types.DecodeTime(vi)
+		x, err = decodeTime(vi)
 		if err != nil {
 			return err
 		}
 	case []byte:
-		x, err = types.DecodeTime(b2s(vi))
+		x, err = decodeTime(b2s(vi))
 		if err != nil {
 			return err
 		}
@@ -175,6 +175,25 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	// convert back to UTC
 	v.Set(reflect.ValueOf(x.UTC()))
 	return nil
+}
+
+// date format :
+var (
+	DDMMYYYY       = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
+	DDMMYYYYHHMMSS = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+)
+
+// DecodeTime : this will decode time by using multiple format
+func decodeTime(str string) (t time.Time, err error) {
+	switch {
+	case DDMMYYYY.MatchString(str):
+		t, err = time.Parse("2006-01-02", str)
+	case DDMMYYYYHHMMSS.MatchString(str):
+		t, err = time.Parse("2006-01-02 15:04:05", str)
+	default:
+		t, err = time.Parse(time.RFC3339Nano, str)
+	}
+	return
 }
 
 // DecodeSpatial :

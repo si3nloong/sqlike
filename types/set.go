@@ -13,7 +13,7 @@ import (
 type Set []string
 
 // DataType :
-func (s Set) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
+func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	var def *string
@@ -54,19 +54,16 @@ func (s Set) Value() (driver.Value, error) {
 func (s *Set) Scan(it interface{}) error {
 	switch vi := it.(type) {
 	case []byte:
-		if err := s.unmarshal(string(vi)); err != nil {
-			return err
-		}
+		s.unmarshal(string(vi))
+
 	case string:
-		if err := s.unmarshal(vi); err != nil {
-			return err
-		}
+		s.unmarshal(vi)
+
 	case nil:
 	}
 	return nil
 }
 
-func (s *Set) unmarshal(val string) error {
+func (s *Set) unmarshal(val string) {
 	*s = strings.Split(val, ",")
-	return nil
 }
