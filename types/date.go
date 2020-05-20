@@ -66,6 +66,7 @@ func (d *Date) Scan(it interface{}) error {
 		return nil
 
 	case nil:
+		*d = Date{}
 		return nil
 
 	default:

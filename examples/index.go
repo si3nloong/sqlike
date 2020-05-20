@@ -10,7 +10,7 @@ import (
 )
 
 // IndexExamples :
-func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err  error
 		idxs []sqlike.Index
@@ -41,8 +41,8 @@ func IndexExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 			})
 		require.NoError(t, err)
 		idxs, err = idx.List(ctx)
-		require.True(t, len(idxs) > 1)
 		require.NoError(t, err)
+		require.True(t, len(idxs) > 1)
 	}
 
 	// Auto build indexes using yaml file

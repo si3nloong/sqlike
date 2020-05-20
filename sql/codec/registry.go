@@ -16,6 +16,7 @@ import (
 	"golang.org/x/text/language"
 )
 
+// Codecer :
 type Codecer interface {
 	RegisterTypeCodec(t reflect.Type, enc ValueEncoder, dec ValueDecoder)
 	RegisterTypeEncoder(t reflect.Type, enc ValueEncoder)

@@ -9,7 +9,7 @@ import (
 )
 
 // MigrateExamples :
-func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		ns      *normalStruct
 		err     error
@@ -149,10 +149,9 @@ func MigrateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 }
 
 // MigrateErrorExamples :
-func MigrateErrorExamples(t *testing.T, db *sqlike.Database) {
+func MigrateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err error
-		ctx = context.Background()
 	)
 
 	{

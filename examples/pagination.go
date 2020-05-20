@@ -43,7 +43,7 @@ func (usrs Users) Swap(i, j int) {
 }
 
 // PaginationExamples :
-func PaginationExamples(t *testing.T, ctx context.Context, c *sqlike.Client) {
+func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	var (
 		// result *sqlike.Result
 		err error

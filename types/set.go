@@ -10,6 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/util"
 )
 
+// Set : sql data type of `SET`
 type Set []string
 
 // DataType :

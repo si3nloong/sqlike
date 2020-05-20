@@ -85,28 +85,28 @@ func testCase(t *testing.T, ctx context.Context, client *sqlike.Client) {
 	mg := connectMongoDB(ctx)
 
 	{
-		SQLDumpExamples(t, ctx, client)
-		MigrateExamples(t, ctx, db)
-		IndexExamples(t, ctx, db)
+		SQLDumpExamples(ctx, t, client)
+		MigrateExamples(ctx, t, db)
+		IndexExamples(ctx, t, db)
 
-		InsertExamples(t, ctx, db)
-		FindExamples(t, ctx, db)
-		QueryExamples(t, ctx, db)
-		TransactionExamples(t, ctx, db)
-		PaginationExamples(t, ctx, client)
-		UpdateExamples(t, ctx, db)
-		DeleteExamples(t, ctx, db)
-		JSONExamples(t, ctx, db)
-		CasbinExamples(t, ctx, db)
-		SpatialExamples(t, ctx, db)
-		ExtraExamples(t, ctx, db, mg)
+		InsertExamples(ctx, t, db)
+		FindExamples(ctx, t, db)
+		QueryExamples(ctx, t, db)
+		TransactionExamples(ctx, t, db)
+		PaginationExamples(ctx, t, client)
+		UpdateExamples(ctx, t, db)
+		DeleteExamples(ctx, t, db)
+		JSONExamples(ctx, t, db)
+		CasbinExamples(ctx, t, db)
+		SpatialExamples(ctx, t, db)
+		ExtraExamples(ctx, t, db, mg)
 	}
 
 	// Errors
 	{
-		MigrateErrorExamples(t, db)
-		InsertErrorExamples(t, db)
-		FindErrorExamples(t, db)
-		UpdateErrorExamples(t, db)
+		MigrateErrorExamples(ctx, t, db)
+		InsertErrorExamples(ctx, t, db)
+		FindErrorExamples(ctx, t, db)
+		UpdateErrorExamples(ctx, t, db)
 	}
 }

@@ -18,7 +18,7 @@ import (
 )
 
 // FindExamples :
-func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		// result sql.Result
 		result *sqlike.Result
@@ -461,10 +461,9 @@ func FindExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 }
 
 // FindErrorExamples :
-func FindErrorExamples(t *testing.T, db *sqlike.Database) {
+func FindErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err error
-		ctx = context.Background()
 	)
 
 	{

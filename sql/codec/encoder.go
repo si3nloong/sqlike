@@ -71,6 +71,7 @@ func (enc DefaultEncoders) EncodeTime(_ reflext.StructFielder, v reflect.Value) 
 	return x.UTC(), nil
 }
 
+// EncodeSpatial :
 func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
 	return func(sf reflext.StructFielder, v reflect.Value) (interface{}, error) {
 		if reflext.IsZero(v) {

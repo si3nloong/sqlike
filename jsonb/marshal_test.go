@@ -162,8 +162,8 @@ func TestMarshal(t *testing.T) {
 		dataByte, _ = sjson.SetBytes(dataByte, "NullKey", k.String())
 
 		b, err = Marshal(i)
-		require.Equal(t, dataByte, b)
 		require.NoError(t, err)
+		require.Equal(t, dataByte, b)
 	}
 
 	t.Run("Test Map's Key with Int, Uint data type", func(it *testing.T) {

@@ -17,6 +17,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
+// SQLDialect :
 type SQLDialect interface {
 	TableName(db, table string) string
 	Var(i int) string

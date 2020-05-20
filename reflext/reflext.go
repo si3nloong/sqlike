@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Structer :
 type Structer interface {
 	Fields() []StructFielder
 	Properties() []StructFielder
@@ -14,15 +15,33 @@ type Structer interface {
 	GetByTraversal(index []int) StructFielder
 }
 
+// StructFielder :
 type StructFielder interface {
-	Name() string // New name of struct field
+	// New name of struct field
+	Name() string
+
+	// reflect.Type of the field
 	Type() reflect.Type
+
+	// index position of the field
 	Index() []int
+
 	Tag() StructTag
+
+	// if the field is struct, parent will not be nil
+	// this will be the parent struct of current struct
 	Parent() StructFielder
+
 	ParentByTraversal(cb func(StructFielder) bool) StructFielder
+
+	// if the field is struct, children will not be nil
+	// this will be the fields of current struct
 	Children() []StructFielder
+
+	// determine the field is nullable
 	IsNullable() bool
+
+	// determine the field is embedded struct
 	IsEmbedded() bool
 }
 
@@ -95,14 +114,17 @@ func (sf *StructField) Parent() StructFielder {
 	return sf.parent
 }
 
+// Children :
 func (sf *StructField) Children() []StructFielder {
 	return sf.children
 }
 
+// IsNullable :
 func (sf *StructField) IsNullable() bool {
 	return sf.null
 }
 
+// IsEmbedded :
 func (sf *StructField) IsEmbedded() bool {
 	return sf.embed
 }

@@ -13,7 +13,7 @@ import (
 )
 
 // CasbinExamples :
-func CasbinExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func CasbinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		a   persist.FilteredAdapter
 		e   *casbin.Enforcer

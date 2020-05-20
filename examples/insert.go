@@ -11,7 +11,7 @@ import (
 )
 
 // InsertExamples :
-func InsertExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err      error
 		result   sql.Result
@@ -143,10 +143,9 @@ func InsertExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 }
 
 // InsertErrorExamples :
-func InsertErrorExamples(t *testing.T, db *sqlike.Database) {
+func InsertErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		ns  normalStruct
-		ctx = context.Background()
 		err error
 	)
 

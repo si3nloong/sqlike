@@ -41,65 +41,41 @@ const (
 	MultiPolygon
 )
 
+var names = map[Type]string{
+	String:          "string",
+	Bool:            "boolean",
+	Byte:            "byte",
+	Int:             "int",
+	Int8:            "int8",
+	Int16:           "int16",
+	Int32:           "int32",
+	Int64:           "int64",
+	Uint:            "uint",
+	Uint8:           "uint8",
+	Uint16:          "uint16",
+	Uint32:          "uint32",
+	Uint64:          "uint64",
+	Float32:         "float32",
+	Float64:         "float64",
+	Slice:           "slice",
+	Map:             "map",
+	Struct:          "struct",
+	Timestamp:       "timestamp",
+	DateTime:        "datetime",
+	JSON:            "json",
+	UUID:            "uuid",
+	Point:           "point",
+	LineString:      "linestring",
+	Polygon:         "polygon",
+	MultiPoint:      "multipoint",
+	MultiLineString: "multilinestring",
+	MultiPolygon:    "multipolygon",
+}
+
+// String :
 func (t Type) String() string {
-	switch t {
-	case String:
-		return "string"
-	case Bool:
-		return "boolean"
-	case Byte:
-		return "byte"
-	case Int:
-		return "int"
-	case Int8:
-		return "int8"
-	case Int16:
-		return "int16"
-	case Int32:
-		return "int32"
-	case Int64:
-		return "int64"
-	case Uint:
-		return "uint"
-	case Uint8:
-		return "uint8"
-	case Uint16:
-		return "uint16"
-	case Uint32:
-		return "uint32"
-	case Uint64:
-		return "uint64"
-	case Float32:
-		return "float32"
-	case Float64:
-		return "float64"
-	case Slice:
-		return "slice"
-	case Map:
-		return "map"
-	case Struct:
-		return "struct"
-	case Timestamp:
-		return "timestamp"
-	case DateTime:
-		return "datetime"
-	case JSON:
-		return "json"
-	case UUID:
-		return "uuid"
-	case Point:
-		return "point"
-	case LineString:
-		return "linestring"
-	case Polygon:
-		return "polygon"
-	case MultiPoint:
-		return "multipoint"
-	case MultiLineString:
-		return "multilinestring"
-	case MultiPolygon:
-		return "multipolygon"
-	default:
-		return "unknown"
+	if v, ok := names[t]; ok {
+		return v
 	}
+	return "unknown"
 }

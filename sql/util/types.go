@@ -23,6 +23,7 @@ func (slice *StringSlice) Splice(idx int) {
 	*slice = append((*slice)[:idx], (*slice)[idx+1:]...)
 }
 
+// Sort :
 func (slice *StringSlice) Sort() {
 	sort.Strings(*slice)
 }

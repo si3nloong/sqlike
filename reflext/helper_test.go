@@ -63,9 +63,9 @@ func TestTypeOf(t *testing.T) {
 	)
 
 	str := "hello world"
-	rt := reflect.TypeOf(&str)
 
 	{
+		rt := reflect.TypeOf(&str)
 		require.Equal(t, rt, TypeOf(ptr))
 		require.Equal(t, rt, TypeOf(rt))
 	}

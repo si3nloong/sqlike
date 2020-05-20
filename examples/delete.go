@@ -14,7 +14,7 @@ import (
 )
 
 // DeleteExamples :
-func DeleteExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func DeleteExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		affected int64
 		result   sql.Result

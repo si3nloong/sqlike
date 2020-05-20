@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Spatial :
 type Spatial struct {
 	ID             int64 `sqlike:",primary_key,auto_increment"`
 	Point          orb.Point
@@ -29,7 +30,7 @@ type Spatial struct {
 }
 
 // SpatialExamples :
-func SpatialExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func SpatialExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		sp    = Spatial{}
 		table = db.Table("spatial")

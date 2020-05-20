@@ -23,7 +23,7 @@ type user struct {
 }
 
 // TransactionExamples :
-func TransactionExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		uid      uuid.UUID
 		ns       normalStruct

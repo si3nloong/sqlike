@@ -15,7 +15,7 @@ import (
 )
 
 // UpdateExamples :
-func UpdateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		ns       normalStruct
 		err      error
@@ -183,11 +183,10 @@ func UpdateExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
 }
 
 // UpdateErrorExamples :
-func UpdateErrorExamples(t *testing.T, db *sqlike.Database) {
+func UpdateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		ns  normalStruct
 		err error
-		ctx = context.Background()
 	)
 
 	table := db.Table("NormalStruct")

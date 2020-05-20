@@ -10,7 +10,7 @@ type wrappedConnector struct {
 	itpr Interceptor
 }
 
-// WrapDriver :
+// WrapConnector :
 func WrapConnector(conn driver.Connector, itpr Interceptor) driver.Connector {
 	return wrappedConnector{conn: conn, itpr: itpr}
 }

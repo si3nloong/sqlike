@@ -21,7 +21,7 @@ func (ot *OpenTracingInterceptor) ConnPing(ctx context.Context, conn driver.Ping
 	return
 }
 
-// ConnPing :
+// ConnBeginTx :
 func (ot *OpenTracingInterceptor) ConnBeginTx(ctx context.Context, conn driver.ConnBeginTx, opts driver.TxOptions) (tx driver.Tx, err error) {
 	if ot.opts.BeginTx {
 		var span opentracing.Span

@@ -196,7 +196,7 @@ func decodeTime(str string) (t time.Time, err error) {
 	return
 }
 
-// DecodeSpatial :
+// DecodePoint :
 func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 	var p orb.Point
 	if it == nil {

@@ -20,6 +20,10 @@ func TestDate(t *testing.T) {
 		err error
 	)
 
+	t.Run("DataType", func(it *testing.T) {
+
+	})
+
 	t.Run("Parse Date with invalid value", func(it *testing.T) {
 		d, err = ParseDate("2020-13-02")
 		require.Error(it, err)
@@ -118,6 +122,10 @@ func TestDate(t *testing.T) {
 
 	t.Run("Date with sql.Scanner", func(it *testing.T) {
 		d = Date{}
+		d.Scan(nil)
+		require.Equal(it, Date{}, d)
+
+		d = Date{}
 		dt, _ := time.Parse("2006-01-02", "2018-05-31")
 		d.Scan(dt)
 		require.Equal(it, Date{Year: 2018, Month: 5, Day: 31}, d)
@@ -129,6 +137,9 @@ func TestDate(t *testing.T) {
 		d = Date{}
 		d.Scan([]byte("2106-03-26"))
 		require.Equal(it, Date{Year: 2106, Month: 3, Day: 26}, d)
+
+		d = Date{}
+		require.Error(it, d.Scan(float64(9999)))
 	})
 
 	t.Run("Date with driver.Valuer", func(it *testing.T) {

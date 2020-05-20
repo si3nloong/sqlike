@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func QueryExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	stmt := expr.Union(
 		sql.Select().

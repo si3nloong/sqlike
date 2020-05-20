@@ -15,7 +15,7 @@ import (
 )
 
 // JSONExamples :
-func JSONExamples(t *testing.T, ctx context.Context, db *sqlike.Database) {
+func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err    error
 		result *sqlike.Result

@@ -17,7 +17,7 @@ type indexStruct struct {
 	ID     string `sqlike:""`
 }
 
-// Date :
+// Model :
 type Model struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time

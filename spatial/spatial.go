@@ -1,8 +1,9 @@
 package spatial
 
-// Type
+// Type :
 type Type int
 
+// Spatial Type :
 const (
 	Point Type = iota + 1
 	LineString
@@ -14,6 +15,7 @@ const (
 
 type function int
 
+// String :
 func (f function) String() string {
 	switch f {
 	case SpatialTypeGeomFromText:
