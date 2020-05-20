@@ -1,12 +1,14 @@
 package jsonb
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/si3nloong/sqlike/reflext"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
@@ -40,6 +42,61 @@ func TestDecodeByte(t *testing.T) {
 	require.Equal(t, []byte(`The inline tables above are identical to the following standard table definitions:`), x)
 }
 
+func TestDecodeLanguage(t *testing.T) {
+	var (
+		dec = DefaultDecoder{}
+		r   *Reader
+		// tag language.Tag
+		x   language.Tag
+		err error
+	)
+
+	v := reflext.ValueOf(&x).Elem()
+
+	// r = NewReader([]byte(`""`))
+	// err = dec.DecodeTime(r, v)
+	// require.NoError(t, err)
+	// require.Equal(t, time.Time{}, x)
+
+	{
+		r = NewReader([]byte(`"en"`))
+		err = dec.DecodeLanguage(r, v)
+		require.NoError(t, err)
+		require.Equal(t, language.English, x)
+	}
+}
+
+func TestCurrency(t *testing.T) {
+	var (
+		dec = DefaultDecoder{registry: buildDefaultRegistry()}
+		r   *Reader
+		x   currency.Unit
+		err error
+	)
+
+	v := reflext.ValueOf(&x).Elem()
+
+	t.Run("Decode with null", func(ti *testing.T) {
+		r = NewReader([]byte(`null`))
+		err = dec.DecodeCurrency(r, v)
+		require.NoError(t, err)
+		require.Equal(t, currency.Unit{}, x)
+	})
+
+	t.Run("Decode with value", func(ti *testing.T) {
+		r = NewReader([]byte(`"USD"`))
+		err = dec.DecodeCurrency(r, v)
+		require.NoError(t, err)
+		require.Equal(t, currency.USD, x)
+	})
+
+	t.Run("Decode with invalid value", func(ti *testing.T) {
+		r = NewReader([]byte(`"USDT"`))
+		err = dec.DecodeCurrency(r, v)
+		require.Error(t, err)
+	})
+}
+
 func TestDecodeTime(t *testing.T) {
 	var (
 		dec = DefaultDecoder{}
@@ -71,6 +128,61 @@ func TestDecodeTime(t *testing.T) {
 	r = NewReader([]byte(`"2018-01-02 13:65:66"`))
 	err = dec.DecodeTime(r, v)
 	require.Error(t, err)
+}
+
+func TestDecodeJSONRaw(t *testing.T) {
+	var (
+		dec = DefaultDecoder{registry: buildDefaultRegistry()}
+		r   *Reader
+		x   json.RawMessage
+		err error
+	)
+
+	v := reflext.ValueOf(&x).Elem()
+
+	t.Run("Decode with null", func(ti *testing.T) {
+		r = NewReader([]byte(`null`))
+		err = dec.DecodeJSONRaw(r, v)
+		require.NoError(t, err)
+		require.Equal(t, json.RawMessage(`null`), x)
+	})
+
+	t.Run("Decode with number", func(ti *testing.T) {
+		r = NewReader([]byte(`98`))
+		err = dec.DecodeJSONRaw(r, v)
+		require.NoError(t, err)
+		require.Equal(t, json.RawMessage(`98`), x)
+	})
+}
+
+func TestDecodeJSONNumber(t *testing.T) {
+	var (
+		dec = DefaultDecoder{registry: buildDefaultRegistry()}
+		r   *Reader
+		x   json.Number
+		err error
+	)
+
+	v := reflext.ValueOf(&x).Elem()
+
+	t.Run("Decode with null", func(ti *testing.T) {
+		r = NewReader([]byte(`null`))
+		err = dec.DecodeJSONNumber(r, v)
+		require.NoError(t, err)
+		require.Equal(t, json.Number("0"), x)
+	})
+
+	t.Run("Decode with position integer", func(ti *testing.T) {
+		r = NewReader([]byte(`88`))
+		err = dec.DecodeJSONNumber(r, v)
+		require.NoError(t, err)
+		require.Equal(t, json.Number("88"), x)
+		require.Equal(t, "88", x.String())
+		i64, _ := x.Int64()
+		require.Equal(t, int64(88), i64)
+		f64, _ := x.Float64()
+		require.Equal(t, float64(88), f64)
+	})
 }
 
 func TestDecodeMap(t *testing.T) {
