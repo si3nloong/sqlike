@@ -53,6 +53,24 @@ func TestIndirectInit(t *testing.T) {
 	}
 }
 
+func TestTypeOf(t *testing.T) {
+	var (
+		ptr *string
+		// multiptrint *****int
+		// nilSlice    []string
+		// nilMap      map[string]interface{}
+		// v           reflect.Value
+	)
+
+	str := "hello world"
+	rt := reflect.TypeOf(&str)
+
+	{
+		require.Equal(t, rt, TypeOf(ptr))
+		require.Equal(t, rt, TypeOf(rt))
+	}
+}
+
 func TestValueOf(t *testing.T) {
 	var (
 		ptr         *string
@@ -111,10 +129,10 @@ func TestIsNullable(t *testing.T) {
 	var (
 		it          interface{}
 		str         string
-		integer     int
-		bigint      int64
-		uinteger    uint
-		biguint     uint64
+		i           int
+		i64         int64
+		u           uint
+		u64         uint64
 		f32         float32
 		pf32        *float32
 		f64         float64
@@ -130,10 +148,10 @@ func TestIsNullable(t *testing.T) {
 
 	require.True(t, IsNullable(reflect.TypeOf(it)))
 	require.False(t, IsNullable(reflect.TypeOf(str)))
-	require.False(t, IsNullable(reflect.TypeOf(integer)))
-	require.False(t, IsNullable(reflect.TypeOf(bigint)))
-	require.False(t, IsNullable(reflect.TypeOf(uinteger)))
-	require.False(t, IsNullable(reflect.TypeOf(biguint)))
+	require.False(t, IsNullable(reflect.TypeOf(i)))
+	require.False(t, IsNullable(reflect.TypeOf(i64)))
+	require.False(t, IsNullable(reflect.TypeOf(u)))
+	require.False(t, IsNullable(reflect.TypeOf(u64)))
 	require.False(t, IsNullable(reflect.TypeOf(flag)))
 	require.False(t, IsNullable(reflect.TypeOf(f32)))
 	require.True(t, IsNullable(reflect.TypeOf(pf32)))
@@ -147,26 +165,86 @@ func TestIsNullable(t *testing.T) {
 	require.True(t, IsNullable(reflect.TypeOf(pStruct)))
 }
 
+func TestZero(t *testing.T) {
+
+}
+
+func TestIsKind(t *testing.T) {
+	var (
+		it          interface{}
+		str         string
+		i           int
+		i8          int8
+		i16         int16
+		i32         int32
+		i64         int64
+		u           uint
+		u8          uint8
+		u16         uint16
+		u32         uint32
+		biguint     uint64
+		f32         float32
+		f64         float64
+		flag        bool
+		b           []byte
+		slice       []string
+		arr         [2]string
+		hashMap     map[string]string
+		emptyStruct struct{}
+		pStruct     *struct{}
+	)
+
+	require.True(t, IsKind(reflect.TypeOf(it), reflect.Interface))
+	require.True(t, IsKind(reflect.TypeOf(str), reflect.String))
+	require.True(t, IsKind(reflect.TypeOf(i), reflect.Int))
+	require.True(t, IsKind(reflect.TypeOf(i8), reflect.Int8))
+	require.True(t, IsKind(reflect.TypeOf(i16), reflect.Int16))
+	require.True(t, IsKind(reflect.TypeOf(i32), reflect.Int32))
+	require.True(t, IsKind(reflect.TypeOf(i64), reflect.Int64))
+	require.True(t, IsKind(reflect.TypeOf(u), reflect.Uint))
+	require.True(t, IsKind(reflect.TypeOf(u8), reflect.Uint8))
+	require.True(t, IsKind(reflect.TypeOf(u16), reflect.Uint16))
+	require.True(t, IsKind(reflect.TypeOf(u32), reflect.Uint32))
+	require.True(t, IsKind(reflect.TypeOf(biguint), reflect.Uint64))
+	require.True(t, IsKind(reflect.TypeOf(f32), reflect.Float32))
+	require.True(t, IsKind(reflect.TypeOf(f64), reflect.Float64))
+	require.True(t, IsKind(reflect.TypeOf(flag), reflect.Bool))
+	require.True(t, IsKind(reflect.TypeOf(b), reflect.Slice))
+	require.True(t, IsKind(reflect.TypeOf(slice), reflect.Slice))
+	require.True(t, IsKind(reflect.TypeOf(arr), reflect.Array))
+	require.True(t, IsKind(reflect.TypeOf(hashMap), reflect.Map))
+	require.True(t, IsKind(reflect.TypeOf(emptyStruct), reflect.Struct))
+	require.True(t, IsKind(reflect.TypeOf(pStruct), reflect.Ptr))
+}
+
+type zero struct {
+}
+
+func (z zero) IsZero() bool {
+	return true
+}
+
 func TestIsZero(t *testing.T) {
 	var (
 		it           interface{}
 		str          string
-		integer      int
-		tinyint      int8
-		smallint     int16
-		mediumint    int32
-		bigint       int64
-		uinteger     uint
-		tinyuint     uint8
-		smalluint    uint16
-		mediumuint   uint32
-		biguint      uint64
+		i            int
+		i8           int8
+		i16          int16
+		i32          int32
+		i64          int64
+		u            uint
+		u8           uint8
+		u16          uint16
+		u32          uint32
+		u64          uint64
 		f32          float32
 		f64          float64
 		flag         bool
 		b            []byte
 		slice        []string
-		arr          = make([]*string, 0)
+		arr          [1]string
+		initSlice    = make([]*string, 0)
 		hashMap      map[string]string
 		initMap      = make(map[string]bool)
 		emptyStruct  struct{}
@@ -176,26 +254,31 @@ func TestIsZero(t *testing.T) {
 		}
 	)
 
+	require.True(t, IsZero(reflect.ValueOf(zero{})))
+	require.True(t, IsZero(reflect.ValueOf(&zero{})))
 	require.True(t, IsZero(reflect.ValueOf(it)))
 	require.True(t, IsZero(reflect.ValueOf(str)))
-	require.True(t, IsZero(reflect.ValueOf(integer)))
-	require.True(t, IsZero(reflect.ValueOf(tinyint)))
-	require.True(t, IsZero(reflect.ValueOf(smallint)))
-	require.True(t, IsZero(reflect.ValueOf(mediumint)))
-	require.True(t, IsZero(reflect.ValueOf(bigint)))
-	require.True(t, IsZero(reflect.ValueOf(uinteger)))
-	require.True(t, IsZero(reflect.ValueOf(tinyuint)))
-	require.True(t, IsZero(reflect.ValueOf(smalluint)))
-	require.True(t, IsZero(reflect.ValueOf(mediumuint)))
-	require.True(t, IsZero(reflect.ValueOf(biguint)))
+	require.True(t, IsZero(reflect.ValueOf(i)))
+	require.True(t, IsZero(reflect.ValueOf(i8)))
+	require.True(t, IsZero(reflect.ValueOf(i16)))
+	require.True(t, IsZero(reflect.ValueOf(i32)))
+	require.True(t, IsZero(reflect.ValueOf(i64)))
+	require.True(t, IsZero(reflect.ValueOf(u)))
+	require.True(t, IsZero(reflect.ValueOf(u8)))
+	require.True(t, IsZero(reflect.ValueOf(u16)))
+	require.True(t, IsZero(reflect.ValueOf(u32)))
+	require.True(t, IsZero(reflect.ValueOf(u64)))
 	require.True(t, IsZero(reflect.ValueOf(f32)))
 	require.True(t, IsZero(reflect.ValueOf(f64)))
 	require.True(t, IsZero(reflect.ValueOf(flag)))
 	require.True(t, IsZero(reflect.ValueOf(b)))
-	require.True(t, IsZero(reflect.ValueOf(slice)))
 	require.True(t, IsZero(reflect.ValueOf(arr)))
+	require.True(t, IsZero(reflect.ValueOf(slice)))
+	require.True(t, IsZero(reflect.ValueOf(initSlice)))
 	require.True(t, IsZero(reflect.ValueOf(hashMap)))
 	require.True(t, IsZero(reflect.ValueOf(initMap)))
 	require.True(t, IsZero(reflect.ValueOf(emptyStruct)))
 	require.True(t, IsZero(reflect.ValueOf(uninitStruct)))
+
+	require.False(t, IsZero(reflect.ValueOf([2]string{"a", "b"})))
 }

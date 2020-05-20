@@ -110,6 +110,9 @@ func IsNullable(t reflect.Type) bool {
 
 // IsKind : compare and check the respective reflect.Kind
 func IsKind(t reflect.Type, k reflect.Kind) bool {
+	if t == nil {
+		return k == reflect.Interface
+	}
 	return t.Kind() == k
 }
 

@@ -25,4 +25,7 @@ func TestConnect(t *testing.T) {
 	opt := new(options.ConnectOptions)
 	str = ms.Connect(opt.ApplyURI(uri))
 	require.Equal(t, uri, str)
+	require.Panics(t, func() {
+		ms.Connect(nil)
+	})
 }
