@@ -1,6 +1,7 @@
 package types
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -21,7 +22,16 @@ func TestDate(t *testing.T) {
 	)
 
 	t.Run("DataType", func(it *testing.T) {
+		var d Date
+		col := d.DataType(nil, field{
+			name: "Date",
+			t:    reflect.TypeOf(d),
+		})
 
+		require.Equal(it, "Date", col.Name)
+		require.Equal(it, "DATE", col.DataType)
+		require.Equal(it, "DATE", col.Type)
+		require.False(it, col.Nullable)
 	})
 
 	t.Run("Parse Date with invalid value", func(it *testing.T) {
@@ -31,7 +41,7 @@ func TestDate(t *testing.T) {
 		d, err = ParseDate("2020-00-02")
 		require.Error(it, err)
 
-		d, err = ParseDate("2020-02-30")
+		d, err = ParseDate("2020-02-31")
 		require.Error(it, err)
 
 		d, err = ParseDate("2020-04-36")

@@ -1,6 +1,7 @@
 package types
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -10,14 +11,30 @@ func TestSet(t *testing.T) {
 
 	set := Set{"a", "b", "c", "d"}
 
-	t.Run("Set with nil value", func(it *testing.T) {
+	t.Run("DataType", func(it *testing.T) {
+		col := set.DataType(nil, field{
+			name: "Set",
+			t:    reflect.TypeOf(set),
+			null: true,
+		})
+
+		require.Equal(it, "Set", col.Name)
+		require.Equal(it, "SET", col.DataType)
+		require.Equal(it, "SET('')", col.Type)
+		require.Nil(it, col.DefaultValue)
+		require.True(it, col.Nullable)
+		require.Equal(it, &latin1, col.Charset)
+		require.Equal(it, &latin1Bin, col.Collation)
+	})
+
+	t.Run("driver.Valuer with nil value", func(it *testing.T) {
 		var set Set
 		v, err := set.Value()
 		require.NoError(it, err)
 		require.Nil(it, v)
 	})
 
-	t.Run("Set with value", func(it *testing.T) {
+	t.Run("driver.Valuer with value", func(it *testing.T) {
 		v, err := set.Value()
 		require.NoError(it, err)
 		require.Equal(it, "a,b,c,d", v)

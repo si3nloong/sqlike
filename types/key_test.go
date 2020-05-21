@@ -2,13 +2,68 @@ package types
 
 import (
 	"encoding/json"
+	"reflect"
 	"strconv"
 	"testing"
 
 	"github.com/si3nloong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
+
+type field struct {
+	name string
+	t    reflect.Type
+	null bool
+}
+
+// Name :
+func (f field) Name() string {
+	return f.name
+}
+
+// Type :
+func (f field) Type() reflect.Type {
+	return f.t
+}
+
+// Index :
+func (field) Index() []int {
+	return nil
+}
+
+// Tag :
+func (field) Tag() reflext.StructTag {
+	return reflext.StructTag{}
+}
+
+// Parent :
+func (field) Parent() reflext.StructFielder {
+	return nil
+}
+
+// ParentByTraversal :
+func (field) ParentByTraversal(cb func(reflext.StructFielder) bool) reflext.StructFielder {
+	return nil
+}
+
+// Children :
+func (field) Children() []reflext.StructFielder {
+	return nil
+}
+
+// IsNullable :
+func (f field) IsNullable() bool {
+	return f.null
+}
+
+// IsEmbedded :
+func (field) IsEmbedded() bool {
+	return false
+}
+
+var _ reflext.StructFielder = (*field)(nil)
 
 func TestKey(t *testing.T) {
 	var (
@@ -17,6 +72,29 @@ func TestKey(t *testing.T) {
 		b   []byte
 		err error
 	)
+
+	t.Run("DataType", func(it *testing.T) {
+		k := new(Key)
+		col := k.DataType(nil, field{
+			name: "Key",
+			t:    reflect.TypeOf(k),
+		})
+
+		require.Equal(it, "Key", col.Name)
+		require.Equal(it, "VARCHAR", col.DataType)
+		require.Equal(it, "VARCHAR(512)", col.Type)
+		require.Equal(it, &latin1, col.Charset)
+		require.Equal(it, &latin1Bin, col.Collation)
+		require.True(it, col.Nullable)
+	})
+
+	t.Run("ID", func(it *testing.T) {
+		nk := NameKey("Name", "name-value", nil)
+		require.Equal(it, "name-value", nk.ID())
+
+		idk := IDKey("Name", 217371238213213, nil)
+		require.Equal(it, "217371238213213", idk.ID())
+	})
 
 	t.Run("Empty Key", func(it *testing.T) {
 		k := new(Key)
@@ -164,6 +242,33 @@ func TestKey(t *testing.T) {
 		err = json.Unmarshal([]byte(`null`), k3)
 		require.NoError(it, err)
 		require.Equal(it, &Key{}, k3)
+	})
+
+	t.Run("driver.Valuer", func(it *testing.T) {
+		k := NameKey("Parent", "hello-world", nil)
+		v, err := k.Value()
+		require.NoError(t, err)
+		require.Equal(it, `Parent,'hello-world'`, v)
+
+		nk := NameKey("Child", "hRTYUIO88191", k)
+		v, err = nk.Value()
+		require.NoError(t, err)
+		require.Equal(it, `Parent,'hello-world'/Child,'hRTYUIO88191'`, v)
+
+		idk := IDKey("Parent", 187239123213, nil)
+		v, err = idk.Value()
+		require.NoError(t, err)
+		require.Equal(it, `Parent,187239123213`, v)
+
+		idck := IDKey("Child", 17288, idk)
+		v, err = idck.Value()
+		require.NoError(t, err)
+		require.Equal(it, `Parent,187239123213/Child,17288`, v)
+
+		mk := NameKey("Mix", "Name-value", idk)
+		v, err = mk.Value()
+		require.NoError(t, err)
+		require.Equal(it, `Parent,187239123213/Mix,'Name-value'`, v)
 	})
 
 	nk := NewNameKey("Name", nil)
