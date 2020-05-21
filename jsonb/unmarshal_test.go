@@ -9,6 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/language"
 )
 
 type User struct {
@@ -19,23 +21,32 @@ type User struct {
 }
 
 type ptrStruct struct {
-	PtrStr     *string
-	PtrBool    *bool
-	PtrInt     *int
-	PtrInt8    *int8
-	PtrInt16   *int16
-	PtrInt32   *int32
-	PtrInt64   *int64
-	PtrUint    *uint
-	PtrUint8   *uint8
-	PtrUint16  *uint16
-	PtrUint32  *uint32
-	PtrUint64  *uint64
-	PtrFloat32 *float32
-	PtrFloat64 *float64
-	PtrJSONRaw *json.RawMessage
-	PtrByte    *[]byte
-	PtrStruct  *struct {
+	PtrStr          *string
+	PtrByte         *[]byte
+	PtrBool         *bool
+	PtrInt          *int
+	PtrInt8         *int8
+	PtrInt16        *int16
+	PtrInt32        *int32
+	PtrInt64        *int64
+	PtrUint         *uint
+	PtrUint8        *uint8
+	PtrUint16       *uint16
+	PtrUint32       *uint32
+	PtrUint64       *uint64
+	PtrFloat32      *float32
+	PtrFloat64      *float64
+	PtrJSONRaw      *json.RawMessage
+	PtrJSONNumber   *json.Number
+	PtrStrSlice     *[]string
+	PtrIntSlice     *[]int
+	PtrUintSlice    *[]uint
+	PtrF32Slice     *[]float32
+	PtrF64Slice     *[]float64
+	PtrLanguageTag  *language.Tag
+	PtrCurrencyUnit *currency.Unit
+	PtrTime         *time.Time
+	PtrStruct       *struct {
 		Nested string
 	}
 }
@@ -89,6 +100,47 @@ func TestUnmarshal(t *testing.T) {
 		b   []byte
 		err error
 	)
+
+	t.Run("Unmarshal RawMessage", func(it *testing.T) {
+		var (
+			b = []byte(`{
+				"Raw": {
+					"Title": "Header",
+					"Body": {}
+				},
+				"Nested" : {
+					"DeepNested" : {
+						"RawObject" : {
+							"Name" : "john",
+							"Email" : "john@hotmail.com",
+							"Emoji":  " 😆 😉 😊 ",
+							"Age" : 28
+						},
+						"RawStr" : "hello world!",
+						"RawNumber": 189202.882
+					}
+				}
+			}`)
+			o struct {
+				Raw    json.RawMessage
+				Nested struct {
+					DeepNested struct {
+						RawObject json.RawMessage
+						RawStr    json.RawMessage
+						RawNumber json.RawMessage
+					}
+				}
+			}
+		)
+
+		err = Unmarshal(b, &o)
+		require.NoError(it, err)
+		require.Equal(it, json.RawMessage(`{"Title":"Header","Body":{}}`), o.Raw)
+		require.Equal(it, json.RawMessage(`{"Name":"john","Email":"john@hotmail.com","Emoji":" 😆 😉 😊 ","Age":28}`), o.Nested.DeepNested.RawObject)
+		require.Equal(it, json.RawMessage(`"hello world!"`), o.Nested.DeepNested.RawStr)
+		require.Equal(it, json.RawMessage(`189202.882`), o.Nested.DeepNested.RawNumber)
+		require.Equal(it, json.RawMessage(`"hello world!"`), o.Nested.DeepNested.RawStr)
+	})
 
 	{
 		pk, err = ioutil.ReadFile("./../examples/pk.pem")
@@ -198,25 +250,40 @@ func TestUnmarshal(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(it, int16(0), i16)
 
-		Unmarshal([]byte(`1354677198`), &i32)
+		err = Unmarshal([]byte(`1354677198`), &i32)
+		require.NoError(t, err)
 		require.Equal(it, int32(1354677198), i32)
-		Unmarshal([]byte(`-1354677198`), &i32)
+
+		err = Unmarshal([]byte(`-1354677198`), &i32)
+		require.NoError(t, err)
 		require.Equal(it, int32(-1354677198), i32)
-		Unmarshal(nullval, &i32)
+
+		err = Unmarshal(nullval, &i32)
+		require.NoError(t, err)
 		require.Equal(it, int32(0), i32)
 
-		Unmarshal([]byte(`7354673213123121983`), &i64)
+		err = Unmarshal([]byte(`7354673213123121983`), &i64)
+		require.NoError(t, err)
 		require.Equal(it, int64(7354673213123121983), i64)
-		Unmarshal([]byte(`-7354673213123121983`), &i64)
+
+		err = Unmarshal([]byte(`-7354673213123121983`), &i64)
+		require.NoError(t, err)
 		require.Equal(it, int64(-7354673213123121983), i64)
-		Unmarshal(nullval, &i64)
+
+		err = Unmarshal(nullval, &i64)
+		require.NoError(t, err)
 		require.Equal(it, int64(0), i64)
 
-		Unmarshal([]byte(`1354677198`), &i)
+		err = Unmarshal([]byte(`1354677198`), &i)
+		require.NoError(t, err)
 		require.Equal(it, int(1354677198), i)
-		Unmarshal([]byte(`-1354677198`), &i)
+
+		err = Unmarshal([]byte(`-1354677198`), &i)
+		require.NoError(t, err)
 		require.Equal(it, int(-1354677198), i)
-		Unmarshal(nullval, &i)
+
+		err = Unmarshal(nullval, &i)
+		require.NoError(t, err)
 		require.Equal(it, int(0), i)
 	})
 
@@ -229,39 +296,59 @@ func TestUnmarshal(t *testing.T) {
 			ui   uint
 		)
 
-		Unmarshal([]byte(`10`), &ui8)
+		err = Unmarshal([]byte(`10`), &ui8)
+		require.NoError(t, err)
 		require.Equal(it, uint8(10), ui8)
+
 		err = Unmarshal([]byte(`-10`), &ui8)
 		require.Error(t, err)
-		Unmarshal(nullval, &ui8)
+
+		err = Unmarshal(nullval, &ui8)
+		require.NoError(t, err)
 		require.Equal(it, uint8(0), ui8)
 
-		Unmarshal([]byte(`128`), &ui16)
+		err = Unmarshal([]byte(`128`), &ui16)
+		require.NoError(t, err)
 		require.Equal(it, uint16(128), ui16)
+
 		err = Unmarshal([]byte(`-128`), &ui16)
 		require.Error(t, err)
-		Unmarshal(nullval, &ui16)
+
+		err = Unmarshal(nullval, &ui16)
+		require.NoError(t, err)
 		require.Equal(it, uint16(0), ui16)
 
-		Unmarshal([]byte(`1354677198`), &ui32)
+		err = Unmarshal([]byte(`1354677198`), &ui32)
+		require.NoError(t, err)
 		require.Equal(it, uint32(1354677198), ui32)
+
 		err = Unmarshal([]byte(`-1354677198`), &ui32)
 		require.Error(t, err)
-		Unmarshal(nullval, &ui32)
+
+		err = Unmarshal(nullval, &ui32)
+		require.NoError(t, err)
 		require.Equal(it, uint32(0), ui32)
 
-		Unmarshal([]byte(`7354673213123121983`), &ui64)
+		err = Unmarshal([]byte(`7354673213123121983`), &ui64)
+		require.NoError(t, err)
 		require.Equal(it, uint64(7354673213123121983), ui64)
+
 		err = Unmarshal([]byte(`-7354673213123121983`), &ui64)
 		require.Error(t, err)
-		Unmarshal(nullval, &ui64)
+
+		err = Unmarshal(nullval, &ui64)
+		require.NoError(t, err)
 		require.Equal(it, uint64(0), ui64)
 
-		Unmarshal([]byte(`1354677198`), &ui)
+		err = Unmarshal([]byte(`1354677198`), &ui)
+		require.NoError(t, err)
 		require.Equal(it, uint(1354677198), ui)
+
 		err = Unmarshal([]byte(`-1354677198`), &ui)
 		require.Error(t, err)
-		Unmarshal(nullval, &ui)
+
+		err = Unmarshal(nullval, &ui)
+		require.NoError(t, err)
 		require.Equal(it, uint(0), ui)
 	})
 
@@ -271,30 +358,37 @@ func TestUnmarshal(t *testing.T) {
 			f64 float64
 		)
 
-		Unmarshal([]byte(`10`), &f32)
+		err = Unmarshal([]byte(`10`), &f32)
+		require.NoError(t, err)
 		require.Equal(it, float32(10), f32)
 
-		Unmarshal([]byte(`10.32`), &f32)
+		err = Unmarshal([]byte(`10.32`), &f32)
+		require.NoError(t, err)
 		require.Equal(it, float32(10.32), f32)
 
-		Unmarshal([]byte(`-882.3261239`), &f32)
+		err = Unmarshal([]byte(`-882.3261239`), &f32)
+		require.NoError(t, err)
 		require.Equal(it, float32(-882.3261239), f32)
 
-		Unmarshal([]byte(`-128.32128392`), &f64)
+		err = Unmarshal([]byte(`-128.32128392`), &f64)
+		require.NoError(t, err)
 		require.Equal(it, float64(-128.32128392), f64)
 
-		Unmarshal([]byte(`10.32128392`), &f64)
+		err = Unmarshal([]byte(`10.32128392`), &f64)
+		require.NoError(t, err)
 		require.Equal(it, float64(10.32128392), f64)
 	})
 
 	t.Run("Unmarshal Byte", func(it *testing.T) {
 		b = []byte(`"` + string(byteval) + `"`)
 		var bytea []byte
-		Unmarshal(b, &bytea)
+		err = Unmarshal(b, &bytea)
+		require.NoError(t, err)
 		require.Equal(t, pk, bytea)
 
 		bytea = []byte(nil)
-		Unmarshal(nullval, &bytea)
+		err = Unmarshal(nullval, &bytea)
+		require.NoError(t, err)
 		require.Equal(t, []byte(nil), bytea)
 	})
 
@@ -303,10 +397,12 @@ func TestUnmarshal(t *testing.T) {
 		date := `2018-01-02T15:04:33Z`
 		b = []byte(`"` + date + `"`)
 
-		Unmarshal(b, &dt)
+		err = Unmarshal(b, &dt)
+		require.NoError(t, err)
 		require.Equal(t, date, dt.UTC().Format(time.RFC3339))
 
-		Unmarshal(nullval, &dt)
+		err = Unmarshal(nullval, &dt)
+		require.NoError(t, err)
 		require.Equal(t, `0001-01-01T00:00:00Z`, dt.UTC().Format(time.RFC3339))
 	})
 
@@ -321,20 +417,24 @@ func TestUnmarshal(t *testing.T) {
 		)
 
 		nullArr = []string{"xyz"}
-		Unmarshal(nullval, &nullArr)
+		err = Unmarshal(nullval, &nullArr)
+		require.NoError(t, err)
 		require.Equal(t, []string(nil), nullArr)
 
-		Unmarshal([]byte("[]"), &initArr)
+		err = Unmarshal([]byte("[]"), &initArr)
+		require.NoError(t, err)
 		require.NotNil(t, initArr)
 		require.Equal(t, make([]int, 0), initArr)
 
-		Unmarshal([]byte(`["a", "b", "c"]`), &strArr)
+		err = Unmarshal([]byte(`["a", "b", "c"]`), &strArr)
+		require.NoError(t, err)
 		require.ElementsMatch(t, []string{"a", "b", "c"}, strArr)
 
-		Unmarshal([]byte(`[2, 8, 32, 64, 128]`), &intArr)
+		err = Unmarshal([]byte(`[2, 8, 32, 64, 128]`), &intArr)
+		require.NoError(t, err)
 		require.ElementsMatch(t, []int{2, 8, 32, 64, 128}, intArr)
 
-		Unmarshal([]byte(`[
+		err = Unmarshal([]byte(`[
 			[2, 8, 32, 64, 128],
 			[1, 3, 5, 7],
 			[0, 100, 1000, 10000, 100000]
@@ -344,8 +444,9 @@ func TestUnmarshal(t *testing.T) {
 			{1, 3, 5, 7},
 			{0, 100, 1000, 10000, 100000},
 		}, twoDArr)
+		require.NoError(t, err)
 
-		Unmarshal([]byte(`[
+		err = Unmarshal([]byte(`[
 			[
 				["a", "b", "c", "d", "e"],
 				["甲", "乙", "丙", "丁"],
@@ -360,6 +461,7 @@ func TestUnmarshal(t *testing.T) {
 				["Rust", "GoLang"]
 			]
 		]`), &threeDArr)
+		require.NoError(t, err)
 		require.ElementsMatch(t, [][][]string{{
 			[]string{"a", "b", "c", "d", "e"},
 			[]string{"甲", "乙", "丙", "丁"},
@@ -382,7 +484,8 @@ func TestUnmarshal(t *testing.T) {
 		}]`)
 
 		users := []User{}
-		Unmarshal(b, &users)
+		err = Unmarshal(b, &users)
+		require.NoError(t, err)
 		id := uuid.MustParse("daa68da0-8890-11ea-bc55-0242ac130003")
 		require.ElementsMatch(t, []User{
 			{Name: "John", Email: "john@hotmail.com", Age: 20},
@@ -449,7 +552,6 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("Unmarshal Struct", func(it *testing.T) {
-
 		{
 			// unmarshal with empty object {}
 			b = []byte(`   {   } `)
@@ -492,7 +594,7 @@ func TestUnmarshal(t *testing.T) {
 			"Bool": true
 		}`)
 
-			cp := make([]byte, len(b), len(b))
+			cp := make([]byte, len(b))
 			copy(cp, b)
 
 			var o testStruct
@@ -522,14 +624,16 @@ func TestUnmarshal(t *testing.T) {
 			i.Name = "testing"
 			i.Email = "sianloong90@gmail.com"
 			i.Age = 100
-			Unmarshal(nullval, &i)
+			err = Unmarshal(nullval, &i)
+			require.NoError(t, err)
 			require.Equal(t, User{}, i)
 		}
 
 		{
 			u := new(User)
 			u.Name = "testing"
-			Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), u)
+			err = Unmarshal([]byte(`{"Name": "lol", "Email":"test@hotmail.com", "Age": 18}`), u)
+			require.NoError(t, err)
 			require.Equal(t, "lol", u.Name)
 			require.Equal(t, "test@hotmail.com", u.Email)
 			require.Equal(t, int(18), u.Age)
@@ -538,7 +642,9 @@ func TestUnmarshal(t *testing.T) {
 
 	t.Run("Unmarshal Pointer Struct", func(it *testing.T) {
 		var ptr *ptrStruct
-		Unmarshal([]byte(`null`), &ptr)
+		err = Unmarshal([]byte(`null`), &ptr)
+		require.NoError(t, err)
+
 		var nilptr *ptrStruct
 		require.Equal(t, nilptr, ptr)
 
@@ -555,7 +661,14 @@ func TestUnmarshal(t *testing.T) {
 			"PtrUint16": 8814,
 			"PtrUint32": 2031273814,
 			"PtrUint64": 88818111321351212,
-			"PtrJSONRaw": {   "k1" : "value"  , "k2"  : "  value 1312$%^&*"}
+			"PtrStrSlice" : ["a", "b", "c", "d"],
+			"PtrJSONRaw": {   "k1" : "value"  , "k2"  : "  value 1312$%^&*"},
+			"PtrJSONNumber" : 183939.778,
+			"PtrUintSlice" : [7, 88, 199, 200],
+			"PtrF32Slice" :  [10.88, 728.99, 722.00],
+			"PtrCurrencyUnit" : "MYR",
+			"PtrLanguageTag" : "en",
+			"PtrTime": "2008-01-26T00:00:58Z"
 		}`), initPtr)
 		require.NoError(t, err)
 
@@ -594,19 +707,54 @@ func TestUnmarshal(t *testing.T) {
 			var nilByte *[]byte
 			require.Equal(t, nilByte, initPtr.PtrByte)
 		}
-		// 	test(&ptr)
-		// 	// nptr := new(ptrStruct)
-		// 	// if v.IsNil() {
-		// 	// 	v.Elem().Set(reflect.New(v.Type().Elem()).Elem())
-		// 	// }
 
-		// 	// v.Set(reflect.ValueOf(nptr))
-		// 	// log.Println(v.CanAddr(), v.IsValid())
-		// 	// v.Set(reflect.New(reflect.TypeOf(ptr).Elem()))
-		// 	// log.Println("CanSet :", v.CanSet())
+		{
+			raw := json.RawMessage(`{"k1":"value","k2":"  value 1312$%^&*"}`)
+			require.Equal(t, &raw, initPtr.PtrJSONRaw)
+		}
 
-		// 	// var nilPtr *ptrStruct
-		// 	// require.Equal(t, nilPtr, ptr)
+		{
+			num := json.Number("183939.778")
+			require.Equal(t, &num, initPtr.PtrJSONNumber)
+			f64, _ := initPtr.PtrJSONNumber.Float64()
+			require.Equal(t, float64(183939.778), f64)
+			i64, _ := initPtr.PtrJSONNumber.Int64()
+			require.Equal(t, int64(0), i64)
+		}
+
+		{
+			slice := []string{"a", "b", "c", "d"}
+			require.Equal(t, &slice, initPtr.PtrStrSlice)
+		}
+
+		{
+			require.Nil(it, initPtr.PtrIntSlice)
+		}
+
+		{
+			slice := []uint{7, 88, 199, 200}
+			require.Equal(t, &slice, initPtr.PtrUintSlice)
+		}
+
+		{
+			slice := []float32{10.88, 728.99, 722.00}
+			require.Equal(t, &slice, initPtr.PtrF32Slice)
+		}
+
+		{
+			lang := language.English
+			require.Equal(t, &lang, initPtr.PtrLanguageTag)
+		}
+
+		{
+			unit, _ := currency.ParseISO("MYR")
+			require.Equal(t, &unit, initPtr.PtrCurrencyUnit)
+		}
+
+		{
+			dt, _ := time.Parse(time.RFC3339, "2008-01-26T00:00:58Z")
+			require.Equal(t, &dt, initPtr.PtrTime)
+		}
 	})
 }
 

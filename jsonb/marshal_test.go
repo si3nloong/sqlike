@@ -226,12 +226,14 @@ func BenchmarkJSONMarshal(b *testing.B) {
 			require.NoError(t, err)
 		}
 	})
+
 	b.Run("Pointer Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
 			_, err = json.Marshal(nsInit)
 			require.NoError(t, err)
 		}
 	})
+
 	b.Run("Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
 			_, err = json.Marshal(nsPtr)
@@ -248,12 +250,14 @@ func BenchmarkJSONBMarshal(b *testing.B) {
 			require.NoError(t, err)
 		}
 	})
+
 	b.Run("Pointer Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
 			_, err = Marshal(nsInit)
 			require.NoError(t, err)
 		}
 	})
+
 	b.Run("Struct w initialize", func(t *testing.B) {
 		for n := 0; n < t.N; n++ {
 			_, err = Marshal(nsPtr)

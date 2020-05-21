@@ -60,6 +60,13 @@ func (r *Reader) ReadObject(cb func(*Reader, string) error) error {
 			break
 		}
 	}
+
+	if c != '}' {
+		return ErrInvalidJSON{
+			callback: "ReadObject",
+			message:  "expect end with } for object",
+		}
+	}
 	return nil
 }
 
@@ -155,7 +162,7 @@ keyLoop:
 	if c != '}' {
 		return ErrInvalidJSON{
 			callback: "ReadFlattenObject",
-			message:  "expect start with } for object",
+			message:  "expect end with } for object",
 		}
 	}
 	return nil

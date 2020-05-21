@@ -1,7 +1,9 @@
 package jsonb
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
@@ -103,13 +105,17 @@ func (dec DefaultDecoder) DecodeTime(r *Reader, v reflect.Value) error {
 	if err != nil {
 		return err
 	}
-	reflext.Set(v, reflect.ValueOf(x))
+	v.Set(reflect.ValueOf(x))
 	return nil
 }
 
 // DecodeJSONRaw :
 func (dec DefaultDecoder) DecodeJSONRaw(r *Reader, v reflect.Value) error {
-	v.SetBytes(r.Bytes())
+	b := new(bytes.Buffer)
+	if err := json.Compact(b, r.Bytes()); err != nil {
+		return err
+	}
+	v.SetBytes(b.Bytes())
 	return nil
 }
 
@@ -251,15 +257,17 @@ func (dec *DefaultDecoder) DecodeStruct(r *Reader, v reflect.Value) error {
 		return r.skipNull()
 	}
 
-	return r.ReadFlattenObject(func(it *Reader, k string) error {
+	return r.ReadObject(func(it *Reader, k string) error {
 		vv, exists := mapper.LookUpFieldByName(v, k)
 		if !exists {
 			return nil
 		}
+
 		decoder, err := dec.registry.LookupDecoder(vv.Type())
 		if err != nil {
 			return err
 		}
+
 		return decoder(it, vv)
 	})
 }

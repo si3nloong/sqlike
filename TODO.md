@@ -72,6 +72,7 @@
 - [x] Support option tag `unique_index` with create table.
 - [x] Support option tag `unique_index` with alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
+- [x] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
 - [ ] Support spatial `Polygon`.
 - [ ] Support default value for `StructField`.
 - [ ] Support `charset` and `collate` on `AlterTable`.
@@ -81,5 +82,4 @@
 - [ ] Support insert with map.
 - [ ] Support foreign key.
 - [ ] Strict mode. (prevent toxic query)
-- [ ] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
 - [ ] [BREAKING CHANGE] collate should reside in charset package.

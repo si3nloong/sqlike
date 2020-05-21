@@ -9,11 +9,8 @@ import (
 
 func TestReader(t *testing.T) {
 	var (
-		r *Reader
-		// err error
+		r = NewReader([]byte("null"))
 	)
-
-	r = NewReader([]byte("null"))
 
 	require.True(t, r.IsNull())
 
@@ -32,8 +29,4 @@ func TestReader(t *testing.T) {
 		v, _ := r.reset().ReadValue()
 		require.Equal(t, nil, v)
 	}
-	// require.Error(t, err)
-	// _, err = r.ReadBoolean()
-	// require.Error(t, err)
-	// require.Error(t, r.ReadArray(nil))
 }

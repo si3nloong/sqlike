@@ -8,10 +8,6 @@ import (
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 )
 
-func init() {
-	ToSQL(nil)
-}
-
 // ToSQL :
 func ToSQL(src interface{}) error {
 	ms := dialect.GetDialectByDriver("mysql").(*mysql.MySQL)

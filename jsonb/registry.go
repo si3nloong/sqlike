@@ -159,13 +159,13 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
-	dec, ok = r.typeDecoders[reflext.Deref(t)]
-	if ok {
-		return dec, nil
-	}
-
 	if ptrType.Implements(jsonbUnmarshaler) {
 		return unmarshalerDecoder(), nil
+	}
+
+	dec, ok = r.typeDecoders[t]
+	if ok {
+		return dec, nil
 	}
 
 	if ptrType.Implements(jsonUnmarshaler) {

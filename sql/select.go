@@ -29,7 +29,7 @@ func Select(fields ...interface{}) *SelectStmt {
 	return stmt.Select(fields...)
 }
 
-// Distinct :
+// Select :
 func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 	if len(fields) == 1 {
 		switch fields[0].(type) {

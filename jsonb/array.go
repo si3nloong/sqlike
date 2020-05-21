@@ -27,9 +27,11 @@ func (r *Reader) ReadArray(cb func(r *Reader) error) error {
 			return err
 		}
 
-		it := NewReader(b)
-		if err := cb(it); err != nil {
-			return err
+		if cb != nil {
+			it := NewReader(b)
+			if err := cb(it); err != nil {
+				return err
+			}
 		}
 
 		c = r.nextToken()
