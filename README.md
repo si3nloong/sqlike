@@ -296,11 +296,6 @@ func main() {
 
 Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).
 
-## Powered by
-
-[![WeTix](https://i.ibb.co/BZptCgZ/wetix-rgb-02-3x.png)](https://wetix.my)
-[![RM](https://i.ibb.co/gjjJHsQ/IMG-0399-2.png)](https://revenuemonster.my/)
-
 ## License
 
 [MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)

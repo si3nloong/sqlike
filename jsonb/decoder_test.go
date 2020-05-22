@@ -125,9 +125,24 @@ func TestDecodeTime(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, dt, x)
 
-	r = NewReader([]byte(`"2018-01-02 13:65:66"`))
-	err = dec.DecodeTime(r, v)
-	require.Error(t, err)
+	t.Run("Decode Time w invalid format", func(it *testing.T) {
+		r = NewReader([]byte(`"2018-01-02 13:65:66"`))
+		err = dec.DecodeTime(r, v)
+		require.Error(it, err)
+
+		r = NewReader([]byte(`2018-01-02 13:65:66"`))
+		err = dec.DecodeTime(r, v)
+		require.Error(it, err)
+
+		r = NewReader([]byte(`"2018-01-02 13:65:66`))
+		err = dec.DecodeTime(r, v)
+		require.Error(it, err)
+
+		r = NewReader([]byte(``))
+		err = dec.DecodeTime(r, v)
+		require.Error(it, err)
+	})
+
 }
 
 func TestDecodeJSONRaw(t *testing.T) {
@@ -182,6 +197,16 @@ func TestDecodeJSONNumber(t *testing.T) {
 		require.Equal(t, int64(88), i64)
 		f64, _ := x.Float64()
 		require.Equal(t, float64(88), f64)
+	})
+
+	t.Run("Decode json.Number w invalid value", func(ti *testing.T) {
+		r = NewReader([]byte(`hsdjdkd`))
+		err = dec.DecodeJSONNumber(r, v)
+		require.Error(t, err)
+
+		// r = NewReader([]byte(`10.3a`))
+		// err = dec.DecodeJSONNumber(r, v)
+		// require.Error(t, err)
 	})
 }
 
