@@ -38,7 +38,6 @@ func NewDumper(driver string, conn driver.Queryer) *Dumper {
 		"SMALLINT":  byteToString,
 		"MEDIUMINT": byteToString,
 		"BIGINT":    byteToString,
-		// "GEOMETRY":  StringPoint,
 		"TIMESTAMP": tsToString,
 		"DATETIME":  tsToString,
 		"DATE":      dateToString,

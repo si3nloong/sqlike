@@ -33,19 +33,17 @@ type dumpStruct struct {
 	Array   []string
 	// Point        orb.Point
 	// LineString   orb.LineString
-	Enum         Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Set          types.Set `sqlike:",set=A|B|C"`
-	Date         types.Date
-	DateTime     time.Time
-	Timestamp    types.Timestamp `sqlike:",omitempty"`
-	PtrString    *string
-	PtrBool      *bool
-	PtrInt64     *int64
-	PtrUint64    *uint64
-	PtrJSONRaw   *json.RawMessage
-	PtrDate      *types.Date
-	PtrDateTime  *time.Time
-	PtrTimestamp *types.Timestamp
+	Enum        Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Set         types.Set `sqlike:",set=A|B|C"`
+	Date        types.Date
+	DateTime    time.Time
+	PtrString   *string
+	PtrBool     *bool
+	PtrInt64    *int64
+	PtrUint64   *uint64
+	PtrJSONRaw  *json.RawMessage
+	PtrDate     *types.Date
+	PtrDateTime *time.Time
 }
 
 // SQLDumpExamples :

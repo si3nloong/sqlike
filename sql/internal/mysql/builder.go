@@ -65,6 +65,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	blr.SetBuilder(reflect.TypeOf(primitive.Sort{}), b.BuildSort)
 	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
+	blr.SetBuilder(reflect.TypeOf(primitive.Case{}), b.BuildCase)
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
 	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
@@ -77,6 +78,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	b.builder = blr
 }
 
+// BuildCastAs :
 func (b *mySQLBuilder) BuildCastAs(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.CastAs)
 	stmt.WriteString("CAST(")
@@ -94,6 +96,7 @@ func (b *mySQLBuilder) BuildCastAs(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildFunction :
 func (b *mySQLBuilder) BuildFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Func)
 	stmt.WriteString(x.Name)
@@ -110,6 +113,7 @@ func (b *mySQLBuilder) BuildFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildJSONFunction :
 func (b *mySQLBuilder) BuildJSONFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.JSONFunc)
 	stmt.WriteString(x.Type.String())
@@ -126,12 +130,14 @@ func (b *mySQLBuilder) BuildJSONFunction(stmt sqlstmt.Stmt, it interface{}) erro
 	return nil
 }
 
+// BuildString :
 func (b *mySQLBuilder) BuildString(stmt sqlstmt.Stmt, it interface{}) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(b.Quote(v.String()))
 	return nil
 }
 
+// BuildLike :
 func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.L)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
@@ -178,6 +184,7 @@ func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildField :
 func (b *mySQLBuilder) BuildField(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Field)
 	stmt.WriteString("FIELD")
@@ -193,6 +200,7 @@ func (b *mySQLBuilder) BuildField(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildValue :
 func (b *mySQLBuilder) BuildValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Value)
 	v := reflext.ValueOf(x.Raw)
@@ -261,6 +269,7 @@ func (b *mySQLBuilder) BuildJSONColumn(stmt sqlstmt.Stmt, it interface{}) error 
 	return nil
 }
 
+// BuildNil :
 func (b *mySQLBuilder) BuildNil(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Nil)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
@@ -274,12 +283,14 @@ func (b *mySQLBuilder) BuildNil(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildRaw :
 func (b *mySQLBuilder) BuildRaw(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Raw)
 	stmt.WriteString(x.Value)
 	return nil
 }
 
+// BuildAs :
 func (b *mySQLBuilder) BuildAs(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.As)
 	if err := b.getValue(stmt, x.Field); err != nil {
@@ -290,6 +301,7 @@ func (b *mySQLBuilder) BuildAs(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildAggregate :
 func (b *mySQLBuilder) BuildAggregate(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Aggregate)
 	switch x.By {
@@ -317,6 +329,7 @@ func (b *mySQLBuilder) BuildAggregate(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildOperator :
 func (b *mySQLBuilder) BuildOperator(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Operator)
 	stmt.WriteByte(' ')
@@ -325,6 +338,7 @@ func (b *mySQLBuilder) BuildOperator(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildClause :
 func (b *mySQLBuilder) BuildClause(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.C)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
@@ -343,6 +357,7 @@ func (b *mySQLBuilder) BuildClause(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildSort :
 func (b *mySQLBuilder) BuildSort(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.Sort)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
@@ -355,6 +370,7 @@ func (b *mySQLBuilder) BuildSort(stmt sqlstmt.Stmt, it interface{}) error {
 	return nil
 }
 
+// BuildKeyValue :
 func (b *mySQLBuilder) BuildKeyValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.KV)
 	stmt.WriteString(b.Quote(string(x.Field)))
@@ -362,6 +378,7 @@ func (b *mySQLBuilder) BuildKeyValue(stmt sqlstmt.Stmt, it interface{}) (err err
 	return b.getValue(stmt, x.Value)
 }
 
+// BuildMath :
 func (b *mySQLBuilder) BuildMath(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Math)
 	stmt.WriteString(b.Quote(string(x.Field)) + " ")
@@ -374,6 +391,30 @@ func (b *mySQLBuilder) BuildMath(stmt sqlstmt.Stmt, it interface{}) (err error) 
 	return
 }
 
+// BuildCase :
+func (b *mySQLBuilder) BuildCase(stmt sqlstmt.Stmt, it interface{}) error {
+	x := it.(primitive.Case)
+	stmt.WriteString("CASE")
+	for _, w := range x.Whens {
+		stmt.WriteString(" WHEN ")
+		for i, c := range w.Conds {
+			if i > 0 {
+				stmt.WriteString(" AND ")
+			}
+			if err := b.builder.BuildStatement(stmt, c); err != nil {
+				return err
+			}
+		}
+		stmt.WriteString(" THEN ")
+		if err := b.getValue(stmt, w.Result); err != nil {
+			return err
+		}
+	}
+	stmt.WriteString(" END")
+	return nil
+}
+
+// BuildSpatialFunc :
 func (b *mySQLBuilder) BuildSpatialFunc(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	x := it.(spatial.Func)
 	stmt.WriteString(x.Type.String())
@@ -388,6 +429,170 @@ func (b *mySQLBuilder) BuildSpatialFunc(stmt sqlstmt.Stmt, it interface{}) (err 
 	}
 	stmt.WriteByte(')')
 	return
+}
+
+// BuildGroup :
+func (b *mySQLBuilder) BuildGroup(stmt sqlstmt.Stmt, it interface{}) (err error) {
+	x := it.(primitive.Group)
+	for len(x.Values) > 0 {
+		if err := b.getValue(stmt, x.Values[0]); err != nil {
+			return err
+		}
+		x.Values = x.Values[1:]
+	}
+	return
+}
+
+// BuildRange :
+func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error) {
+	x := it.(primitive.R)
+	v := reflext.ValueOf(x.From)
+	encoder, err := b.registry.LookupEncoder(v)
+	if err != nil {
+		return err
+	}
+	arg, err := encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArgs(arg)
+
+	v = reflext.ValueOf(x.To)
+	encoder, err = b.registry.LookupEncoder(v)
+	if err != nil {
+		return err
+	}
+	arg, err = encoder(nil, v)
+	if err != nil {
+		return err
+	}
+	stmt.AppendArgs(arg)
+	stmt.WriteByte('?')
+	stmt.WriteString(" AND ")
+	stmt.WriteByte('?')
+	return
+}
+
+// BuildSelectStmt :
+func (b *mySQLBuilder) BuildSelectStmt(stmt sqlstmt.Stmt, it interface{}) error {
+	x := it.(*sql.SelectStmt)
+	stmt.WriteString("SELECT ")
+	if x.DistinctOn {
+		stmt.WriteString("DISTINCT ")
+	}
+	if err := b.appendSelect(stmt, x.Projections); err != nil {
+		return err
+	}
+	stmt.WriteString(" FROM ")
+	if err := b.appendTable(stmt, x.Tables); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, x.Skip)
+
+	return nil
+}
+
+// BuildUpdateStmt :
+func (b *mySQLBuilder) BuildUpdateStmt(stmt sqlstmt.Stmt, it interface{}) error {
+	x := it.(*sql.UpdateStmt)
+	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
+	if err := b.appendSet(stmt, x.Values); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Max, 0)
+	return nil
+}
+
+// BuildDeleteStmt :
+func (b *mySQLBuilder) BuildDeleteStmt(stmt sqlstmt.Stmt, it interface{}) error {
+	// x := it.(*sql.DeleteStmt)
+	// stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
+	// if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+	// 	return err
+	// }
+	// if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+	// 	return err
+	// }
+	// b.appendLimitNOffset(stmt, x.Max, 0)
+	return nil
+}
+
+// BuildFindActions :
+func (b *mySQLBuilder) BuildFindActions(stmt sqlstmt.Stmt, it interface{}) error {
+	x := it.(*actions.FindActions)
+	x.Table = strings.TrimSpace(x.Table)
+	if x.Table == "" {
+		return errors.New("mysql: empty table name")
+	}
+	stmt.WriteString("SELECT ")
+	if x.DistinctOn {
+		stmt.WriteString("DISTINCT ")
+	}
+	if err := b.appendSelect(stmt, x.Projections); err != nil {
+		return err
+	}
+	stmt.WriteString(" FROM " + b.TableName(x.Database, x.Table))
+	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+		return err
+	}
+	if err := b.appendGroupBy(stmt, x.GroupBys); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Count, x.Skip)
+
+	return nil
+}
+
+// BuildUpdateActions :
+func (b *mySQLBuilder) BuildUpdateActions(stmt sqlstmt.Stmt, it interface{}) error {
+	x, ok := it.(*actions.UpdateActions)
+	if !ok {
+		return errors.New("data type not match")
+	}
+	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
+	if err := b.appendSet(stmt, x.Values); err != nil {
+		return err
+	}
+	if err := b.appendWhere(stmt, x.Conditions); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Record, 0)
+	return nil
+}
+
+// BuildDeleteActions :
+func (b *mySQLBuilder) BuildDeleteActions(stmt sqlstmt.Stmt, it interface{}) error {
+	x := it.(*actions.DeleteActions)
+	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
+	if err := b.appendWhere(stmt, x.Conditions); err != nil {
+		return err
+	}
+	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+		return err
+	}
+	b.appendLimitNOffset(stmt, x.Record, 0)
+	return nil
 }
 
 func (b *mySQLBuilder) getValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
@@ -418,162 +623,6 @@ func (b *mySQLBuilder) getValue(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	// stmt.AppendArgs(vv)
 	convertSpatial(stmt, vv)
 	return
-}
-
-func (b *mySQLBuilder) BuildGroup(stmt sqlstmt.Stmt, it interface{}) (err error) {
-	x := it.(primitive.Group)
-	for len(x.Values) > 0 {
-		if err := b.getValue(stmt, x.Values[0]); err != nil {
-			return err
-		}
-		x.Values = x.Values[1:]
-	}
-	return
-}
-
-func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error) {
-	x := it.(primitive.R)
-	v := reflext.ValueOf(x.From)
-	encoder, err := b.registry.LookupEncoder(v)
-	if err != nil {
-		return err
-	}
-	arg, err := encoder(nil, v)
-	if err != nil {
-		return err
-	}
-	stmt.AppendArgs(arg)
-
-	v = reflext.ValueOf(x.To)
-	encoder, err = b.registry.LookupEncoder(v)
-	if err != nil {
-		return err
-	}
-	arg, err = encoder(nil, v)
-	if err != nil {
-		return err
-	}
-	stmt.AppendArgs(arg)
-	stmt.WriteByte('?')
-	stmt.WriteString(" AND ")
-	stmt.WriteByte('?')
-	return
-}
-
-func (b *mySQLBuilder) BuildSelectStmt(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(*sql.SelectStmt)
-	stmt.WriteString("SELECT ")
-	if x.DistinctOn {
-		stmt.WriteString("DISTINCT ")
-	}
-	if err := b.appendSelect(stmt, x.Projections); err != nil {
-		return err
-	}
-	stmt.WriteString(" FROM ")
-	if err := b.appendTable(stmt, x.Tables); err != nil {
-		return err
-	}
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-		return err
-	}
-	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Max, x.Skip)
-
-	return nil
-}
-
-func (b *mySQLBuilder) BuildUpdateStmt(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(*sql.UpdateStmt)
-	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
-	if err := b.appendSet(stmt, x.Values); err != nil {
-		return err
-	}
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Max, 0)
-	return nil
-}
-
-func (b *mySQLBuilder) BuildDeleteStmt(stmt sqlstmt.Stmt, it interface{}) error {
-	// x := it.(*sql.DeleteStmt)
-	// stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
-	// if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-	// 	return err
-	// }
-	// if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-	// 	return err
-	// }
-	// b.appendLimitNOffset(stmt, x.Max, 0)
-	return nil
-}
-
-func (b *mySQLBuilder) BuildFindActions(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(*actions.FindActions)
-	x.Table = strings.TrimSpace(x.Table)
-	if x.Table == "" {
-		return errors.New("mysql: empty table name")
-	}
-	stmt.WriteString("SELECT ")
-	if x.DistinctOn {
-		stmt.WriteString("DISTINCT ")
-	}
-	if err := b.appendSelect(stmt, x.Projections); err != nil {
-		return err
-	}
-	stmt.WriteString(" FROM " + b.TableName(x.Database, x.Table))
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-		return err
-	}
-	if err := b.appendGroupBy(stmt, x.GroupBys); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Count, x.Skip)
-
-	return nil
-}
-
-func (b *mySQLBuilder) BuildUpdateActions(stmt sqlstmt.Stmt, it interface{}) error {
-	x, ok := it.(*actions.UpdateActions)
-	if !ok {
-		return errors.New("data type not match")
-	}
-	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
-	if err := b.appendSet(stmt, x.Values); err != nil {
-		return err
-	}
-	if err := b.appendWhere(stmt, x.Conditions); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Record, 0)
-	return nil
-}
-
-func (b *mySQLBuilder) BuildDeleteActions(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(*actions.DeleteActions)
-	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
-	if err := b.appendWhere(stmt, x.Conditions); err != nil {
-		return err
-	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-		return err
-	}
-	b.appendLimitNOffset(stmt, x.Record, 0)
-	return nil
 }
 
 func (b *mySQLBuilder) appendSelect(stmt sqlstmt.Stmt, pjs []interface{}) error {

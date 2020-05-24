@@ -40,6 +40,19 @@ func NotExists(subquery interface{}) (grp primitive.Group) {
 	return
 }
 
+// Case :
+func Case(wts ...*primitive.WhenThen) (c primitive.Case) {
+	c.Whens = wts
+	return c
+}
+
+// When :
+func When(conds ...interface{}) *primitive.WhenThen {
+	wt := new(primitive.WhenThen)
+	wt.Conds = conds
+	return wt
+}
+
 func union(link primitive.Raw, stmts []selectStmt) (grp primitive.Group) {
 	for i, stmt := range stmts {
 		if i > 0 {

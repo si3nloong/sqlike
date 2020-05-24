@@ -27,10 +27,11 @@ func (r *Reader) ReadNumber() (Number, error) {
 
 	r.unreadByte()
 	str := string(r.b[r.pos:])
-	for i := r.pos; i < r.len; i++ {
+	pos := r.pos
+	for i := pos; i < r.len; i++ {
 		c = r.nextToken()
 		if c != '.' && c != 'e' && valueMap[c] != jsonNumber {
-			str = string(r.b[r.pos:i])
+			str = string(r.b[pos:i])
 			r.pos = i
 			break
 		}
@@ -54,5 +55,4 @@ func (r *Reader) skipNumber() {
 			return
 		}
 	}
-	return
 }

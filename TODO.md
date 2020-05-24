@@ -24,7 +24,6 @@
 - [x] Support aggregate functions `Max`, `Min`, `Count`, `Avg`, `Sum`.
 - [x] Connect to `MySQL` server with `options.Connect`.
 - [x] Support omit options on `InsertOne` and `Insert`.
-- [x] Support custom type `GeoPoint`.
 - [x] Change default primary key with `SetPrimaryKey`.
 - [x] Support extra options like `charset` and `collation` in connection.
 - [x] Get `MySQL` server version.
@@ -81,5 +80,7 @@
 - [ ] Comprehensive `testcase`.
 - [ ] Support insert with map.
 - [ ] Support foreign key.
+- [ ] Support comment.
+- [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
 - [ ] Strict mode. (prevent toxic query)
 - [ ] [BREAKING CHANGE] collate should reside in charset package.

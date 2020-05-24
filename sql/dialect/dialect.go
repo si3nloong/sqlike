@@ -72,6 +72,9 @@ func init() {
 func RegisterDialect(driver string, dialect Dialect) {
 	mutex.Lock()
 	defer mutex.Unlock()
+	if dialect == nil {
+		panic("invalid nil dialect")
+	}
 	dialects[driver] = dialect
 }
 

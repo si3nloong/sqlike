@@ -143,9 +143,6 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 		ok  bool
 	)
 
-	// if !v.IsValid() || reflext.IsNull(v) {
-	// 	return NilEncoder, nil
-	// }
 	if !v.IsValid() {
 		return NilEncoder, nil
 	}
@@ -211,7 +208,6 @@ func encodeValue(_ reflext.StructFielder, v reflect.Value) (interface{}, error) 
 	return x.Value()
 }
 
-// NilEncoder :
 func NilEncoder(_ reflext.StructFielder, _ reflect.Value) (interface{}, error) {
 	return nil, nil
 }

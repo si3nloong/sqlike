@@ -25,10 +25,23 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	table := db.Table("NormalStruct")
 	uid, _ := uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
+	uid2, _ := uuid.Parse("ae608554-491c-4472-beac-97feef49e810")
 
 	{
 		ns = normalStruct{}
 		ns.ID = uid
+		ns.Timestamp = time.Now()
+		result, err = table.InsertOne(
+			ctx,
+			&ns,
+			options.InsertOne().
+				SetMode(options.InsertIgnore))
+		affected, _ = result.RowsAffected()
+		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
+
+		ns = normalStruct{}
+		ns.ID = uid2
 		ns.Timestamp = time.Now()
 		result, err = table.InsertOne(
 			ctx,
@@ -178,6 +191,53 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
+	}
+
+	// update with case
+	{
+		i8 := int8(88)
+		i64 := int64(56789)
+		uids := []uuid.UUID{uid, uid2}
+		affected, err = table.Update(
+			ctx,
+			actions.Update().
+				Where(expr.In("$Key", uids)).
+				Set(
+					expr.ColumnValue(
+						"SID",
+						expr.Case(
+							expr.When(
+								expr.Equal("$Key", uid),
+							).Then(i64),
+							expr.When(
+								expr.Equal("$Key", uid2),
+							).Then(i8),
+						),
+					),
+				),
+			options.Update().SetDebug(true),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, int64(2), affected)
+
+		result, err := table.Find(
+			ctx,
+			actions.Find().
+				Where(
+					expr.In("$Key", uids),
+				).
+				OrderBy(
+					expr.Asc("$Key"),
+				),
+		)
+		require.NoError(t, err)
+		nss := []normalStruct{}
+		err = result.All(&nss)
+		require.NoError(t, err)
+
+		require.Equal(t, "88", nss[0].SID)
+		require.Equal(t, "56789", nss[1].SID)
 	}
 
 }
