@@ -28,18 +28,7 @@ func (opt *InsertOneOptions) SetOmitFields(fields ...string) *InsertOneOptions {
 	return opt
 }
 
-// AppendOmitField :
-func (opt *InsertOneOptions) AppendOmitField(field string) *InsertOneOptions {
-	opt.Omits = append(opt.Omits, field)
-	return opt
-}
-
-// SetOnConflict :
-func (opt *InsertOneOptions) SetOnConflict(src []interface{}) *InsertOneOptions {
-	return opt
-}
-
-// AppendOnConflict :
-func (opt *InsertOneOptions) AppendOnConflict(col string, val interface{}) *InsertOneOptions {
-	return opt
-}
+// // SetOnConflict :
+// func (opt *InsertOneOptions) SetOnConflict(src []interface{}) *InsertOneOptions {
+// 	return opt
+// }

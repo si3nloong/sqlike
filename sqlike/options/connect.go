@@ -1,7 +1,6 @@
 package options
 
 import (
-	"net"
 	"regexp"
 	"strings"
 
@@ -59,16 +58,16 @@ func (opt *ConnectOptions) SetProtocol(network string) *ConnectOptions {
 
 // SetHost :
 func (opt *ConnectOptions) SetHost(host string) *ConnectOptions {
-	if ip := net.ParseIP(opt.Host); ip != nil {
-		panic("invalid ip address")
-	}
+	// if ip := net.ParseIP(opt.Host); ip != nil {
+	// 	panic("invalid ip address")
+	// }
 	opt.Host = strings.TrimSpace(host)
 	return opt
 }
 
 // SetPort :
 func (opt *ConnectOptions) SetPort(port string) *ConnectOptions {
-	if !regexp.MustCompile("[0-9]+").MatchString(port) {
+	if len(regexp.MustCompile("[0-9]+").FindAllString(port, -1)) != 1 {
 		panic("invalid port format")
 	}
 	opt.Port = strings.TrimSpace(port)

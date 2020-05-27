@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFindOne(t *testing.T) {
-	opt := FindOne()
+func TestFind(t *testing.T) {
+	opt := Find()
 
 	t.Run("SetDebug", func(it *testing.T) {
 		{

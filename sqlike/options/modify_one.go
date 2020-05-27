@@ -29,9 +29,3 @@ func (opt *ModifyOneOptions) SetStrict(strict bool) *ModifyOneOptions {
 	opt.NoStrict = !strict
 	return opt
 }
-
-// AppendOmitField :
-func (opt *ModifyOneOptions) AppendOmitField(field string) *ModifyOneOptions {
-	opt.Omits = append(opt.Omits, field)
-	return opt
-}
