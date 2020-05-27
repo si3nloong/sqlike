@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -89,8 +88,7 @@ func TestSelect(t *testing.T) {
 
 		x := New()
 		stmt2 := sqlstmt.NewStatement(x)
-		x.parser.BuildStatement(stmt2, stmt)
-		log.Println(stmt2.String())
-		// New().Select(stmt)
+		err := x.parser.BuildStatement(stmt2, stmt)
+		require.NoError(t, err)
 	}
 }

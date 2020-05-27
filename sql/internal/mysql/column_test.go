@@ -21,8 +21,8 @@ func TestRenameColumn(t *testing.T) {
 	ms := New()
 	stmt := sqlstmt.AcquireStmt(ms)
 	defer sqlstmt.ReleaseStmt(stmt)
-	ms.RenameTable(stmt, "db", "oldName", "newName")
-	require.Equal(t, "RENAME TABLE `db`.`oldName` TO `db`.`newName`;", stmt.String())
+	ms.RenameColumn(stmt, "db", "table", "c1", "_column_")
+	require.Equal(t, "ALTER TABLE `db`.`table` RENAME COLUMN `c1` TO `_column_`;", stmt.String())
 	require.ElementsMatch(t, []interface{}{}, stmt.Args())
 }
 

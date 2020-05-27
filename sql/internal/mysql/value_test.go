@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"database/sql"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -53,4 +55,13 @@ func TestFormat(t *testing.T) {
 	ts, _ := time.Parse("2006-01-02 15:04:05", "2020-01-03 12:00:40")
 	str = ms.Format(ts)
 	require.Equal(t, `"2020-01-03 12:00:40"`, str)
+
+	str = ms.Format([]byte("hello world"))
+	require.Equal(t, `"hello world"`, str)
+
+	str = ms.Format(sql.RawBytes(`raw`))
+	require.Equal(t, `raw`, str)
+
+	str = ms.Format(json.RawMessage(`{"key":"value", "key2":"value"}`))
+	require.Equal(t, `"{\"key\":\"value\", \"key2\":\"value\"}"`, str)
 }

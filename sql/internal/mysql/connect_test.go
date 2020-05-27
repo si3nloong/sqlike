@@ -28,4 +28,9 @@ func TestConnect(t *testing.T) {
 	require.Panics(t, func() {
 		ms.Connect(nil)
 	})
+
+	require.Panics(t, func() {
+		opt := new(options.ConnectOptions)
+		ms.Connect(opt)
+	})
 }

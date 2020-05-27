@@ -16,6 +16,46 @@ func TestUseDatabase(t *testing.T) {
 	require.ElementsMatch(t, []interface{}{}, stmt.Args())
 }
 
+func TestCreateDatabase(t *testing.T) {
+	ms := New()
+	stmt := sqlstmt.AcquireStmt(ms)
+	defer sqlstmt.ReleaseStmt(stmt)
+
+	{
+		ms.CreateDatabase(stmt, "db", false)
+		require.Equal(t, "CREATE DATABASE `db`;", stmt.String())
+		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	}
+
+	stmt.Reset()
+
+	{
+		ms.CreateDatabase(stmt, "db", true)
+		require.Equal(t, "CREATE DATABASE IF NOT EXISTS `db`;", stmt.String())
+		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	}
+}
+
+func TestDropDatabase(t *testing.T) {
+	ms := New()
+	stmt := sqlstmt.AcquireStmt(ms)
+	defer sqlstmt.ReleaseStmt(stmt)
+
+	{
+		ms.DropDatabase(stmt, "db", false)
+		require.Equal(t, "DROP SCHEMA `db`;", stmt.String())
+		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	}
+
+	stmt.Reset()
+
+	{
+		ms.DropDatabase(stmt, "db", true)
+		require.Equal(t, "DROP SCHEMA IF EXISTS `db`;", stmt.String())
+		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	}
+}
+
 func TestGetDatabases(t *testing.T) {
 	ms := New()
 	stmt := sqlstmt.AcquireStmt(ms)
