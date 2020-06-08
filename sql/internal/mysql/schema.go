@@ -66,6 +66,10 @@ func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) (col columns.Column)
 	col.DataType = "MEDIUMBLOB"
 	col.Type = "MEDIUMBLOB"
 	col.Nullable = sf.IsNullable()
+	tag := sf.Tag()
+	if v, ok := tag.LookUp("default"); ok {
+		col.DefaultValue = &v
+	}
 	return
 }
 
@@ -151,6 +155,9 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 	col.DefaultValue = &dflt
 	col.Charset = &charset
 	col.Collation = &collation
+	if v, ok := tag.LookUp("default"); ok {
+		col.DefaultValue = &v
+	}
 
 	if enum, ok := tag.LookUp("enum"); ok {
 		paths := strings.Split(enum, "|")
@@ -241,6 +248,7 @@ func (s mySQLSchema) BoolDataType(sf reflext.StructFielder) (col columns.Column)
 
 func (s mySQLSchema) IntDataType(sf reflext.StructFielder) (col columns.Column) {
 	t := sf.Type()
+	tag := sf.Tag()
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
@@ -249,15 +257,21 @@ func (s mySQLSchema) IntDataType(sf reflext.StructFielder) (col columns.Column) 
 	col.Type = dataType
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := sf.Tag().LookUp("auto_increment"); ok {
+	if _, ok := tag.LookUp("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
+	} else if v, ok := tag.LookUp("default"); ok {
+		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
+			panic("int default value should be integer")
+		}
+		col.DefaultValue = &v
 	}
 	return
 }
 
 func (s mySQLSchema) UintDataType(sf reflext.StructFielder) (col columns.Column) {
 	t := sf.Type()
+	tag := sf.Tag()
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
@@ -266,23 +280,35 @@ func (s mySQLSchema) UintDataType(sf reflext.StructFielder) (col columns.Column)
 	col.Type = dataType + " UNSIGNED"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := sf.Tag().LookUp("auto_increment"); ok {
+	if _, ok := tag.LookUp("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
+	} else if v, ok := tag.LookUp("default"); ok {
+		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
+			panic("uint default value should be unsigned integer")
+		}
+		col.DefaultValue = &v
 	}
 	return
 }
 
 func (s mySQLSchema) FloatDataType(sf reflext.StructFielder) (col columns.Column) {
 	dflt := "0"
+	tag := sf.Tag()
 	col.Name = sf.Name()
 	col.DataType = "REAL"
 	col.Type = "REAL"
-	if _, ok := sf.Tag().LookUp("unsigned"); ok {
+	if _, ok := tag.LookUp("unsigned"); ok {
 		col.Type += " UNSIGNED"
 	}
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
+	if v, ok := tag.LookUp("default"); ok {
+		if _, err := strconv.ParseFloat(v, 10); err != nil {
+			panic("float default value should be decimal number")
+		}
+		col.DefaultValue = &v
+	}
 	return
 }
 

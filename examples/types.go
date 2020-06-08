@@ -24,7 +24,7 @@ type Model struct {
 }
 
 type normalStruct struct {
-	ID            uuid.UUID `sqlike:"$Key"`
+	ID            uuid.UUID `sqlike:"$Key,comment=Primary key"`
 	Key           *types.Key
 	VirtualColumn string `sqlike:",generated_column"`
 	Date          types.Date
@@ -38,7 +38,7 @@ type normalStruct struct {
 	Bool          bool
 	priv          int
 	Skip          interface{} `sqlike:"-"`
-	Int           int
+	Int           int         `sqlike:",default=100"`
 	TinyInt       int8
 	SmallInt      int16
 	MediumInt     int32

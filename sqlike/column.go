@@ -28,9 +28,17 @@ type Column struct {
 	// default value of the column
 	DefaultValue *string
 
-	Charset   *string
+	// text character set encoding
+	Charset *string
+
+	// text collation for sorting
 	Collation *string
-	Extra     string
+
+	// column comment
+	Comment string
+
+	// extra information
+	Extra string
 }
 
 // ColumnView :

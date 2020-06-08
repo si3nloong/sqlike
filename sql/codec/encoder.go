@@ -100,7 +100,8 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
 func (enc DefaultEncoders) EncodeString(sf reflext.StructFielder, v reflect.Value) (interface{}, error) {
 	str := v.String()
 	if str == "" && sf != nil {
-		if val, ok := sf.Tag().LookUp("enum"); ok {
+		tag := sf.Tag()
+		if val, ok := tag.LookUp("enum"); ok {
 			enums := strings.Split(val, "|")
 			if len(enums) > 0 {
 				return enums[0], nil

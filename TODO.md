@@ -72,6 +72,7 @@
 - [x] Support option tag `unique_index` with alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
 - [x] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
+- [x] Support comment.
 - [ ] Support spatial `Polygon`.
 - [ ] Support default value for `StructField`.
 - [ ] Support `charset` and `collate` on `AlterTable`.
@@ -80,7 +81,6 @@
 - [ ] Comprehensive `testcase`.
 - [ ] Support insert with map.
 - [ ] Support foreign key.
-- [ ] Support comment.
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
 - [ ] Strict mode. (prevent toxic query)
 - [ ] [BREAKING CHANGE] collate should reside in charset package.

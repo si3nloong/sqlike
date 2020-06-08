@@ -114,6 +114,7 @@ func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 			&col.DataType,
 			&col.Charset,
 			&col.Collation,
+			&col.Comment,
 			&col.Extra,
 		); err != nil {
 			return nil, err

@@ -41,6 +41,14 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		}
 
 		latin1 := "latin1"
+
+		{
+			pk := columnMap["$Key"]
+			require.Equal(t, "VARCHAR(36)", pk.Type)
+			require.Equal(t, "$Key", pk.Name)
+			require.Equal(t, "Primary key", pk.Comment)
+		}
+
 		// check struct tag option
 		require.Equal(t, "VARCHAR(300)", columnMap["CustomStrType"].Type)
 		require.Equal(t, "DOUBLE UNSIGNED", columnMap["UFloat32"].Type)

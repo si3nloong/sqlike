@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/si3nloong/sqlike/reflext"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,9 +28,25 @@ func TestRegistry(t *testing.T) {
 	rg.RegisterTypeCodec(typeof, nil, nil)
 	rg.RegisterTypeEncoder(typeof, nil)
 	rg.RegisterTypeDecoder(typeof, nil)
+
+	tByte := reflect.TypeOf([]byte{})
+	byteEncoder := func(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+		return v.Bytes(), nil
+	}
+	rg.RegisterTypeCodec(tByte, byteEncoder, nil)
+	// encoder, err := rg.LookupEncoder(reflect.ValueOf([]byte{}))
+	// require.NoError(t, err)
+
+	// require.Same(t, ValueEncoder(byteEncoder), encoder)
 }
 
 func TestEncodeValue(t *testing.T) {
+	{
+		it, err := encodeValue(nil, reflect.ValueOf(nil))
+		require.NoError(t, err)
+		require.Nil(t, it)
+	}
+
 	{
 		it, err := encodeValue(nil, reflect.ValueOf("hello world"))
 		require.Error(t, err)

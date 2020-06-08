@@ -85,14 +85,21 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 		}
 
 		idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
-		if _, ok := sf.Tag().LookUp("unique_index"); ok {
+		if _, ok := tag.LookUp("unique_index"); ok {
 			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
 			stmt.WriteByte(',')
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
 
-		// Generated columns :
+		if v, ok := tag.LookUp("comment"); ok {
+			if len(v) > 60 {
+				panic("maximum length of comment is 60 characters")
+			}
+			stmt.WriteString(" COMMENT '" + v + "'")
+		}
+
+		// check generated columns
 		t := reflext.Deref(sf.Type())
 		if t.Kind() != reflect.Struct {
 			continue
@@ -134,6 +141,7 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 			children = children[1:]
 			children = append(children, child.Children()...)
 		}
+
 	}
 	if pkk != nil {
 		stmt.WriteByte(',')
@@ -207,10 +215,18 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 			return
 		}
 		ms.buildSchemaByColumn(stmt, col)
+
+		if v, ok := sf.Tag().LookUp("comment"); ok {
+			if len(v) > 60 {
+				panic("maximum length of comment is 60 characters")
+			}
+			stmt.WriteString(" COMMENT '" + v + "'")
+		}
+
 		stmt.WriteString(" " + suffix)
 		suffix = "AFTER " + ms.Quote(sf.Name())
 
-		// Generated columns :
+		// check generated columns
 		t := reflext.Deref(sf.Type())
 		if t.Kind() != reflect.Struct {
 			continue
@@ -262,6 +278,7 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 			children = children[1:]
 			children = append(children, child.Children()...)
 		}
+
 	}
 
 	if pkk != nil {
