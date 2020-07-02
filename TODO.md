@@ -31,31 +31,31 @@
 - [x] Support omit options on `ModifyOne`.
 - [x] List all `Database`.
 - [x] Support `Tag` such as `auto_increment`, `charset`, `size`, `unsigned`, `enum`, `longtext`, `generated_column`, `virtual_column`, `stored_column`.
-- [x] [Feature] Truncate selected `Table`.
-- [x] [Feature] List all column for selected `Table`.
+- [x] :bulb: Truncate selected `Table`.
+- [x] :bulb: List all column for selected `Table`.
 - [x] Add index using `CreateOne` and `CreateMany`.
-- [x] [Feature] Drop selected `Table`.
-- [x] [Feature] Rename `Table`.
-- [x] [Feature] Check `Table` exists.
-- [x] [Feature] Create single `Index` (support `unique`, `fulltext` and `spatial`).
-- [x] [Feature] Support primary key on `Migration`.
-- [x] [Feature] Create multiple `Index`.
-- [x] [Feature] List all `Index`.
-- [x] [Feature] Drop selected `Index`.
-- [x] [Feature] `Transaction` support.
-- [x] [Feature] Add timeout for `Transaction`.
-- [x] [Bug] Virtual column sequence in `ALTER TABLE`.
+- [x] :bulb: Drop selected `Table`.
+- [x] :bulb: Rename `Table`.
+- [x] :bulb: Check `Table` exists.
+- [x] :bulb: Create single `Index` (support `unique`, `fulltext` and `spatial`).
+- [x] :bulb: Support primary key on `Migration`.
+- [x] :bulb: Create multiple `Index`.
+- [x] :bulb: List all `Index`.
+- [x] :bulb: Drop selected `Index`.
+- [x] :bulb: `Transaction` support.
+- [x] :bulb: Add timeout for `Transaction`.
+- [x] :bug: Virtual column sequence in `ALTER TABLE`.
 - [x] Support custom type `Key`.
 - [x] Support custom type `Date`.
-- [x] [Feature] Create `Logger`.
-- [x] [Feature] Custom `JSON` encoder (w/o cover `Map` datatype).
+- [x] :bulb: Create `Logger`.
+- [x] :bulb: Custom `JSON` encoder (w/o cover `Map` datatype).
 - [x] Custom `JSON` decoder.
-- [x] [Bug] `UnmarshalJSONB` into `[]byte`.
-- [x] [Feature] Single database `Migration`.
-- [x] [Feature] Support `generated_column` for `Migration` (`virtual_column` or stored_column`)
+- [x] :bug: `UnmarshalJSONB` into `[]byte`.
+- [x] :bulb: Single database `Migration`.
+- [x] :bulb: Support `generated_column` for `Migration` (`virtual_column` or stored_column`)
 - [x] Support `UnsafeMigrate`.
 - [x] Support `MustUnsafeMigrate`.
-- [x] [Feature] `InsertIgnore` & `Upsert`.
+- [x] :bulb: `InsertIgnore` & `Upsert`.
 - [x] Set omit or setter fields on `Upsert`.
 - [x] Insert single record into `Table`.
 - [x] Insert multiple record into `Table`.
@@ -71,7 +71,7 @@
 - [x] Support option tag `unique_index` with create table.
 - [x] Support option tag `unique_index` with alter table.
 - [x] Support `charset` and `collate` on `Connect` and `CreateDatabase`.
-- [x] [Bug](jsonb) Support nested `json.RawMessage` unmarshal.
+- [x] :bug: (jsonb) Support nested `json.RawMessage` unmarshal.
 - [x] Support comment.
 - [ ] Support spatial `Polygon`.
 - [ ] Support default value for `StructField`.
