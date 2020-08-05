@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -73,11 +74,13 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	}
 
 	{
-		filename := "backup.sql"
-		file, err := os.Create(filename)
+		// zip all sql files
+
+		file, err := ioutil.TempFile("", ".sql")
 		if err != nil {
 			panic(err)
 		}
+		defer os.Remove(file.Name())
 
 		// utcNow := time.Now().UTC().Add(-1 * time.Hour * 48)
 		zero := time.Time{}
@@ -120,11 +123,12 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		err = table.Truncate(ctx)
 		require.NoError(t, err)
 
-		// b, err := ioutil.ReadFile(filename)
+		// b, err := ioutil.ReadFile(file.Name())
 		// if err != nil {
 		// 	panic(err)
 		// }
 
+		// log.Println(string(b))
 		// result, err := client.Exec(string(b))
 		// require.NoError(t, err)
 		// affected, err := result.RowsAffected()

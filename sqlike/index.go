@@ -3,7 +3,7 @@ package sqlike
 import (
 	"context"
 
-	"github.com/Masterminds/semver"
+	semver "github.com/Masterminds/semver/v3"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"

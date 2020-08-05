@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/Masterminds/semver"
+	semver "github.com/Masterminds/semver/v3"
 
 	_ "github.com/go-sql-driver/mysql"
 	mysql "github.com/go-sql-driver/mysql"
