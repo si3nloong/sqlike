@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -127,10 +126,7 @@ func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Write
 	if err := dump.dialect.SelectStmt(stmt, query); err != nil {
 		return 0, err
 	}
-	log.Println("Statement =>", stmt.String())
 
-	// 	log.Println("Statement =>", stmt.String())
-	// 	log.Println("Args =>", stmt.Args())
 	rows, err := dump.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
 		return 0, err
@@ -152,7 +148,7 @@ func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Write
 `)
 	w.WriteString("# Driver: " + dump.driver + "\n")
 	w.WriteString("# Version: " + version + "\n")
-	w.WriteString("# Host: rm-zf86x4n0wvyy6830yyo.mysql.kualalumpur.rds.aliyuncs.com\n")
+	// w.WriteString("# Host: rm-zf86x4n0wvyy6830yyo.mysql.kualalumpur.rds.aliyuncs.com\n")
 	w.WriteString("# Database: " + dbName + "\n")
 	w.WriteString("# Generation Time: " + time.Now().UTC().Format(time.RFC3339) + "\n")
 	w.WriteString("# ************************************************************\n")
