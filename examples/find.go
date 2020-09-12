@@ -123,7 +123,14 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, float64(19833.6789), ns.Float64)
 		require.Equal(t, Enum("FAILED"), ns.Enum)
 		require.Equal(t, virtualColumn, ns.Struct.VirtualStr)
+
 		require.Nil(t, ns.Struct.NestedNullInt)
+		require.Nil(t, ns.Struct.Key)
+		var nilKey *types.Key
+		require.Equal(t, nilKey, ns.Struct.Key)
+		require.True(t, ns.Struct.Key == nil)
+		require.True(t, ns.Struct.Key == nilKey)
+
 		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)

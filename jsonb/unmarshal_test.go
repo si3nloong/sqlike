@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -60,8 +61,11 @@ type testStruct struct {
 	StrSlice   []string
 	Users      []User
 	Nested     struct {
-		MultiPtr ***string
-		Security struct {
+		NilKey         *types.Key
+		MultiNilPtrKey ******types.Key
+		Key            *types.Key
+		MultiPtr       ***string
+		Security       struct {
 			PrivateKey []byte
 		}
 		Test   string
@@ -573,6 +577,8 @@ func TestUnmarshal(t *testing.T) {
 				{"Name":"SianLoong",   "Age": 18}   ,
 			 { "Name":"Junkai"}],
 			"Nested": {
+				"NilKey": null,
+				"MultiNilPtrKey": null,
 				"MultiPtr": "testing \"multiple\" pointer",
 				"Security"   : {
 					"PrivateKey": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlDWFFJQkFBS0JnUUMrYUlTemtOdXFiZmdxWW9IYW1iS0dyaEF6UnV0dWYydWFzOUJIeXllUFJUdUk5ZVdwCnJHY3lRZlhPVlh2OGJBZVMxK2tIS0MvK1ZDTk9EbGZBTFlQWVVZa053eHVvRnFMbU1SR3E1MzMwSEVLSUpySDcKSUU5aUs0QUVZL3h5WjBTUEp5ZkNnQ2ZaeGtJTmpacWFoSS8rVWxrL1BmdWwyaEQ0ZTNUZVpGTm5HUUlEQVFBQgpBb0dBSHpOYlExMWlVV3dSdFVoTkJQZ1lnKzh6NG1NbG93YW9LRUo4eDdibmRaZWZxTks2WG5KTXVyU0tSZFJHCks5ZTc2ZmtOUzBudmkxcFlLcXM0LzltMWQ4Mk9XdmtDeXZvR3pmRXdyNGJ6bVBBZjdkczVkWElhb29wbWV4WWwKbFpsSmtuMDhWNFJmOWc4RFEyNFRsb3BpZ3RrSzY5UktRSzFHaHVyV1A4UjVxeTBDUVFEZ3dxcGVKZFF5RUdaYgpQUElJN2ZsSUVDRjlQNnNVc1ovNW40cEhNNmg2N0dOdGU1cEx4bDkzOXYybVhaN09aSUZHQU1rUmNDL1ZIK3c4Cm5oaytaNE9yQWtFQTJOK01oOWRpN1YreldaNUNIWXBWTHM5Qi9xOVl3YjFCNjN0UnZUbG9QSnFqTHc1NDUzZUUKbEs0ZnJSaVhXbEhLaUpLYlBOTU1ZUVkyTVRrcEQ2dDhTd0pCQUlkU2JRVFdQZFlPcmJITkZlUnVjeUlDSkVlbQpwN2lENFUrSDBOZGhzTlNoc3BOZVVkM0JpQVZRZmhOR1ZyRHBMalFaa1BXZzJBdTNkcUpnaGM1ZXdKVUNRQUVFCkV4RnoxZGZNMGZkQ2dZYkg1aHhCQmtzZUlTbFBMS2JndmdKSDZaQVhIVnFVRThicHpXb3c0cDhaOVdPTDdJbjEKUGRyc0ZpdkNMckRPVnIzbkRMOENRUURKSENwSEVFNTc0ckpzblJNYk5rR0F5dmZheW9MeElhVUF5WXovaGxrMgpzQ0wzb3BsdDNYM0tjYzV1MkRISVFsZTdGM1M4Wmp4REZMSVRrbnJ4QS9UVgotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ=="
@@ -597,9 +603,25 @@ func TestUnmarshal(t *testing.T) {
 			cp := make([]byte, len(b))
 			copy(cp, b)
 
-			var o testStruct
+			var (
+				o           testStruct
+				nilKey      *types.Key
+				multiNilKey ******types.Key
+			)
+
+			o.Nested.Key = types.IDKey("XX", 100, nil)
+
 			err = Unmarshal(cp, &o)
 			require.NoError(t, err)
+
+			require.Nil(t, o.Nested.Key)
+			require.Equal(t, nilKey, o.Nested.Key)
+
+			require.Nil(t, o.Nested.NilKey)
+			require.Equal(t, nilKey, o.Nested.NilKey)
+
+			require.Nil(t, o.Nested.MultiNilPtrKey)
+			require.Equal(t, multiNilKey, o.Nested.MultiNilPtrKey)
 
 			// after unmarshal, the input should be the same (input shouldn't modified)
 			require.Equal(t, uuid.MustParse(`4c03d1de-645b-40d2-9ed5-12bb537a602e`), *****o.UUID)

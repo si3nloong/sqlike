@@ -258,6 +258,10 @@ func (dec *DefaultDecoder) DecodeStruct(r *Reader, v reflect.Value) error {
 	}
 
 	return r.ReadObject(func(it *Reader, k string) error {
+		if it.IsNull() {
+			return nil
+		}
+
 		vv, exists := mapper.LookUpFieldByName(v, k)
 		if !exists {
 			return nil

@@ -53,6 +53,7 @@ type normalStruct struct {
 	UFloat32      float32 `sqlike:",unsigned"`
 	EmptyStruct   struct{}
 	Struct        struct {
+		Key           *types.Key
 		VirtualStr    string `sqlike:",virtual_column=VirtualColumn"`
 		StoredStr     string `sqlike:",stored_column"`
 		NestedBool    bool

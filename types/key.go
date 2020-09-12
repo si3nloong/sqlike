@@ -71,7 +71,7 @@ func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column
 }
 
 // ID :
-func (k *Key) ID() string {
+func (k Key) ID() string {
 	if k.NameID != "" {
 		return k.NameID
 	}
@@ -107,10 +107,7 @@ func copyKey(k *Key) *Key {
 }
 
 // Value :
-func (k *Key) Value() (driver.Value, error) {
-	if k == nil {
-		return nil, nil
-	}
+func (k Key) Value() (driver.Value, error) {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	k.marshal(blr, true)
@@ -133,7 +130,7 @@ func (k *Key) Scan(it interface{}) error {
 }
 
 // Incomplete :
-func (k *Key) Incomplete() bool {
+func (k Key) Incomplete() bool {
 	return k.NameID == "" && k.IntID == 0
 }
 
@@ -180,30 +177,24 @@ func (k *Key) Equal(o *Key) bool {
 }
 
 // MarshalBinary :
-func (k *Key) MarshalBinary() ([]byte, error) {
-	if k == nil {
-		return []byte(`null`), nil
-	}
+func (k Key) MarshalBinary() ([]byte, error) {
 	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalText :
-func (k *Key) MarshalText() ([]byte, error) {
+func (k Key) MarshalText() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	k.marshal(buf, true)
 	return buf.Bytes(), nil
 }
 
 // MarshalJSON :
-func (k *Key) MarshalJSON() ([]byte, error) {
-	if k == nil {
-		return []byte(`null`), nil
-	}
+func (k Key) MarshalJSON() ([]byte, error) {
 	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalJSONB :
-func (k *Key) MarshalJSONB() ([]byte, error) {
+func (k Key) MarshalJSONB() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	buf.WriteRune('"')
 	k.marshal(buf, true)
@@ -273,7 +264,7 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 }
 
 // MarshalBSONValue :
-func (k *Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
+func (k Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
 }
 
@@ -290,10 +281,7 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 }
 
 // String returns a string representation of the key.
-func (k *Key) String() string {
-	if k == nil {
-		return ""
-	}
+func (k Key) String() string {
 	b := bytes.NewBuffer(make([]byte, 0, 512))
 	k.marshal(b, false)
 	return b.String()

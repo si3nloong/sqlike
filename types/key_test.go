@@ -173,6 +173,19 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("JSONB Marshal & Unmarshal", func(it *testing.T) {
+		var nilKey *Key
+		b, err = jsonb.Marshal(nilKey)
+		require.NoError(it, err)
+		require.Equal(t, []byte(`null`), b)
+
+		var o struct {
+			Key *Key
+		}
+
+		b, err = jsonb.Marshal(o)
+		require.NoError(it, err)
+		require.Equal(t, []byte(`{"Key":null}`), b)
+
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())
 
