@@ -260,28 +260,56 @@ func TestKey(t *testing.T) {
 	t.Run("driver.Valuer", func(it *testing.T) {
 		k := NameKey("Parent", "hello-world", nil)
 		v, err := k.Value()
-		require.NoError(t, err)
+		require.NoError(it, err)
 		require.Equal(it, `Parent,'hello-world'`, v)
 
 		nk := NameKey("Child", "hRTYUIO88191", k)
 		v, err = nk.Value()
-		require.NoError(t, err)
+		require.NoError(it, err)
 		require.Equal(it, `Parent,'hello-world'/Child,'hRTYUIO88191'`, v)
 
 		idk := IDKey("Parent", 187239123213, nil)
 		v, err = idk.Value()
-		require.NoError(t, err)
+		require.NoError(it, err)
 		require.Equal(it, `Parent,187239123213`, v)
 
 		idck := IDKey("Child", 17288, idk)
 		v, err = idck.Value()
-		require.NoError(t, err)
+		require.NoError(it, err)
 		require.Equal(it, `Parent,187239123213/Child,17288`, v)
 
 		mk := NameKey("Mix", "Name-value", idk)
 		v, err = mk.Value()
-		require.NoError(t, err)
+		require.NoError(it, err)
 		require.Equal(it, `Parent,187239123213/Mix,'Name-value'`, v)
+	})
+
+	t.Run("Check Panic", func(it *testing.T) {
+		var nilKey *Key
+		require.Panics(t, func() {
+			nilKey.String()
+		})
+		require.Panics(t, func() {
+			nilKey.MarshalText()
+		})
+		require.Panics(t, func() {
+			nilKey.MarshalBinary()
+		})
+		require.Panics(t, func() {
+			nilKey.MarshalJSON()
+		})
+		require.Panics(t, func() {
+			nilKey.MarshalJSONB()
+		})
+		require.Panics(t, func() {
+			nilKey.MarshalBSONValue()
+		})
+		require.Panics(t, func() {
+			nilKey.GobEncode()
+		})
+		require.Panics(t, func() {
+			nilKey.Encode()
+		})
 	})
 
 	nk := NewNameKey("Name", nil)

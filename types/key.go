@@ -400,8 +400,8 @@ func gobKeyToKey(gk *gobKey) *Key {
 // Encode returns an opaque representation of the key
 // suitable for use in HTML and URLs.
 // This is compatible with the Python and Java runtimes.
-func (k *Key) Encode() string {
-	pk := keyToProto(k)
+func (k Key) Encode() string {
+	pk := keyToProto(&k)
 	b, err := proto.Marshal(pk)
 	if err != nil {
 		panic(err)
@@ -441,9 +441,9 @@ func DecodeKey(encoded string) (*Key, error) {
 
 // GobEncode marshals the key into a sequence of bytes
 // using an encoding/gob.Encoder.
-func (k *Key) GobEncode() ([]byte, error) {
+func (k Key) GobEncode() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	if err := gob.NewEncoder(buf).Encode(keyToGobKey(k)); err != nil {
+	if err := gob.NewEncoder(buf).Encode(keyToGobKey(&k)); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
