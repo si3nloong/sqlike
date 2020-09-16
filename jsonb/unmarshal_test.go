@@ -425,6 +425,10 @@ func TestUnmarshal(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, []string(nil), nullArr)
 
+		err = Unmarshal([]byte(`null`), &nullArr)
+		require.NoError(t, err)
+		require.Equal(t, []string(nil), nullArr)
+
 		err = Unmarshal([]byte("[]"), &initArr)
 		require.NoError(t, err)
 		require.NotNil(t, initArr)

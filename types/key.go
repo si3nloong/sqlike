@@ -110,7 +110,7 @@ func copyKey(k *Key) *Key {
 func (k Key) Value() (driver.Value, error) {
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
-	k.marshal(blr, true)
+	marshal(&k, blr, true)
 	return blr.String(), nil
 }
 
@@ -129,8 +129,11 @@ func (k *Key) Scan(it interface{}) error {
 	return nil
 }
 
-// Incomplete :
-func (k Key) Incomplete() bool {
+// Incomplete : is a safe method to check key is nil or empty
+func (k *Key) Incomplete() bool {
+	if k == nil {
+		return true
+	}
 	return k.NameID == "" && k.IntID == 0
 }
 
@@ -176,28 +179,37 @@ func (k *Key) Equal(o *Key) bool {
 	}
 }
 
-// MarshalBinary :
-func (k Key) MarshalBinary() ([]byte, error) {
-	return []byte(`"` + k.Encode() + `"`), nil
-}
-
 // MarshalText :
 func (k Key) MarshalText() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	k.marshal(buf, true)
+	marshal(&k, buf, true)
 	return buf.Bytes(), nil
+}
+
+// MarshalBinary :
+func (k Key) MarshalBinary() ([]byte, error) {
+	if k.Incomplete() {
+		return []byte(`null`), nil
+	}
+	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalJSON :
 func (k Key) MarshalJSON() ([]byte, error) {
+	if k.Incomplete() {
+		return []byte(`null`), nil
+	}
 	return []byte(`"` + k.Encode() + `"`), nil
 }
 
 // MarshalJSONB :
 func (k Key) MarshalJSONB() ([]byte, error) {
+	if k.Incomplete() {
+		return []byte(`null`), nil
+	}
 	buf := new(bytes.Buffer)
 	buf.WriteRune('"')
-	k.marshal(buf, true)
+	marshal(&k, buf, true)
 	buf.WriteRune('"')
 	return buf.Bytes(), nil
 }
@@ -265,6 +277,9 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 
 // MarshalBSONValue :
 func (k Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	if k.Incomplete() {
+		return bsontype.Null, nil, nil
+	}
 	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
 }
 
@@ -283,14 +298,14 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 // String returns a string representation of the key.
 func (k Key) String() string {
 	b := bytes.NewBuffer(make([]byte, 0, 512))
-	k.marshal(b, false)
+	marshal(&k, b, false)
 	return b.String()
 }
 
 // marshal marshals the key's string representation to the buffer.
-func (k *Key) marshal(w writer, escape bool) {
+func marshal(k *Key, w writer, escape bool) {
 	if k.Parent != nil {
-		k.Parent.marshal(w, escape)
+		marshal(k.Parent, w, escape)
 		w.WriteByte('/')
 	}
 	w.WriteString(k.Kind)

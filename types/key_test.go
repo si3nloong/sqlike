@@ -161,6 +161,7 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
+
 		pk := IDKey("Parent", 1288888, nil)
 		require.Equal(it, "1288888", pk.ID())
 
@@ -181,6 +182,16 @@ func TestKey(t *testing.T) {
 		var o struct {
 			Key *Key
 		}
+
+		ik := new(Key)
+		b, err = json.Marshal(ik)
+		require.NoError(it, err)
+		require.Equal(t, []byte(`null`), b)
+
+		ik2 := new(Key)
+		b, err = jsonb.Marshal(ik2)
+		require.NoError(it, err)
+		require.Equal(t, []byte(`null`), b)
 
 		b, err = jsonb.Marshal(o)
 		require.NoError(it, err)
@@ -285,29 +296,39 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("Check Panic", func(it *testing.T) {
-		var nilKey *Key
-		require.Panics(t, func() {
+		var (
+			k       Key
+			nilKey  *Key
+			nullKey *Key
+		)
+
+		require.True(it, k.Incomplete())
+		require.True(it, nilKey.Incomplete())
+		require.False(it, k.Equal(nilKey))
+		require.True(it, nilKey.Equal(nullKey))
+
+		require.Panics(it, func() {
 			nilKey.String()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.MarshalText()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.MarshalBinary()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.MarshalJSON()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.MarshalJSONB()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.MarshalBSONValue()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.GobEncode()
 		})
-		require.Panics(t, func() {
+		require.Panics(it, func() {
 			nilKey.Encode()
 		})
 	})
