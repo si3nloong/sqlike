@@ -108,6 +108,9 @@ func copyKey(k *Key) *Key {
 
 // Value :
 func (k Key) Value() (driver.Value, error) {
+	if k.Incomplete() {
+		return nil, nil // database shouldn't store value ",0", it's meaningless
+	}
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	marshal(&k, blr, true)

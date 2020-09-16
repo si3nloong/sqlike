@@ -307,6 +307,10 @@ func TestKey(t *testing.T) {
 		require.False(it, k.Equal(nilKey))
 		require.True(it, nilKey.Equal(nullKey))
 
+		v, err := k.Value()
+		require.NoError(t, err)
+		require.Nil(t, v)
+
 		require.Panics(it, func() {
 			nilKey.String()
 		})
