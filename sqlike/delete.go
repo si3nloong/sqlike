@@ -96,7 +96,7 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 		ctx,
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
 		return 0, err

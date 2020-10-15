@@ -143,6 +143,7 @@ func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
 	}
+
 	stmt.WriteByte(' ')
 	if x.IsNot {
 		stmt.WriteString("NOT LIKE")
@@ -159,7 +160,7 @@ func (b *mySQLBuilder) BuildLike(stmt sqlstmt.Stmt, it interface{}) error {
 
 	t := v.Type()
 	if builder, ok := b.builder.LookupBuilder(t); ok {
-		if err := builder(stmt, it); err != nil {
+		if err := builder(stmt, x.Value); err != nil {
 			return err
 		}
 		return nil
@@ -285,8 +286,10 @@ func (b *mySQLBuilder) BuildNil(stmt sqlstmt.Stmt, it interface{}) error {
 
 // BuildRaw :
 func (b *mySQLBuilder) BuildRaw(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(primitive.Raw)
-	stmt.WriteString(x.Value)
+	x, ok := it.(primitive.Raw)
+	if ok {
+		stmt.WriteString(x.Value)
+	}
 	return nil
 }
 

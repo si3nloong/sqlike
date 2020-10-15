@@ -4,3 +4,4 @@ vendor/*
 .idea/
 .vscode/*
 *.sql
+.DS_STORE
