@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"sort"
+	"strconv"
 	"testing"
 	"time"
 
@@ -378,7 +379,10 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			ctx,
 			actions.FindOne().
 				Where(
-					expr.Like("FullText", symbol+"%"),
+					expr.Or(
+						expr.Like("FullText", symbol+"%"),
+						expr.Like("FullText", expr.Raw(strconv.Quote(symbol+"%"))),
+					),
 				),
 			options.FindOne().SetDebug(true),
 		).Decode(&ns)
