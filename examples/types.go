@@ -9,7 +9,7 @@ import (
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
-	uuid "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 type indexStruct struct {
