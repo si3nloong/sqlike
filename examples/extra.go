@@ -171,7 +171,6 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 		); err != nil {
 			panic(err)
 		}
-
 	}
 
 	// MongoDB :

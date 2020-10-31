@@ -295,9 +295,9 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 	}
 
 	// TODO: character set
-	// stmt.WriteByte(',')
-	// stmt.WriteString(`CONVERT TO CHARACTER SET utf8mb4`)
-	// stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
+	stmt.WriteByte(',')
+	stmt.WriteString(`CHARACTER SET utf8mb4`)
+	stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
 	stmt.WriteByte(';')
 	return
 }

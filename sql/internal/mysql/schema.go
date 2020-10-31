@@ -74,7 +74,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) (col columns.Column)
 }
 
 func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) (col columns.Column) {
-	charset, collation := "latin1", "latin1_bin"
+	charset, collation := "ascii", "ascii_general_ci"
 	col.Name = sf.Name()
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(36)"
