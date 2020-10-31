@@ -381,7 +381,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				Where(
 					expr.Or(
 						expr.Like("FullText", symbol+"%"),
-						expr.Like("FullText", expr.Raw(strconv.Quote(symbol+"%"))),
+						expr.Like("FullText", expr.Raw(strconv.Quote("%"+symbol+"%"))),
 					),
 				),
 			options.FindOne().SetDebug(true),

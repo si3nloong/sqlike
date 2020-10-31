@@ -39,10 +39,14 @@ func TestExamples(t *testing.T) {
 			ctx,
 			"mysql",
 			options.Connect().
-				SetUsername("root").
-				SetPassword("abcd1234").
-				SetCharset("utf8mb4"),
+				ApplyURI(`root:abcd1234@tcp()/?parseTime=true&loc=UTC&charset=utf8mb4`),
 		)
+
+		// set timezone for UTC
+		if _, err := client.ExecContext(ctx, `SET GLOBAL time_zone = '+00:00';`); err != nil {
+			panic(err)
+		}
+
 		testCase(ctx, t, client)
 	}
 
@@ -88,6 +92,7 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		SQLDumpExamples(ctx, t, client)
 		MigrateExamples(ctx, t, db)
 		IndexExamples(ctx, t, db)
+		ExtraExamples(ctx, t, db, mg)
 
 		InsertExamples(ctx, t, db)
 		FindExamples(ctx, t, db)
@@ -99,7 +104,6 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
 		SpatialExamples(ctx, t, db)
-		ExtraExamples(ctx, t, db, mg)
 	}
 
 	// Errors
