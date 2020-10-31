@@ -112,7 +112,11 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 
 		table.MustUnsafeMigrate(ctx, dt)
 
-		if _, err := table.InsertOne(ctx, &dt); err != nil {
+		if _, err := table.InsertOne(
+			ctx,
+			&dt,
+			options.InsertOne().SetDebug(true),
+		); err != nil {
 			panic(err)
 		}
 
