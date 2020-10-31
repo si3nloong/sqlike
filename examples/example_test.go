@@ -39,7 +39,7 @@ func TestExamples(t *testing.T) {
 			ctx,
 			"mysql",
 			options.Connect().
-				ApplyURI(`root:abcd1234@tcp()/?parseTime=true&loc=UTC&charset=utf8mb4`),
+				ApplyURI(`root:abcd1234@tcp()/?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
 		)
 
 		// set timezone for UTC
@@ -57,7 +57,10 @@ func TestExamples(t *testing.T) {
 
 		cfg := mysql.NewConfig()
 		cfg.User = username
-		cfg.Params = map[string]string{"charset": "utf8mb4"}
+		cfg.Params = map[string]string{
+			"charset":   "utf8mb4",
+			"collation": "utf8mb4_general_ci",
+		}
 		cfg.Passwd = "abcd1234"
 		cfg.ParseTime = true
 		conn, err := mysql.NewConnector(cfg)
