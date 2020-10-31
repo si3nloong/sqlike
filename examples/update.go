@@ -197,7 +197,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	{
 		i8 := int8(88)
 		i64 := int64(56789)
-		uids := []uuid.UUID{uid, uid2}
+		uids := []string{uid.String(), uid2.String()}
 		affected, err = table.Update(
 			ctx,
 			actions.Update().
