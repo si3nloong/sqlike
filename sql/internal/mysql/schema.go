@@ -109,6 +109,9 @@ func (s mySQLSchema) TimeDataType(sf reflext.StructFielder) (col columns.Column)
 	col.Type = "DATETIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
+	if _, ok := sf.Tag().LookUp("on_update"); ok {
+		col.Extra = "ON UPDATE " + dflt
+	}
 	return
 }
 
