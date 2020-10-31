@@ -28,7 +28,7 @@ type normalStruct struct {
 	Key           *types.Key
 	VirtualColumn string `sqlike:",generated_column"`
 	Date          types.Date
-	SID           string `sqlike:",charset=latin1"`
+	SID           string
 	Emoji         string `sqlike:""`
 	FullText      string
 	LongStr       string  `sqlike:",longtext"`
