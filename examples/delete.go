@@ -36,6 +36,60 @@ func DeleteExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 	}
 
+	// Delete record with primary key tag (DestroyOne)
+	{
+		type dummy struct {
+			UUID uuid.UUID `sqlike:",primary_key"`
+		}
+
+		table := db.Table("testDB")
+		err = table.DropIfExists(ctx)
+		require.NoError(t, err)
+
+		table.MustUnsafeMigrate(ctx, dummy{})
+		records := []dummy{
+			{UUID: uuid.New()},
+			{UUID: uuid.New()},
+		}
+
+		_, err = table.Insert(ctx, &records)
+		require.NoError(t, err)
+
+		// destroy with empty value should error
+		{
+			var nilDummy *dummy
+			err = table.DestroyOne(ctx, nilDummy)
+			require.Error(t, err)
+
+			err = table.DestroyOne(ctx, nil)
+			require.Error(t, err)
+		}
+
+		err = table.DestroyOne(
+			ctx,
+			records[0],
+			options.DestroyOne().SetDebug(true),
+		)
+		require.NoError(t, err)
+
+		err = table.DestroyOne(
+			ctx,
+			&records[1],
+			options.DestroyOne().SetDebug(true),
+		)
+		require.NoError(t, err)
+
+		var count uint
+		if err := table.FindOne(
+			ctx,
+			actions.FindOne().Select(expr.Count("UUID")),
+			options.FindOne().SetDebug(true),
+		).Scan(&count); err != nil {
+			require.NoError(t, err)
+		}
+		require.Equal(t, uint(0), count)
+	}
+
 	// Single delete
 	{
 		ns := newNormalStruct()
