@@ -3,8 +3,6 @@ package sqlike
 import (
 	"context"
 	"errors"
-	"fmt"
-	"reflect"
 
 	"github.com/si3nloong/sqlike/reflext"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
@@ -17,7 +15,11 @@ import (
 )
 
 // DestroyOne : hard delete a record on the table using primary key. You should alway have primary key defined in your struct in order to use this api.
-func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
+func (tb *Table) DestroyOne(ctx context.Context, delete interface{}, opts ...*options.DestroyOneOptions) error {
+	opt := new(options.DestroyOneOptions)
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
 	return destroyOne(
 		ctx,
 		tb.dbName,
@@ -28,6 +30,7 @@ func (tb *Table) DestroyOne(ctx context.Context, delete interface{}) error {
 		tb.dialect,
 		tb.logger,
 		delete,
+		opt,
 	)
 }
 
@@ -104,30 +107,38 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 	return result.RowsAffected()
 }
 
-func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}) error {
+func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}, opt *options.DestroyOneOptions) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput
 	}
+
 	t := v.Type()
-	if !reflext.IsKind(t, reflect.Ptr) {
-		return ErrUnaddressableEntity
-	}
-	if v.IsNil() {
-		return ErrNilEntity
-	}
-
 	cdc := cache.CodecByType(t)
-	f, exists := cdc.LookUpFieldByName(pk)
-	if !exists {
-		return fmt.Errorf("sqlike: missing primary key field %q", pk)
-	}
-
 	x := new(actions.DeleteActions)
 	x.Database = dbName
 	x.Table = tbName
-	fv := cache.FieldByIndexesReadOnly(v, f.Index())
-	x.Where(expr.Equal(f.Name(), fv.Interface()))
+
+	var pkv = [2]interface{}{}
+	for _, sf := range cdc.Properties() {
+		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
+		if _, ok := sf.Tag().LookUp("primary_key"); ok {
+			pkv[0] = sf.Name()
+			pkv[1] = fv.Interface()
+			continue
+		}
+		if sf.Name() == pk && pkv[0] == nil {
+			pkv[0] = sf.Name()
+			pkv[1] = fv.Interface()
+			continue
+		}
+	}
+
+	if pkv[0] == nil {
+		return errors.New("sqlike: missing primary key field")
+	}
+
+	x.Where(expr.Equal(pkv[0], pkv[1]))
 	x.Limit(1)
 
 	stmt := sqlstmt.AcquireStmt(dialect)
@@ -139,7 +150,7 @@ func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.St
 		ctx,
 		driver,
 		stmt,
-		logger,
+		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
 		return err
