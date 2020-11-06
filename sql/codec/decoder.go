@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/jsonb"
@@ -174,6 +175,33 @@ func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	}
 	// convert back to UTC
 	v.Set(reflect.ValueOf(x.UTC()))
+	return nil
+}
+
+// DecodeCivilDate :
+func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) error {
+	var (
+		x   civil.Date
+		err error
+	)
+	switch vi := it.(type) {
+	case time.Time:
+		x = civil.DateOf(vi)
+	case string:
+		x, err = civil.ParseDate(vi)
+		if err != nil {
+			return err
+		}
+	case []byte:
+		x, err = civil.ParseDate(b2s(vi))
+		if err != nil {
+			return err
+		}
+	case int64:
+		x = civil.DateOf(time.Unix(vi, 0))
+	case nil:
+	}
+	v.Set(reflect.ValueOf(x))
 	return nil
 }
 

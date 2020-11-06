@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
@@ -150,6 +151,7 @@ type ptrStruct struct {
 	NullTimestamp *time.Time
 	NullKey       *types.Key
 	NullDate      *types.Date
+	NullCivilDate *civil.Date
 	NullEnum      *Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
@@ -242,6 +244,7 @@ func newPtrStruct() ptrStruct {
 	u8 := uint8(88)
 	u64 := uint64(37128973897126)
 	enum := Success
+	dt := civil.DateOf(time.Now())
 
 	ps := ptrStruct{}
 	ps.NullStr = &str
@@ -256,6 +259,7 @@ func newPtrStruct() ptrStruct {
 	ps.NullUint64 = &u64
 	ps.NullJSONRaw = &jsonByte
 	ps.NullTimestamp = &now
+	ps.NullCivilDate = &dt
 	ps.NullEnum = &enum
 	return ps
 }

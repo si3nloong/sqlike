@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	gouuid "github.com/satori/go.uuid"
@@ -91,6 +92,7 @@ func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.Char)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)
+	sb.SetType(reflect.TypeOf(civil.Date{}), sqltype.Date)
 	sb.SetType(reflect.TypeOf(json.RawMessage{}), sqltype.JSON)
 	sb.SetType(reflect.TypeOf(orb.Point{}), sqltype.Point)
 	sb.SetType(reflect.TypeOf(orb.LineString{}), sqltype.LineString)
