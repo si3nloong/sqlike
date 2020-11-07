@@ -86,12 +86,10 @@ func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) (col columns.Column)
 }
 
 func (s mySQLSchema) DateDataType(sf reflext.StructFielder) (col columns.Column) {
-	dflt := "CURDATE()"
 	col.Name = sf.Name()
 	col.DataType = "DATE"
 	col.Type = "DATE"
 	col.Nullable = sf.IsNullable()
-	col.DefaultValue = &dflt
 	return
 }
 
