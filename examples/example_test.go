@@ -40,7 +40,7 @@ func TestExamples(t *testing.T) {
 			ctx,
 			"mysql",
 			options.Connect().
-				ApplyURI(`root:abcd1234@tcp()/?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
+				ApplyURI(`root:abcd1234@tcp()/sqlike?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
 		)
 
 		// set timezone for UTC
