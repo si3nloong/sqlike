@@ -2,6 +2,7 @@ package examples
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"testing"
 
@@ -46,6 +47,31 @@ func TestExamples(t *testing.T) {
 		if _, err := client.ExecContext(ctx, `SET GLOBAL time_zone = '+00:00';`); err != nil {
 			panic(err)
 		}
+
+		var (
+			str1 string
+			str2 string
+		)
+		client.QueryRowContext(ctx, `show variables like "collation_database";`).Scan(&str1, &str2)
+		log.Println(str1, str2)
+
+		client.Database("sqlike")
+		rows, err := client.QueryContext(ctx, `show table status`)
+		require.NoError(t, err)
+
+		cols, _ := rows.Columns()
+		for rows.Next() {
+			output := make([]interface{}, len(cols))
+			for idx := range output {
+				output[idx] = new(sql.RawBytes)
+			}
+			err = rows.Scan(output...)
+			log.Println("==================>")
+			for idx := range output {
+				log.Println(cols[idx], "=>", string(*output[idx].(*sql.RawBytes)))
+			}
+		}
+		rows.Close()
 
 		testCase(ctx, t, client)
 	}
