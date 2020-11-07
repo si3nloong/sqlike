@@ -55,24 +55,6 @@ func TestExamples(t *testing.T) {
 		client.QueryRowContext(ctx, `show variables like "collation_database";`).Scan(&str1, &str2)
 		log.Println(str1, str2)
 
-		client.Database("sqlike")
-		rows, err := client.QueryContext(ctx, `show table status`)
-		require.NoError(t, err)
-
-		cols, _ := rows.Columns()
-		for rows.Next() {
-			output := make([]interface{}, len(cols))
-			for idx := range output {
-				output[idx] = new(sql.RawBytes)
-			}
-			err = rows.Scan(output...)
-			log.Println("==================>")
-			for idx := range output {
-				log.Println(cols[idx], "=>", string(*output[idx].(*sql.RawBytes)))
-			}
-		}
-		rows.Close()
-
 		testCase(ctx, t, client)
 	}
 
@@ -123,6 +105,24 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		MigrateExamples(ctx, t, db)
 		IndexExamples(ctx, t, db)
 		ExtraExamples(ctx, t, db, mg)
+
+		client.Database("sqlike")
+		rows, err := client.QueryContext(ctx, `show table status`)
+		require.NoError(t, err)
+
+		cols, _ := rows.Columns()
+		for rows.Next() {
+			output := make([]interface{}, len(cols))
+			for idx := range output {
+				output[idx] = new(sql.RawBytes)
+			}
+			err = rows.Scan(output...)
+			log.Println("==================>")
+			for idx := range output {
+				log.Println(cols[idx], "=>", string(*output[idx].(*sql.RawBytes)))
+			}
+		}
+		rows.Close()
 
 		InsertExamples(ctx, t, db)
 		FindExamples(ctx, t, db)
