@@ -162,6 +162,7 @@ type generatedStruct struct {
 		ID     string  `sqlike:",stored_column=NestedID"`
 		Amount float64 `sqlike:",virtual_column=Amount"`
 	}
+	CivilDate civil.Date
 	model
 	Model `sqlike:"Date"`
 }
@@ -269,6 +270,7 @@ func newGeneratedStruct() *generatedStruct {
 	gs := &generatedStruct{}
 	gs.Nested.ID = uuid.New().String()
 	gs.Nested.Amount = gofakeit.Float64Range(1, 10000)
+	gs.CivilDate = civil.DateOf(utcNow)
 	gs.CreatedAt = utcNow
 	gs.UpdatedAt = utcNow
 	return gs

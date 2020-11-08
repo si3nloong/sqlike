@@ -194,51 +194,51 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	}
 
 	// update with case
-	{
-		uids := []uuid.UUID{uid, uid2}
-		i8 := int8(88)
-		i64 := int64(56789)
-		affected, err = table.Update(
-			ctx,
-			actions.Update().
-				Where(expr.In("$Key", uids)).
-				Set(
-					expr.ColumnValue(
-						"SID",
-						expr.Case(
-							expr.When(
-								expr.Equal("$Key", uid),
-							).Then(i64),
-							expr.When(
-								expr.Equal("$Key", uid2),
-							).Then(i8),
-						),
-					),
-				),
-			options.Update().SetDebug(true),
-		)
+	// {
+	// 	uids := []uuid.UUID{uid, uid2}
+	// 	i8 := int8(88)
+	// 	i64 := int64(56789)
+	// 	affected, err = table.Update(
+	// 		ctx,
+	// 		actions.Update().
+	// 			Where(expr.In("$Key", uids)).
+	// 			Set(
+	// 				expr.ColumnValue(
+	// 					"SID",
+	// 					expr.Case(
+	// 						expr.When(
+	// 							expr.Equal("$Key", uid),
+	// 						).Then(i64),
+	// 						expr.When(
+	// 							expr.Equal("$Key", uid2),
+	// 						).Then(i8),
+	// 					),
+	// 				),
+	// 			),
+	// 		options.Update().SetDebug(true),
+	// 	)
 
-		require.NoError(t, err)
-		require.Equal(t, int64(2), affected)
+	// 	require.NoError(t, err)
+	// 	require.Equal(t, int64(2), affected)
 
-		result, err := table.Find(
-			ctx,
-			actions.Find().
-				Where(
-					expr.In("$Key", uids),
-				).
-				OrderBy(
-					expr.Asc("$Key"),
-				),
-		)
-		require.NoError(t, err)
-		nss := []normalStruct{}
-		err = result.All(&nss)
-		require.NoError(t, err)
+	// 	result, err := table.Find(
+	// 		ctx,
+	// 		actions.Find().
+	// 			Where(
+	// 				expr.In("$Key", uids),
+	// 			).
+	// 			OrderBy(
+	// 				expr.Asc("$Key"),
+	// 			),
+	// 	)
+	// 	require.NoError(t, err)
+	// 	nss := []normalStruct{}
+	// 	err = result.All(&nss)
+	// 	require.NoError(t, err)
 
-		require.Equal(t, "88", nss[0].SID)
-		require.Equal(t, "56789", nss[1].SID)
-	}
+	// 	require.Equal(t, "88", nss[0].SID)
+	// 	require.Equal(t, "56789", nss[1].SID)
+	// }
 
 }
 

@@ -116,9 +116,8 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		}
 
 		require.ElementsMatch(t, []string{
-			"NestedID", "Amount", "Nested",
-			"No", "id",
-			"Line1", "Line2", "City", "State", "Country",
+			"NestedID", "Amount", "Nested", "CivilDate",
+			"No", "id", "Line1", "Line2", "City", "State", "Country",
 			"Date.CreatedAt", "Date.UpdatedAt",
 		}, columns)
 
