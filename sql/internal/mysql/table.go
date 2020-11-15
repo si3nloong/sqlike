@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"log"
 	"reflect"
 	"strings"
 
@@ -174,6 +175,9 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		stored  bool
 	)
 
+	log.Println(idxs)
+
+	// fks := []string{}
 	suffix := "FIRST"
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 
@@ -182,6 +186,7 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 			stmt.WriteByte(',')
 		}
 
+		tag := sf.Tag()
 		action := "ADD"
 		idx = cols.IndexOf(sf.Name())
 		if idx > -1 {
@@ -190,15 +195,21 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 		if !hasPk {
 			// allow primary_key tag to override
-			if _, ok := sf.Tag().LookUp("primary_key"); ok {
+			if _, ok := tag.LookUp("primary_key"); ok {
 				pkk = sf
 			}
 			if sf.Name() == pk && pkk == nil {
 				pkk = sf
 			}
+		} else if _, ok := tag.LookUp("foreign_key"); ok && idxs.IndexOf(sf.Name()) < 0 {
+			stmt.WriteString(`ADD FOREIGN KEY `)
+			stmt.WriteString("(`" + sf.Name() + "`)")
+			stmt.WriteString(` REFERENCES `)
+			// FIXME: allow use to set foreign key reference
+			stmt.WriteString("`" + strings.Replace(sf.Name(), pk, "", -1) + "`") // table
+			stmt.WriteString(" (`" + pk + "`),")
 		}
 
-		tag := sf.Tag()
 		_, ok1 := tag.LookUp("unique_index")
 		_, ok2 := tag.LookUp("auto_increment")
 		if ok1 || ok2 {
@@ -216,7 +227,7 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := sf.Tag().LookUp("comment"); ok {
+		if v, ok := tag.LookUp("comment"); ok {
 			if len(v) > 60 {
 				panic("maximum length of comment is 60 characters")
 			}
@@ -235,9 +246,9 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		children := sf.Children()
 		for len(children) > 0 {
 			child := children[0]
-			tg := child.Tag()
-			k1, virtual = tg.LookUp("virtual_column")
-			k2, stored = tg.LookUp("stored_column")
+			tag = child.Tag()
+			k1, virtual = tag.LookUp("virtual_column")
+			k2, stored = tag.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(info, child)
@@ -275,10 +286,10 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 				stmt.WriteString(" " + suffix)
 				suffix = "AFTER " + ms.Quote(name)
 			}
+
 			children = children[1:]
 			children = append(children, child.Children()...)
 		}
-
 	}
 
 	if pkk != nil {
@@ -299,5 +310,7 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 	stmt.WriteString(`CHARACTER SET utf8mb4`)
 	stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)
 	stmt.WriteByte(';')
+
+	log.Println(stmt.String())
 	return
 }
