@@ -65,7 +65,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	blr.SetBuilder(reflect.TypeOf(primitive.Sort{}), b.BuildSort)
 	blr.SetBuilder(reflect.TypeOf(primitive.KV{}), b.BuildKeyValue)
 	blr.SetBuilder(reflect.TypeOf(primitive.Math{}), b.BuildMath)
-	blr.SetBuilder(reflect.TypeOf(primitive.Case{}), b.BuildCase)
+	blr.SetBuilder(reflect.TypeOf(&primitive.Case{}), b.BuildCase)
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
 	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
@@ -396,24 +396,27 @@ func (b *mySQLBuilder) BuildMath(stmt sqlstmt.Stmt, it interface{}) (err error) 
 
 // BuildCase :
 func (b *mySQLBuilder) BuildCase(stmt sqlstmt.Stmt, it interface{}) error {
-	x := it.(primitive.Case)
+	x := it.(*primitive.Case)
+	stmt.WriteByte('(')
 	stmt.WriteString("CASE")
-	for _, w := range x.Whens {
+	for _, w := range x.WhenClauses {
 		stmt.WriteString(" WHEN ")
-		for i, c := range w.Conds {
-			if i > 0 {
-				stmt.WriteString(" AND ")
-			}
-			if err := b.builder.BuildStatement(stmt, c); err != nil {
-				return err
-			}
+		if err := b.builder.BuildStatement(stmt, w[0]); err != nil {
+			return err
 		}
 		stmt.WriteString(" THEN ")
-		if err := b.getValue(stmt, w.Result); err != nil {
+		if err := b.getValue(stmt, w[1]); err != nil {
+			return err
+		}
+	}
+	stmt.WriteString(" ELSE ")
+	if x.ElseClause != nil {
+		if err := b.getValue(stmt, x.ElseClause); err != nil {
 			return err
 		}
 	}
 	stmt.WriteString(" END")
+	stmt.WriteByte(')')
 	return nil
 }
 

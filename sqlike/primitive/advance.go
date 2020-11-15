@@ -2,17 +2,18 @@ package primitive
 
 // Case :
 type Case struct {
-	Whens []*WhenThen
+	WhenClauses [][2]interface{}
+	ElseClause  interface{}
 }
 
-// WhenThen :
-type WhenThen struct {
-	Conds  []interface{}
-	Result interface{}
+// When :
+func (c *Case) When(cond, result interface{}) *Case {
+	c.WhenClauses = append(c.WhenClauses, [2]interface{}{cond, result})
+	return c
 }
 
-// Then :
-func (wt *WhenThen) Then(result interface{}) *WhenThen {
-	wt.Result = result
-	return wt
+// Else :
+func (c *Case) Else(result interface{}) *Case {
+	c.ElseClause = result
+	return c
 }

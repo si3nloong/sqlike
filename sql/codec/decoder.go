@@ -237,7 +237,14 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 		return errors.New("point must be []byte")
 	}
 
-	if len(data) == 42 {
+	length := len(data)
+	if length == 0 {
+		// empty data, return empty go struct which in this case
+		// would be [0,0]
+		return nil
+	}
+
+	if length == 42 {
 		dst := make([]byte, 21)
 		_, err := hex.Decode(dst, data)
 		if err != nil {
@@ -252,7 +259,7 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 	// 	return scan.Scan(data[:])
 	// }
 
-	if len(data) == 25 {
+	if length == 25 {
 		// Most likely MySQL's SRID+WKB format.
 		// However, could be a line string or multipoint with only one point.
 		// But those would be invalid for parsing a point.
@@ -261,12 +268,6 @@ func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 			return err
 		}
 		v.Set(reflect.ValueOf(p))
-		return nil
-	}
-
-	if len(data) == 0 {
-		// empty data, return empty go struct which in this case
-		// would be [0,0]
 		return nil
 	}
 

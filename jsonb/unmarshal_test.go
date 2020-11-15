@@ -46,6 +46,7 @@ type ptrStruct struct {
 	PtrF64Slice     *[]float64
 	PtrLanguageTag  *language.Tag
 	PtrCurrencyUnit *currency.Unit
+	PtrUUID         *uuid.UUID
 	PtrTime         *time.Time
 	PtrStruct       *struct {
 		Nested string
@@ -165,6 +166,11 @@ func TestUnmarshal(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, ptruid)
 		require.Equal(t, uuid.MustParse("4c03d1de-645b-40d2-9ed5-12bb537a602e"), *****ptruid)
+
+		var nilUUID *uuid.UUID
+		err = Unmarshal([]byte(`null`), &nilUUID)
+		require.NoError(t, err)
+		require.Nil(t, nilUUID)
 	})
 
 	t.Run("Unmarshal String", func(it *testing.T) {
@@ -754,6 +760,7 @@ func TestUnmarshal(t *testing.T) {
 		}
 
 		{
+			require.Nil(it, initPtr.PtrUUID)
 			require.Nil(it, initPtr.PtrIntSlice)
 		}
 

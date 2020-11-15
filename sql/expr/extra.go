@@ -2,12 +2,6 @@ package expr
 
 import "github.com/si3nloong/sqlike/sqlike/primitive"
 
-// import (
-// 	"github.com/si3nloong/sqlike/sql"
-
-// 	"github.com/si3nloong/sqlike/sqlike/primitive"
-// )
-
 type selectStmt interface {
 	// Where(fields ...interface{}) selectStmt
 }
@@ -41,16 +35,8 @@ func NotExists(subquery interface{}) (grp primitive.Group) {
 }
 
 // Case :
-func Case(wts ...*primitive.WhenThen) (c primitive.Case) {
-	c.Whens = wts
-	return c
-}
-
-// When :
-func When(conds ...interface{}) *primitive.WhenThen {
-	wt := new(primitive.WhenThen)
-	wt.Conds = conds
-	return wt
+func Case() *primitive.Case {
+	return new(primitive.Case)
 }
 
 func union(link primitive.Raw, stmts []selectStmt) (grp primitive.Group) {

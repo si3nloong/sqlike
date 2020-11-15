@@ -91,6 +91,11 @@ func UnmarshalValue(data []byte, v reflect.Value) error {
 // unmarshalerDecoder
 func unmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
+		if r.IsNull() {
+			v.Set(reflect.New(v.Type()).Elem())
+			return r.skipNull()
+		}
+
 		r.pos = r.len
 		if v.Kind() != reflect.Ptr {
 			return v.Addr().Interface().(Unmarshaler).UnmarshalJSONB(r.Bytes())
@@ -102,6 +107,11 @@ func unmarshalerDecoder() ValueDecoder {
 // jsonUnmarshalerDecoder
 func jsonUnmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
+		if r.IsNull() {
+			v.Set(reflect.New(v.Type()).Elem())
+			return r.skipNull()
+		}
+
 		r.pos = r.len
 		if v.Kind() != reflect.Ptr {
 			return v.Addr().Interface().(json.Unmarshaler).UnmarshalJSON(r.Bytes())
@@ -113,6 +123,11 @@ func jsonUnmarshalerDecoder() ValueDecoder {
 // textUnmarshalerDecoder
 func textUnmarshalerDecoder() ValueDecoder {
 	return func(r *Reader, v reflect.Value) error {
+		if r.IsNull() {
+			v.Set(reflect.New(v.Type()).Elem())
+			return r.skipNull()
+		}
+
 		r.pos = r.len
 		b := r.Bytes()
 		b = bytes.Trim(b, `"`)

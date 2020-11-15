@@ -176,10 +176,22 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	// Advance update query
 	{
+		/*
+			UPDATE `sqlike`.`NormalStruct`
+			SET
+				`Emoji` = "<😗>",
+				`SID` = `LongStr`,
+				`Int` = `Int` + 100,
+				`Tinyint` = 80
+			WHERE `$Key` = "be72fc34-917b-11e9-af91-6c96cfd87b17"
+			LIMIT 1;
+		*/
 		affected, err = table.UpdateOne(
 			ctx,
 			actions.UpdateOne().
-				Where(expr.Equal("$Key", uid)).
+				Where(
+					expr.Equal("$Key", uid),
+				).
 				Set(
 					expr.ColumnValue("Emoji", "<😗>"),
 					expr.ColumnValue("SID", expr.Column("LongStr")),
@@ -194,51 +206,77 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	}
 
 	// update with case
-	// {
-	// 	uids := []uuid.UUID{uid, uid2}
-	// 	i8 := int8(88)
-	// 	i64 := int64(56789)
-	// 	affected, err = table.Update(
-	// 		ctx,
-	// 		actions.Update().
-	// 			Where(expr.In("$Key", uids)).
-	// 			Set(
-	// 				expr.ColumnValue(
-	// 					"SID",
-	// 					expr.Case(
-	// 						expr.When(
-	// 							expr.Equal("$Key", uid),
-	// 						).Then(i64),
-	// 						expr.When(
-	// 							expr.Equal("$Key", uid2),
-	// 						).Then(i8),
-	// 					),
-	// 				),
-	// 			),
-	// 		options.Update().SetDebug(true),
-	// 	)
+	{
+		/*
+			UPDATE `sqlike`.`NormalStruct` SET `SID` = (
+				CASE
+					WHEN (`$Key` = "be72fc34-917b-11e9-af91-6c96cfd87b17" AND `$Key` IS NOT NULL) THEN 88
+					WHEN `$Key` = "ae608554-491c-4472-beac-97feef49e810" THEN 56789
+					ELSE 100
+				END
+			)
+			WHERE `$Key` IN (
+				"be72fc34-917b-11e9-af91-6c96cfd87b17",
+				"ae608554-491c-4472-beac-97feef49e810"
+			);
+		*/
 
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, int64(2), affected)
+		uids := []uuid.UUID{uid, uid2}
+		i8 := int8(88)
+		i32 := int32(100)
+		i64 := int64(56789)
+		affected, err = table.Update(
+			ctx,
+			actions.Update().
+				Where(expr.In("$Key", uids)).
+				Set(
+					expr.ColumnValue(
+						"SID",
+						expr.Case().
+							When(
+								expr.And(
+									expr.Equal("$Key", uid),
+									expr.NotNull("$Key"),
+								),
+								i8,
+							).
+							When(
+								expr.Equal("$Key", uid2),
+								i64,
+							).
+							Else(i32),
+					),
+				),
+			options.Update().SetDebug(true),
+		)
 
-	// 	result, err := table.Find(
-	// 		ctx,
-	// 		actions.Find().
-	// 			Where(
-	// 				expr.In("$Key", uids),
-	// 			).
-	// 			OrderBy(
-	// 				expr.Asc("$Key"),
-	// 			),
-	// 	)
-	// 	require.NoError(t, err)
-	// 	nss := []normalStruct{}
-	// 	err = result.All(&nss)
-	// 	require.NoError(t, err)
+		require.NoError(t, err)
+		require.Equal(t, int64(2), affected)
 
-	// 	require.Equal(t, "88", nss[0].SID)
-	// 	require.Equal(t, "56789", nss[1].SID)
-	// }
+		var result1 normalStruct
+		err := table.FindOne(
+			ctx,
+			actions.FindOne().
+				Where(
+					expr.Equal("$Key", uid),
+				),
+		).Decode(&result1)
+		require.NoError(t, err)
+
+		require.Equal(t, "88", result1.SID)
+
+		var result2 normalStruct
+		err = table.FindOne(
+			ctx,
+			actions.FindOne().
+				Where(
+					expr.Equal("$Key", uid2),
+				),
+		).Decode(&result2)
+		require.NoError(t, err)
+
+		require.Equal(t, "56789", result2.SID)
+	}
 
 }
 
