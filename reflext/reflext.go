@@ -154,12 +154,12 @@ var _ Structer = (*Struct)(nil)
 
 // Fields :
 func (s *Struct) Fields() []StructFielder {
-	return s.fields
+	return append(make(Fields, 0, len(s.fields)), s.fields...)
 }
 
 // Properties :
 func (s *Struct) Properties() []StructFielder {
-	return s.properties
+	return append(make(Fields, 0, len(s.properties)), s.properties...)
 }
 
 // LookUpFieldByName :

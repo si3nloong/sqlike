@@ -1,5 +1,7 @@
 package options
 
+import "github.com/si3nloong/sqlike/sql/util"
+
 type insertMode int
 
 // insert modes :
@@ -11,7 +13,7 @@ const (
 // InsertOptions :
 type InsertOptions struct {
 	Mode  insertMode
-	Omits []string
+	Omits util.StringSlice
 	Debug bool
 }
 

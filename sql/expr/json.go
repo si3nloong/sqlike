@@ -2,7 +2,6 @@ package expr
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/si3nloong/sqlike/sqlike/primitive"
 )
@@ -68,7 +67,6 @@ func JSON_SET(doc interface{}, path string, value interface{}, pathValues ...int
 // JSON_INSERT :
 func JSON_INSERT(doc interface{}, path string, value interface{}, pathValues ...interface{}) (f primitive.JSONFunc) {
 	length := len(pathValues)
-	log.Println(length)
 	if length > 0 && length%2 != 0 {
 		panic("invalid argument len for JSON_INSERT(json_doc, path, val[, path, val] ...)")
 	}

@@ -14,21 +14,42 @@ import (
 // InsertInto :
 func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
 	records := v.Len()
+
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
 	}
 	stmt.WriteString(" INTO " + ms.TableName(db, table) + " (")
-	for i, f := range fields {
-		if i > 0 {
+
+	omitField := make(map[string]bool)
+	noOfOmit := len(opt.Omits)
+	for i := 0; i < len(fields); {
+		// omit all the field provided by user
+		if noOfOmit > 0 && opt.Omits.IndexOf(fields[i].Name()) > -1 {
+			if opt.Mode != options.InsertOnDuplicate {
+				fields = append(fields[:i], fields[i+1:]...)
+				continue
+			} else {
+				omitField[fields[i].Name()] = true
+			}
+		}
+
+		// omit all the struct field with `generated_column` tag, it shouldn't include when inserting to the db
+		if _, ok := fields[i].Tag().LookUp("generated_column"); ok {
+			fields = append(fields[:i], fields[i+1:]...)
+			continue
+		}
+
+		stmt.WriteString(ms.Quote(fields[i].Name()))
+		if i < len(fields)-1 {
 			stmt.WriteByte(',')
 		}
-		stmt.WriteString(ms.Quote(f.Name()))
+
+		i++
 	}
 	stmt.WriteString(") VALUES ")
+
 	length := len(fields)
-	// binds := strings.Repeat("?,", length)
-	// binds = "(" + binds[:len(binds)-1] + ")"
 	encoders := make([]codec.ValueEncoder, length)
 	for i := 0; i < records; i++ {
 		if i > 0 {
@@ -36,43 +57,52 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 		}
 		stmt.WriteByte('(')
 		vi := reflext.Indirect(v.Index(i))
-		for j, sf := range fields {
+
+		for j := range fields {
 			if j > 0 {
 				stmt.WriteByte(',')
 			}
+
 			// first record only find encoders
-			fv := cache.FieldByIndexesReadOnly(vi, sf.Index())
+			fv := cache.FieldByIndexesReadOnly(vi, fields[j].Index())
 			if i == 0 {
-				encoders[j], err = findEncoder(cdc, sf, fv)
+				encoders[j], err = findEncoder(cdc, fields[j], fv)
 				if err != nil {
 					return err
 				}
 			}
 
-			val, err := encoders[j](sf, fv)
+			val, err := encoders[j](fields[j], fv)
 			if err != nil {
 				return err
 			}
 
 			convertSpatial(stmt, val)
-
 		}
 		stmt.WriteByte(')')
-		// stmt.WriteString(binds)
 	}
+
+	var column string
 	if opt.Mode == options.InsertOnDuplicate {
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
-		for _, f := range fields {
-			if f.Name() == pk {
+		for i := range fields {
+			// skip primary key on duplicate update
+			if fields[i].Name() == pk {
 				next = false
+				continue
+			}
+
+			// skip omit fields on update
+			if _, ok := omitField[fields[i].Name()]; ok {
 				continue
 			}
 			if next {
 				stmt.WriteByte(',')
 			}
-			c := ms.Quote(f.Name())
-			stmt.WriteString(c + "=VALUES(" + c + ")")
+
+			column = ms.Quote(fields[i].Name())
+			stmt.WriteString(column + "=VALUES(" + column + ")")
 			next = true
 		}
 	}

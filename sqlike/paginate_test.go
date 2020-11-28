@@ -40,8 +40,6 @@ func TestPaginate(t *testing.T) {
 			expr.Asc("B"),
 			expr.Asc("ID"),
 		}, pg.action.Sorts)
-
-		// log.Println(pg.buildAction())
 	})
 
 	t.Run("Descending", func(ti *testing.T) {

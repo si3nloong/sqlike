@@ -95,13 +95,9 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cache reflext.St
 	}
 
 	def := cache.CodecByType(t)
-	fields := skipColumns(def.Properties(), opt.Omits)
-	if len(fields) < 1 {
-		return nil, ErrEmptyFields
-	}
-
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
+
 	if err := dialect.InsertInto(
 		stmt,
 		dbName,
@@ -109,7 +105,7 @@ func insertMany(ctx context.Context, dbName, tbName, pk string, cache reflext.St
 		pk,
 		cache,
 		cdc,
-		fields,
+		def.Properties(),
 		v,
 		opt,
 	); err != nil {

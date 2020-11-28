@@ -7,9 +7,15 @@ import (
 	"errors"
 	"log"
 
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/sql/dialect/mysql"
 	"github.com/si3nloong/sqlike/sqlike/options"
 )
+
+func init() {
+	dialect.RegisterDialect("mysql", mysql.New())
+}
 
 // Open : open connection to sql server with connection string
 func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (client *Client, err error) {

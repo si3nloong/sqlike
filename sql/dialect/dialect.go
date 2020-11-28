@@ -9,7 +9,6 @@ import (
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sql/internal/mysql"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -61,12 +60,6 @@ var (
 	mutex    sync.Mutex
 	dialects = make(map[string]Dialect)
 )
-
-var _ Dialect = (*(mysql.MySQL))(nil)
-
-func init() {
-	RegisterDialect("mysql", mysql.New())
-}
 
 // RegisterDialect :
 func RegisterDialect(driver string, dialect Dialect) {

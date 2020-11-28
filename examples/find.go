@@ -307,6 +307,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		require.ElementsMatch(t, []string{
 			`🤕`,
+			`🥶 😱 😨 😰`,
 			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
 			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,
 			`😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`,

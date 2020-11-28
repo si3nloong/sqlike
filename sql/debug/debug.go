@@ -2,7 +2,7 @@ package debug
 
 import (
 	"github.com/si3nloong/sqlike/sql/dialect"
-	"github.com/si3nloong/sqlike/sql/internal/mysql"
+	"github.com/si3nloong/sqlike/sql/dialect/mysql"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 )
 
