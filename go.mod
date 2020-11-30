@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.72.0
 	github.com/Masterminds/semver/v3 v3.1.0
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.17.0
+	github.com/casbin/casbin/v2 v2.19.2
 	github.com/go-sql-driver/mysql v1.5.1-0.20201114011101-cf72fd249522
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
