@@ -11,7 +11,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/paulmach/orb v0.1.7
+	github.com/paulmach/orb v0.2.1
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/sjson v1.1.2
