@@ -17,7 +17,7 @@ require (
 	github.com/tidwall/sjson v1.1.2
 	github.com/valyala/bytebufferpool v1.0.1-0.20180905182247-cdfbe9377474
 	github.com/xdg/stringprep v1.0.0 // indirect
-	go.mongodb.org/mongo-driver v1.4.3
+	go.mongodb.org/mongo-driver v1.4.6
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/text v0.3.4
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
