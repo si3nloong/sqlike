@@ -3,7 +3,7 @@ module github.com/si3nloong/sqlike
 go 1.14
 
 require (
-	cloud.google.com/go v0.72.0
+	cloud.google.com/go v0.76.0
 	github.com/Masterminds/semver/v3 v3.1.0
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.17.0
@@ -18,7 +18,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.1-0.20180905182247-cdfbe9377474
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.4.3
-	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
-	golang.org/x/text v0.3.4
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
+	golang.org/x/text v0.3.5
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
