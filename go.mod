@@ -3,7 +3,7 @@ module github.com/si3nloong/sqlike
 go 1.15
 
 require (
-	cloud.google.com/go v0.76.0
+	cloud.google.com/go v0.77.0
 	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.23.1
