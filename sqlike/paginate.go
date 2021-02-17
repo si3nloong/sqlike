@@ -92,10 +92,9 @@ func (pg *Paginator) NextCursor(ctx context.Context, cursor interface{}) (err er
 		&options.FindOptions{Debug: pg.option.Debug},
 		options.NoLock,
 	)
+	// prevent memory leak
+	defer result.Close()
 	pg.values, err = result.nextValues()
-	if err != nil {
-		return
-	}
 	return
 }
 
