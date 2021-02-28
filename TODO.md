@@ -81,6 +81,6 @@
 - [ ] Comprehensive `testcase`.
 - [ ] Support insert with map.
 - [ ] Support foreign key.
+- [ ] Support multiple tag (reflext).
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
-- [ ] Strict mode. (prevent toxic query)
 - [ ] [BREAKING CHANGE] collate should reside in charset package.

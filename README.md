@@ -44,7 +44,6 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
 - Developer friendly, (query is highly similar to native sql query)
 - Support `sqldump` for backup purpose **(experiment)**
-- Prevent toxic query with `Strict Mode` **(pending)**
 
 ## Missing DOC?
 
@@ -54,12 +53,12 @@ You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/exam
 
 Our main objective is anti toxic query, that why some functionality we doesn't offer out of box
 
-- offset based pagination (you may achieve this by using `Limit` and `Offset`)
+- offset based pagination (but you may achieve this by using `Limit` and `Offset`)
 - eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
 - join (eg. left join, outer join, inner join), join clause is consider as toxic query, you should alway find your record using primary key
-- left wildcard search using Like is not allow (you may use Raw to bypass)
-- bidirectional sorting is not allow (except mysql 8.0)
-- currently only support `mysql` driver
+- left wildcard search using Like is not allow (but you may use `expr.Raw` to bypass it)
+- bidirectional sorting is not allow (except mysql 8.0 and above)
+- currently only support `mysql` driver (postgres and sqlite yet to implement)
 
 ## General APIs
 
@@ -279,12 +278,13 @@ func main() {
 
     itpr := opentracing.NewInterceptor(
         opentracing.WithDBInstance("sqlike"),
-        opentracing.WithDBUser("root"),
+        opentracing.WithDBUser(cfg.User),
         opentracing.WithExec(true),
         opentracing.WithQuery(true),
     )
     client, err := sqlike.ConnectDB(
-        ctx, driver,
+        ctx, 
+        driver,
         instrumented.WrapConnector(conn, itpr),
     )
     if err != nil {
