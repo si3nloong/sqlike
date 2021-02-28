@@ -6,11 +6,13 @@
     <a href="https://github.com/si3nloong/sqlike/blob/master/LICENSE"><img src="https://img.shields.io/github/license/si3nloong/sqlike" alt="license" title="license"/></a>
 </p>
 
-# Sequel ORM
+# sqlike
+
+> A golang SQL ORM which anti toxic query and focus on latest features.
 
 ## Installation
 
-```bash
+```console
 go get github.com/si3nloong/sqlike
 ```
 
@@ -19,7 +21,7 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 ## Minimum Requirements
 
 - **mysql 5.7** and above
-- **Golang 1.13** and above
+- **golang 1.15** and above
 
 ## Why another ORM?
 
@@ -296,6 +298,22 @@ func main() {
 
 Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).
 
+## Special Sponsors
+
+<p>
+    <img src="https://revenuemonster.my/public/img/rm-logowhite-3x.png" alt="RevenueMonster" width="180px" style="margin:5px 10px;">
+    <img src="https://asset.wetix.my/images/logo/wetix.png" alt="WeTix" width="180px" style="margin:5px 10px;">
+</p>
+
+## Big Thanks To
+
+Thanks to these awesome companies for their support of Open Source developers ❤
+
+[![GitHub](https://jstools.dev/img/badges/github.svg)](https://github.com/open-source)
+[![NPM](https://jstools.dev/img/badges/npm.svg)](https://www.npmjs.com/)
+
 ## License
 
 [MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+
+Copyright (c) 2019-present, SianLoong Lee
