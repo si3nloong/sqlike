@@ -27,6 +27,7 @@ type Model struct {
 type normalStruct struct {
 	ID            uuid.UUID `sqlike:"$Key,comment=Primary key"`
 	Key           *types.Key
+	PtrUUID       *uuid.UUID
 	VirtualColumn string `sqlike:",generated_column"`
 	Date          types.Date
 	SID           string

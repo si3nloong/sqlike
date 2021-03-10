@@ -179,12 +179,7 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	}
 
 	if ptrType.Implements(sqlScanner) {
-		return func(it interface{}, v reflect.Value) error {
-			if v.Kind() != reflect.Ptr {
-				return v.Addr().Interface().(sql.Scanner).Scan(it)
-			}
-			return reflext.Init(v).Interface().(sql.Scanner).Scan(it)
-		}, nil
+		return sqlScannerDecoder, nil
 	}
 
 	dec, ok = r.typeDecoders[t]
@@ -210,6 +205,21 @@ func encodeValue(_ reflext.StructFielder, v reflect.Value) (interface{}, error) 
 	return x.Value()
 }
 
+// NilEncoder :
 func NilEncoder(_ reflext.StructFielder, _ reflect.Value) (interface{}, error) {
 	return nil, nil
+}
+
+func sqlScannerDecoder(it interface{}, v reflect.Value) error {
+	if it == nil {
+		// Avoid from sql.scanner when the value is nil
+		v.Set(reflect.Zero(v.Type()))
+		return nil
+	}
+
+	if v.Kind() != reflect.Ptr {
+		return v.Addr().Interface().(sql.Scanner).Scan(it)
+	}
+
+	return reflext.Init(v).Interface().(sql.Scanner).Scan(it)
 }

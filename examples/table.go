@@ -57,7 +57,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, &latin1, columnMap["Enum"].Charset)
 
 		require.ElementsMatch(t, []string{
-			"$Key", "Key", "Date", "SID",
+			"$Key", "Key", "PtrUUID", "Date", "SID",
 			"Emoji", "FullText", "LongStr", "CustomStrType",
 			"EmptyByte", "Byte", "Bool",
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",

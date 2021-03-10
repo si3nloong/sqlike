@@ -127,6 +127,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		require.Nil(t, ns.Struct.NestedNullInt)
 		require.Nil(t, ns.Struct.Key)
+		require.Nil(t, ns.PtrUUID)
 		var nilKey *types.Key
 		require.Equal(t, nilKey, ns.Struct.Key)
 		require.True(t, ns.Struct.Key == nil)
@@ -139,7 +140,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 
 		columns := []string{
-			"$Key", "Key", "Date",
+			"$Key", "Key", "PtrUUID", "Date",
 			"SID", "Emoji", "FullText", "LongStr", "CustomStrType",
 			"EmptyByte", "Byte", "Bool",
 			"Int", "TinyInt", "SmallInt", "MediumInt", "BigInt",
