@@ -157,15 +157,16 @@ func (a *Adapter) RemovePolicy(sec string, ptype string, rules []string) error {
 	policy := toPolicy(ptype, rules)
 	if _, err := a.table.DeleteOne(
 		a.ctx,
-		actions.DeleteOne().Where(
-			expr.Equal("PType", policy.PType),
-			expr.Equal("V0", policy.V0),
-			expr.Equal("V1", policy.V1),
-			expr.Equal("V2", policy.V2),
-			expr.Equal("V3", policy.V3),
-			expr.Equal("V4", policy.V4),
-			expr.Equal("V5", policy.V5),
-		),
+		actions.DeleteOne().
+			Where(
+				expr.Equal("PType", policy.PType),
+				expr.Equal("V0", policy.V0),
+				expr.Equal("V1", policy.V1),
+				expr.Equal("V2", policy.V2),
+				expr.Equal("V3", policy.V3),
+				expr.Equal("V4", policy.V4),
+				expr.Equal("V5", policy.V5),
+			),
 	); err != nil {
 		return err
 	}
@@ -203,37 +204,32 @@ func (a *Adapter) IsFiltered() bool {
 	return a.filtered
 }
 
-func loadPolicy(policy *Policy, model model.Model) {
-	const prefixLine = ", "
-	var sb strings.Builder
+func loadPolicy(policy *Policy, m model.Model) {
+	tokens := append([]string{}, policy.PType)
 
-	sb.WriteString(policy.PType)
 	if len(policy.V0) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V0)
+		tokens = append(tokens, policy.V0)
 	}
 	if len(policy.V1) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V1)
+		tokens = append(tokens, policy.V1)
 	}
 	if len(policy.V2) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V2)
+		tokens = append(tokens, policy.V2)
 	}
 	if len(policy.V3) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V3)
+		tokens = append(tokens, policy.V3)
 	}
 	if len(policy.V4) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V4)
+		tokens = append(tokens, policy.V4)
 	}
 	if len(policy.V5) > 0 {
-		sb.WriteString(prefixLine)
-		sb.WriteString(policy.V5)
+		tokens = append(tokens, policy.V5)
 	}
 
-	persist.LoadPolicyLine(sb.String(), model)
+	key := tokens[0]
+	sec := key[:1]
+	m[sec][key].Policy = append(m[sec][key].Policy, tokens[1:])
+	m[sec][key].PolicyMap[strings.Join(tokens[1:], model.DefaultSep)] = len(m[sec][key].Policy) - 1
 }
 
 func toPolicy(ptype string, rules []string) *Policy {
