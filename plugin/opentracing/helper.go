@@ -4,54 +4,98 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"io"
+	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
+	"github.com/si3nloong/sqlike/util"
 )
 
+var r = regexp.MustCompile(`(\$\d|\?|\:\w+)`)
+
 func (ot *OpenTracingInterceptor) logQuery(span opentracing.Span, query string) {
+	ot.logQueryArgs(span, query, nil)
+}
+
+func (ot *OpenTracingInterceptor) logQueryArgs(span opentracing.Span, query string, args []driver.NamedValue) {
 	if span == nil {
 		return
 	}
 
-	span.LogFields(
-		log.String(string(ext.DBStatement), query),
-	)
-}
-
-func (ot *OpenTracingInterceptor) logArgs(span opentracing.Span, args []driver.NamedValue) {
-	if span == nil || !ot.opts.Args {
+	if !ot.opts.Args || len(args) == 0 {
+		span.LogFields(
+			log.String(string(ext.DBStatement), query),
+		)
 		return
 	}
 
-	fields := make([]log.Field, len(args))
-	for i, arg := range args {
-		switch v := arg.Value.(type) {
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+
+	mapQuery(query, blr, args)
+
+	span.LogFields(
+		log.String(string(ext.DBStatement), blr.String()),
+	)
+}
+
+func mapQuery(query string, w io.StringWriter, args []driver.NamedValue) {
+	var (
+		i      int
+		paths  []int
+		value  string
+		length = len(args)
+	)
+
+	for {
+		paths = r.FindStringIndex(query)
+		if len(paths) < 2 {
+			w.WriteString(query)
+			break
+		}
+
+		w.WriteString(query[:paths[0]])
+
+		// by default, query string won't be have invalid arguments
+		// TODO: if it's :name argument, we should store the value in map
+		switch v := args[i].Value.(type) {
 		case string:
-			fields[i] = log.String(arg.Name, v)
+			value = strconv.Quote(v)
 		case int64:
-			fields[i] = log.Int64(arg.Name, v)
+			value = strconv.FormatInt(v, 64)
 		case uint64:
-			fields[i] = log.Uint64(arg.Name, v)
+			value = strconv.FormatUint(v, 64)
 		case float64:
-			fields[i] = log.Float64(arg.Name, v)
+			value = strconv.FormatFloat(v, 'e', -1, 64)
 		case bool:
-			fields[i] = log.Bool(arg.Name, v)
+			value = strconv.FormatBool(v)
 		case time.Time:
-			fields[i] = log.String(arg.Name, v.Format(time.RFC3339))
+			value = v.Format(time.RFC3339)
 		case []byte:
-			fields[i] = log.String(arg.Name, string(v))
+			value = strconv.Quote(util.UnsafeString(v))
 		case sql.RawBytes:
-			fields[i] = log.String(arg.Name, string(v))
+			value = string(v)
+		case fmt.Stringer:
+			value = strconv.Quote(v.String())
 		case nil:
-			fields[i] = log.String(arg.Name, "null")
+			value = "NULL"
 		default:
-			fields[i] = log.String(arg.Name, fmt.Sprintf("%v", v))
+			value = fmt.Sprintf("%v", v)
+		}
+
+		w.WriteString(value)
+		query = query[paths[1]:]
+		i++
+
+		if i >= length {
+			w.WriteString(query)
+			break
 		}
 	}
-	span.LogFields(fields...)
 }
 
 func (ot *OpenTracingInterceptor) logError(span opentracing.Span, err error) {

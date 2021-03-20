@@ -12,8 +12,7 @@ func (ot *OpenTracingInterceptor) StmtExecContext(ctx context.Context, conn driv
 	if ot.opts.Exec {
 		var span opentracing.Span
 		span, ctx = ot.MaybeStartSpanFromContext(ctx, "stmt_exec")
-		ot.logQuery(span, query)
-		ot.logArgs(span, args)
+		ot.logQueryArgs(span, query, args)
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()
@@ -28,8 +27,7 @@ func (ot *OpenTracingInterceptor) StmtQueryContext(ctx context.Context, conn dri
 	if ot.opts.Query {
 		var span opentracing.Span
 		span, ctx = ot.MaybeStartSpanFromContext(ctx, "stmt_query")
-		ot.logQuery(span, query)
-		ot.logArgs(span, args)
+		ot.logQueryArgs(span, query, args)
 		defer func() {
 			ot.logError(span, err)
 			span.Finish()

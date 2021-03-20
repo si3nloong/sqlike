@@ -62,10 +62,14 @@ func (sm *Statement) Format(state fmt.State, verb rune) {
 		state.Write([]byte(str))
 		return
 	}
-	i := 1
-	args := sm.Args()
+
+	var (
+		i    = 1
+		args = sm.Args()
+		idx  int
+	)
 	for {
-		idx := strings.Index(str, sm.fmt.Var(i))
+		idx = strings.Index(str, sm.fmt.Var(i))
 		if idx < 0 {
 			state.Write([]byte(str))
 			break
@@ -98,6 +102,6 @@ func (sm *Statement) TimeElapsed() time.Duration {
 
 // Reset : implement resetter as strings.Builer
 func (sm *Statement) Reset() {
-	sm.args = []interface{}{}
+	sm.args = nil
 	sm.Builder.Reset()
 }
