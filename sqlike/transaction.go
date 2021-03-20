@@ -16,6 +16,9 @@ import (
 type SessionContext interface {
 	context.Context
 	Table(name string) *Table
+	Prepare(query string) (*sql.Stmt, error)
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Query(query string, args ...interface{}) (*sql.Rows, error)
 	QueryStmt(ctx context.Context, query interface{}) (*Result, error)
 }
 
@@ -34,6 +37,21 @@ type Transaction struct {
 	dialect dialect.Dialect
 	codec   codec.Codecer
 	logger  logs.Logger
+}
+
+// Prepare :
+func (tx *Transaction) Prepare(query string) (*sql.Stmt, error) {
+	return tx.driver.PrepareContext(tx, query)
+}
+
+// Exec :
+func (tx *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
+	return tx.driver.ExecContext(tx, query, args)
+}
+
+// Query :
+func (tx *Transaction) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return tx.driver.QueryContext(tx, query, args)
 }
 
 // Table :
