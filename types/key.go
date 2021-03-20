@@ -18,7 +18,6 @@ import (
 
 	"errors"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
 	pb "github.com/si3nloong/sqlike/proto"
 	"github.com/si3nloong/sqlike/reflext"
@@ -27,6 +26,7 @@ import (
 	"github.com/si3nloong/sqlike/util"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
+	"google.golang.org/protobuf/proto"
 )
 
 // Writer :
@@ -51,11 +51,13 @@ type Key struct {
 }
 
 var (
-	_ driver.Valuer          = (*Key)(nil)
-	_ sql.Scanner            = (*Key)(nil)
-	_ fmt.Stringer           = (*Key)(nil)
-	_ encoding.TextMarshaler = (*Key)(nil)
-	_ json.Marshaler         = (*Key)(nil)
+	_ driver.Valuer            = (*Key)(nil)
+	_ sql.Scanner              = (*Key)(nil)
+	_ fmt.Stringer             = (*Key)(nil)
+	_ encoding.TextMarshaler   = (*Key)(nil)
+	_ encoding.TextUnmarshaler = (*Key)(nil)
+	_ json.Marshaler           = (*Key)(nil)
+	_ json.Unmarshaler         = (*Key)(nil)
 )
 
 // DataType :

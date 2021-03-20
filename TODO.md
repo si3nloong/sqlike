@@ -74,7 +74,6 @@
 - [x] :bug: (jsonb) Support nested `json.RawMessage` unmarshal.
 - [x] Support comment.
 - [ ] Support spatial `Polygon`.
-- [ ] Support default value for `StructField`.
 - [ ] Support `charset` and `collate` on `AlterTable`.
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support migration like `django`.

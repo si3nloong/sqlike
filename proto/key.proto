@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/si3nloong/sqlike/proto";
+
 package proto;
 
 message Key {
