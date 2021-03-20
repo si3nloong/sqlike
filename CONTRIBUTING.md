@@ -2,7 +2,7 @@
 
 ## Installation
 
-1. Ensure you have minimum version 1.13 of [go](https://golang.org/dl/) installed.
+1. Ensure you have minimum version 1.15 of [go](https://golang.org/dl/) installed.
 2. Ensure you have minimum version 5.7 of [mysql](https://dev.mysql.com/downloads/installer/) installed.
 3. After fork the repository, you may start your development.
 
