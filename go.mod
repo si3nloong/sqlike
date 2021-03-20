@@ -8,7 +8,7 @@ require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.25.5
 	github.com/go-sql-driver/mysql v1.5.1-0.20210202043019-fe2230a8b20c
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.1
 	github.com/google/uuid v1.2.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/paulmach/orb v0.1.7
