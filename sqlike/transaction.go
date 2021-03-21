@@ -19,7 +19,8 @@ type SessionContext interface {
 	Prepare(query string) (*sql.Stmt, error)
 	Exec(query string, args ...interface{}) (sql.Result, error)
 	Query(query string, args ...interface{}) (*sql.Rows, error)
-	QueryStmt(ctx context.Context, query interface{}) (*Result, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	QueryStmt(query interface{}) (*Result, error)
 }
 
 // Transaction :
@@ -39,19 +40,24 @@ type Transaction struct {
 	logger  logs.Logger
 }
 
-// Prepare :
+// Prepare : PrepareContext creates a prepared statement for use within a transaction.
 func (tx *Transaction) Prepare(query string) (*sql.Stmt, error) {
 	return tx.driver.PrepareContext(tx, query)
 }
 
-// Exec :
+// Exec : ExecContext executes a query that doesn't return rows. For example: an INSERT and UPDATE.
 func (tx *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	return tx.driver.ExecContext(tx, query, args)
+	return tx.driver.ExecContext(tx, query, args...)
 }
 
-// Query :
+// Query : QueryContext executes a query that returns rows, typically a SELECT.
 func (tx *Transaction) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	return tx.driver.QueryContext(tx, query, args)
+	return tx.driver.QueryContext(tx, query, args...)
+}
+
+// QueryRow : QueryRowContext executes a query that is expected to return at most one row. QueryRowContext always returns a non-nil value. Errors are deferred until Row's Scan method is called.
+func (tx *Transaction) QueryRow(query string, args ...interface{}) *sql.Row {
+	return tx.driver.QueryRowContext(tx, query, args...)
 }
 
 // Table :
@@ -68,8 +74,8 @@ func (tx *Transaction) Table(name string) *Table {
 	}
 }
 
-// QueryStmt : support complex and advance query statement
-func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
+// QueryStmt : QueryStmt support complex and advance query statement, make sure you executes a query that returns rows, typically a SELECT.
+func (tx *Transaction) QueryStmt(query interface{}) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
@@ -79,7 +85,7 @@ func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Resul
 		return nil, err
 	}
 	rows, err := driver.Query(
-		ctx,
+		tx,
 		tx.driver,
 		stmt,
 		getLogger(tx.logger, true),
@@ -95,12 +101,12 @@ func (tx *Transaction) QueryStmt(ctx context.Context, query interface{}) (*Resul
 	return rslt, rslt.err
 }
 
-// RollbackTransaction :
+// RollbackTransaction : Rollback aborts the transaction.
 func (tx *Transaction) RollbackTransaction() error {
 	return tx.driver.Rollback()
 }
 
-// CommitTransaction :
+// CommitTransaction : Commit commits the transaction.
 func (tx *Transaction) CommitTransaction() error {
 	return tx.driver.Commit()
 }

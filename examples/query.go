@@ -2,6 +2,7 @@ package examples
 
 import (
 	"context"
+	"regexp"
 	"testing"
 
 	"github.com/si3nloong/sqlike/sql"
@@ -62,11 +63,39 @@ func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		if err := db.RunInTransaction(
 			ctx,
 			func(sess sqlike.SessionContext) error {
-				result, err := sess.QueryStmt(sess, stmt)
+				if _, err := sess.Exec("USE `sqlike`;"); err != nil {
+					return err
+				}
+
+				var version string
+				if err := sess.QueryRow(`SELECT VERSION();`).Scan(&version); err != nil {
+					return err
+				}
+				require.Regexp(t, regexp.MustCompile(`\d+\.\d+\d+`), version)
+
+				rows, err := sess.Query("SELECT COUNT(*) FROM `GeneratedStruct`;")
+				if err != nil {
+					return err
+				}
+
+				var count uint
+				for rows.Next() {
+					if err := rows.Scan(&count); err != nil {
+						return err
+					}
+				}
+				require.NotEmpty(t, count)
+
+				if err := rows.Close(); err != nil {
+					return err
+				}
+
+				result, err := sess.QueryStmt(stmt)
 				if err != nil {
 					return err
 				}
 				defer result.Close()
+
 				return nil
 			}); err != nil {
 			panic(err)
