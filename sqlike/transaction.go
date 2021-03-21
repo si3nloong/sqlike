@@ -77,8 +77,9 @@ func (tx *Transaction) Table(name string) *Table {
 // QueryStmt : QueryStmt support complex and advance query statement, make sure you executes a query that returns rows, typically a SELECT.
 func (tx *Transaction) QueryStmt(query interface{}) (*Result, error) {
 	if query == nil {
-		return nil, errors.New("empty query statement")
+		return nil, errors.New("sqlike: empty query statement")
 	}
+
 	stmt := sqlstmt.AcquireStmt(tx.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	if err := tx.dialect.SelectStmt(stmt, query); err != nil {
