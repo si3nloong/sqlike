@@ -3,6 +3,7 @@ package opentracing
 import (
 	"database/sql"
 	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
@@ -66,16 +67,18 @@ func mapQuery(query string, w io.StringWriter, args []driver.NamedValue) {
 		case string:
 			value = strconv.Quote(v)
 		case int64:
-			value = strconv.FormatInt(v, 64)
+			value = strconv.FormatInt(v, 10)
 		case uint64:
-			value = strconv.FormatUint(v, 64)
+			value = strconv.FormatUint(v, 10)
 		case float64:
 			value = strconv.FormatFloat(v, 'e', -1, 64)
 		case bool:
 			value = strconv.FormatBool(v)
 		case time.Time:
-			value = v.Format(time.RFC3339)
+			value = `"` + v.Format(time.RFC3339) + `"`
 		case []byte:
+			value = strconv.Quote(util.UnsafeString(v))
+		case json.RawMessage:
 			value = strconv.Quote(util.UnsafeString(v))
 		case sql.RawBytes:
 			value = string(v)
@@ -84,7 +87,7 @@ func mapQuery(query string, w io.StringWriter, args []driver.NamedValue) {
 		case nil:
 			value = "NULL"
 		default:
-			value = fmt.Sprintf("%v", v)
+			value = strconv.Quote(fmt.Sprintf("%v", v))
 		}
 
 		w.WriteString(value)
