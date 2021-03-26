@@ -272,6 +272,8 @@ func parseIndexType(name string) (idxType indexes.Type) {
 		idxType = indexes.FullText
 	case "primary":
 		idxType = indexes.Primary
+	case "multi-valued":
+		idxType = indexes.MultiValued
 	default:
 		panic(fmt.Errorf("invalid index type %q", name))
 	}

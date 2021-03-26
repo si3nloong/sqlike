@@ -269,5 +269,7 @@ func newJSONStruct() (js jsonStruct) {
 	js.Raw = []byte(`{"message":"ok","type":"TNG","category":"EWALLET","status":"SUCCESS","amountInCents":1000}`)
 	js.StrArr = []string{"a", "b", "c", "d", "e", "f"}
 	js.IntArr = []int{100, 16, -2, 88, 32, -47, 25}
+	js.Struct.StringSlice = sort.StringSlice{"a", "b", "c"}
+	js.Struct.IntSlice = sort.IntSlice{0, 1, 224, 999}
 	return
 }

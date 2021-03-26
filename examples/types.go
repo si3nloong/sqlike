@@ -2,6 +2,7 @@ package examples
 
 import (
 	"encoding/json"
+	"sort"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -89,6 +90,8 @@ type jsonStruct struct {
 	IntArr []int
 	Map    map[string]int
 	Struct struct {
+		StringSlice sort.StringSlice
+		IntSlice    sort.IntSlice
 	}
 	NullableFloat *float64
 }

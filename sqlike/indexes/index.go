@@ -25,6 +25,7 @@ const (
 	Unique
 	Spatial
 	Primary
+	MultiValued
 )
 
 func (t Type) String() string {
@@ -37,6 +38,8 @@ func (t Type) String() string {
 		return "SPATIAL"
 	case Primary:
 		return "PRIMARY"
+	case MultiValued:
+		return "MULTI-VALUED"
 	default:
 		return "BTREE"
 	}
@@ -97,11 +100,19 @@ func (idx Index) GetName() string {
 
 func (idx Index) buildName(w writer) {
 	switch idx.Type {
-	case Unique:
-		w.WriteString("UX")
 	case Primary:
 		w.WriteString("PRIMARY")
 		return
+
+	case Unique:
+		w.WriteString("UX")
+
+	case FullText:
+		w.WriteString("FTX")
+
+	case MultiValued:
+		w.WriteString("MVX")
+
 	default:
 		w.WriteString("IX")
 	}

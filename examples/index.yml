@@ -26,4 +26,11 @@ indexes:
   columns:
   - name: NestedID
   - name: id
+
+# Multi-Valued index
+# - table: JSON
+#   type: multi-valued
+#   column: StrArr
+#   castAs: VARCHAR(10) ARRAY
+
     

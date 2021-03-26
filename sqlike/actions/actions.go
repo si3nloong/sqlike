@@ -34,8 +34,3 @@ func DeleteOne() DeleteOneStatement {
 func Delete() DeleteStatement {
 	return &DeleteActions{}
 }
-
-// Copy :
-func Copy() CopyStatement {
-	return &CopyActions{}
-}

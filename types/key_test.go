@@ -16,6 +16,7 @@ type field struct {
 	name string
 	t    reflect.Type
 	null bool
+	opts map[string]string
 }
 
 // Name :
@@ -34,7 +35,7 @@ func (field) Index() []int {
 }
 
 // Tag :
-func (field) Tag() reflext.StructTag {
+func (f field) Tag() reflext.StructTag {
 	return reflext.StructTag{}
 }
 
