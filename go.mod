@@ -13,7 +13,7 @@ require (
 	github.com/paulmach/orb v0.1.7
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/sjson v1.1.5
+	github.com/tidwall/sjson v1.1.6
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.5.0
