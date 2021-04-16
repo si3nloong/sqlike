@@ -1,11 +1,12 @@
 package primitive
 
 // DataType :
-type DataType int
+type DataType string
 
 // data types :
 const (
-	JSON DataType = iota + 1
-	Varchar
-	Char
+	JSON    DataType = "JSON"
+	Varchar DataType = "VARCHAR"
+	Char    DataType = "CHAR"
+	Date    DataType = "DATE"
 )

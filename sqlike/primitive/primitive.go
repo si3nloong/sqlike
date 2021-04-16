@@ -59,6 +59,19 @@ type Func struct {
 	Args []interface{}
 }
 
+// Encoding :
+type Encoding struct {
+	Charset *string
+	Column  interface{}
+	Collate string
+}
+
+// TypeSafe :
+type TypeSafe struct {
+	Type  DataType
+	Value interface{}
+}
+
 // JSONFunc :
 type JSONFunc struct {
 	Type jsonFunction

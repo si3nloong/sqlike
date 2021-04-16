@@ -12,13 +12,14 @@ import (
 	"io"
 	"math/rand"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"errors"
 
-	"github.com/google/uuid"
+	"github.com/segmentio/ksuid"
 	pb "github.com/si3nloong/sqlike/proto"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -28,6 +29,8 @@ import (
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 	"google.golang.org/protobuf/proto"
 )
+
+const keyEnv = "SQLIKE_NAMESPACE"
 
 // Writer :
 type writer interface {
@@ -293,6 +296,9 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	if k == nil {
 		return errors.New("types: invalid key value <nil>")
 	}
+	if t == bsontype.Null {
+		return nil
+	}
 	v, _, ok := bsoncore.ReadString(b)
 	if !ok {
 		return errors.New("types: invalid bson string value")
@@ -513,9 +519,10 @@ func protoToKey(pk *pb.Key) *Key {
 // The namespace of the new key is empty.
 func NameKey(kind, name string, parent *Key) *Key {
 	return &Key{
-		Kind:   kind,
-		NameID: name,
-		Parent: parent,
+		Namespace: os.Getenv(keyEnv),
+		Kind:      kind,
+		NameID:    name,
+		Parent:    parent,
 	}
 }
 
@@ -525,9 +532,10 @@ func NameKey(kind, name string, parent *Key) *Key {
 // The namespace of the new key is empty.
 func IDKey(kind string, id int64, parent *Key) *Key {
 	return &Key{
-		Kind:   kind,
-		IntID:  id,
-		Parent: parent,
+		Namespace: os.Getenv(keyEnv),
+		Kind:      kind,
+		IntID:     id,
+		Parent:    parent,
 	}
 }
 
@@ -546,17 +554,19 @@ func NewIDKey(kind string, parent *Key) *Key {
 	}
 
 	return &Key{
-		Kind:   kind,
-		IntID:  id,
-		Parent: parent,
+		Namespace: os.Getenv(keyEnv),
+		Kind:      kind,
+		IntID:     id,
+		Parent:    parent,
 	}
 }
 
 // NewNameKey :
 func NewNameKey(kind string, parent *Key) *Key {
 	return &Key{
-		Kind:   kind,
-		NameID: uuid.New().String(),
-		Parent: parent,
+		Namespace: os.Getenv(keyEnv),
+		Kind:      kind,
+		NameID:    ksuid.New().String(),
+		Parent:    parent,
 	}
 }

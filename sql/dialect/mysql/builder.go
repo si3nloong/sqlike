@@ -54,11 +54,13 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	blr.SetBuilder(reflect.TypeOf(primitive.As{}), b.BuildAs)
 	blr.SetBuilder(reflect.TypeOf(primitive.Nil{}), b.BuildNil)
 	blr.SetBuilder(reflect.TypeOf(primitive.Raw{}), b.BuildRaw)
+	blr.SetBuilder(reflect.TypeOf(primitive.Encoding{}), b.BuildEncoding)
 	blr.SetBuilder(reflect.TypeOf(primitive.Aggregate{}), b.BuildAggregate)
 	blr.SetBuilder(reflect.TypeOf(primitive.Column{}), b.BuildColumn)
 	blr.SetBuilder(reflect.TypeOf(primitive.JSONColumn{}), b.BuildJSONColumn)
 	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.BuildClause)
 	blr.SetBuilder(reflect.TypeOf(primitive.L{}), b.BuildLike)
+	blr.SetBuilder(reflect.TypeOf(primitive.TypeSafe{}), b.BuildTypeSafe)
 	blr.SetBuilder(reflect.TypeOf(primitive.Operator(0)), b.BuildOperator)
 	blr.SetBuilder(reflect.TypeOf(primitive.Group{}), b.BuildGroup)
 	blr.SetBuilder(reflect.TypeOf(primitive.R{}), b.BuildRange)
@@ -69,7 +71,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.Stat
 	blr.SetBuilder(reflect.TypeOf(spatial.Func{}), b.BuildSpatialFunc)
 	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
 	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
-	blr.SetBuilder(reflect.TypeOf(&sql.DeleteStmt{}), b.BuildDeleteStmt)
+	// blr.SetBuilder(reflect.TypeOf(&sql.DeleteStmt{}), b.BuildDeleteStmt)
 	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
 	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
@@ -479,6 +481,33 @@ func (b *mySQLBuilder) BuildRange(stmt sqlstmt.Stmt, it interface{}) (err error)
 	return
 }
 
+// BuildEncoding :
+func (b *mySQLBuilder) BuildEncoding(stmt sqlstmt.Stmt, it interface{}) (err error) {
+	x := it.(primitive.Encoding)
+	if x.Charset != nil {
+		if (*x.Charset)[0] != '_' {
+			stmt.WriteString("_")
+		}
+		stmt.WriteString(*x.Charset + " ")
+	}
+	err = b.builder.BuildStatement(stmt, x.Column)
+	if err != nil {
+		return
+	}
+	stmt.WriteString(" COLLATE " + x.Collate)
+	return
+}
+
+// BuildTypeSafe :
+func (b *mySQLBuilder) BuildTypeSafe(stmt sqlstmt.Stmt, it interface{}) (err error) {
+	ts := it.(primitive.TypeSafe)
+	switch ts.Type {
+	case primitive.Varchar:
+		stmt.WriteString(strconv.Quote(ts.Value.(string)))
+	}
+	return
+}
+
 // BuildSelectStmt :
 func (b *mySQLBuilder) BuildSelectStmt(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(*sql.SelectStmt)
@@ -503,7 +532,6 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt sqlstmt.Stmt, it interface{}) error 
 		return err
 	}
 	b.appendLimitNOffset(stmt, x.Max, x.Skip)
-
 	return nil
 }
 
@@ -521,20 +549,6 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt sqlstmt.Stmt, it interface{}) error 
 		return err
 	}
 	b.appendLimitNOffset(stmt, x.Max, 0)
-	return nil
-}
-
-// BuildDeleteStmt :
-func (b *mySQLBuilder) BuildDeleteStmt(stmt sqlstmt.Stmt, it interface{}) error {
-	// x := it.(*sql.DeleteStmt)
-	// stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
-	// if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
-	// 	return err
-	// }
-	// if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
-	// 	return err
-	// }
-	// b.appendLimitNOffset(stmt, x.Max, 0)
 	return nil
 }
 
