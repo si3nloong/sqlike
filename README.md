@@ -18,9 +18,13 @@ go get github.com/si3nloong/sqlike
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
 
+## Legacy Support
+
+SQLike did support **mysql 5.7** as well. For better compatibility, we suggest you to use at least mysql 8.0.
+
 ## Minimum Requirements
 
-- **mysql 5.7** and above
+- **mysql 8.0** and above
 - **golang 1.15** and above
 
 ## Why another ORM?
@@ -33,9 +37,10 @@ Fully compatible with native library `database/sql`, which mean you are allow to
 - Support `ENUM` and `SET`
 - Support `UUID`
 - Support `JSON`
-- Support `descending index` for mysql 8.0
+- Support `descending index`
+- Support `multi-valued` index
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
-- Support `generated column` for `stored column` and `virtual column`
+- Support `generated column` of `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support `Transactions`
@@ -301,7 +306,6 @@ Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://
 ## Special Sponsors
 
 <p>
-    <img src="https://revenuemonster.my/public/img/rm-logowhite-3x.png" alt="RevenueMonster" width="180px" style="margin:5px 10px;">
     <img src="https://asset.wetix.my/images/logo/wetix.png" alt="WeTix" width="180px" style="margin:5px 10px;">
 </p>
 
