@@ -84,8 +84,8 @@ func TestKey(t *testing.T) {
 		require.Equal(it, "Key", col.Name)
 		require.Equal(it, "VARCHAR", col.DataType)
 		require.Equal(it, "VARCHAR(512)", col.Type)
-		require.Equal(it, &latin1, col.Charset)
-		require.Equal(it, &latin1Bin, col.Collation)
+		require.Equal(it, "latin1", *col.Charset)
+		require.Equal(it, "latin1_bin", *col.Collation)
 		require.True(it, col.Nullable)
 	})
 

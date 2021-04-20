@@ -15,6 +15,7 @@ type Set []string
 
 // DataType :
 func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column {
+	charset, collate := "utf8mb4", "utf8mb4_0900_ai_ci"
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	var def *string
@@ -32,13 +33,14 @@ func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column
 	}
 	blr.WriteByte('\'')
 	blr.WriteByte(')')
+
 	return columns.Column{
 		Name:         sf.Name(),
 		Type:         blr.String(),
 		DataType:     "SET",
 		Nullable:     reflext.IsNullable(sf.Type()),
-		Charset:      &latin1,
-		Collation:    &latin1Bin,
+		Charset:      &charset,
+		Collation:    &collate,
 		DefaultValue: def,
 	}
 }

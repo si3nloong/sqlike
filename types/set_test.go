@@ -23,8 +23,8 @@ func TestSet(t *testing.T) {
 		require.Equal(it, "SET('')", col.Type)
 		require.Nil(it, col.DefaultValue)
 		require.True(it, col.Nullable)
-		require.Equal(it, &latin1, col.Charset)
-		require.Equal(it, &latin1Bin, col.Collation)
+		require.Equal(it, "utf8mb4", *col.Charset)
+		require.Equal(it, "utf8mb4_0900_ai_ci", *col.Collation)
 	})
 
 	t.Run("driver.Valuer with nil value", func(it *testing.T) {

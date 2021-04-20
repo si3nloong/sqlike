@@ -30,7 +30,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 ## Why another ORM?
 
 - We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us
-- We want to get rid from _toxic query_
+- We want to get rid from _toxic query_/_slow query_ 
 
 ## What do we provide apart from native package (database/sql)?
 

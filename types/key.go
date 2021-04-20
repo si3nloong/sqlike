@@ -25,6 +25,7 @@ import (
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/util"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 	"google.golang.org/protobuf/proto"
@@ -38,11 +39,6 @@ type writer interface {
 	WriteString(string) (int, error)
 	WriteByte(byte) error
 }
-
-var (
-	latin1    = "latin1"
-	latin1Bin = "latin1_bin"
-)
 
 // Key :
 type Key struct {
@@ -61,17 +57,31 @@ var (
 	_ encoding.TextUnmarshaler = (*Key)(nil)
 	_ json.Marshaler           = (*Key)(nil)
 	_ json.Unmarshaler         = (*Key)(nil)
+	_ bson.ValueMarshaler      = (*Key)(nil)
+	_ bson.ValueUnmarshaler    = (*Key)(nil)
 )
 
 // DataType :
 func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
+	tag := sf.Tag()
+	size, charset, collate := "512", "latin1", "latin1_bin"
+	if v, ok := tag.LookUp("charset"); ok {
+		charset = v
+	}
+	if v, ok := tag.LookUp("collate"); ok {
+		collate = v
+	}
+	if v, ok := tag.LookUp("size"); ok {
+		size = v
+	}
+
 	return columns.Column{
 		Name:      sf.Name(),
 		DataType:  "VARCHAR",
-		Type:      "VARCHAR(512)",
+		Type:      "VARCHAR(" + size + ")",
 		Nullable:  reflext.IsNullable(sf.Type()),
-		Charset:   &latin1,
-		Collation: &latin1Bin,
+		Charset:   &charset,
+		Collation: &collate,
 	}
 }
 
