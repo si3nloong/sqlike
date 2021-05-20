@@ -74,7 +74,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) (col columns.Column)
 }
 
 func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) (col columns.Column) {
-	charset, collation := "ascii", "ascii_general_ci"
+	charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 	col.Name = sf.Name()
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(36)"
@@ -166,10 +166,9 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 			panic("invalid enum formats")
 		}
 
-		// if charset is not set, default is using latin1 for better performance
 		if !ok1 {
-			charset = "latin1"
-			collation = "latin1_bin"
+			charset = "utf8mb4"
+			collation = "utf8mb4_unicode_ci"
 		}
 
 		blr := util.AcquireString()
@@ -220,7 +219,7 @@ func (s mySQLSchema) CharDataType(sf reflext.StructFielder) (col columns.Column)
 	dflt := ""
 	switch sf.Type() {
 	case reflect.TypeOf(currency.Unit{}):
-		charset, collation := string(charset.Latin1), "latin1_bin"
+		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 		col.Type = "CHAR(3)"
 		col.Charset = &charset
 		col.Collation = &collation
