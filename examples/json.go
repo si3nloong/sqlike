@@ -34,10 +34,11 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	// create index
 	{
 		err = table.Indexes().CreateOne(ctx, indexes.Index{
-			Name: "words",
-			Type: indexes.MultiValued,
-			Cast: "StrArr",
-			As:   "CHAR(50) ARRAY",
+			Name:    "words",
+			Type:    indexes.MultiValued,
+			Cast:    "StrArr",
+			As:      "CHAR(50) ARRAY",
+			Comment: "wording index",
 		})
 		require.NoError(t, err)
 	}

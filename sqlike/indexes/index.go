@@ -52,6 +52,7 @@ type Index struct {
 	As      string
 	Type    Type
 	Columns []Col
+	Comment string
 }
 
 // Direction :

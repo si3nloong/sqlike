@@ -8,6 +8,7 @@ indexes:
     direction: asc
   - name: Bool
     direction: desc
+  comment: "For filter purpose"
 
 - table: NormalStruct
   name: test_idx

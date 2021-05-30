@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"regexp"
+	"strconv"
 
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
@@ -74,26 +75,30 @@ func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexe
 				stmt.WriteString("`" + idx.Cast + "` -> '$'")
 			}
 			stmt.WriteString(" AS " + idx.As + ")) )")
-			continue
+		} else {
+			if name != "" {
+				stmt.WriteString(ms.Quote(name))
+			}
+			stmt.WriteString(" (")
+			for j, col := range idx.Columns {
+				if j > 0 {
+					stmt.WriteByte(',')
+				}
+				stmt.WriteString(ms.Quote(col.Name))
+				if !supportDesc {
+					continue
+				}
+				if col.Direction == indexes.Descending {
+					stmt.WriteString(" DESC")
+				}
+			}
+			stmt.WriteByte(')')
 		}
 
-		if name != "" {
-			stmt.WriteString(ms.Quote(name))
+		if idx.Comment != "" {
+			stmt.WriteString(" COMMENT " + strconv.Quote(idx.Comment))
 		}
-		stmt.WriteString(" (")
-		for j, col := range idx.Columns {
-			if j > 0 {
-				stmt.WriteByte(',')
-			}
-			stmt.WriteString(ms.Quote(col.Name))
-			if !supportDesc {
-				continue
-			}
-			if col.Direction == indexes.Descending {
-				stmt.WriteString(" DESC")
-			}
-		}
-		stmt.WriteByte(')')
+
 	}
 	stmt.WriteByte(';')
 }
