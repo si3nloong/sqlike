@@ -10,7 +10,7 @@
 
 > A golang SQL ORM which anti toxic query and focus on latest features.
 
-## Installation
+## 🔨 Installation
 
 ```console
 go get github.com/si3nloong/sqlike
@@ -18,27 +18,27 @@ go get github.com/si3nloong/sqlike
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
 
-## Legacy Support
+## 📻 Legacy Support
 
 SQLike did support **mysql 5.7** as well. For better compatibility, we suggest you to use at least mysql 8.0.
 
-## Minimum Requirements
+## 🪣 Minimum Requirements
 
 - **mysql 8.0** and above
 - **golang 1.15** and above
 
-## Why another ORM?
+## ❓ Why another ORM?
 
 - We don't really care about _legacy support_, we want _latest feature_ that mysql and golang offer us
-- We want to get rid from _toxic query_/_slow query_ 
+- We want to get rid from **toxic query** (also known as slow query)
 
-## What do we provide apart from native package (database/sql)?
+## ✨ What do we provide apart from native package (database/sql)?
 
 - Support `ENUM` and `SET`
-- Support `UUID`
+- Support `UUID` (^8.0)
 - Support `JSON`
-- Support `descending index`
-- Support `multi-valued` index
+- Support `descending index` (^8.0)
+- Support `multi-valued` index (^8.0.17)
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` of `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
@@ -52,11 +52,13 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Developer friendly, (query is highly similar to native sql query)
 - Support `sqldump` for backup purpose **(experiment)**
 
-## Missing DOC?
+## 📝 Documentation
 
-You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis
+https://github.com/si3nloong/sqlike/tree/master/docs/API.md
 
-## Limitation
+<!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
+
+## ⚠️ Limitation
 
 Our main objective is anti toxic query, that why some functionality we doesn't offer out of box
 
@@ -290,7 +292,7 @@ func main() {
         opentracing.WithQuery(true),
     )
     client, err := sqlike.ConnectDB(
-        ctx, 
+        ctx,
         driver,
         instrumented.WrapConnector(conn, itpr),
     )
@@ -303,20 +305,20 @@ func main() {
 
 Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).
 
-## Special Sponsors
+## 🔋 Special Sponsors
 
 <p>
     <img src="https://asset.wetix.my/images/logo/wetix.png" alt="WeTix" width="180px" style="margin:5px 10px;">
 </p>
 
-## Big Thanks To
+## 🎉 Big Thanks To
 
 Thanks to these awesome companies for their support of Open Source developers ❤
 
 [![GitHub](https://jstools.dev/img/badges/github.svg)](https://github.com/open-source)
 [![NPM](https://jstools.dev/img/badges/npm.svg)](https://www.npmjs.com/)
 
-## License
+## 📄 License
 
 [MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
 
