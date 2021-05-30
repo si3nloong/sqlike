@@ -46,6 +46,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Support `Transactions`
 - Support cursor based pagination
 - Support advance and complex query statement
+- Support [civil.Date](https://cloud.google.com/go/civil)
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support authorization plugin [Casbin](https://github.com/casbin/casbin)
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
