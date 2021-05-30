@@ -118,6 +118,12 @@ func (b *mySQLBuilder) BuildFunction(stmt sqlstmt.Stmt, it interface{}) error {
 // BuildJSONFunction :
 func (b *mySQLBuilder) BuildJSONFunction(stmt sqlstmt.Stmt, it interface{}) error {
 	x := it.(primitive.JSONFunc)
+	if x.Prefix != nil {
+		if err := b.getValue(stmt, x.Prefix); err != nil {
+			return err
+		}
+		stmt.WriteString(" ")
+	}
 	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
 	for i, args := range x.Args {
@@ -502,8 +508,39 @@ func (b *mySQLBuilder) BuildEncoding(stmt sqlstmt.Stmt, it interface{}) (err err
 func (b *mySQLBuilder) BuildTypeSafe(stmt sqlstmt.Stmt, it interface{}) (err error) {
 	ts := it.(primitive.TypeSafe)
 	switch ts.Type {
-	case primitive.Varchar:
+	case "string":
 		stmt.WriteString(strconv.Quote(ts.Value.(string)))
+	case "bool":
+		v := ts.Value.(bool)
+		if v {
+			stmt.WriteString("1")
+		} else {
+			stmt.WriteString("0")
+		}
+	case "int":
+		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int)), 10))
+	case "int8":
+		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int8)), 10))
+	case "int16":
+		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int16)), 10))
+	case "int32":
+		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int32)), 10))
+	case "int64":
+		stmt.WriteString(strconv.FormatInt(ts.Value.(int64), 10))
+	case "uint":
+		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint)), 10))
+	case "uint8":
+		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint8)), 10))
+	case "uint16":
+		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint16)), 10))
+	case "uint32":
+		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint32)), 10))
+	case "uint64":
+		stmt.WriteString(strconv.FormatUint(ts.Value.(uint64), 10))
+	case "float32":
+		stmt.WriteString(strconv.FormatFloat(float64(ts.Value.(float32)), 'e', -1, 64))
+	case "float64":
+		stmt.WriteString(strconv.FormatFloat(ts.Value.(float64), 'e', -1, 64))
 	}
 	return
 }

@@ -16,6 +16,7 @@ const (
 	JSON_INSERT
 	JSON_REPLACE
 	JSON_REMOVE
+	MEMBER_OF
 )
 
 var jsonFuncNames = [...]string{
@@ -31,6 +32,7 @@ var jsonFuncNames = [...]string{
 	"JSON_INSERT",
 	"JSON_REPLACE",
 	"JSON_REMOVE",
+	"MEMBER OF",
 }
 
 func (f jsonFunction) String() string {

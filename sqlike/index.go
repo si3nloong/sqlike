@@ -39,10 +39,7 @@ func (idv *IndexView) CreateOne(ctx context.Context, idx indexes.Index) error {
 // Create :
 func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
 	for _, idx := range idxs {
-		if idx.Type == indexes.MultiValued && len(idx.Columns) == 1 {
-			continue
-		}
-		if len(idx.Columns) < 1 {
+		if idx.Type != indexes.MultiValued && len(idx.Columns) < 1 {
 			return ErrNoColumn
 		}
 	}

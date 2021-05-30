@@ -48,7 +48,9 @@ func (t Type) String() string {
 // Index :
 type Index struct {
 	Name    string
+	CastAs  string
 	Type    Type
+	Column  string
 	Columns []Col
 }
 

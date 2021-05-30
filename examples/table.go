@@ -40,8 +40,6 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			columns = append(columns, f.Name)
 		}
 
-		latin1 := "latin1"
-
 		{
 			pk := columnMap["$Key"]
 			require.Equal(t, "VARCHAR(36)", pk.Type)
@@ -53,8 +51,8 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, "VARCHAR(300)", columnMap["CustomStrType"].Type)
 		require.Equal(t, "DOUBLE UNSIGNED", columnMap["UFloat32"].Type)
 		require.Equal(t, "ENUM('SUCCESS','FAILED','UNKNOWN')", columnMap["Enum"].Type)
-		// enum by default is using latin1 for performance concern
-		require.Equal(t, &latin1, columnMap["Enum"].Charset)
+		// // enum by default is using latin1 for performance concern
+		// require.Equal(t, &latin1, columnMap["Enum"].Charset)
 
 		require.ElementsMatch(t, []string{
 			"$Key", "Key", "PtrUUID", "Date", "SID",

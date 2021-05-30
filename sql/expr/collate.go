@@ -11,10 +11,3 @@ func Collate(collate string, col interface{}, charset ...string) (o primitive.En
 	o.Collate = collate
 	return
 }
-
-// String :
-func String(str string) (o primitive.TypeSafe) {
-	o.Type = primitive.Varchar
-	o.Value = str
-	return
-}

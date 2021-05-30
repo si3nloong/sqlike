@@ -33,7 +33,11 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	jss := [...]jsonStruct{
 		newJSONStruct(),
 		newJSONStruct(),
-		newJSONStruct(),
+		{
+			Text:   "Hello America 🎉 !!!",
+			StrArr: []string{"Hello", "America", "🎉"},
+			IntArr: []int{6743, 88},
+		},
 	}
 
 	{
@@ -257,10 +261,35 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		arr := []output{}
 		err = result.All(&arr)
+		require.NoError(t, err)
 		require.True(t, len(arr) > 0)
 		require.True(t, len(arr[0].Raw) > 3)
 		require.Equal(t, "ok", arr[0].Message)
+
+		var out []jsonStruct
+
+		result, err = table.Find(
+			ctx,
+			actions.Find().
+				Where(
+					expr.MemberOf("🎉", "StrArr"),
+				),
+			options.Find().
+				SetDebug(true).
+				SetNoLimit(true),
+		)
 		require.NoError(t, err)
+
+		err = result.All(&out)
+		require.NoError(t, err)
+
+		require.Equal(t, jsonStruct{
+			ID:     3,
+			Text:   "Hello America 🎉 !!!",
+			StrArr: []string{"Hello", "America", "🎉"},
+			IntArr: []int{6743, 88},
+			Raw:    json.RawMessage(`null`),
+		}, out[0])
 	}
 }
 

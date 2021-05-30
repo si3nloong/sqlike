@@ -28,9 +28,9 @@ indexes:
   - name: id
 
 # Multi-Valued index
-# - table: JSON
-#   type: multi-valued
-#   column: StrArr
-#   castAs: VARCHAR(10) ARRAY
+- table: JSON
+  type: multi-valued
+  column: StrArr
+  castAs: VARCHAR(10) ARRAY
 
     

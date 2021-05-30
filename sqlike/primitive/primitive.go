@@ -68,14 +68,15 @@ type Encoding struct {
 
 // TypeSafe :
 type TypeSafe struct {
-	Type  DataType
+	Type  string
 	Value interface{}
 }
 
 // JSONFunc :
 type JSONFunc struct {
-	Type jsonFunction
-	Args []interface{}
+	Prefix interface{}
+	Type   jsonFunction
+	Args   []interface{}
 }
 
 // Group :

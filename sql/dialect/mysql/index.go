@@ -62,10 +62,15 @@ func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexe
 			stmt.WriteByte(',')
 		}
 
-		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type))
+		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type) + " ")
 		name := idx.GetName()
+		if idx.Type == indexes.MultiValued {
+			stmt.WriteString(name + "( (CAST(`" + idx.Column + "` -> '$' AS CHAR(10) ARRAY)) )")
+			continue
+		}
+
 		if name != "" {
-			stmt.WriteString(" " + ms.Quote(name))
+			stmt.WriteString(ms.Quote(name))
 		}
 		stmt.WriteString(" (")
 		for j, col := range idx.Columns {
@@ -97,8 +102,7 @@ func (ms MySQL) DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string) 
 			stmt.WriteByte(',')
 		}
 
-		stmt.WriteString("DROP INDEX ")
-		stmt.WriteString(ms.Quote(idx))
+		stmt.WriteString("DROP INDEX " + ms.Quote(idx))
 	}
 	stmt.WriteByte(';')
 }

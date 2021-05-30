@@ -135,6 +135,14 @@ func JSON_TYPE(val interface{}) (f primitive.JSONFunc) {
 	return
 }
 
+// MemberOf : mysql 8.0.17
+func MemberOf(val interface{}, arr interface{}) (f primitive.JSONFunc) {
+	f.Prefix = val
+	f.Type = primitive.MEMBER_OF
+	f.Args = append(f.Args, wrapColumn(arr))
+	return
+}
+
 // JSONColumn :
 func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
 	c.Column = column
