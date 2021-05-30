@@ -10,6 +10,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
@@ -28,6 +29,17 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	// migrate
 	{
 		table.MustMigrate(ctx, jsonStruct{})
+	}
+
+	// create index
+	{
+		err = table.Indexes().CreateOne(ctx, indexes.Index{
+			Name: "words",
+			Type: indexes.MultiValued,
+			Cast: "StrArr",
+			As:   "CHAR(50) ARRAY",
+		})
+		require.NoError(t, err)
 	}
 
 	jss := [...]jsonStruct{

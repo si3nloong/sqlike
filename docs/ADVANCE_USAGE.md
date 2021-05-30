@@ -1,5 +1,13 @@
 # Advance Usage
 
+### Sub-query
+
+```go
+
+```
+
+### Complex Query
+
 ### Integrate with [OpenTracing](https://github.com/opentracing/opentracing-go)
 
 Tracing is become very common in practice. And you may integrate your `OpenTracing` as such :

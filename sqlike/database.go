@@ -139,8 +139,8 @@ type indexDefinition struct {
 		Table   string `yaml:"table"`
 		Name    string `yaml:"name"`
 		Type    string `yaml:"type"`
-		CastAs  string `yaml:"castAs"`
-		Column  string `yaml:"column"`
+		Cast    string `yaml:"cast"`
+		As      string `yaml:"as"`
 		Columns []struct {
 			Name      string `yaml:"name"`
 			Direction string `yaml:"direction"`
@@ -229,10 +229,10 @@ func (db *Database) readAndBuildIndexes(ctx context.Context, path string) error 
 		}
 
 		index := indexes.Index{
-			Name:    idx.Name,
+			Name:    strings.TrimSpace(idx.Name),
 			Type:    parseIndexType(idx.Type),
-			CastAs:  idx.CastAs,
-			Column:  idx.Column,
+			Cast:    strings.TrimSpace(idx.Cast),
+			As:      strings.TrimSpace(idx.As),
 			Columns: columns,
 		}
 

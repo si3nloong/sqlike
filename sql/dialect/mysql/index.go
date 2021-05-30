@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"regexp"
+
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 )
@@ -65,7 +67,13 @@ func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexe
 		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type) + " ")
 		name := idx.GetName()
 		if idx.Type == indexes.MultiValued {
-			stmt.WriteString(name + "( (CAST(`" + idx.Column + "` -> '$' AS CHAR(10) ARRAY)) )")
+			stmt.WriteString(name + "( (CAST(")
+			if regexp.MustCompile(`(?is).+\s*\-\>\s*.+`).MatchString(idx.Cast) {
+				stmt.WriteString(idx.Cast)
+			} else {
+				stmt.WriteString("`" + idx.Cast + "` -> '$'")
+			}
+			stmt.WriteString(" AS " + idx.As + ")) )")
 			continue
 		}
 

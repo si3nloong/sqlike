@@ -54,7 +54,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 
 ## 📝 Documentation
 
-https://github.com/si3nloong/sqlike/tree/master/docs/API.md
+https://github.com/si3nloong/sqlike/tree/master/docs/README.md
 
 <!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
 
