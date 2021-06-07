@@ -81,5 +81,7 @@
 - [ ] Support insert with map.
 - [ ] Support foreign key.
 - [ ] Support multiple tag (reflext).
+- [ ] Support proxy mode for master-slave topology.
+- [ ] Support any of [index](https://dev.mysql.com/doc/refman/8.0/en/create-index.html).
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
