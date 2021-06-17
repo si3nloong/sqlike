@@ -1,12 +1,10 @@
-<p align="center">
-    <a href="https://github.com/si3nloong/sqlike/actions"><img src="https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master" alt="build status" title="build status"/></a>
-    <a href="https://github.com/si3nloong/sqlike/releases"><img src="https://img.shields.io/github/v/tag/si3nloong/sqlike" alt="semver tag" title="semver tag"/></a>
-    <a href="https://goreportcard.com/report/github.com/si3nloong/sqlike"><img src="https://goreportcard.com/badge/github.com/si3nloong/sqlike" alt="go report card" title="go report card"/></a>
-    <a href="https://codecov.io/gh/si3nloong/sqlike"><img src="https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg" alt="coverage status" title="coverage status"/></a>
-    <a href="https://github.com/si3nloong/sqlike/blob/master/LICENSE"><img src="https://img.shields.io/github/license/si3nloong/sqlike" alt="license" title="license"/></a>
-</p>
-
 # sqlike
+
+[![Build](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions?query=workflow%3Abuild)
+[![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/releases)
+[![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
+[![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
+[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
 
 > A golang SQL ORM which anti toxic query and focus on latest features.
 
