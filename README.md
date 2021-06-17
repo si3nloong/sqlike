@@ -51,10 +51,6 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Developer friendly, (query is highly similar to native sql query)
 - Support `sqldump` for backup purpose **(experiment)**
 
-## 📝 Documentation
-
-https://github.com/si3nloong/sqlike/tree/master/docs/README.md
-
 <!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
 
 ## ⚠️ Limitation
