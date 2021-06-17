@@ -73,6 +73,8 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 ## General APIs
 
 ```go
+package main
+
 import (
     "time"
     "github.com/si3nloong/sqlike/sqlike/actions"
@@ -81,6 +83,8 @@ import (
     "github.com/si3nloong/sqlike/sql/expr"
     "github.com/google/uuid"
     "context"
+
+    _ "github.com/go-sql-driver/mysql"
 )
 
 // UserStatus :
