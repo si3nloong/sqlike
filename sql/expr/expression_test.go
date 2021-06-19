@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/primitive"
 	"github.com/stretchr/testify/require"
 )
 

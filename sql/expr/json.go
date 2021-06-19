@@ -3,7 +3,7 @@ package expr
 import (
 	"encoding/json"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/primitive"
 )
 
 // JSON_QUOTE :

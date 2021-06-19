@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/si3nloong/sqlike/jsonb"
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )

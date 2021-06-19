@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -12,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // SingleResult : single result is an interface implementing apis as similar as driver.Result

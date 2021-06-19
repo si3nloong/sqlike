@@ -2,7 +2,7 @@ package sql
 
 import (
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/primitive"
 )
 
 // DeleteStmt :

@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	gouuid "github.com/satori/go.uuid"
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	"github.com/si3nloong/sqlike/sqlike/columns"
+	"github.com/si3nloong/sqlike/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )

@@ -11,7 +11,7 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"

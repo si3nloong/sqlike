@@ -5,7 +5,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/driver"
@@ -14,6 +13,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // SQLDialect :

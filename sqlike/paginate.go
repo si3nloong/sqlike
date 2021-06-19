@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/primitive"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // ErrInvalidCursor :

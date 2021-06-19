@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/si3nloong/sqlike/reflext"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -12,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // DestroyOne : hard delete a record on the table using primary key. You should alway have primary key defined in your struct in order to use this api.

@@ -7,13 +7,13 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // InsertOne : insert single record. You should always pass in the address of input.

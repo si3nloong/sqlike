@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"strings"
 
-	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
+	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/util"
 )
 

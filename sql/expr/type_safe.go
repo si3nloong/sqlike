@@ -1,6 +1,6 @@
 package expr
 
-import "github.com/si3nloong/sqlike/sqlike/primitive"
+import "github.com/si3nloong/sqlike/x/primitive"
 
 // String :
 func String(val string) (o primitive.TypeSafe) {

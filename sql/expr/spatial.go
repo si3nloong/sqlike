@@ -3,7 +3,7 @@ package expr
 import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/primitive"
 	"github.com/si3nloong/sqlike/x/spatial"
 )
 

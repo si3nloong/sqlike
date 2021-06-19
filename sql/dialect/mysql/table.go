@@ -4,12 +4,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/si3nloong/sqlike/reflext"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // HasPrimaryKey :

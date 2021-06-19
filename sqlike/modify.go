@@ -5,7 +5,6 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
 	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -13,6 +12,7 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
 	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // ModifyOne :
