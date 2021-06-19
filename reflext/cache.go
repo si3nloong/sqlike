@@ -47,10 +47,10 @@ func NewMapperFunc(tag string, fmtFunc FormatFunc) *Mapper {
 
 // CodecByType :
 func (m *Mapper) CodecByType(t reflect.Type) Structer {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
 	mapping, ok := m.cache[t]
 	if !ok {
+		m.mutex.Lock()
+		defer m.mutex.Unlock()
 		mapping = getCodec(t, m.tag, m.fmtFunc)
 		m.cache[t] = mapping
 	}
