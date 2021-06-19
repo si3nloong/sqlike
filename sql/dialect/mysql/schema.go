@@ -12,7 +12,7 @@ import (
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/x/util"
 	"golang.org/x/text/currency"
 )
 

@@ -14,7 +14,7 @@ import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/spatial"
+	"github.com/si3nloong/sqlike/x/spatial"
 
 	"github.com/si3nloong/sqlike/jsonb"
 )

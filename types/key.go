@@ -20,11 +20,11 @@ import (
 	"errors"
 
 	"github.com/segmentio/ksuid"
-	pb "github.com/si3nloong/sqlike/proto"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/util"
+	pb "github.com/si3nloong/sqlike/x/proto"
+	"github.com/si3nloong/sqlike/x/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"

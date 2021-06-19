@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/spatial"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/x/spatial"
 )
 
 var operatorMap = map[primitive.Operator]string{

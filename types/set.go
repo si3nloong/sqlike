@@ -7,7 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/x/util"
 )
 
 // Set : sql data type of `SET`

@@ -14,7 +14,7 @@ import (
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/types"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/x/util"
 
 	"github.com/si3nloong/sqlike/sql/dialect"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
