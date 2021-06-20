@@ -248,6 +248,9 @@ func (k *Key) UnmarshalBinary(b []byte) error {
 
 // UnmarshalText :
 func (k *Key) UnmarshalText(b []byte) error {
+	if len(b) == 0 {
+		return nil
+	}
 	str := string(b)
 	if str == "null" {
 		return nil
@@ -266,11 +269,10 @@ func (k *Key) UnmarshalJSON(b []byte) error {
 	if length < 2 {
 		return errors.New("types: invalid key json value")
 	}
-	str := string(b)
-	if str == "null" {
+	if util.UnsafeString(b) == "null" {
 		return nil
 	}
-	str = string(b[1 : length-1])
+	str := string(b[1 : length-1])
 	key, err := DecodeKey(str)
 	if err != nil {
 		return err
@@ -285,11 +287,13 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 	if length < 2 {
 		return errors.New("types: invalid key json value")
 	}
-	str := string(b)
-	if str == "null" {
+	if len(b) == 0 {
 		return nil
 	}
-	str = string(b[1 : length-1])
+	if util.UnsafeString(b) == "null" {
+		return nil
+	}
+	str := string(b[1 : length-1])
 	return k.unmarshal(str)
 }
 

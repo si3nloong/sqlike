@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/si3nloong/sqlike/options"
+	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/dialect/mysql"
 )
@@ -68,8 +69,15 @@ func MustConnect(ctx context.Context, driver string, opt *options.ConnectOptions
 // ConnectDB :
 func ConnectDB(ctx context.Context, driver string, conn driver.Connector) (*Client, error) {
 	database := sql.OpenDB(conn)
-	dialect := dialect.GetDialectByDriver(driver)
-	client, err := newClient(ctx, driver, database, dialect, "", "")
+	dlct := dialect.GetDialectByDriver(driver)
+	client, err := newClient(
+		ctx,
+		driver,
+		database,
+		dlct,
+		charset.DefaultCharset,
+		charset.DefaultCollation,
+	)
 	if err != nil {
 		return nil, err
 	}

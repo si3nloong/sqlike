@@ -16,50 +16,40 @@ type field struct {
 	name string
 	t    reflect.Type
 	null bool
-	opts map[string]string
 }
 
-// Name :
 func (f field) Name() string {
 	return f.name
 }
 
-// Type :
 func (f field) Type() reflect.Type {
 	return f.t
 }
 
-// Index :
 func (field) Index() []int {
 	return nil
 }
 
-// Tag :
 func (f field) Tag() reflext.StructTager {
 	return reflext.StructTag{}
 }
 
-// Parent :
 func (field) Parent() reflext.StructFielder {
 	return nil
 }
 
-// ParentByTraversal :
 func (field) ParentByTraversal(cb func(reflext.StructFielder) bool) reflext.StructFielder {
 	return nil
 }
 
-// Children :
 func (field) Children() []reflext.StructFielder {
 	return nil
 }
 
-// IsNullable :
 func (f field) IsNullable() bool {
 	return f.null
 }
 
-// IsEmbedded :
 func (field) IsEmbedded() bool {
 	return false
 }

@@ -1,5 +1,10 @@
 package charset
 
+const (
+	DefaultCharset   = "utf8mb4"
+	DefaultCollation = "utf8mb4_0900_ai_ci"
+)
+
 // Code :
 type Code string
 
