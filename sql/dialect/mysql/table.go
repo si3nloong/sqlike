@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/driver"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
@@ -13,7 +13,7 @@ import (
 )
 
 // HasPrimaryKey :
-func (ms MySQL) HasPrimaryKey(stmt sqlstmt.Stmt, db, table string) {
+func (ms MySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
 	stmt.WriteByte(';')
@@ -21,7 +21,7 @@ func (ms MySQL) HasPrimaryKey(stmt sqlstmt.Stmt, db, table string) {
 }
 
 // RenameTable :
-func (ms MySQL) RenameTable(stmt sqlstmt.Stmt, db, oldName, newName string) {
+func (ms MySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(" TO ")
@@ -30,7 +30,7 @@ func (ms MySQL) RenameTable(stmt sqlstmt.Stmt, db, oldName, newName string) {
 }
 
 // DropTable :
-func (ms MySQL) DropTable(stmt sqlstmt.Stmt, db, table string, exists bool) {
+func (ms MySQL) DropTable(stmt db.Stmt, db, table string, exists bool) {
 	stmt.WriteString("DROP TABLE")
 	if exists {
 		stmt.WriteString(" IF EXISTS")
@@ -40,18 +40,18 @@ func (ms MySQL) DropTable(stmt sqlstmt.Stmt, db, table string, exists bool) {
 }
 
 // TruncateTable :
-func (ms MySQL) TruncateTable(stmt sqlstmt.Stmt, db, table string) {
+func (ms MySQL) TruncateTable(stmt db.Stmt, db, table string) {
 	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
 }
 
 // HasTable :
-func (ms MySQL) HasTable(stmt sqlstmt.Stmt, dbName, table string) {
+func (ms MySQL) HasTable(stmt db.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs(dbName, table)
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error) {
+func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error) {
 	var (
 		col     columns.Column
 		pkk     reflext.StructFielder
@@ -164,7 +164,7 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
+func (ms *MySQL) AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
 	var (
 		col     columns.Column
 		pkk     reflext.StructFielder

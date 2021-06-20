@@ -7,9 +7,9 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -87,7 +87,7 @@ func insertMany(
 	cache reflext.StructMapper,
 	cdc codec.Codecer,
 	driver sqldriver.Driver,
-	dialect db.Dialect,
+	dialect dialect.Dialect,
 	logger logs.Logger,
 	src interface{},
 	opt *options.InsertOptions,

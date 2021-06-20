@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -51,7 +51,7 @@ type Client struct {
 	logger  logs.Logger
 	cache   reflext.StructMapper
 	codec   codec.Codecer
-	dialect db.Dialect
+	dialect dialect.Dialect
 }
 
 // newClient : create a new client struct by providing driver, *sql.DB, dialect etc
@@ -59,7 +59,7 @@ func newClient(
 	ctx context.Context,
 	driver string,
 	db *sql.DB,
-	dialect db.Dialect,
+	dialect dialect.Dialect,
 	code charset.Code,
 	collate string,
 ) (*Client, error) {

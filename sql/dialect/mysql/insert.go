@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
+func (ms MySQL) InsertInto(stmt db.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
 	records := v.Len()
 
 	stmt.WriteString("INSERT")
@@ -122,7 +122,7 @@ func findEncoder(c codec.Codecer, sf reflext.StructFielder, v reflect.Value) (co
 	return encoder, nil
 }
 
-func convertSpatial(stmt sqlstmt.Stmt, val interface{}) {
+func convertSpatial(stmt db.Stmt, val interface{}) {
 	switch vi := val.(type) {
 	case spatial.Geometry:
 		switch vi.Type {

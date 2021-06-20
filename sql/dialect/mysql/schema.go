@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/schema"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
@@ -74,7 +74,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) (col columns.Column)
 }
 
 func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) (col columns.Column) {
-	charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
+	charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
 	col.Name = sf.Name()
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(36)"
@@ -219,12 +219,12 @@ func (s mySQLSchema) CharDataType(sf reflext.StructFielder) (col columns.Column)
 	dflt := ""
 	switch sf.Type() {
 	case reflect.TypeOf(currency.Unit{}):
-		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
+		charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
 		col.Type = "CHAR(3)"
 		col.Charset = &charset
 		col.Collation = &collation
 	default:
-		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
+		charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
 		col.Type = "CHAR(191)"
 		col.Charset = &charset
 		col.Collation = &collation
@@ -330,7 +330,7 @@ func (s mySQLSchema) ArrayDataType(sf reflext.StructFielder) (col columns.Column
 	return
 }
 
-func (ms MySQL) buildSchemaByColumn(stmt sqlstmt.Stmt, col columns.Column) {
+func (ms MySQL) buildSchemaByColumn(stmt db.Stmt, col columns.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
 	if col.Charset != nil {

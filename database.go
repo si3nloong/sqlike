@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
@@ -30,7 +30,7 @@ type Database struct {
 	pk         string
 	client     *Client
 	driver     driver.Driver
-	dialect    db.Dialect
+	dialect    dialect.Dialect
 	codec      codec.Codecer
 	logger     logs.Logger
 }

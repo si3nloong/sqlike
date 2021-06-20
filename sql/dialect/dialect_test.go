@@ -1,4 +1,4 @@
-package db
+package dialect
 
 import (
 	"testing"

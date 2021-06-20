@@ -3,6 +3,7 @@ package mysql
 import (
 	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
@@ -15,7 +16,7 @@ type MySQL struct {
 	sqlutil.MySQLUtil
 }
 
-var _ db.Dialect = (*(MySQL))(nil)
+var _ dialect.Dialect = (*(MySQL))(nil)
 
 // New :
 func New() *MySQL {
@@ -32,6 +33,6 @@ func New() *MySQL {
 }
 
 // GetVersion :
-func (ms MySQL) GetVersion(stmt sqlstmt.Stmt) {
+func (ms MySQL) GetVersion(stmt db.Stmt) {
 	stmt.WriteString("SELECT VERSION();")
 }

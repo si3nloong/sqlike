@@ -2,19 +2,9 @@ package sqlstmt
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"time"
 )
-
-// Stmt :
-type Stmt interface {
-	io.StringWriter
-	io.ByteWriter
-	fmt.Stringer
-	Args() []interface{}
-	AppendArgs(args ...interface{})
-}
 
 // Formatter :
 type Formatter interface {

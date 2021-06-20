@@ -5,9 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -104,7 +104,7 @@ func find(
 	cache reflext.StructMapper,
 	cdc codec.Codecer,
 	driver sqldriver.Driver,
-	dialect db.Dialect,
+	dialect dialect.Dialect,
 	logger logs.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,

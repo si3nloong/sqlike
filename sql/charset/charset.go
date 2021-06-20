@@ -5,10 +5,10 @@ type Code string
 
 // codes :
 const (
-	UTF8MB4  Code = "utf8mb4"  // UTF-8 Unicode
-	UTF8     Code = "utf8"     // UTF-8 Unicode
-	UTF16    Code = "utf16"    // UTF-16 Unicode
-	UTF32    Code = "utf32"    // UTF-32 Unicode
+	Utf8mb4  Code = "utf8mb4"  // UTF-8 Unicode
+	Utf8     Code = "utf8"     // UTF-8 Unicode
+	Utf16    Code = "utf16"    // UTF-16 Unicode
+	Utf32    Code = "utf32"    // UTF-32 Unicode
 	Latin1   Code = "latin1"   // cp1252 West European
 	Latin2   Code = "latin2"   // ISO 8859-2 Central European
 	Latin5   Code = "latin5"   // ISO 8859-9 Turkish

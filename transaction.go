@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/codec"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -35,7 +35,7 @@ type Transaction struct {
 	pk      string
 	client  *Client
 	driver  *sql.Tx
-	dialect db.Dialect
+	dialect dialect.Dialect
 	codec   codec.Codecer
 	logger  logs.Logger
 }

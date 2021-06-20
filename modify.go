@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
@@ -39,7 +39,7 @@ func modifyOne(
 	ctx context.Context,
 	dbName, tbName, pk string,
 	cache reflext.StructMapper,
-	dialect db.Dialect,
+	dialect dialect.Dialect,
 	driver sqldriver.Driver,
 	logger logs.Logger,
 	update interface{},

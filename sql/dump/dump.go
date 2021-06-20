@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/types"
 	"github.com/si3nloong/sqlike/x/util"
@@ -58,7 +58,7 @@ type Dumper struct {
 	sync.Mutex
 	driver  string
 	conn    driver.Queryer
-	dialect db.Dialect
+	dialect dialect.Dialect
 	mapper  map[string]Parser
 }
 
@@ -67,7 +67,7 @@ func NewDumper(driver string, conn driver.Queryer) *Dumper {
 	dumper := new(Dumper)
 	dumper.driver = strings.TrimSpace(strings.ToLower(driver))
 	dumper.conn = conn
-	dumper.dialect = db.GetDialectByDriver(driver)
+	dumper.dialect = dialect.GetDialectByDriver(driver)
 	dumper.mapper = map[string]Parser{
 		"VARCHAR":   byteToString,
 		"CHAR":      byteToString,

@@ -6,11 +6,12 @@ import (
 
 	"reflect"
 
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // BuildStatementFunc :
-type BuildStatementFunc func(stmt Stmt, it interface{}) error
+type BuildStatementFunc func(stmt db.Stmt, it interface{}) error
 
 // StatementBuilder :
 type StatementBuilder struct {
@@ -39,7 +40,7 @@ func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFun
 }
 
 // BuildStatement :
-func (sb *StatementBuilder) BuildStatement(stmt Stmt, it interface{}) error {
+func (sb *StatementBuilder) BuildStatement(stmt db.Stmt, it interface{}) error {
 	v := reflext.ValueOf(it)
 	if x, ok := sb.builders[v.Type()]; ok {
 		return x(stmt, it)

@@ -7,13 +7,13 @@ import (
 	"errors"
 	"log"
 
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
+	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/dialect/mysql"
 )
 
 func init() {
-	db.RegisterDialect("mysql", mysql.New())
+	dialect.RegisterDialect("mysql", mysql.New())
 }
 
 // Open : open connection to sql server with connection string
@@ -22,14 +22,14 @@ func Open(ctx context.Context, driver string, opt *options.ConnectOptions) (clie
 		return nil, errors.New("sqlike: invalid connection options <nil>")
 	}
 	var database *sql.DB
-	dialect := db.GetDialectByDriver(driver)
-	connStr := dialect.Connect(opt)
+	dlct := dialect.GetDialectByDriver(driver)
+	connStr := dlct.Connect(opt)
 	log.Println("Connecting to :", connStr)
 	database, err = sql.Open(driver, connStr)
 	if err != nil {
 		return
 	}
-	client, err = newClient(ctx, driver, database, dialect, opt.Charset, opt.Collate)
+	client, err = newClient(ctx, driver, database, dlct, opt.Charset, opt.Collate)
 	return
 }
 
@@ -68,7 +68,7 @@ func MustConnect(ctx context.Context, driver string, opt *options.ConnectOptions
 // ConnectDB :
 func ConnectDB(ctx context.Context, driver string, conn driver.Connector) (*Client, error) {
 	database := sql.OpenDB(conn)
-	dialect := db.GetDialectByDriver(driver)
+	dialect := dialect.GetDialectByDriver(driver)
 	client, err := newClient(ctx, driver, database, dialect, "", "")
 	if err != nil {
 		return nil, err
