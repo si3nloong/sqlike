@@ -87,7 +87,7 @@ func insertMany(
 	cache reflext.StructMapper,
 	cdc codec.Codecer,
 	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	dlct dialect.Dialect,
 	logger logs.Logger,
 	src interface{},
 	opt *options.InsertOptions,
@@ -103,7 +103,7 @@ func insertMany(
 		return nil, errors.New("sqlike: insert only support array or slice of entity")
 	}
 
-	if v.Len() < 1 {
+	if v.Len() == 0 {
 		return nil, ErrInvalidInput
 	}
 
@@ -113,10 +113,10 @@ func insertMany(
 	}
 
 	def := cache.CodecByType(t)
-	stmt := sqlstmt.AcquireStmt(dialect)
+	stmt := sqlstmt.AcquireStmt(dlct)
 	defer sqlstmt.ReleaseStmt(stmt)
 
-	if err := dialect.InsertInto(
+	if err := dlct.InsertInto(
 		stmt,
 		dbName,
 		tbName,

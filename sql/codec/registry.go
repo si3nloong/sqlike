@@ -84,7 +84,7 @@ type Registry struct {
 
 var _ Codecer = (*Registry)(nil)
 
-// NewRegistry creates a new empty Registry.
+// NewRegistry : creates a new empty Registry.
 func NewRegistry() *Registry {
 	return &Registry{
 		typeEncoders: make(map[reflect.Type]ValueEncoder),

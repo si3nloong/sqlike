@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -11,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	gouuid "github.com/satori/go.uuid"
-	"github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/db"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/x/reflext"
@@ -19,13 +20,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-// DataTyper :
-type DataTyper interface {
-	DataType(info driver.Info, sf reflext.StructFielder) columns.Column
-}
+var (
+	dataTypeImplementor = reflect.TypeOf((*db.ColumnDataTypeImplementer)(nil)).Elem()
+)
 
 // DataTypeFunc :
-type DataTypeFunc func(sf reflext.StructFielder) columns.Column
+type DataTypeFunc func(sf reflext.StructFielder) *columns.Column
 
 // Builder :
 type Builder struct {
@@ -66,22 +66,23 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 }
 
 // GetColumn :
-func (sb *Builder) GetColumn(info driver.Info, sf reflext.StructFielder) (columns.Column, error) {
-	t := reflext.Deref(sf.Type())
+func (sb *Builder) GetColumn(ctx context.Context) (*columns.Column, error) {
+	f := db.GetField(ctx)
+	t := reflext.Deref(f.Type())
 	v := reflect.New(t)
-	if x, ok := v.Interface().(DataTyper); ok {
-		return x.DataType(info, sf), nil
+	if x, ok := v.Interface().(db.ColumnDataTypeImplementer); ok {
+		return x.ColumnDataType(ctx), nil
 	}
 
 	if x, ok := sb.typeMap[t]; ok {
-		return sb.builders[x](sf), nil
+		return sb.builders[x](f), nil
 	}
 
 	if x, ok := sb.typeMap[t.Kind()]; ok {
-		return sb.builders[x](sf), nil
+		return sb.builders[x](f), nil
 	}
 
-	return columns.Column{}, fmt.Errorf("schema: invalid data type support %v", t)
+	return nil, fmt.Errorf("schema: invalid data type support %v", t)
 }
 
 // SetDefaultTypes :

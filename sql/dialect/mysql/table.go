@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strings"
 
+	"context"
+
 	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
@@ -51,16 +53,22 @@ func (ms MySQL) HasTable(stmt db.Stmt, dbName, table string) {
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error) {
+func (ms MySQL) CreateTable(
+	stmt db.Stmt,
+	dbName, table, pk string,
+	info driver.Info,
+	fields []reflext.StructFielder,
+) (err error) {
 	var (
-		col     columns.Column
+		col     *columns.Column
 		pkk     reflext.StructFielder
 		k1, k2  string
 		virtual bool
 		stored  bool
+		ctx     context.Context
 	)
 
-	stmt.WriteString("CREATE TABLE " + ms.TableName(db, table) + " ")
+	stmt.WriteString("CREATE TABLE " + ms.TableName(dbName, table) + " ")
 	stmt.WriteByte('(')
 
 	// Main columns :
@@ -69,7 +77,8 @@ func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info
 			stmt.WriteByte(',')
 		}
 
-		col, err = ms.schema.GetColumn(info, sf)
+		ctx = context.WithValue(context.TODO(), db.FieldContext, sf)
+		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
@@ -94,7 +103,7 @@ func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info
 
 		if v, ok := tag.LookUp("comment"); ok {
 			if len(v) > 60 {
-				panic("maximum length of comment is 60 characters")
+				panic("sqlike: maximum length of comment is 60 characters")
 			}
 			stmt.WriteString(" COMMENT '" + v + "'")
 		}
@@ -113,7 +122,8 @@ func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info
 			k2, stored = tg.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
-				col, err = ms.schema.GetColumn(info, child)
+				ctx = context.WithValue(context.TODO(), db.FieldContext, child)
+				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
 				}
@@ -164,18 +174,28 @@ func (ms MySQL) CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
+func (ms *MySQL) AlterTable(
+	stmt db.Stmt,
+	dbName, table, pk string,
+	hasPk bool,
+	info driver.Info,
+	fields []reflext.StructFielder,
+	cols util.StringSlice,
+	idxs util.StringSlice,
+	unsafe bool,
+) (err error) {
 	var (
-		col     columns.Column
+		col     *columns.Column
 		pkk     reflext.StructFielder
 		idx     int
 		k1, k2  string
 		virtual bool
 		stored  bool
+		ctx     context.Context
 	)
 
 	suffix := "FIRST"
-	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
+	stmt.WriteString("ALTER TABLE " + ms.TableName(dbName, table) + " ")
 
 	for i, sf := range fields {
 		if i > 0 {
@@ -183,6 +203,7 @@ func (ms *MySQL) AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info
 		}
 
 		action := "ADD"
+		ctx = context.WithValue(context.TODO(), db.FieldContext, sf)
 		idx = cols.IndexOf(sf.Name())
 		if idx > -1 {
 			action = "MODIFY"
@@ -210,7 +231,7 @@ func (ms *MySQL) AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info
 			}
 		}
 		stmt.WriteString(action + " ")
-		col, err = ms.schema.GetColumn(info, sf)
+		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
@@ -238,9 +259,10 @@ func (ms *MySQL) AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info
 			tg := child.Tag()
 			k1, virtual = tg.LookUp("virtual_column")
 			k2, stored = tg.LookUp("stored_column")
+			ctx = context.WithValue(context.TODO(), db.FieldContext, child)
 			if virtual || stored {
 				stmt.WriteByte(',')
-				col, err = ms.schema.GetColumn(info, child)
+				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
 				}

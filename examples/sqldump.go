@@ -46,6 +46,7 @@ type dumpStruct struct {
 	PtrJSONRaw  *json.RawMessage
 	PtrDate     *civil.Date
 	PtrDateTime *time.Time
+	PtrSet      *types.Set `sqlike:",set=A|B|C"`
 }
 
 // SQLDumpExamples :
@@ -67,7 +68,8 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 
 	{
 		if _, err := table.Insert(
-			ctx, &data,
+			ctx,
+			&data,
 			options.Insert().SetDebug(true),
 		); err != nil {
 			require.NoError(t, err)

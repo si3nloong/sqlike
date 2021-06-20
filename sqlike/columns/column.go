@@ -1,8 +1,5 @@
 package columns
 
-// DataType :
-type DataType int
-
 // Column :
 type Column struct {
 	Name         string

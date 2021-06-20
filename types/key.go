@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding"
@@ -20,7 +21,7 @@ import (
 	"errors"
 
 	"github.com/segmentio/ksuid"
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	pb "github.com/si3nloong/sqlike/x/proto"
 	"github.com/si3nloong/sqlike/x/reflext"
@@ -50,20 +51,22 @@ type Key struct {
 }
 
 var (
-	_ driver.Valuer            = (*Key)(nil)
-	_ sql.Scanner              = (*Key)(nil)
-	_ fmt.Stringer             = (*Key)(nil)
-	_ encoding.TextMarshaler   = (*Key)(nil)
-	_ encoding.TextUnmarshaler = (*Key)(nil)
-	_ json.Marshaler           = (*Key)(nil)
-	_ json.Unmarshaler         = (*Key)(nil)
-	_ bson.ValueMarshaler      = (*Key)(nil)
-	_ bson.ValueUnmarshaler    = (*Key)(nil)
+	_ db.ColumnDataTypeImplementer = (*Key)(nil)
+	_ driver.Valuer                = (*Key)(nil)
+	_ sql.Scanner                  = (*Key)(nil)
+	_ fmt.Stringer                 = (*Key)(nil)
+	_ encoding.TextMarshaler       = (*Key)(nil)
+	_ encoding.TextUnmarshaler     = (*Key)(nil)
+	_ json.Marshaler               = (*Key)(nil)
+	_ json.Unmarshaler             = (*Key)(nil)
+	_ bson.ValueMarshaler          = (*Key)(nil)
+	_ bson.ValueUnmarshaler        = (*Key)(nil)
 )
 
 // DataType :
-func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
-	tag := sf.Tag()
+func (k Key) ColumnDataType(ctx context.Context) *columns.Column {
+	f := db.GetField(ctx)
+	tag := f.Tag()
 	size, charset, collate := "512", "latin1", "latin1_bin"
 	if v, ok := tag.LookUp("charset"); ok {
 		charset = v
@@ -75,11 +78,11 @@ func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column
 		size = v
 	}
 
-	return columns.Column{
-		Name:      sf.Name(),
+	return &columns.Column{
+		Name:      f.Name(),
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(" + size + ")",
-		Nullable:  reflext.IsNullable(sf.Type()),
+		Nullable:  reflext.IsNullable(f.Type()),
 		Charset:   &charset,
 		Collation: &collate,
 	}

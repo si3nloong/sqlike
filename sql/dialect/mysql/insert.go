@@ -12,7 +12,15 @@ import (
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(stmt db.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
+func (ms MySQL) InsertInto(
+	stmt db.Stmt,
+	db, table, pk string,
+	cache reflext.StructMapper,
+	cdc codec.Codecer,
+	fields []reflext.StructFielder,
+	v reflect.Value,
+	opt *options.InsertOptions,
+) (err error) {
 	records := v.Len()
 
 	stmt.WriteString("INSERT")
@@ -63,8 +71,10 @@ func (ms MySQL) InsertInto(stmt db.Stmt, db, table, pk string, cache reflext.Str
 				stmt.WriteByte(',')
 			}
 
-			// first record only find encoders
+			// get struct property value
 			fv := cache.FieldByIndexesReadOnly(vi, fields[j].Index())
+
+			// first record only find encoders
 			if i == 0 {
 				encoders[j], err = findEncoder(cdc, fields[j], fv)
 				if err != nil {
@@ -86,22 +96,22 @@ func (ms MySQL) InsertInto(stmt db.Stmt, db, table, pk string, cache reflext.Str
 	if opt.Mode == options.InsertOnDuplicate {
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
-		for i := range fields {
+		for _, f := range fields {
 			// skip primary key on duplicate update
-			if fields[i].Name() == pk {
+			if f.Name() == pk {
 				next = false
 				continue
 			}
 
 			// skip omit fields on update
-			if _, ok := omitField[fields[i].Name()]; ok {
+			if _, ok := omitField[f.Name()]; ok {
 				continue
 			}
 			if next {
 				stmt.WriteByte(',')
 			}
 
-			column = ms.Quote(fields[i].Name())
+			column = ms.Quote(f.Name())
 			stmt.WriteString(column + "=VALUES(" + column + ")")
 			next = true
 		}

@@ -1,10 +1,11 @@
 package types
 
 import (
+	"context"
 	"database/sql/driver"
 	"strings"
 
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/util"
@@ -13,8 +14,13 @@ import (
 // Set : sql data type of `SET`
 type Set []string
 
+var (
+	_ db.ColumnDataTypeImplementer = (*Set)(nil)
+)
+
 // DataType :
-func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column {
+func (s *Set) ColumnDataType(ctx context.Context) *columns.Column {
+	f := db.GetField(ctx)
 	charset, collate := "utf8mb4", "utf8mb4_0900_ai_ci"
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
@@ -22,7 +28,7 @@ func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column
 	blr.WriteString("SET(")
 	blr.WriteByte('\'')
 
-	val, ok := sf.Tag().LookUp("set")
+	val, ok := f.Tag().LookUp("set")
 	if ok {
 		paths := strings.Split(val, "|")
 		if len(paths) >= 64 {
@@ -34,14 +40,14 @@ func (s Set) DataType(_ sqldriver.Info, sf reflext.StructFielder) columns.Column
 	blr.WriteByte('\'')
 	blr.WriteByte(')')
 
-	return columns.Column{
-		Name:         sf.Name(),
-		Type:         blr.String(),
+	return &columns.Column{
+		Name:         f.Name(),
 		DataType:     "SET",
-		Nullable:     reflext.IsNullable(sf.Type()),
+		Type:         blr.String(),
+		Nullable:     reflext.IsNullable(f.Type()),
+		DefaultValue: def,
 		Charset:      &charset,
 		Collation:    &collate,
-		DefaultValue: def,
 	}
 }
 

@@ -3,6 +3,26 @@ package primitive
 // Operator :
 type Operator int
 
+// operators :
+const (
+	Equal Operator = iota
+	NotEqual
+	GreaterThan
+	LesserThan
+	GreaterOrEqual
+	LesserOrEqual
+	Like
+	NotLike
+	In
+	NotIn
+	Between
+	NotBetween
+	And
+	Or
+	IsNull
+	NotNull
+)
+
 func (op Operator) String() (n string) {
 	switch op {
 	case Equal:
@@ -36,23 +56,3 @@ func (op Operator) String() (n string) {
 	}
 	return
 }
-
-// operators :
-const (
-	Equal Operator = iota
-	NotEqual
-	GreaterThan
-	LesserThan
-	GreaterOrEqual
-	LesserOrEqual
-	Like
-	NotLike
-	In
-	NotIn
-	Between
-	NotBetween
-	And
-	Or
-	IsNull
-	NotNull
-)
