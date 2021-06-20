@@ -4,13 +4,13 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
@@ -24,7 +24,11 @@ type SingleResult interface {
 }
 
 // FindOne : find single record on the table, you should alway check the return error to ensure it have result return.
-func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, opts ...*options.FindOneOptions) SingleResult {
+func (tb *Table) FindOne(
+	ctx context.Context,
+	act actions.SelectOneStatement,
+	opts ...*options.FindOneOptions,
+) SingleResult {
 	x := new(actions.FindOneActions)
 	if act != nil {
 		*x = *(act.(*actions.FindOneActions))
@@ -58,7 +62,11 @@ func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, op
 }
 
 // Find : find multiple records on the table.
-func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...*options.FindOptions) (*Result, error) {
+func (tb *Table) Find(
+	ctx context.Context,
+	act actions.SelectStatement,
+	opts ...*options.FindOptions,
+) (*Result, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
@@ -90,7 +98,18 @@ func (tb *Table) Find(ctx context.Context, act actions.SelectStatement, opts ...
 	return csr, nil
 }
 
-func find(ctx context.Context, dbName, tbName string, cache reflext.StructMapper, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.FindActions, opt *options.FindOptions, lock options.LockMode) *Result {
+func find(
+	ctx context.Context,
+	dbName, tbName string,
+	cache reflext.StructMapper,
+	cdc codec.Codecer,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+	act *actions.FindActions,
+	opt *options.FindOptions,
+	lock options.LockMode,
+) *Result {
 	if act.Database == "" {
 		act.Database = dbName
 	}

@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"strings"
 
-	semver "github.com/Masterminds/semver/v3"
+	"github.com/Masterminds/semver/v3"
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql/charset"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -51,11 +51,18 @@ type Client struct {
 	logger  logs.Logger
 	cache   reflext.StructMapper
 	codec   codec.Codecer
-	dialect dialect.Dialect
+	dialect db.Dialect
 }
 
 // newClient : create a new client struct by providing driver, *sql.DB, dialect etc
-func newClient(ctx context.Context, driver string, db *sql.DB, dialect dialect.Dialect, code charset.Code, collate string) (*Client, error) {
+func newClient(
+	ctx context.Context,
+	driver string,
+	db *sql.DB,
+	dialect db.Dialect,
+	code charset.Code,
+	collate string,
+) (*Client, error) {
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	client := &Client{
 		DB:      db,

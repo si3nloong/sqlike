@@ -6,11 +6,11 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/x/reflext"
 
 	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
@@ -42,7 +42,7 @@ type Table struct {
 	driver sqldriver.Driver
 
 	// sql dialect
-	dialect dialect.Dialect
+	dialect db.Dialect
 
 	// encoder and decoder for the value
 	codec  codec.Codecer

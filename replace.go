@@ -5,12 +5,16 @@ import (
 	"database/sql"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // ReplaceOne :
-func (tb *Table) ReplaceOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+func (tb *Table) ReplaceOne(
+	ctx context.Context,
+	src interface{},
+	opts ...*options.InsertOneOptions,
+) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]

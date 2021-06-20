@@ -3,8 +3,8 @@ package sqlike
 import (
 	"context"
 
-	semver "github.com/Masterminds/semver/v3"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/Masterminds/semver/v3"
+	"github.com/si3nloong/sqlike/db"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
@@ -149,7 +149,13 @@ func (idv *IndexView) isSupportDesc() bool {
 	return *idv.supportDesc
 }
 
-func isIndexExists(ctx context.Context, dbName, table, indexName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger) (bool, error) {
+func isIndexExists(
+	ctx context.Context,
+	dbName, table, indexName string,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+) (bool, error) {
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	dialect.HasIndexByName(stmt, dbName, table, indexName)

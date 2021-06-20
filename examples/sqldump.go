@@ -11,11 +11,11 @@ import (
 
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
+	"github.com/si3nloong/sqlike"
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/options"
 	sqldump "github.com/si3nloong/sqlike/sql/dump"
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 )

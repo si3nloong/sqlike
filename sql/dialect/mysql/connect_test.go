@@ -3,7 +3,7 @@ package mysql
 import (
 	"testing"
 
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/stretchr/testify/require"
 )
 

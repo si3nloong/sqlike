@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/si3nloong/sqlike/actions"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/x/primitive"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"

@@ -7,17 +7,21 @@ import (
 
 	"errors"
 
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // InsertOne : insert single record. You should always pass in the address of input.
-func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*options.InsertOneOptions) (sql.Result, error) {
+func (tb *Table) InsertOne(
+	ctx context.Context,
+	src interface{},
+	opts ...*options.InsertOneOptions,
+) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -53,7 +57,11 @@ func (tb *Table) InsertOne(ctx context.Context, src interface{}, opts ...*option
 }
 
 // Insert : insert multiple records. You should always pass in the address of the slice.
-func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.InsertOptions) (sql.Result, error) {
+func (tb *Table) Insert(
+	ctx context.Context,
+	src interface{},
+	opts ...*options.InsertOptions,
+) (sql.Result, error) {
 	opt := new(options.InsertOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -73,7 +81,17 @@ func (tb *Table) Insert(ctx context.Context, src interface{}, opts ...*options.I
 	)
 }
 
-func insertMany(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, cdc codec.Codecer, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, src interface{}, opt *options.InsertOptions) (sql.Result, error) {
+func insertMany(
+	ctx context.Context,
+	dbName, tbName, pk string,
+	cache reflext.StructMapper,
+	cdc codec.Codecer,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+	src interface{},
+	opt *options.InsertOptions,
+) (sql.Result, error) {
 	v := reflext.ValueOf(src)
 	if !v.IsValid() {
 		return nil, ErrInvalidInput

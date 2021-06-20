@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/si3nloong/sqlike/actions"
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/x/primitive"
 	"github.com/stretchr/testify/require"
 )

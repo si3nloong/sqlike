@@ -11,13 +11,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,7 +30,7 @@ type Database struct {
 	pk         string
 	client     *Client
 	driver     driver.Driver
-	dialect    dialect.Dialect
+	dialect    db.Dialect
 	codec      codec.Codecer
 	logger     logs.Logger
 }
@@ -74,7 +74,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()
 	if rslt.err != nil {
-		defer rslt.rows.Close()
+		rslt.rows.Close()
 	}
 	for _, col := range rslt.columnTypes {
 		rslt.columns = append(rslt.columns, col.Name())

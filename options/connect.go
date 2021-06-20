@@ -58,9 +58,6 @@ func (opt *ConnectOptions) SetProtocol(network string) *ConnectOptions {
 
 // SetHost :
 func (opt *ConnectOptions) SetHost(host string) *ConnectOptions {
-	// if ip := net.ParseIP(opt.Host); ip != nil {
-	// 	panic("invalid ip address")
-	// }
 	opt.Host = strings.TrimSpace(host)
 	return opt
 }

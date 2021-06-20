@@ -3,16 +3,20 @@ package sqlike
 import (
 	"context"
 
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 )
 
 // UpdateOne :
-func (tb *Table) UpdateOne(ctx context.Context, act actions.UpdateOneStatement, opts ...*options.UpdateOneOptions) (int64, error) {
+func (tb *Table) UpdateOne(
+	ctx context.Context,
+	act actions.UpdateOneStatement,
+	opts ...*options.UpdateOneOptions,
+) (int64, error) {
 	x := new(actions.UpdateOneActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateOneActions))
@@ -36,7 +40,11 @@ func (tb *Table) UpdateOne(ctx context.Context, act actions.UpdateOneStatement, 
 }
 
 // Update :
-func (tb *Table) Update(ctx context.Context, act actions.UpdateStatement, opts ...*options.UpdateOptions) (int64, error) {
+func (tb *Table) Update(
+	ctx context.Context,
+	act actions.UpdateStatement,
+	opts ...*options.UpdateOptions,
+) (int64, error) {
 	x := new(actions.UpdateActions)
 	if act != nil {
 		*x = *(act.(*actions.UpdateActions))
@@ -57,7 +65,15 @@ func (tb *Table) Update(ctx context.Context, act actions.UpdateStatement, opts .
 	)
 }
 
-func update(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.UpdateActions, opt *options.UpdateOptions) (int64, error) {
+func update(
+	ctx context.Context,
+	dbName, tbName string,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+	act *actions.UpdateActions,
+	opt *options.UpdateOptions,
+) (int64, error) {
 	if act.Database == "" {
 		act.Database = dbName
 	}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/primitive"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
@@ -15,7 +15,11 @@ import (
 var ErrInvalidCursor = errors.New("sqlike: invalid cursor")
 
 // Paginate :
-func (tb *Table) Paginate(ctx context.Context, act actions.PaginateStatement, opts ...*options.PaginateOptions) (*Paginator, error) {
+func (tb *Table) Paginate(
+	ctx context.Context,
+	act actions.PaginateStatement,
+	opts ...*options.PaginateOptions,
+) (*Paginator, error) {
 	x := new(actions.PaginateActions)
 	if act != nil {
 		*x = *(act.(*actions.PaginateActions))

@@ -1,18 +1,18 @@
-package dialect
+package db
 
 import (
 	"reflect"
 	"strings"
 	"sync"
 
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
 	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 

@@ -1,8 +1,8 @@
 package mysql
 
 import (
+	"github.com/si3nloong/sqlike/actions"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 )
 
 // Delete :

@@ -4,18 +4,22 @@ import (
 	"context"
 	"errors"
 
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // DestroyOne : hard delete a record on the table using primary key. You should alway have primary key defined in your struct in order to use this api.
-func (tb *Table) DestroyOne(ctx context.Context, delete interface{}, opts ...*options.DestroyOneOptions) error {
+func (tb *Table) DestroyOne(
+	ctx context.Context,
+	delete interface{},
+	opts ...*options.DestroyOneOptions,
+) error {
 	opt := new(options.DestroyOneOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]
@@ -58,7 +62,11 @@ func (tb *Table) DeleteOne(ctx context.Context, act actions.DeleteOneStatement, 
 }
 
 // Delete : delete multiple record on the table using where clause. If you didn't provided any where clause, it will throw error. For multiple record deletion without where clause, you should use `Truncate` instead.
-func (tb *Table) Delete(ctx context.Context, act actions.DeleteStatement, opts ...*options.DeleteOptions) (int64, error) {
+func (tb *Table) Delete(
+	ctx context.Context,
+	act actions.DeleteStatement,
+	opts ...*options.DeleteOptions,
+) (int64, error) {
 	x := new(actions.DeleteActions)
 	if act != nil {
 		*x = *(act.(*actions.DeleteActions))
@@ -79,7 +87,15 @@ func (tb *Table) Delete(ctx context.Context, act actions.DeleteStatement, opts .
 	)
 }
 
-func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, act *actions.DeleteActions, opt *options.DeleteOptions) (int64, error) {
+func deleteMany(
+	ctx context.Context,
+	dbName, tbName string,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+	act *actions.DeleteActions,
+	opt *options.DeleteOptions,
+) (int64, error) {
 	if act.Database == "" {
 		act.Database = dbName
 	}
@@ -107,7 +123,16 @@ func deleteMany(ctx context.Context, dbName, tbName string, driver sqldriver.Dri
 	return result.RowsAffected()
 }
 
-func destroyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, driver sqldriver.Driver, dialect sqldialect.Dialect, logger logs.Logger, delete interface{}, opt *options.DestroyOneOptions) error {
+func destroyOne(
+	ctx context.Context,
+	dbName, tbName, pk string,
+	cache reflext.StructMapper,
+	driver sqldriver.Driver,
+	dialect db.Dialect,
+	logger logs.Logger,
+	delete interface{},
+	opt *options.DestroyOneOptions,
+) error {
 	v := reflext.ValueOf(delete)
 	if !v.IsValid() {
 		return ErrInvalidInput

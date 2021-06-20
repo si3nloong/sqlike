@@ -5,18 +5,22 @@ import (
 	"errors"
 	"reflect"
 
-	sqldialect "github.com/si3nloong/sqlike/sql/dialect"
+	"github.com/si3nloong/sqlike/actions"
+	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/options"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/sqlike/options"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
 
 // ModifyOne :
-func (tb *Table) ModifyOne(ctx context.Context, update interface{}, opts ...*options.ModifyOneOptions) error {
+func (tb *Table) ModifyOne(
+	ctx context.Context,
+	update interface{},
+	opts ...*options.ModifyOneOptions,
+) error {
 	return modifyOne(
 		ctx,
 		tb.dbName,
@@ -31,7 +35,16 @@ func (tb *Table) ModifyOne(ctx context.Context, update interface{}, opts ...*opt
 	)
 }
 
-func modifyOne(ctx context.Context, dbName, tbName, pk string, cache reflext.StructMapper, dialect sqldialect.Dialect, driver sqldriver.Driver, logger logs.Logger, update interface{}, opts []*options.ModifyOneOptions) error {
+func modifyOne(
+	ctx context.Context,
+	dbName, tbName, pk string,
+	cache reflext.StructMapper,
+	dialect db.Dialect,
+	driver sqldriver.Driver,
+	logger logs.Logger,
+	update interface{},
+	opts []*options.ModifyOneOptions,
+) error {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
 		return ErrInvalidInput

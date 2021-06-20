@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/si3nloong/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/stretchr/testify/require"
 )
