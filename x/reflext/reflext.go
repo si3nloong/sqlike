@@ -15,6 +15,13 @@ type Structer interface {
 	GetByTraversal(index []int) StructFielder
 }
 
+// StructTager :
+type StructTager interface {
+	Name() string
+	FieldName() string
+	LookUp(key string) (val string, exists bool)
+}
+
 // StructFielder :
 type StructFielder interface {
 	// New name of struct field
@@ -26,7 +33,8 @@ type StructFielder interface {
 	// index position of the field
 	Index() []int
 
-	Tag() StructTag
+	// get struct tag info
+	Tag() StructTager
 
 	// if the field is struct, parent will not be nil
 	// this will be the parent struct of current struct
@@ -47,9 +55,9 @@ type StructFielder interface {
 
 // StructTag :
 type StructTag struct {
-	originalName string
-	name         string
-	opts         map[string]string
+	fieldName string
+	name      string
+	opts      map[string]string
 }
 
 // Name :
@@ -57,9 +65,9 @@ func (st StructTag) Name() string {
 	return st.name
 }
 
-// OriginalName :
-func (st StructTag) OriginalName() string {
-	return st.originalName
+// FieldName :
+func (st StructTag) FieldName() string {
+	return st.fieldName
 }
 
 // Get :
@@ -81,7 +89,7 @@ type StructField struct {
 	path     string
 	t        reflect.Type
 	null     bool
-	tag      StructTag
+	tag      *StructTag
 	embed    bool
 	parent   StructFielder
 	children []StructFielder
@@ -100,7 +108,7 @@ func (sf *StructField) Type() reflect.Type {
 }
 
 // Tag :
-func (sf *StructField) Tag() StructTag {
+func (sf *StructField) Tag() StructTager {
 	return sf.tag
 }
 
@@ -270,7 +278,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				// embedded struct
 				path := sf.path
 				if f.Anonymous {
-					if sf.tag.OriginalName() == "" {
+					if sf.tag.FieldName() == "" {
 						path = q.pp
 					}
 					// queue = append(queue, typeQueue{ft, sf, path})
@@ -322,10 +330,11 @@ func appendSlice(s []int, i int) []int {
 	return x
 }
 
-func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
+func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st *StructTag) {
+	st = new(StructTag)
 	parts := strings.Split(f.Tag.Get(tagName), ",")
 	name := strings.TrimSpace(parts[0])
-	st.originalName = name
+	st.fieldName = name
 	if name == "" {
 		name = f.Name
 		if fmtFunc != nil {

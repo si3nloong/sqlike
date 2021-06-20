@@ -31,8 +31,8 @@ type embeddedStruct struct {
 func TestStructTag(t *testing.T) {
 	var (
 		tag = StructTag{
-			originalName: "A",
-			name:         "a",
+			fieldName: "A",
+			name:      "a",
 			opts: map[string]string{
 				"omitempty": "",
 				"size":      "20",
@@ -43,9 +43,9 @@ func TestStructTag(t *testing.T) {
 		ok bool
 	)
 
-	require.Equal(t, tag.OriginalName(), "A")
+	require.Equal(t, tag.FieldName(), "A")
 	require.Equal(t, tag.Name(), "a")
-	require.Equal(t, tag.OriginalName(), "A")
+	require.Equal(t, tag.FieldName(), "A")
 
 	// unexists tag
 	{
