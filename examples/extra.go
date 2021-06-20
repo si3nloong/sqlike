@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike"
 	"github.com/si3nloong/sqlike/actions"
 	"github.com/si3nloong/sqlike/options"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -99,7 +99,7 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 		type dateTime struct {
 			ID   uuid.UUID `sqlike:",primary_key"`
 			Name string
-			Date types.Date `sqlike:",on_update"`
+			Date civil.Date `sqlike:",on_update"`
 			Time time.Time  `sqlike:",on_update"`
 		}
 
@@ -107,7 +107,7 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 		dt := dateTime{}
 		dt.ID = uuid.New()
 		dt.Name = "yuki"
-		dt.Date = types.Date{}
+		dt.Date = civil.DateOf(utcNow)
 		dt.Time = utcNow
 
 		table.MustUnsafeMigrate(ctx, dt)

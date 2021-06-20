@@ -30,7 +30,7 @@ type normalStruct struct {
 	Key           *types.Key
 	PtrUUID       *uuid.UUID
 	VirtualColumn string `sqlike:",generated_column"`
-	Date          types.Date
+	Date          civil.Date
 	SID           string
 	Emoji         string `sqlike:""`
 	FullText      string
@@ -154,7 +154,7 @@ type ptrStruct struct {
 	NullJSONRaw   *json.RawMessage
 	NullTimestamp *time.Time
 	NullKey       *types.Key
-	NullDate      *types.Date
+	NullDate      *civil.Date
 	NullCivilDate *civil.Date
 	NullEnum      *Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
@@ -218,6 +218,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.Struct.VirtualStr = gofakeit.Sentence(10)
 	ns.Struct.StoredStr = `hello world!`
 	ns.Struct.NestedBool = true
+	ns.Date = civil.DateOf(now)
 	ns.DateTime = now
 	ns.Timestamp = now
 	ns.Language = language.English
@@ -241,7 +242,7 @@ func newPtrStruct() ptrStruct {
 	uid := uuid.New()
 	flag := true
 	b := []byte(`hello world`)
-	date, _ := types.ParseDate("2019-01-02")
+	date, _ := civil.ParseDate("2019-01-02")
 	jsonByte := json.RawMessage(`{"message":"hello world"}`)
 	i := 124
 	i32 := int32(-603883)

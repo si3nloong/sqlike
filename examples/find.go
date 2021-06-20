@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike"
 	"github.com/si3nloong/sqlike/actions"
@@ -82,6 +83,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Struct.VirtualStr = virtualColumn
 		ns.DateTime = ts
 		ns.Timestamp = ts
+		ns.Date = civil.DateOf(ts)
 		ns.Language = lang
 		ns.Languages = langs
 		ns.Set = append(ns.Set, "A", "A", "B")
