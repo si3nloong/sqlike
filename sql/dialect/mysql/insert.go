@@ -1,12 +1,12 @@
 package mysql
 
 import (
-	"context"
 	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/options"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
@@ -83,7 +83,7 @@ func (ms MySQL) InsertInto(
 				}
 			}
 
-			ctx := context.WithValue(context.TODO(), "field", fields[j])
+			ctx := sql.FieldContext(fields[i])
 			val, err := encoders[j](ctx, fv)
 			if err != nil {
 				return err

@@ -1,11 +1,10 @@
 package types
 
 import (
-	"context"
 	"reflect"
 	"testing"
 
-	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,14 +13,14 @@ func TestSet(t *testing.T) {
 	set := Set{"a", "b", "c", "d"}
 
 	t.Run("DataType", func(it *testing.T) {
-		col := set.ColumnDataType(context.WithValue(
-			context.TODO(),
-			db.FieldContext,
-			field{
-				name: "Set",
-				t:    reflect.TypeOf(set),
-				null: true,
-			}))
+		col := set.ColumnDataType(
+			sql.FieldContext(
+				field{
+					name: "Set",
+					t:    reflect.TypeOf(set),
+					null: true,
+				}),
+		)
 
 		require.Equal(it, "Set", col.Name)
 		require.Equal(it, "SET", col.DataType)

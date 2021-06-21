@@ -6,8 +6,8 @@ import (
 	"github.com/si3nloong/sqlike/sqlike/columns"
 )
 
-// SqlValueConverter :
-type SqlValueConverter interface {
+// SQLValuer :
+type SQLValuer interface {
 	SQLValue(ctx context.Context) (interface{}, error)
 }
 

@@ -93,12 +93,11 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	mg := connectMongoDB(ctx)
 
 	{
-		SQLDumpExamples(ctx, t, client)
 		MigrateExamples(ctx, t, db)
 		IndexExamples(ctx, t, db)
-		ExtraExamples(ctx, t, db, mg)
 
 		InsertExamples(ctx, t, db)
+		panic("")
 		FindExamples(ctx, t, db)
 		QueryExamples(ctx, t, db)
 		TransactionExamples(ctx, t, db)
@@ -108,6 +107,10 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
 		SpatialExamples(ctx, t, db)
+
+		SQLDumpExamples(ctx, t, client)
+
+		ExtraExamples(ctx, t, db, mg)
 	}
 
 	// Errors

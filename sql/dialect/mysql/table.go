@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
 	"github.com/si3nloong/sqlike/sqlike/columns"
@@ -77,7 +78,7 @@ func (ms MySQL) CreateTable(
 			stmt.WriteByte(',')
 		}
 
-		ctx = context.WithValue(context.TODO(), db.FieldContext, sf)
+		ctx = sql.FieldContext(sf)
 		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
@@ -122,7 +123,7 @@ func (ms MySQL) CreateTable(
 			k2, stored = tg.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
-				ctx = context.WithValue(context.TODO(), db.FieldContext, child)
+				ctx = sql.FieldContext(child)
 				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
@@ -203,7 +204,7 @@ func (ms *MySQL) AlterTable(
 		}
 
 		action := "ADD"
-		ctx = context.WithValue(context.TODO(), db.FieldContext, sf)
+		ctx = sql.FieldContext(sf)
 		idx = cols.IndexOf(sf.Name())
 		if idx > -1 {
 			action = "MODIFY"
@@ -259,7 +260,7 @@ func (ms *MySQL) AlterTable(
 			tg := child.Tag()
 			k1, virtual = tg.LookUp("virtual_column")
 			k2, stored = tg.LookUp("stored_column")
-			ctx = context.WithValue(context.TODO(), db.FieldContext, child)
+			ctx = sql.FieldContext(child)
 			if virtual || stored {
 				stmt.WriteByte(',')
 				col, err = ms.schema.GetColumn(ctx)

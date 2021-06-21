@@ -6,12 +6,11 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
-	"golang.org/x/net/context"
 )
 
 type field struct {
@@ -69,13 +68,10 @@ func TestKey(t *testing.T) {
 	t.Run("DataType", func(it *testing.T) {
 		k := new(Key)
 
-		col := k.ColumnDataType(context.WithValue(
-			context.TODO(),
-			db.FieldContext,
-			field{
-				name: "Key",
-				t:    reflect.TypeOf(k),
-			}))
+		col := k.ColumnDataType(sql.FieldContext(field{
+			name: "Key",
+			t:    reflect.TypeOf(k),
+		}))
 
 		require.Equal(it, "Key", col.Name)
 		require.Equal(it, "VARCHAR", col.DataType)

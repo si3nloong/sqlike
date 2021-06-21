@@ -10,6 +10,8 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
 	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/sql"
+	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -138,12 +140,23 @@ type CustomValuer struct {
 }
 
 var (
-	_ db.SqlValueConverter = (*CustomValuer)(nil)
+	_ db.SQLValuer                 = (*CustomValuer)(nil)
+	_ db.ColumnDataTypeImplementer = (*CustomValuer)(nil)
 )
 
+func (c CustomValuer) ColumnDataType(ctx context.Context) *columns.Column {
+	f := sql.GetField(ctx)
+	return &columns.Column{
+		Name:     f.Name(),
+		DataType: "INT",
+		Type:     "INT",
+	}
+}
+
 func (c CustomValuer) SQLValue(ctx context.Context) (interface{}, error) {
+	log.Println("debug field ===================>")
 	log.Println(ctx)
-	return nil, nil
+	return 100, nil
 }
 
 type ptrStruct struct {

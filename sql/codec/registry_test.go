@@ -42,13 +42,13 @@ func TestRegistry(t *testing.T) {
 
 func TestEncodeValue(t *testing.T) {
 	{
-		it, err := encodeValue(nil, reflect.ValueOf(nil))
+		it, err := encodeDriverValue(context.TODO(), reflect.ValueOf(nil))
 		require.NoError(t, err)
 		require.Nil(t, it)
 	}
 
 	{
-		it, err := encodeValue(nil, reflect.ValueOf("hello world"))
+		it, err := encodeDriverValue(context.TODO(), reflect.ValueOf("hello world"))
 		require.Error(t, err)
 		require.Nil(t, it)
 	}
@@ -57,7 +57,7 @@ func TestEncodeValue(t *testing.T) {
 		var it interface{}
 		it = num{}
 		x := it.(driver.Valuer)
-		it, err := encodeValue(nil, reflect.ValueOf(x))
+		it, err := encodeDriverValue(context.TODO(), reflect.ValueOf(x))
 		require.NoError(t, err)
 		require.Equal(t, int64(1000), it)
 	}
@@ -72,7 +72,7 @@ func TestNilEncoder(t *testing.T) {
 
 	{
 		v = reflect.ValueOf(nil)
-		it, err = NilEncoder(nil, v)
+		it, err = NilEncoder(context.TODO(), v)
 		require.NoError(t, err)
 		require.Nil(t, it)
 	}
@@ -80,7 +80,7 @@ func TestNilEncoder(t *testing.T) {
 	{
 		str := "hello world"
 		v = reflect.ValueOf(str)
-		it, err = NilEncoder(nil, v)
+		it, err = NilEncoder(context.TODO(), v)
 		require.NoError(t, err)
 		require.Nil(t, it)
 	}

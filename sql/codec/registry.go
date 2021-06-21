@@ -12,6 +12,7 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
 	"golang.org/x/text/currency"
@@ -150,8 +151,12 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 		return NilEncoder, nil
 	}
 
+	if _, ok := v.Interface().(db.SQLValuer); ok {
+		return encodeSQLValue, nil
+	}
+
 	if _, ok := v.Interface().(driver.Valuer); ok {
-		return encodeValue, nil
+		return encodeDriverValue, nil
 	}
 
 	t := v.Type()
@@ -195,7 +200,7 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	return nil, ErrNoDecoder{Type: t}
 }
 
-func encodeValue(_ context.Context, v reflect.Value) (interface{}, error) {
+func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
 		return nil, nil
 	}
@@ -204,6 +209,17 @@ func encodeValue(_ context.Context, v reflect.Value) (interface{}, error) {
 		return nil, errors.New("codec: invalid type for assertion")
 	}
 	return x.Value()
+}
+
+func encodeSQLValue(ctx context.Context, v reflect.Value) (interface{}, error) {
+	if !v.IsValid() || reflext.IsNull(v) {
+		return nil, nil
+	}
+	x, ok := v.Interface().(db.SQLValuer)
+	if !ok {
+		return nil, errors.New("codec: invalid type for assertion")
+	}
+	return x.SQLValue(ctx)
 }
 
 // NilEncoder :

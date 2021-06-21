@@ -7,11 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"time"
 
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
+
+	sqlx "github.com/si3nloong/sqlike/sql"
 
 	"github.com/si3nloong/sqlike/jsonb"
 )
@@ -95,10 +98,12 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
 }
 
 // EncodeString :
-func (enc DefaultEncoders) EncodeString(sf context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (interface{}, error) {
 	str := v.String()
-	// if str == "" && sf != nil {
-	// 	tag := sf.Tag()
+	f := sqlx.GetField(ctx)
+	log.Println(f)
+	// if str == "" {
+	// 	tag := f.Tag()
 	// 	if val, ok := tag.LookUp("enum"); ok {
 	// 		enums := strings.Split(val, "|")
 	// 		if len(enums) > 0 {
