@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -82,7 +83,8 @@ func (ms MySQL) InsertInto(
 				}
 			}
 
-			val, err := encoders[j](fields[j], fv)
+			ctx := context.WithValue(context.TODO(), "field", fields[j])
+			val, err := encoders[j](ctx, fv)
 			if err != nil {
 				return err
 			}

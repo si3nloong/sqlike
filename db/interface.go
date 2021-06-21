@@ -8,7 +8,7 @@ import (
 
 // SqlValueConverter :
 type SqlValueConverter interface {
-	SqlValue(ctx context.Context) (interface{}, error)
+	SQLValue(ctx context.Context) (interface{}, error)
 }
 
 // ColumnDataTypeImplementer :

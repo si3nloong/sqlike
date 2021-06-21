@@ -1,12 +1,15 @@
 package examples
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"sort"
 	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
+	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -131,8 +134,21 @@ type model struct {
 	Address
 }
 
+type CustomValuer struct {
+}
+
+var (
+	_ db.SqlValueConverter = (*CustomValuer)(nil)
+)
+
+func (c CustomValuer) SQLValue(ctx context.Context) (interface{}, error) {
+	log.Println(ctx)
+	return nil, nil
+}
+
 type ptrStruct struct {
 	ID            int64 `sqlike:"$Key,auto_increment"`
+	CustomValue   CustomValuer
 	NullUUID      *uuid.UUID
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool

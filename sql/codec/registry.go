@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
@@ -194,7 +195,7 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	return nil, ErrNoDecoder{Type: t}
 }
 
-func encodeValue(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+func encodeValue(_ context.Context, v reflect.Value) (interface{}, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
 		return nil, nil
 	}
@@ -206,7 +207,7 @@ func encodeValue(_ reflext.StructFielder, v reflect.Value) (interface{}, error) 
 }
 
 // NilEncoder :
-func NilEncoder(_ reflext.StructFielder, _ reflect.Value) (interface{}, error) {
+func NilEncoder(_ context.Context, _ reflect.Value) (interface{}, error) {
 	return nil, nil
 }
 

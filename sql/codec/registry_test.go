@@ -1,11 +1,11 @@
 package codec
 
 import (
+	"context"
 	"database/sql/driver"
 	"reflect"
 	"testing"
 
-	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +30,7 @@ func TestRegistry(t *testing.T) {
 	rg.RegisterTypeDecoder(typeof, nil)
 
 	tByte := reflect.TypeOf([]byte{})
-	byteEncoder := func(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+	byteEncoder := func(_ context.Context, v reflect.Value) (interface{}, error) {
 		return v.Bytes(), nil
 	}
 	rg.RegisterTypeCodec(tByte, byteEncoder, nil)
