@@ -1,4 +1,4 @@
-package columns
+package sql
 
 // Column :
 type Column struct {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/si3nloong/sqlike/actions"
 	"github.com/si3nloong/sqlike/options"
+	sqlx "github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/codec"
 	"github.com/si3nloong/sqlike/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
@@ -117,6 +118,7 @@ func find(
 		act.Table = tbName
 	}
 	rslt := new(Result)
+	rslt.ctx = sqlx.Context(act.Database, act.Table)
 	rslt.cache = cache
 	rslt.codec = cdc
 

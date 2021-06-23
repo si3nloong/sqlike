@@ -68,10 +68,11 @@ func TestKey(t *testing.T) {
 	t.Run("DataType", func(it *testing.T) {
 		k := new(Key)
 
-		col := k.ColumnDataType(sql.FieldContext(field{
-			name: "Key",
-			t:    reflect.TypeOf(k),
-		}))
+		col := k.ColumnDataType(sql.Context("", "").
+			SetField(field{
+				name: "Key",
+				t:    reflect.TypeOf(k),
+			}))
 
 		require.Equal(it, "Key", col.Name)
 		require.Equal(it, "VARCHAR", col.DataType)

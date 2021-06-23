@@ -72,11 +72,17 @@ func (st StructTag) FieldName() string {
 
 // Get :
 func (st StructTag) Get(key string) string {
+	if st.opts == nil {
+		return ""
+	}
 	return st.opts[key]
 }
 
 // LookUp :
 func (st StructTag) LookUp(key string) (val string, exist bool) {
+	if st.opts == nil {
+		return
+	}
 	val, exist = st.opts[key]
 	return
 }
@@ -89,7 +95,7 @@ type StructField struct {
 	path     string
 	t        reflect.Type
 	null     bool
-	tag      *StructTag
+	tag      StructTag
 	embed    bool
 	parent   StructFielder
 	children []StructFielder
@@ -330,8 +336,7 @@ func appendSlice(s []int, i int) []int {
 	return x
 }
 
-func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st *StructTag) {
-	st = new(StructTag)
+func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
 	parts := strings.Split(f.Tag.Get(tagName), ",")
 	name := strings.TrimSpace(parts[0])
 	st.fieldName = name

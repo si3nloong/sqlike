@@ -42,11 +42,11 @@ func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFun
 // BuildStatement :
 func (sb *StatementBuilder) BuildStatement(stmt db.Stmt, it interface{}) error {
 	v := reflext.ValueOf(it)
-	if x, ok := sb.builders[v.Type()]; ok {
-		return x(stmt, it)
+	if cb, ok := sb.builders[v.Type()]; ok {
+		return cb(stmt, it)
 	}
-	if x, ok := sb.builders[v.Kind()]; ok {
-		return x(stmt, it)
+	if cb, ok := sb.builders[v.Kind()]; ok {
+		return cb(stmt, it)
 	}
 
 	return fmt.Errorf("sqlstmt: invalid data type support %v", v.Type())

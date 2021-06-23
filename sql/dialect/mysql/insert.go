@@ -15,7 +15,7 @@ import (
 // InsertInto :
 func (ms MySQL) InsertInto(
 	stmt db.Stmt,
-	db, table, pk string,
+	dbName, table, pk string,
 	cache reflext.StructMapper,
 	cdc codec.Codecer,
 	fields []reflext.StructFielder,
@@ -24,11 +24,12 @@ func (ms MySQL) InsertInto(
 ) (err error) {
 	records := v.Len()
 
+	ctx := sql.Context(dbName, table)
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
 	}
-	stmt.WriteString(" INTO " + ms.TableName(db, table) + " (")
+	stmt.WriteString(" INTO " + ms.TableName(dbName, table) + " (")
 
 	omitField := make(map[string]bool)
 	noOfOmit := len(opt.Omits)
@@ -67,29 +68,32 @@ func (ms MySQL) InsertInto(
 		stmt.WriteByte('(')
 		vi := reflext.Indirect(v.Index(i))
 
-		for j := range fields {
+		for j, f := range fields {
 			if j > 0 {
 				stmt.WriteByte(',')
 			}
 
 			// get struct property value
-			fv := cache.FieldByIndexesReadOnly(vi, fields[j].Index())
+			fv := cache.FieldByIndexesReadOnly(vi, f.Index())
 
 			// first record only find encoders
 			if i == 0 {
-				encoders[j], err = findEncoder(cdc, fields[j], fv)
+				// encoders[j], err = findEncoder(cdc, f, fv)
+				encoders[j], err = cdc.LookupEncoder(fv)
 				if err != nil {
 					return err
 				}
 			}
 
-			ctx := sql.FieldContext(fields[i])
+			ctx.SetField(f)
 			val, err := encoders[j](ctx, fv)
 			if err != nil {
 				return err
 			}
 
-			convertSpatial(stmt, val)
+			stmt.WriteByte('?')
+			stmt.AppendArgs(val)
+			// convertSpatial(stmt, val)
 		}
 		stmt.WriteByte(')')
 	}
@@ -120,18 +124,6 @@ func (ms MySQL) InsertInto(
 	}
 	stmt.WriteByte(';')
 	return
-}
-
-func findEncoder(c codec.Codecer, sf reflext.StructFielder, v reflect.Value) (codec.ValueEncoder, error) {
-	// auto_increment field should pass nil if it's empty
-	if _, ok := sf.Tag().LookUp("auto_increment"); ok && reflext.IsZero(v) {
-		return codec.NilEncoder, nil
-	}
-	encoder, err := c.LookupEncoder(v)
-	if err != nil {
-		return nil, err
-	}
-	return encoder, nil
 }
 
 func convertSpatial(stmt db.Stmt, val interface{}) {

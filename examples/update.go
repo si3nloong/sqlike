@@ -31,6 +31,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		ns.ID = uid
+		ns.Date = civil.DateOf(time.Now())
 		ns.Timestamp = time.Now()
 		result, err = table.InsertOne(
 			ctx,

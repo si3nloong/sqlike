@@ -7,10 +7,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
 
@@ -73,27 +76,46 @@ func (enc DefaultEncoders) EncodeTime(_ context.Context, v reflect.Value) (inter
 
 // EncodeSpatial :
 func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
-	return func(sf context.Context, v reflect.Value) (interface{}, error) {
+	return func(ctx context.Context, v reflect.Value) (interface{}, error) {
 		if reflext.IsZero(v) {
 			return nil, nil
 		}
-		return nil, nil
-		// x := v.Interface().(orb.Geometry)
+
+		f := sqlx.GetField(ctx)
+		x := v.Interface().(orb.Geometry)
 		// var srid uint
-		// if sf != nil {
-		// 	tag, ok := sf.Tag().LookUp("srid")
-		// 	if ok {
-		// 		integer, _ := strconv.Atoi(tag)
-		// 		if integer > 0 {
-		// 			srid = uint(integer)
-		// 		}
-		// 	}
+		tag, ok := f.Tag().LookUp("srid")
+		if ok {
+			integer, _ := strconv.Atoi(tag)
+			if integer > 0 {
+				// srid = uint(integer)
+			}
+		}
+
+		// switch vi.Type {
+		// case spatial.Point:
+		// 	stmt.WriteString("ST_PointFromText")
+		// case spatial.LineString:
+		// 	stmt.WriteString("ST_LineStringFromText")
+		// case spatial.Polygon:
+		// 	stmt.WriteString("ST_PolygonFromText")
+		// case spatial.MultiPoint:
+		// 	stmt.WriteString("ST_MultiPointFromText")
+		// case spatial.MultiLineString:
+		// 	stmt.WriteString("ST_MultiLineStringFromText")
+		// case spatial.MultiPolygon:
+		// 	stmt.WriteString("ST_MultiPolygonFromText")
+		// default:
 		// }
-		// return spatial.Geometry{
-		// 	Type: st,
-		// 	SRID: srid,
-		// 	WKT:  wkt.MarshalString(x),
-		// }, nil
+
+		// stmt.WriteString("(?")
+		// if vi.SRID > 0 {
+		// 	stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
+		// }
+		// stmt.WriteByte(')')
+		// stmt.AppendArgs(vi.WKT)
+		// log.Println(x)
+		return sql.RawBytes(`ST_PointFromText(` + wkt.MarshalString(x) + `)`), nil
 	}
 }
 
@@ -101,16 +123,15 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
 func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (interface{}, error) {
 	str := v.String()
 	f := sqlx.GetField(ctx)
-	log.Println(f)
-	// if str == "" {
-	// 	tag := f.Tag()
-	// 	if val, ok := tag.LookUp("enum"); ok {
-	// 		enums := strings.Split(val, "|")
-	// 		if len(enums) > 0 {
-	// 			return enums[0], nil
-	// 		}
-	// 	}
-	// }
+	if str == "" {
+		tag := f.Tag()
+		if val, ok := tag.LookUp("enum"); ok {
+			enums := strings.Split(val, "|")
+			if len(enums) > 0 {
+				return enums[0], nil
+			}
+		}
+	}
 	return str, nil
 }
 
@@ -120,12 +141,20 @@ func (enc DefaultEncoders) EncodeBool(_ context.Context, v reflect.Value) (inter
 }
 
 // EncodeInt :
-func (enc DefaultEncoders) EncodeInt(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (interface{}, error) {
+	f := sqlx.GetField(ctx)
+	if _, ok := f.Tag().LookUp("auto_increment"); ok {
+		return nil, nil
+	}
 	return v.Int(), nil
 }
 
 // EncodeUint :
-func (enc DefaultEncoders) EncodeUint(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (interface{}, error) {
+	f := sqlx.GetField(ctx)
+	if _, ok := f.Tag().LookUp("auto_increment"); ok {
+		return nil, nil
+	}
 	return v.Uint(), nil
 }
 
@@ -135,7 +164,7 @@ func (enc DefaultEncoders) EncodeFloat(_ context.Context, v reflect.Value) (inte
 }
 
 // EncodePtr :
-func (enc *DefaultEncoders) EncodePtr(sf context.Context, v reflect.Value) (interface{}, error) {
+func (enc *DefaultEncoders) EncodePtr(ctx context.Context, v reflect.Value) (interface{}, error) {
 	if !v.IsValid() || v.IsNil() {
 		return nil, nil
 	}
@@ -144,7 +173,7 @@ func (enc *DefaultEncoders) EncodePtr(sf context.Context, v reflect.Value) (inte
 	if err != nil {
 		return nil, err
 	}
-	return encoder(sf, v)
+	return encoder(ctx, v)
 }
 
 // EncodeStruct :

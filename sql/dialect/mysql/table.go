@@ -4,13 +4,10 @@ import (
 	"reflect"
 	"strings"
 
-	"context"
-
 	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/sqlike/indexes"
 	"github.com/si3nloong/sqlike/x/reflext"
 )
@@ -61,42 +58,42 @@ func (ms MySQL) CreateTable(
 	fields []reflext.StructFielder,
 ) (err error) {
 	var (
-		col     *columns.Column
+		col     *sql.Column
 		pkk     reflext.StructFielder
 		k1, k2  string
 		virtual bool
 		stored  bool
-		ctx     context.Context
+		ctx     = sql.Context(dbName, table)
 	)
 
 	stmt.WriteString("CREATE TABLE " + ms.TableName(dbName, table) + " ")
 	stmt.WriteByte('(')
 
 	// Main columns :
-	for i, sf := range fields {
+	for i, f := range fields {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
 
-		ctx = sql.FieldContext(sf)
+		ctx.SetField(f)
 		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
 
-		tag := sf.Tag()
+		tag := f.Tag()
 		// allow primary_key tag to override
 		if _, ok := tag.LookUp("primary_key"); ok {
-			pkk = sf
+			pkk = f
 		} else if _, ok := tag.LookUp("auto_increment"); ok {
-			pkk = sf
-		} else if sf.Name() == pk && pkk == nil {
-			pkk = sf
+			pkk = f
+		} else if f.Name() == pk && pkk == nil {
+			pkk = f
 		}
 
-		idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
+		idx := indexes.Index{Columns: indexes.Columns(f.Name())}
 		if _, ok := tag.LookUp("unique_index"); ok {
-			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
+			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 			stmt.WriteByte(',')
 		}
 
@@ -110,12 +107,12 @@ func (ms MySQL) CreateTable(
 		}
 
 		// check generated columns
-		t := reflext.Deref(sf.Type())
+		t := reflext.Deref(f.Type())
 		if t.Kind() != reflect.Struct {
 			continue
 		}
 
-		children := sf.Children()
+		children := f.Children()
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
@@ -123,7 +120,8 @@ func (ms MySQL) CreateTable(
 			k2, stored = tg.LookUp("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
-				ctx = sql.FieldContext(child)
+
+				ctx.SetField(child)
 				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
@@ -139,9 +137,9 @@ func (ms MySQL) CreateTable(
 
 				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), f.Name()), ".")
 				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
+				stmt.WriteString("(" + ms.Quote(f.Name()) + "->>'$." + path + "')")
 				if stored {
 					stmt.WriteString(" STORED")
 				}
@@ -186,59 +184,61 @@ func (ms *MySQL) AlterTable(
 	unsafe bool,
 ) (err error) {
 	var (
-		col     *columns.Column
+		col     *sql.Column
 		pkk     reflext.StructFielder
 		idx     int
 		k1, k2  string
 		virtual bool
 		stored  bool
-		ctx     context.Context
+		ctx     = sql.Context(dbName, table)
 	)
 
 	suffix := "FIRST"
 	stmt.WriteString("ALTER TABLE " + ms.TableName(dbName, table) + " ")
 
-	for i, sf := range fields {
+	for i, f := range fields {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
 
 		action := "ADD"
-		ctx = sql.FieldContext(sf)
-		idx = cols.IndexOf(sf.Name())
+		idx = cols.IndexOf(f.Name())
 		if idx > -1 {
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
 		if !hasPk {
 			// allow primary_key tag to override
-			if _, ok := sf.Tag().LookUp("primary_key"); ok {
-				pkk = sf
+			if _, ok := f.Tag().LookUp("primary_key"); ok {
+				pkk = f
 			}
-			if sf.Name() == pk && pkk == nil {
-				pkk = sf
+			if f.Name() == pk && pkk == nil {
+				pkk = f
 			}
 		}
 
-		tag := sf.Tag()
+		tag := f.Tag()
 		_, ok1 := tag.LookUp("unique_index")
 		_, ok2 := tag.LookUp("auto_increment")
 		if ok1 || ok2 {
-			idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
+			idx := indexes.Index{Columns: indexes.Columns(f.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
 				stmt.WriteString("ADD")
-				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
+				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 				stmt.WriteByte(',')
 			}
 		}
 		stmt.WriteString(action + " ")
+
+		ctx.SetField(f)
 		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
+
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := sf.Tag().LookUp("comment"); ok {
+		if v, ok := f.Tag().LookUp("comment"); ok {
 			if len(v) > 60 {
 				panic("maximum length of comment is 60 characters")
 			}
@@ -246,23 +246,23 @@ func (ms *MySQL) AlterTable(
 		}
 
 		stmt.WriteString(" " + suffix)
-		suffix = "AFTER " + ms.Quote(sf.Name())
+		suffix = "AFTER " + ms.Quote(f.Name())
 
 		// check generated columns
-		t := reflext.Deref(sf.Type())
+		t := reflext.Deref(f.Type())
 		if t.Kind() != reflect.Struct {
 			continue
 		}
 
-		children := sf.Children()
+		children := f.Children()
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
 			k1, virtual = tg.LookUp("virtual_column")
 			k2, stored = tg.LookUp("stored_column")
-			ctx = sql.FieldContext(child)
 			if virtual || stored {
 				stmt.WriteByte(',')
+				ctx.SetField(child)
 				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
@@ -286,9 +286,9 @@ func (ms *MySQL) AlterTable(
 				stmt.WriteString(action + " ")
 				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), f.Name()), ".")
 				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
+				stmt.WriteString("(" + ms.Quote(f.Name()) + "->>'$." + path + "')")
 				if stored {
 					stmt.WriteString(" STORED")
 				}

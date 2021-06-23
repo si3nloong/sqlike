@@ -34,6 +34,7 @@ type Codecer interface {
 var (
 	DefaultRegistry = buildDefaultRegistry()
 	sqlScanner      = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+	dbScanner       = reflect.TypeOf((*db.SQLScanner)(nil)).Elem()
 )
 
 func buildDefaultRegistry() Codecer {
@@ -184,6 +185,10 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
+	if ptrType.Implements(dbScanner) {
+		return dbScannerDecoder, nil
+	}
+
 	if ptrType.Implements(sqlScanner) {
 		return sqlScannerDecoder, nil
 	}
@@ -227,7 +232,7 @@ func NilEncoder(_ context.Context, _ reflect.Value) (interface{}, error) {
 	return nil, nil
 }
 
-func sqlScannerDecoder(it interface{}, v reflect.Value) error {
+func sqlScannerDecoder(_ context.Context, it interface{}, v reflect.Value) error {
 	if it == nil {
 		// Avoid from sql.scanner when the value is nil
 		v.Set(reflect.Zero(v.Type()))
@@ -239,4 +244,18 @@ func sqlScannerDecoder(it interface{}, v reflect.Value) error {
 	}
 
 	return reflext.Init(v).Interface().(sql.Scanner).Scan(it)
+}
+
+func dbScannerDecoder(ctx context.Context, it interface{}, v reflect.Value) error {
+	if it == nil {
+		// Avoid from sql.scanner when the value is nil
+		v.Set(reflect.Zero(v.Type()))
+		return nil
+	}
+
+	if v.Kind() != reflect.Ptr {
+		return v.Addr().Interface().(db.SQLScanner).SQLScan(ctx, it)
+	}
+
+	return reflext.Init(v).Interface().(db.SQLScanner).SQLScan(ctx, it)
 }

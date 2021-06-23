@@ -13,14 +13,11 @@ func TestSet(t *testing.T) {
 	set := Set{"a", "b", "c", "d"}
 
 	t.Run("DataType", func(it *testing.T) {
-		col := set.ColumnDataType(
-			sql.FieldContext(
-				field{
-					name: "Set",
-					t:    reflect.TypeOf(set),
-					null: true,
-				}),
-		)
+		col := set.ColumnDataType(sql.Context("", "").
+			SetField(field{
+				name: "Set",
+				t:    reflect.TypeOf(set),
+			}))
 
 		require.Equal(it, "Set", col.Name)
 		require.Equal(it, "SET", col.DataType)

@@ -6,8 +6,7 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/db"
-	sqlx "github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sqlike/columns"
+	"github.com/si3nloong/sqlike/sql"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/util"
 )
@@ -20,9 +19,9 @@ var (
 )
 
 // DataType :
-func (s *Set) ColumnDataType(ctx context.Context) *columns.Column {
+func (s *Set) ColumnDataType(ctx context.Context) *sql.Column {
 	charset, collate := "utf8mb4", "utf8mb4_0900_ai_ci"
-	f := sqlx.GetField(ctx)
+	f := sql.GetField(ctx)
 	blr := util.AcquireString()
 	defer util.ReleaseString(blr)
 	var def *string
@@ -41,7 +40,7 @@ func (s *Set) ColumnDataType(ctx context.Context) *columns.Column {
 	blr.WriteByte('\'')
 	blr.WriteByte(')')
 
-	return &columns.Column{
+	return &sql.Column{
 		Name:         f.Name(),
 		DataType:     "SET",
 		Type:         blr.String(),

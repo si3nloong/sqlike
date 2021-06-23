@@ -23,7 +23,6 @@ import (
 	"github.com/segmentio/ksuid"
 	"github.com/si3nloong/sqlike/db"
 	sqlx "github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sqlike/columns"
 	pb "github.com/si3nloong/sqlike/x/proto"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/util"
@@ -65,7 +64,7 @@ var (
 )
 
 // DataType :
-func (k Key) ColumnDataType(ctx context.Context) *columns.Column {
+func (k Key) ColumnDataType(ctx context.Context) *sqlx.Column {
 	f := sqlx.GetField(ctx)
 	tag := f.Tag()
 	size, charset, collate := "512", "latin1", "latin1_bin"
@@ -79,7 +78,7 @@ func (k Key) ColumnDataType(ctx context.Context) *columns.Column {
 		size = v
 	}
 
-	return &columns.Column{
+	return &sqlx.Column{
 		Name:      f.Name(),
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(" + size + ")",

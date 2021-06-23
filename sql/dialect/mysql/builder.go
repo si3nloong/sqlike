@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"strconv"
@@ -673,13 +674,13 @@ func (b *mySQLBuilder) getValue(stmt db.Stmt, it interface{}) (err error) {
 	if err != nil {
 		return err
 	}
-	vv, err := encoder(nil, v)
+	vv, err := encoder(context.TODO(), v)
 	if err != nil {
 		return err
 	}
-	// stmt.WriteByte('?')
-	// stmt.AppendArgs(vv)
-	convertSpatial(stmt, vv)
+	stmt.WriteByte('?')
+	stmt.AppendArgs(vv)
+	// convertSpatial(stmt, vv)
 	return
 }
 

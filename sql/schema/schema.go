@@ -15,14 +15,13 @@ import (
 	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/sql"
 	sqltype "github.com/si3nloong/sqlike/sql/type"
-	"github.com/si3nloong/sqlike/sqlike/columns"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
 // DataTypeFunc :
-type DataTypeFunc func(sf reflext.StructFielder) *columns.Column
+type DataTypeFunc func(sf reflext.StructFielder) *sql.Column
 
 // Builder :
 type Builder struct {
@@ -63,7 +62,7 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 }
 
 // GetColumn :
-func (sb *Builder) GetColumn(ctx context.Context) (*columns.Column, error) {
+func (sb *Builder) GetColumn(ctx context.Context) (*sql.Column, error) {
 	f := sql.GetField(ctx)
 	t := reflext.Deref(f.Type())
 	v := reflect.New(t)
