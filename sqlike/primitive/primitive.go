@@ -2,6 +2,7 @@ package primitive
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -68,7 +69,7 @@ type Encoding struct {
 
 // TypeSafe :
 type TypeSafe struct {
-	Type  string
+	Type  reflect.Kind
 	Value interface{}
 }
 

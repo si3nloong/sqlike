@@ -47,12 +47,13 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			require.Equal(t, "Primary key", pk.Comment)
 		}
 
+		utf8mb4 := "utf8mb4"
 		// check struct tag option
 		require.Equal(t, "VARCHAR(300)", columnMap["CustomStrType"].Type)
 		require.Equal(t, "DOUBLE UNSIGNED", columnMap["UFloat32"].Type)
 		require.Equal(t, "ENUM('SUCCESS','FAILED','UNKNOWN')", columnMap["Enum"].Type)
 		// // enum by default is using latin1 for performance concern
-		// require.Equal(t, &latin1, columnMap["Enum"].Charset)
+		require.Equal(t, &utf8mb4, columnMap["Enum"].Charset)
 
 		require.ElementsMatch(t, []string{
 			"$Key", "Key", "PtrUUID", "Date", "SID",
