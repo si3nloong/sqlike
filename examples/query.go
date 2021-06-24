@@ -63,17 +63,17 @@ func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		if err := db.RunInTransaction(
 			ctx,
 			func(sess sqlike.SessionContext) error {
-				if _, err := sess.Exec("USE `sqlike`;"); err != nil {
+				if _, err := db.Exec(sess, "USE `sqlike`;"); err != nil {
 					return err
 				}
 
 				var version string
-				if err := sess.QueryRow(`SELECT VERSION();`).Scan(&version); err != nil {
+				if err := db.QueryRow(sess, `SELECT VERSION();`).Scan(&version); err != nil {
 					return err
 				}
 				require.Regexp(t, regexp.MustCompile(`\d+\.\d+\d+`), version)
 
-				rows, err := sess.Query("SELECT COUNT(*) FROM `GeneratedStruct`;")
+				rows, err := db.Query(sess, "SELECT COUNT(*) FROM `GeneratedStruct`;")
 				if err != nil {
 					return err
 				}
@@ -90,7 +90,7 @@ func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 					return err
 				}
 
-				result, err := sess.QueryStmt(stmt)
+				result, err := db.QueryStmt(sess, stmt)
 				if err != nil {
 					return err
 				}
