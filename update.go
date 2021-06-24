@@ -90,7 +90,7 @@ func update(
 	}
 	result, err := sqldriver.Execute(
 		ctx,
-		driver,
+		getDriverFromContext(ctx, driver),
 		stmt,
 		getLogger(logger, opt.Debug),
 	)

@@ -7,7 +7,7 @@ import (
 )
 
 // DefaultMapper :
-var DefaultMapper = NewMapperFunc("sqlike", nil)
+var DefaultMapper = NewMapperFunc([]string{"db", "sqlike"}, nil)
 
 // StructMapper :
 type StructMapper interface {
@@ -29,7 +29,7 @@ type FormatFunc func(string) string
 // Mapper :
 type Mapper struct {
 	mutex   sync.Mutex
-	tag     string
+	tags    []string
 	cache   map[reflect.Type]*Struct
 	fmtFunc FormatFunc
 }
@@ -37,10 +37,10 @@ type Mapper struct {
 var _ StructMapper = (*Mapper)(nil)
 
 // NewMapperFunc :
-func NewMapperFunc(tag string, fmtFunc FormatFunc) *Mapper {
+func NewMapperFunc(tags []string, fmtFunc FormatFunc) *Mapper {
 	return &Mapper{
 		cache:   make(map[reflect.Type]*Struct),
-		tag:     tag,
+		tags:    tags,
 		fmtFunc: fmtFunc,
 	}
 }
@@ -50,7 +50,7 @@ func (m *Mapper) CodecByType(t reflect.Type) Structer {
 	mapping, ok := m.cache[t]
 	if !ok {
 		m.mutex.Lock()
-		mapping = getCodec(t, m.tag, m.fmtFunc)
+		mapping = getCodec(t, m.tags, m.fmtFunc)
 		_, ok = m.cache[t]
 		if !ok {
 			m.cache[t] = mapping

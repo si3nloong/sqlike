@@ -54,6 +54,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if query == nil {
 		return nil, errors.New("empty query statement")
 	}
+
 	stmt := sqlstmt.AcquireStmt(db.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	if err := db.dialect.SelectStmt(stmt, query); err != nil {
@@ -61,7 +62,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	}
 	rows, err := driver.Query(
 		ctx,
-		db.driver,
+		getDriverFromContext(ctx, db.driver),
 		stmt,
 		getLogger(db.logger, true),
 	)

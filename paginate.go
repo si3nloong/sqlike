@@ -89,7 +89,7 @@ func (pg *Paginator) NextCursor(ctx context.Context, cursor interface{}) (err er
 		pg.table.name,
 		pg.table.client.cache,
 		pg.table.codec,
-		pg.table.driver,
+		getDriverFromContext(ctx, pg.table.driver),
 		pg.table.dialect,
 		pg.table.logger,
 		&fa.FindActions,

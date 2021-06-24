@@ -48,7 +48,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		ns.UpdatedAt = now
 		tx, err = db.BeginTransaction(ctx)
 		require.NoError(t, err)
-		result, err = tx.Table("NormalStruct").InsertOne(ctx, &ns)
+		result, err = db.Table("NormalStruct").InsertOne(tx, &ns)
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
@@ -72,7 +72,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		ns.UpdatedAt = now
 		tx, err = db.BeginTransaction(ctx)
 		require.NoError(t, err)
-		result, err = tx.Table("NormalStruct").InsertOne(ctx, &ns)
+		result, err = db.Table("NormalStruct").InsertOne(tx, &ns)
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
@@ -106,13 +106,13 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				ns.Timestamp = now
 				ns.CreatedAt = now
 				ns.UpdatedAt = now
-				result, err := sess.Table("NormalStruct").InsertOne(sess, &ns)
+				result, err := db.Table("NormalStruct").InsertOne(sess, &ns)
 				if err != nil {
 					return err
 				}
 
 				ns.Int = 888
-				if _, err := sess.Table("NormalStruct").
+				if _, err := db.Table("NormalStruct").
 					UpdateOne(
 						sess,
 						actions.UpdateOne().
@@ -151,7 +151,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				ns.Timestamp = now
 				ns.CreatedAt = now
 				ns.UpdatedAt = now
-				_, err := sess.Table("NormalStruct").
+				_, err := db.Table("NormalStruct").
 					InsertOne(
 						sess,
 						&ns, options.InsertOne().SetDebug(true),
@@ -182,7 +182,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		err = db.RunInTransaction(
 			ctx, func(sess sqlike.SessionContext) error {
 				nss := []normalStruct{}
-				result, err := sess.Table("NormalStruct").
+				result, err := db.Table("NormalStruct").
 					Find(
 						sess,
 						nil, options.Find().
@@ -209,12 +209,12 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	// Commit Transaction
 	{
 		data := &user{ID: rand.Intn(10000), Name: "Oska"}
-		trx, _ := db.BeginTransaction(ctx)
-		_, err = trx.Table("user").InsertOne(ctx, data)
+		tx, _ := db.BeginTransaction(ctx)
+		_, err = db.Table("user").InsertOne(tx, data)
 		require.NoError(t, err)
 
-		err = trx.Table("user").FindOne(
-			ctx,
+		err = db.Table("user").FindOne(
+			tx,
 			actions.FindOne().
 				Where(
 					expr.Equal("$Key", data.ID),
@@ -231,7 +231,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		).Decode(&user{})
 		require.Error(t, err)
 
-		err = trx.CommitTransaction()
+		err = tx.CommitTransaction()
 		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(
@@ -251,12 +251,12 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	// Rollback Transaction
 	{
 		data := &user{ID: 1234, Name: "Oska"}
-		trx, _ := db.BeginTransaction(ctx)
-		_, err = trx.Table("user").InsertOne(ctx, data)
+		tx, _ := db.BeginTransaction(ctx)
+		_, err = db.Table("user").InsertOne(tx, data)
 		require.NoError(t, err)
 
-		err = trx.Table("user").FindOne(
-			ctx,
+		err = db.Table("user").FindOne(
+			tx,
 			actions.FindOne().
 				Where(
 					expr.Equal("$Key", data.ID),
@@ -273,7 +273,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		).Decode(&user{})
 		require.Error(t, err)
 
-		err = trx.RollbackTransaction()
+		err = tx.RollbackTransaction()
 		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(

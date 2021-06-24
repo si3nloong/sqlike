@@ -58,7 +58,7 @@ func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string)
 	cv.tb.dialect.RenameColumn(stmt, cv.tb.dbName, cv.tb.name, oldColName, newColName)
 	_, err := sqldriver.Execute(
 		ctx,
-		cv.tb.driver,
+		getDriverFromContext(ctx, cv.tb.driver),
 		stmt,
 		cv.tb.logger,
 	)
@@ -72,7 +72,7 @@ func (cv *ColumnView) DropOne(ctx context.Context, name string) error {
 	cv.tb.dialect.DropColumn(stmt, cv.tb.dbName, cv.tb.name, name)
 	_, err := sqldriver.Execute(
 		ctx,
-		cv.tb.driver,
+		getDriverFromContext(ctx, cv.tb.driver),
 		stmt,
 		cv.tb.logger,
 	)

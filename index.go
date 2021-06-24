@@ -48,7 +48,7 @@ func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
 	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc())
 	_, err := sqldriver.Execute(
 		ctx,
-		idv.tb.driver,
+		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
 		idv.tb.logger,
 	)
@@ -91,7 +91,7 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc())
 	_, err := sqldriver.Execute(
 		ctx,
-		idv.tb.driver,
+		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
 		idv.tb.logger,
 	)
@@ -99,13 +99,13 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Inde
 }
 
 // DropOne :
-func (idv IndexView) DropOne(ctx context.Context, name string) error {
+func (idv *IndexView) DropOne(ctx context.Context, name string) error {
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, []string{name})
 	_, err := sqldriver.Execute(
 		ctx,
-		idv.tb.driver,
+		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
 		idv.tb.logger,
 	)
@@ -127,7 +127,7 @@ func (idv *IndexView) DropAll(ctx context.Context) error {
 	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, names)
 	if _, err := sqldriver.Execute(
 		ctx,
-		idv.tb.driver,
+		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
 		idv.tb.logger,
 	); err != nil {

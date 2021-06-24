@@ -130,7 +130,7 @@ func find(
 	}
 	rows, err := sqldriver.Query(
 		ctx,
-		driver,
+		getDriverFromContext(ctx, driver),
 		stmt,
 		getLogger(logger, opt.Debug),
 	)

@@ -224,7 +224,7 @@ type typeQueue struct {
 	pp string // parent path
 }
 
-func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
+func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 	fields := make([]StructFielder, 0)
 
 	root := &StructField{}
@@ -243,7 +243,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				continue
 			}
 
-			tag := parseTag(f, tagName, fmtFunc)
+			tag := parseTag(f, tagNames, fmtFunc)
 			if tag.name == "-" {
 				continue
 			}
@@ -336,29 +336,31 @@ func appendSlice(s []int, i int) []int {
 	return x
 }
 
-func parseTag(f reflect.StructField, tagName string, fmtFunc FormatFunc) (st StructTag) {
-	parts := strings.Split(f.Tag.Get(tagName), ",")
-	name := strings.TrimSpace(parts[0])
-	st.fieldName = name
-	if name == "" {
-		name = f.Name
-		if fmtFunc != nil {
-			name = fmtFunc(name)
-		}
-	}
-	st.name = name
+func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st StructTag) {
+	st.fieldName = f.Name
+	st.name = f.Name
 	st.opts = make(map[string]string)
-	if len(parts) > 1 {
-		for _, opt := range parts[1:] {
-			opt = strings.TrimSpace(opt)
-			if strings.Contains(opt, "=") {
-				kv := strings.SplitN(opt, "=", 2)
-				k := strings.TrimSpace(strings.ToLower(kv[0]))
-				st.opts[k] = strings.TrimSpace(kv[1])
-				continue
+	for _, tagName := range tagNames {
+		parts := strings.Split(f.Tag.Get(tagName), ",")
+		name := strings.TrimSpace(parts[0])
+		if name != "" {
+			if fmtFunc != nil {
+				name = fmtFunc(name)
 			}
-			opt = strings.ToLower(opt)
-			st.opts[opt] = ""
+			st.name = name
+		}
+		if len(parts) > 1 {
+			for _, opt := range parts[1:] {
+				opt = strings.TrimSpace(opt)
+				if strings.Contains(opt, "=") {
+					kv := strings.SplitN(opt, "=", 2)
+					k := strings.TrimSpace(strings.ToLower(kv[0]))
+					st.opts[k] = strings.TrimSpace(kv[1])
+					continue
+				}
+				opt = strings.ToLower(opt)
+				st.opts[opt] = ""
+			}
 		}
 	}
 	return

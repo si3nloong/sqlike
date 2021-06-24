@@ -56,7 +56,7 @@ func (tb *Table) Rename(ctx context.Context, name string) error {
 	tb.dialect.RenameTable(stmt, tb.dbName, tb.name, name)
 	_, err := sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -71,7 +71,7 @@ func (tb *Table) Exists(ctx context.Context) bool {
 	tb.dialect.HasTable(stmt, tb.dbName, tb.name)
 	if err := sqldriver.QueryRowContext(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	).Scan(&count); err != nil {
@@ -92,7 +92,7 @@ func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 	tb.dialect.GetColumns(stmt, tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -135,7 +135,7 @@ func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
 	tb.dialect.GetIndexes(stmt, tb.dbName, tb.name)
 	rows, err := sqldriver.Query(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -193,7 +193,7 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 	tb.dialect.TruncateTable(stmt, tb.dbName, tb.name)
 	_, err = sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -201,13 +201,13 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 }
 
 // DropIfExists : will drop the table only if it exists.
-func (tb Table) DropIfExists(ctx context.Context) (err error) {
+func (tb *Table) DropIfExists(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true)
 	_, err = sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -215,13 +215,13 @@ func (tb Table) DropIfExists(ctx context.Context) (err error) {
 }
 
 // Drop : drop the table, but it might throw error when the table is not exists
-func (tb Table) Drop(ctx context.Context) (err error) {
+func (tb *Table) Drop(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.DropTable(stmt, tb.dbName, tb.name, false)
 	_, err = sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	)
@@ -244,7 +244,7 @@ func (tb *Table) Replace(ctx context.Context, fields []string, query *sql.Select
 
 	if _, err := sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	); err != nil {
@@ -318,7 +318,7 @@ func (tb *Table) createTable(ctx context.Context, fields []reflext.StructFielder
 	}
 	if _, err := sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	); err != nil {
@@ -359,7 +359,7 @@ func (tb *Table) alterTable(ctx context.Context, fields []reflext.StructFielder,
 	}
 	if _, err := sqldriver.Execute(
 		ctx,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		stmt,
 		tb.logger,
 	); err != nil {

@@ -113,7 +113,7 @@ func deleteMany(
 	}
 	result, err := sqldriver.Execute(
 		ctx,
-		driver,
+		getDriverFromContext(ctx, driver),
 		stmt,
 		getLogger(logger, opt.Debug),
 	)
@@ -144,26 +144,29 @@ func destroyOne(
 	x.Database = dbName
 	x.Table = tbName
 
-	var pkv = [2]interface{}{}
+	var (
+		fieldName string
+		value     interface{}
+	)
 	for _, sf := range cdc.Properties() {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
 		if _, ok := sf.Tag().LookUp("primary_key"); ok {
-			pkv[0] = sf.Name()
-			pkv[1] = fv.Interface()
-			continue
+			fieldName = sf.Name()
+			value = fv.Interface()
+			break
 		}
-		if sf.Name() == pk && pkv[0] == nil {
-			pkv[0] = sf.Name()
-			pkv[1] = fv.Interface()
-			continue
+		if sf.Name() == pk {
+			fieldName = sf.Name()
+			value = fv.Interface()
+			break
 		}
 	}
 
-	if pkv[0] == nil {
+	if fieldName == "" {
 		return errors.New("sqlike: missing primary key field")
 	}
 
-	x.Where(expr.Equal(pkv[0], pkv[1]))
+	x.Where(expr.Equal(fieldName, value))
 	x.Limit(1)
 
 	stmt := sqlstmt.AcquireStmt(dialect)
@@ -173,7 +176,7 @@ func destroyOne(
 	}
 	result, err := sqldriver.Execute(
 		ctx,
-		driver,
+		getDriverFromContext(ctx, driver),
 		stmt,
 		getLogger(logger, opt.Debug),
 	)

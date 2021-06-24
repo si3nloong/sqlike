@@ -125,7 +125,7 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	c.dialect.GetDatabases(stmt)
 	rows, err := driver.Query(
 		ctx,
-		c.DB,
+		getDriverFromContext(ctx, c.DB),
 		stmt,
 		c.logger,
 	)
@@ -174,7 +174,7 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 	c.dialect.GetVersion(stmt)
 	err = driver.QueryRowContext(
 		ctx,
-		c.DB,
+		getDriverFromContext(ctx, c.DB),
 		stmt,
 		c.logger,
 	).Scan(&ver)
@@ -196,7 +196,7 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 	c.dialect.CreateDatabase(stmt, name, checkExists)
 	_, err := driver.Execute(
 		ctx,
-		c.DB,
+		getDriverFromContext(ctx, c.DB),
 		stmt,
 		c.logger,
 	)
@@ -210,7 +210,7 @@ func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) erro
 	c.dialect.DropDatabase(stmt, name, checkExists)
 	_, err := driver.Execute(
 		ctx,
-		c.DB,
+		getDriverFromContext(ctx, c.DB),
 		stmt,
 		c.logger,
 	)

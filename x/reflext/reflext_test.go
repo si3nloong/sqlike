@@ -15,7 +15,7 @@ type recursiveStruct struct {
 }
 
 type tagStruct struct {
-	ID   int64  `sqlike:"id,omitempty,default=40"`
+	ID   int64  `sqlike:"id,omitempty" db:",default=40"`
 	Skip string `sqlike:"-"`
 }
 
@@ -99,16 +99,12 @@ func TestStructField(t *testing.T) {
 	require.False(t, sf.IsEmbedded())
 }
 
-func TestStruct(t *testing.T) {
-
-}
-
 func TestCodec(t *testing.T) {
 	var (
 		typeof reflect.Type
 		codec  *Struct
 		i      struct {
-			Name   string
+			Name   string `db:"columnName" sqlike:",default=TEST"`
 			Nested struct {
 				embeddedStruct
 				Enum enum
@@ -119,17 +115,19 @@ func TestCodec(t *testing.T) {
 
 	{
 		typeof = reflect.TypeOf(i)
-		codec = getCodec(typeof, "sqlike", nil)
+		codec = getCodec(typeof, []string{"sqlike", "db"}, nil)
 
 		require.Equal(t, len(codec.fields), 13)
 		require.Equal(t, len(codec.properties), 4)
-		require.NotNil(t, codec.names["Name"])
+		require.NotNil(t, codec.names["columnName"])
+		v, _ := codec.names["columnName"].Tag().LookUp("default")
+		require.Equal(t, v, "TEST")
 		require.NotNil(t, codec.names["Nested.Enum"])
 	}
 
 	{
 		typeof = reflect.TypeOf(recursiveStruct{})
-		codec = getCodec(typeof, "sqlike", nil)
+		codec = getCodec(typeof, []string{"sqlike"}, nil)
 
 		require.Equal(t, len(codec.fields), 2)
 		require.Equal(t, len(codec.properties), 2)

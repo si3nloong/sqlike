@@ -8,14 +8,14 @@ import (
 )
 
 type dbStruct struct {
-	Name  string `db:"name"`
+	Name  string `db:"name" sqlike:""`
 	skip  bool
 	Email *string
 }
 
 func TestMapper(t *testing.T) {
 	var (
-		mapper = NewMapperFunc("db", func(str string) string {
+		mapper = NewMapperFunc([]string{"db"}, func(str string) string {
 			return str
 		})
 		ok bool
