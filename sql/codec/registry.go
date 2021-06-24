@@ -12,7 +12,6 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
-	"github.com/si3nloong/sqlike/db"
 	"github.com/si3nloong/sqlike/x/reflext"
 	"github.com/si3nloong/sqlike/x/spatial"
 	"golang.org/x/text/currency"
@@ -34,7 +33,6 @@ type Codecer interface {
 var (
 	DefaultRegistry = buildDefaultRegistry()
 	sqlScanner      = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
-	dbScanner       = reflect.TypeOf((*db.SQLScanner)(nil)).Elem()
 )
 
 func buildDefaultRegistry() Codecer {
@@ -152,10 +150,6 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 		return NilEncoder, nil
 	}
 
-	if _, ok := v.Interface().(db.SQLValuer); ok {
-		return encodeSQLValue, nil
-	}
-
 	if _, ok := v.Interface().(driver.Valuer); ok {
 		return encodeDriverValue, nil
 	}
@@ -185,10 +179,6 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
-	if ptrType.Implements(dbScanner) {
-		return dbScannerDecoder, nil
-	}
-
 	if ptrType.Implements(sqlScanner) {
 		return sqlScannerDecoder, nil
 	}
@@ -205,6 +195,11 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	return nil, ErrNoDecoder{Type: t}
 }
 
+// NilEncoder :
+func NilEncoder(_ context.Context, _ reflect.Value) (interface{}, error) {
+	return nil, nil
+}
+
 func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
 		return nil, nil
@@ -214,22 +209,6 @@ func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) 
 		return nil, errors.New("codec: invalid type for assertion")
 	}
 	return x.Value()
-}
-
-func encodeSQLValue(ctx context.Context, v reflect.Value) (interface{}, error) {
-	if !v.IsValid() || reflext.IsNull(v) {
-		return nil, nil
-	}
-	x, ok := v.Interface().(db.SQLValuer)
-	if !ok {
-		return nil, errors.New("codec: invalid type for assertion")
-	}
-	return x.SQLValue(ctx)
-}
-
-// NilEncoder :
-func NilEncoder(_ context.Context, _ reflect.Value) (interface{}, error) {
-	return nil, nil
 }
 
 func sqlScannerDecoder(_ context.Context, it interface{}, v reflect.Value) error {
@@ -244,18 +223,4 @@ func sqlScannerDecoder(_ context.Context, it interface{}, v reflect.Value) error
 	}
 
 	return reflext.Init(v).Interface().(sql.Scanner).Scan(it)
-}
-
-func dbScannerDecoder(ctx context.Context, it interface{}, v reflect.Value) error {
-	if it == nil {
-		// Avoid from sql.scanner when the value is nil
-		v.Set(reflect.Zero(v.Type()))
-		return nil
-	}
-
-	if v.Kind() != reflect.Ptr {
-		return v.Addr().Interface().(db.SQLScanner).SQLScan(ctx, it)
-	}
-
-	return reflext.Init(v).Interface().(db.SQLScanner).SQLScan(ctx, it)
 }

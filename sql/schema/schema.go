@@ -66,7 +66,7 @@ func (sb *Builder) GetColumn(ctx context.Context) (*sql.Column, error) {
 	f := sql.GetField(ctx)
 	t := reflext.Deref(f.Type())
 	v := reflect.New(t)
-	if x, ok := v.Interface().(db.ColumnDataTypeImplementer); ok {
+	if x, ok := v.Interface().(db.ColumnDataTyper); ok {
 		return x.ColumnDataType(ctx), nil
 	}
 

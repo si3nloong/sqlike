@@ -79,6 +79,12 @@ type normalStruct struct {
 	Model
 }
 
+func (*normalStruct) Load(ctx context.Context) error {
+	log.Println("debug loading ====================++>")
+	log.Println(ctx)
+	return nil
+}
+
 type simpleStruct struct {
 	ID    int64 `sqlike:",auto_increment"`
 	Email string
@@ -135,16 +141,15 @@ type model struct {
 	Address
 }
 
-type CustomValuer struct {
+type CustomValue struct {
 }
 
 var (
-	_ db.SQLValuer                 = (*CustomValuer)(nil)
-	_ db.ColumnDataTypeImplementer = (*CustomValuer)(nil)
+	_ db.ColumnDataTyper = (*CustomValue)(nil)
 )
 
 // ColumnDataType :
-func (c CustomValuer) ColumnDataType(ctx context.Context) *sql.Column {
+func (c CustomValue) ColumnDataType(ctx context.Context) *sql.Column {
 	f := sql.GetField(ctx)
 	return &sql.Column{
 		Name:     f.Name(),
@@ -153,18 +158,9 @@ func (c CustomValuer) ColumnDataType(ctx context.Context) *sql.Column {
 	}
 }
 
-// SQLValue :
-func (c CustomValuer) SQLValue(ctx context.Context) (interface{}, error) {
-	log.Println("debug field ===================>")
-	log.Println("database =>", sql.GetDatabase(ctx))
-	log.Println("table =>", sql.GetTable(ctx))
-	log.Println("field =>", sql.GetField(ctx))
-	return 100, nil
-}
-
 type ptrStruct struct {
-	ID            int64 `sqlike:"$Key,auto_increment"`
-	CustomValue   CustomValuer
+	ID int64 `sqlike:"$Key,auto_increment"`
+	// CustomValue   CustomValue
 	NullUUID      *uuid.UUID
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool

@@ -15,7 +15,7 @@ import (
 type Set []string
 
 var (
-	_ db.ColumnDataTypeImplementer = (*Set)(nil)
+	_ db.ColumnDataTyper = (*Set)(nil)
 )
 
 // DataType :

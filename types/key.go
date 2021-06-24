@@ -51,16 +51,16 @@ type Key struct {
 }
 
 var (
-	_ db.ColumnDataTypeImplementer = (*Key)(nil)
-	_ driver.Valuer                = (*Key)(nil)
-	_ sql.Scanner                  = (*Key)(nil)
-	_ fmt.Stringer                 = (*Key)(nil)
-	_ encoding.TextMarshaler       = (*Key)(nil)
-	_ encoding.TextUnmarshaler     = (*Key)(nil)
-	_ json.Marshaler               = (*Key)(nil)
-	_ json.Unmarshaler             = (*Key)(nil)
-	_ bson.ValueMarshaler          = (*Key)(nil)
-	_ bson.ValueUnmarshaler        = (*Key)(nil)
+	_ db.ColumnDataTyper       = (*Key)(nil)
+	_ driver.Valuer            = (*Key)(nil)
+	_ sql.Scanner              = (*Key)(nil)
+	_ fmt.Stringer             = (*Key)(nil)
+	_ encoding.TextMarshaler   = (*Key)(nil)
+	_ encoding.TextUnmarshaler = (*Key)(nil)
+	_ json.Marshaler           = (*Key)(nil)
+	_ json.Unmarshaler         = (*Key)(nil)
+	_ bson.ValueMarshaler      = (*Key)(nil)
+	_ bson.ValueUnmarshaler    = (*Key)(nil)
 )
 
 // DataType :

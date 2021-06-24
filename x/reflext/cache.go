@@ -50,9 +50,12 @@ func (m *Mapper) CodecByType(t reflect.Type) Structer {
 	mapping, ok := m.cache[t]
 	if !ok {
 		m.mutex.Lock()
-		defer m.mutex.Unlock()
 		mapping = getCodec(t, m.tag, m.fmtFunc)
-		m.cache[t] = mapping
+		_, ok = m.cache[t]
+		if !ok {
+			m.cache[t] = mapping
+		}
+		m.mutex.Unlock()
 	}
 	return mapping
 }
