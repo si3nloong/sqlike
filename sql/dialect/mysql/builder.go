@@ -7,15 +7,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sql/codec"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	sqlutil "github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/x/primitive"
-	"github.com/si3nloong/sqlike/x/reflext"
-	"github.com/si3nloong/sqlike/x/spatial"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
+	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
+	"github.com/si3nloong/sqlike/v2/x/primitive"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
+	"github.com/si3nloong/sqlike/v2/x/spatial"
 )
 
 var operatorMap = map[primitive.Operator]string{

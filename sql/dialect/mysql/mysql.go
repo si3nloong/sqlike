@@ -1,12 +1,12 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
-	"github.com/si3nloong/sqlike/sql/schema"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	sqlutil "github.com/si3nloong/sqlike/sql/util"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
+	"github.com/si3nloong/sqlike/v2/sql/schema"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
+	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
 )
 
 // MySQL :

@@ -3,9 +3,9 @@ package sqlike
 import (
 	"context"
 
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/types"
+	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/types"
 )
 
 // Column : contains sql column information

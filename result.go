@@ -8,8 +8,8 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/x/reflext"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // Resulter :

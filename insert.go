@@ -7,13 +7,13 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/logs"
-	"github.com/si3nloong/sqlike/x/reflext"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
+	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/sqlike/logs"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // InsertOne : insert single record. You should always pass in the address of input.

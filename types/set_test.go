@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/si3nloong/sqlike/sql"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/stretchr/testify/require"
 )
 

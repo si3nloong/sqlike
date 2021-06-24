@@ -1,6 +1,6 @@
 package expr
 
-import "github.com/si3nloong/sqlike/x/primitive"
+import "github.com/si3nloong/sqlike/v2/x/primitive"
 
 // Increment :
 func Increment(field string, inc uint) primitive.Math {

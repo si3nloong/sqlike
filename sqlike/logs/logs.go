@@ -1,7 +1,7 @@
 package logs
 
 import (
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
 // Logger :

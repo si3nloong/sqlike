@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/si3nloong/sqlike/sql/charset"
-	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/v2/sql/charset"
+	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // ConnectOptions :

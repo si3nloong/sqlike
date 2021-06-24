@@ -5,15 +5,15 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/x/reflext"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/sql/driver"
+	"github.com/si3nloong/sqlike/v2/sql/util"
+	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // Dialect :

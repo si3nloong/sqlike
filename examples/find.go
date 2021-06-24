@@ -10,11 +10,11 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
-	"github.com/si3nloong/sqlike"
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	"github.com/si3nloong/sqlike/v2/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 )

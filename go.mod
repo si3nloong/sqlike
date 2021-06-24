@@ -1,4 +1,4 @@
-module github.com/si3nloong/sqlike
+module github.com/si3nloong/sqlike/v2
 
 go 1.15
 

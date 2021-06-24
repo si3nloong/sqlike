@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 )
 
 // HasIndexByName :

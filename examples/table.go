@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/si3nloong/sqlike"
+	"github.com/si3nloong/sqlike/v2"
 	"github.com/stretchr/testify/require"
 )
 

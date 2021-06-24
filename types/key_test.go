@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/si3nloong/sqlike/jsonb"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/x/reflext"
+	"github.com/si3nloong/sqlike/v2/jsonb"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )

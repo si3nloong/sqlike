@@ -9,9 +9,9 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 

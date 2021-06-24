@@ -1,17 +1,17 @@
 # sqlike
 
-[![Build](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions?query=workflow%3Abuild)
-[![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/releases)
-[![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
+[![Build](https://github.com/si3nloong/sqlike/v2/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/v2/actions?query=workflow%3Abuild)
+[![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/v2/releases)
+[![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike/v2)](https://goreportcard.com/report/github.com/si3nloong/sqlike/v2)
 [![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
-[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/v2/blob/master/LICENSE)
 
 > A golang SQL ORM which anti toxic query and focus on latest features.
 
 ## 🔨 Installation
 
 ```console
-go get github.com/si3nloong/sqlike
+go get github.com/si3nloong/sqlike/v2
 ```
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
@@ -50,7 +50,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Developer friendly, (query is highly similar to native sql query)
 - Support `sqldump` for backup purpose **(experiment)**
 
-<!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
+<!-- You can refer to [examples](https://github.com/si3nloong/sqlike/v2/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
 
 ## ⚠️ Limitation
 
@@ -70,10 +70,10 @@ package main
 
 import (
     "time"
-    "github.com/si3nloong/sqlike/actions"
-    "github.com/si3nloong/sqlike"
-    "github.com/si3nloong/sqlike/options"
-    "github.com/si3nloong/sqlike/sql/expr"
+    "github.com/si3nloong/sqlike/v2/actions"
+    "github.com/si3nloong/sqlike/v2"
+    "github.com/si3nloong/sqlike/v2/options"
+    "github.com/si3nloong/sqlike/v2/sql/expr"
     "github.com/google/uuid"
     "context"
 
@@ -274,6 +274,6 @@ Thanks to these awesome companies for their support of Open Source developers �
 
 ## 📄 License
 
-[MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+[MIT](https://github.com/si3nloong/sqlike/v2/blob/master/LICENSE)
 
 Copyright (c) 2019-present, SianLoong Lee

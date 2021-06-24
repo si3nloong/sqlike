@@ -3,7 +3,7 @@ package sqlike
 import (
 	"context"
 
-	"github.com/si3nloong/sqlike/sql/driver"
+	"github.com/si3nloong/sqlike/v2/sql/driver"
 )
 
 func getDriverFromContext(ctx context.Context, dvr driver.Driver) driver.Driver {

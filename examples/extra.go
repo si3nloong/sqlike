@@ -7,11 +7,11 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
-	"github.com/si3nloong/sqlike"
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 )

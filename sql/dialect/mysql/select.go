@@ -1,10 +1,10 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/options"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/options"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
 // Select :

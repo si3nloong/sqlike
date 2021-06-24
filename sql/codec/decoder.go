@@ -15,7 +15,7 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/si3nloong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/v2/jsonb"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 

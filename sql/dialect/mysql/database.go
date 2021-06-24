@@ -1,6 +1,6 @@
 package mysql
 
-import "github.com/si3nloong/sqlike/db"
+import "github.com/si3nloong/sqlike/v2/db"
 
 // UseDatabase :
 func (ms MySQL) UseDatabase(stmt db.Stmt, db string) {

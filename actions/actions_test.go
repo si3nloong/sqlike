@@ -3,7 +3,7 @@ package actions
 import (
 	"testing"
 
-	"github.com/si3nloong/sqlike/sql/expr"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/x/util"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/x/util"
 )
 
 // Connect :

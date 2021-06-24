@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/x/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )

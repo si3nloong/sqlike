@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/db"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 )
 
 // Update :

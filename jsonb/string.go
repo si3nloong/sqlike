@@ -3,7 +3,7 @@ package jsonb
 import (
 	"errors"
 
-	"github.com/si3nloong/sqlike/x/util"
+	"github.com/si3nloong/sqlike/v2/x/util"
 )
 
 // ReadEscapeString :

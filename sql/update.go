@@ -1,7 +1,7 @@
 package sql
 
 import (
-	"github.com/si3nloong/sqlike/x/primitive"
+	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
 
 // UpdateStmt :

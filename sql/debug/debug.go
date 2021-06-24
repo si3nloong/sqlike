@@ -1,9 +1,9 @@
 package debug
 
 import (
-	"github.com/si3nloong/sqlike/sql/dialect"
-	"github.com/si3nloong/sqlike/sql/dialect/mysql"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
+	"github.com/si3nloong/sqlike/v2/sql/dialect/mysql"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
 // ToSQL :

@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 
-	"github.com/si3nloong/sqlike/sql"
+	"github.com/si3nloong/sqlike/v2/sql"
 )
 
 // ColumnDataTyper :

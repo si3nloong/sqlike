@@ -7,11 +7,11 @@ import (
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/si3nloong/sqlike"
-	"github.com/si3nloong/sqlike/actions"
-	"github.com/si3nloong/sqlike/options"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/stretchr/testify/require"
 )
 

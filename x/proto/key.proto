@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/si3nloong/sqlike/x/proto";
+option go_package = "github.com/si3nloong/sqlike/v2/x/proto";
 
 package proto;
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/sql/codec"
-	"github.com/si3nloong/sqlike/sql/dialect"
-	"github.com/si3nloong/sqlike/sqlike/logs"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
+	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // SessionContext :

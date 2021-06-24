@@ -14,12 +14,12 @@ import (
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
-	"github.com/si3nloong/sqlike/x/reflext"
-	"github.com/si3nloong/sqlike/x/spatial"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
+	"github.com/si3nloong/sqlike/v2/x/spatial"
 
-	sqlx "github.com/si3nloong/sqlike/sql"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 
-	"github.com/si3nloong/sqlike/jsonb"
+	"github.com/si3nloong/sqlike/v2/jsonb"
 )
 
 // DefaultEncoders :

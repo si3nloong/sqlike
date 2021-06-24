@@ -5,10 +5,10 @@ import (
 	"database/sql/driver"
 	"strings"
 
-	"github.com/si3nloong/sqlike/db"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/x/reflext"
-	"github.com/si3nloong/sqlike/x/util"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
+	"github.com/si3nloong/sqlike/v2/x/util"
 )
 
 // Set : sql data type of `SET`
