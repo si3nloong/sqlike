@@ -1,10 +1,10 @@
 # sqlike
 
-[![Build](https://github.com/si3nloong/sqlike/v2/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/v2/actions?query=workflow%3Abuild)
-[![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/v2/releases)
+[![Build](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions?query=workflow%3Abuild)
+[![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/releases)
 [![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike/v2)](https://goreportcard.com/report/github.com/si3nloong/sqlike/v2)
 [![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
-[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/v2/blob/master/LICENSE)
+[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
 
 > A golang SQL ORM which anti toxic query and focus on latest features.
 

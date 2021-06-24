@@ -28,7 +28,7 @@ Small pull requests are much easier to review and more likely to get merged. Mak
 
 Please make sure the following is done when submitting a pull request:
 
-1. Fork the [repository](https://github.com/si3nloong/sqlike/v2) and create your branch from master.
+1. Fork the [repository](https://github.com/si3nloong/sqlike) and create your branch from master.
 2. Describe your test plan in your pull request description. Make sure to test your changes.
 3. Make sure your tests pass `go test ./...`.
 4. All pull requests should be opened against the master branch.
@@ -39,4 +39,4 @@ For testing, we are using package `github.com/stretchr/testify`, please ensure y
 
 ## License
 
-By contributing to sqlike, you agree that your contributions will be licensed under its [MIT license](https://github.com/si3nloong/sqlike/v2/blob/master/LICENSE).
+By contributing to sqlike, you agree that your contributions will be licensed under its [MIT license](https://github.com/si3nloong/sqlike/blob/master/LICENSE).
