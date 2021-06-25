@@ -7,5 +7,5 @@ type LockMode int
 const (
 	NoLock LockMode = iota
 	LockForUpdate
-	LockForRead
+	LockForShare
 )

@@ -42,8 +42,8 @@ func TestFindOne(t *testing.T) {
 
 	t.Run("SetLockMode", func(it *testing.T) {
 		{
-			opt.SetLockMode(LockForRead)
-			require.Equal(it, LockForRead, opt.LockMode)
+			opt.SetLockMode(LockForShare)
+			require.Equal(it, LockForShare, opt.LockMode)
 		}
 
 		{

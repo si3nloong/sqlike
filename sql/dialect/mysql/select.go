@@ -16,7 +16,7 @@ func (ms *MySQL) Select(stmt db.Stmt, f *actions.FindActions, lck options.LockMo
 	switch lck {
 	case options.LockForUpdate:
 		stmt.WriteString(" FOR UPDATE")
-	case options.LockForRead:
+	case options.LockForShare:
 		stmt.WriteString(" LOCK IN SHARE MODE")
 	}
 	stmt.WriteByte(';')
