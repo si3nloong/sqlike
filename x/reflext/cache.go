@@ -7,7 +7,7 @@ import (
 )
 
 // DefaultMapper :
-var DefaultMapper = NewMapperFunc([]string{"db", "sqlike"}, nil)
+var DefaultMapper = NewMapperFunc([]string{"sqlike"}, nil)
 
 // StructMapper :
 type StructMapper interface {

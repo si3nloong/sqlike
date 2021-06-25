@@ -15,13 +15,6 @@ type Structer interface {
 	GetByTraversal(index []int) StructFielder
 }
 
-// StructTager :
-type StructTager interface {
-	Name() string
-	FieldName() string
-	LookUp(key string) (val string, exists bool)
-}
-
 // StructFielder :
 type StructFielder interface {
 	// New name of struct field
@@ -51,6 +44,14 @@ type StructFielder interface {
 
 	// determine the field is embedded struct
 	IsEmbedded() bool
+}
+
+// StructTager :
+type StructTager interface {
+	Name() string
+	FieldName() string
+	LookUp(key string) (val string, exists bool)
+	Get(key string) string
 }
 
 // StructTag :
@@ -337,31 +338,39 @@ func appendSlice(s []int, i int) []int {
 }
 
 func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st StructTag) {
-	st.fieldName = f.Name
-	st.name = f.Name
-	st.opts = make(map[string]string)
-	for _, tagName := range tagNames {
-		parts := strings.Split(f.Tag.Get(tagName), ",")
-		name := strings.TrimSpace(parts[0])
-		if name != "" {
-			if fmtFunc != nil {
-				name = fmtFunc(name)
-			}
-			st.name = name
-		}
-		if len(parts) > 1 {
-			for _, opt := range parts[1:] {
-				opt = strings.TrimSpace(opt)
-				if strings.Contains(opt, "=") {
-					kv := strings.SplitN(opt, "=", 2)
-					k := strings.TrimSpace(strings.ToLower(kv[0]))
-					st.opts[k] = strings.TrimSpace(kv[1])
-					continue
-				}
-				opt = strings.ToLower(opt)
-				st.opts[opt] = ""
-			}
+	parts := strings.Split(f.Tag.Get(tagNames[0]), ",")
+	name := strings.TrimSpace(parts[0])
+	st.fieldName = name
+	if name == "" {
+		name = f.Name
+		if fmtFunc != nil {
+			name = fmtFunc(name)
 		}
 	}
+	st.name = name
+	st.opts = make(map[string]string)
+	// for _, tagName := range tagNames {
+	// 	parts := strings.Split(f.Tag.Get(tagName), ",")
+	// 	name := strings.TrimSpace(parts[0])
+	// 	if name != "" {
+	// 		if fmtFunc != nil {
+	// 			name = fmtFunc(name)
+	// 		}
+	// 		st.name = name
+	// 	}
+	if len(parts) > 1 {
+		for _, opt := range parts[1:] {
+			opt = strings.TrimSpace(opt)
+			if strings.Contains(opt, "=") {
+				kv := strings.SplitN(opt, "=", 2)
+				k := strings.TrimSpace(strings.ToLower(kv[0]))
+				st.opts[k] = strings.TrimSpace(kv[1])
+				continue
+			}
+			opt = strings.ToLower(opt)
+			st.opts[opt] = ""
+		}
+	}
+	// }
 	return
 }
