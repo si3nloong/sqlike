@@ -317,7 +317,7 @@ func (s mySQLSchema) FloatDataType(sf reflext.StructFielder) *sql.Column {
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
 	if v, ok := tag.LookUp("default"); ok {
-		if _, err := strconv.ParseFloat(v, 10); err != nil {
+		if _, err := strconv.ParseFloat(v, 64); err != nil {
 			panic("float default value should be decimal number")
 		}
 		col.DefaultValue = &v
