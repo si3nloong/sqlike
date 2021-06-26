@@ -22,7 +22,7 @@ const (
 
 // User :
 type User struct {
-	ID        int64
+	ID        int64 `sqlike:",auto_increment"`
 	Name      string
 	Age       int
 	Status    status `sqlike:",enum=ACTIVE|SUSPEND"`
@@ -42,6 +42,11 @@ func (usrs Users) Swap(i, j int) {
 	usrs[i], usrs[j] = usrs[j], usrs[i]
 }
 
+type UserAddress struct {
+	ID     int64 `sqlike:",auto_increment"`
+	UserID int64 `sqlike:",foreign_key=User:ID"`
+}
+
 // PaginationExamples :
 func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	var (
@@ -53,6 +58,9 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	table := db.Table("User")
 
 	{
+		err = db.Table("UserAddress").DropIfExists(ctx)
+		require.NoError(t, err)
+
 		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 	}
@@ -62,16 +70,21 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 		require.NoError(t, err)
 	}
 
+	{
+		err = db.Table("UserAddress").Migrate(ctx, UserAddress{})
+		require.NoError(t, err)
+	}
+
 	data := []User{
-		{10, "User A", 18, statusActive, time.Now().UTC()},
-		{88, "User B", 12, statusActive, time.Now().UTC()},
-		{8, "User F", 20, statusActive, time.Now().UTC()},
-		{27, "User C", 16, statusSuspend, time.Now().UTC()},
-		{20, "User C", 16, statusActive, time.Now().UTC()},
-		{100, "User G", 10, statusSuspend, time.Now().UTC()},
-		{21, "User C", 16, statusActive, time.Now().UTC()},
-		{50, "User D", 23, statusActive, time.Now().UTC()},
-		{5, "User E", 30, statusSuspend, time.Now().UTC()},
+		{1, "User A", 18, statusActive, time.Now().UTC()},
+		{2, "User B", 12, statusActive, time.Now().UTC()},
+		{3, "User F", 20, statusActive, time.Now().UTC()},
+		{4, "User C", 16, statusSuspend, time.Now().UTC()},
+		{5, "User C", 16, statusActive, time.Now().UTC()},
+		{6, "User G", 10, statusSuspend, time.Now().UTC()},
+		{7, "User C", 16, statusActive, time.Now().UTC()},
+		{8, "User D", 23, statusActive, time.Now().UTC()},
+		{9, "User E", 30, statusSuspend, time.Now().UTC()},
 	}
 
 	{
@@ -107,7 +120,8 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 				).
 				OrderBy(
 					expr.Desc("Age"),
-				).Limit(2),
+				).
+				Limit(2),
 			options.Paginate().
 				SetDebug(true))
 		require.NoError(t, err)
@@ -140,7 +154,8 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 				OrderBy(
 					expr.Desc("Age"),
 					expr.Desc("ID"),
-				).Limit(100),
+				).
+				Limit(100),
 			options.Find().
 				SetDebug(true))
 		require.NoError(t, err)

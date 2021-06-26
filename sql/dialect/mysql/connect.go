@@ -40,7 +40,7 @@ func (ms MySQL) Connect(opt *options.ConnectOptions) (connStr string) {
 	}
 	blr.WriteByte('/')
 	blr.WriteByte('?')
-	blr.WriteString("parseTime=true")
+	blr.WriteString("parseTime=true&multiStatements=true")
 	if opt.Charset == "" {
 		blr.WriteString("&charset=utf8mb4")
 		blr.WriteString("&collation=utf8mb4_unicode_ci")

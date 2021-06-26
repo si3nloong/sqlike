@@ -202,6 +202,8 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	}
 
 	table := db.Table("user")
+	err = db.Table("UserAddress").DropIfExists(ctx)
+	require.NoError(t, err)
 	err = table.DropIfExists(ctx)
 	require.NoError(t, err)
 	table.MustMigrate(ctx, new(user))

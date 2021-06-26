@@ -10,17 +10,18 @@ import (
 
 // SelectStmt :
 type SelectStmt struct {
-	DistinctOn  bool
-	Tables      []interface{}
-	Projections []interface{}
-	Joins       []interface{}
-	IndexHints  string
-	Conditions  primitive.Group
-	Havings     primitive.Group
-	Groups      []interface{}
-	Sorts       []interface{}
-	Max         uint
-	Skip        uint
+	DistinctOn bool
+	Tables     []interface{}
+	Exprs      []interface{}
+	Joins      []interface{}
+	IndexHints string
+	Conditions primitive.Group
+	Havings    primitive.Group
+	Groups     []interface{}
+	Sorts      []interface{}
+	RowCount   uint
+	Skip       uint
+	Options    []interface{}
 }
 
 // Select :
@@ -38,13 +39,13 @@ func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 			grp.Values = append(grp.Values, primitive.Raw{Value: "("})
 			grp.Values = append(grp.Values, fields...)
 			grp.Values = append(grp.Values, primitive.Raw{Value: ")"})
-			stmt.Projections = append(stmt.Projections, grp)
+			stmt.Exprs = append(stmt.Exprs, grp)
 		default:
-			stmt.Projections = append(stmt.Projections, fields...)
+			stmt.Exprs = append(stmt.Exprs, fields...)
 		}
 		return stmt
 	}
-	stmt.Projections = fields
+	stmt.Exprs = fields
 	return stmt
 }
 
@@ -111,7 +112,23 @@ func (stmt *SelectStmt) GroupBy(fields ...interface{}) *SelectStmt {
 // Limit :
 func (stmt *SelectStmt) Limit(num uint) *SelectStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
+	}
+	return stmt
+}
+
+// ForUpdate :
+func (stmt *SelectStmt) ForUpdate(num uint) *SelectStmt {
+	if num > 0 {
+		stmt.Skip = num
+	}
+	return stmt
+}
+
+// ForShare :
+func (stmt *SelectStmt) ForShare(num uint) *SelectStmt {
+	if num > 0 {
+		stmt.Skip = num
 	}
 	return stmt
 }

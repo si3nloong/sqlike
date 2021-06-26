@@ -11,7 +11,7 @@ type UpdateStmt struct {
 	Conditions primitive.Group
 	Values     []primitive.KV
 	Sorts      []interface{}
-	Max        uint
+	RowCount   uint
 }
 
 // Update :
@@ -46,7 +46,7 @@ func (stmt *UpdateStmt) OrderBy(fields ...interface{}) *UpdateStmt {
 // Limit :
 func (stmt *UpdateStmt) Limit(num uint) *UpdateStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
 	}
 	return stmt
 }

@@ -20,7 +20,6 @@ func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	table := db.Table("Index")
 
 	{
-
 		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 	}

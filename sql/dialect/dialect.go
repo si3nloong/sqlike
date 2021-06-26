@@ -30,7 +30,7 @@ type Dialect interface {
 	RenameTable(stmt db.Stmt, db, oldName, newName string)
 	RenameColumn(stmt db.Stmt, db, table, oldColName, newColName string)
 	DropColumn(stmt db.Stmt, db, table, column string)
-	DropTable(stmt db.Stmt, db, table string, checkExists bool)
+	DropTable(stmt db.Stmt, db, table string, checkExists bool, unsafe bool)
 	TruncateTable(stmt db.Stmt, db, table string)
 	GetColumns(stmt db.Stmt, db, table string)
 	HasIndexByName(stmt db.Stmt, db, table, indexName string)

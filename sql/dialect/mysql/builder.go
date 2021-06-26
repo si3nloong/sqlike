@@ -309,8 +309,7 @@ func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it interface{}) error {
 	if err := b.getValue(stmt, x.Field); err != nil {
 		return err
 	}
-	stmt.WriteString(" AS ")
-	stmt.WriteString(b.Quote(x.Name))
+	stmt.WriteString(" AS " + b.Quote(x.Name))
 	return nil
 }
 
@@ -377,8 +376,7 @@ func (b *mySQLBuilder) BuildSort(stmt db.Stmt, it interface{}) error {
 		return err
 	}
 	if x.Order == primitive.Descending {
-		stmt.WriteByte(' ')
-		stmt.WriteString("DESC")
+		stmt.WriteString(" DESC")
 	}
 	return nil
 }
@@ -386,8 +384,7 @@ func (b *mySQLBuilder) BuildSort(stmt db.Stmt, it interface{}) error {
 // BuildKeyValue :
 func (b *mySQLBuilder) BuildKeyValue(stmt db.Stmt, it interface{}) (err error) {
 	x := it.(primitive.KV)
-	stmt.WriteString(b.Quote(string(x.Field)))
-	stmt.WriteString(" = ")
+	stmt.WriteString(b.Quote(string(x.Field)) + " = ")
 	return b.getValue(stmt, x.Value)
 }
 
@@ -407,8 +404,7 @@ func (b *mySQLBuilder) BuildMath(stmt db.Stmt, it interface{}) (err error) {
 // BuildCase :
 func (b *mySQLBuilder) BuildCase(stmt db.Stmt, it interface{}) error {
 	x := it.(*primitive.Case)
-	stmt.WriteByte('(')
-	stmt.WriteString("CASE")
+	stmt.WriteString("(CASE")
 	for _, w := range x.WhenClauses {
 		stmt.WriteString(" WHEN ")
 		if err := b.builder.BuildStatement(stmt, w[0]); err != nil {
@@ -425,8 +421,7 @@ func (b *mySQLBuilder) BuildCase(stmt db.Stmt, it interface{}) error {
 			return err
 		}
 	}
-	stmt.WriteString(" END")
-	stmt.WriteByte(')')
+	stmt.WriteString(" END)")
 	return nil
 }
 
@@ -483,9 +478,7 @@ func (b *mySQLBuilder) BuildRange(stmt db.Stmt, it interface{}) (err error) {
 		return err
 	}
 	stmt.AppendArgs(arg)
-	stmt.WriteByte('?')
-	stmt.WriteString(" AND ")
-	stmt.WriteByte('?')
+	stmt.WriteString("? AND ?")
 	return
 }
 
@@ -494,7 +487,7 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it interface{}) (err error) {
 	x := it.(primitive.Encoding)
 	if x.Charset != nil {
 		if (*x.Charset)[0] != '_' {
-			stmt.WriteString("_")
+			stmt.WriteByte('_')
 		}
 		stmt.WriteString(*x.Charset + " ")
 	}
@@ -554,7 +547,7 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it interface{}) error {
 	if x.DistinctOn {
 		stmt.WriteString("DISTINCT ")
 	}
-	if err := b.appendSelect(stmt, x.Projections); err != nil {
+	if err := b.appendSelect(stmt, x.Exprs); err != nil {
 		return err
 	}
 	stmt.WriteString(" FROM ")
@@ -570,14 +563,14 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it interface{}) error {
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Max, x.Skip)
+	b.appendLimitNOffset(stmt, x.RowCount, x.Skip)
 	return nil
 }
 
 // BuildUpdateStmt :
 func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it interface{}) error {
 	x := it.(*sql.UpdateStmt)
-	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + ` `)
+	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + " ")
 	if err := b.appendSet(stmt, x.Values); err != nil {
 		return err
 	}
@@ -587,7 +580,7 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it interface{}) error {
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Max, 0)
+	b.appendLimitNOffset(stmt, x.RowCount, 0)
 	return nil
 }
 
@@ -616,7 +609,6 @@ func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it interface{}) error {
 		return err
 	}
 	b.appendLimitNOffset(stmt, x.Count, x.Skip)
-
 	return nil
 }
 

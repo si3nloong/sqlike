@@ -204,7 +204,7 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 func (tb *Table) DropIfExists(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true)
+	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true, false)
 	_, err = sqldriver.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
@@ -218,7 +218,21 @@ func (tb *Table) DropIfExists(ctx context.Context) (err error) {
 func (tb *Table) Drop(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	tb.dialect.DropTable(stmt, tb.dbName, tb.name, false)
+	tb.dialect.DropTable(stmt, tb.dbName, tb.name, false, false)
+	_, err = sqldriver.Execute(
+		ctx,
+		getDriverFromContext(ctx, tb.driver),
+		stmt,
+		tb.logger,
+	)
+	return
+}
+
+// UnsafeDrop : drop the table without table is exists and foreign key constraint error
+func (tb *Table) UnsafeDrop(ctx context.Context) (err error) {
+	stmt := sqlstmt.AcquireStmt(tb.dialect)
+	defer sqlstmt.ReleaseStmt(stmt)
+	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true, true)
 	_, err = sqldriver.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),

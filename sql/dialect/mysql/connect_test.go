@@ -19,9 +19,9 @@ func TestConnect(t *testing.T) {
 		Host:     "localhost",
 		Port:     "3306",
 	})
-	require.Equal(t, `root:@tcp(localhost:3306)/?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci`, str)
+	require.Equal(t, `root:@tcp(localhost:3306)/?parseTime=true&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci`, str)
 
-	uri := `root:@unix(localhost:3306)/?parseTime=true&charset=utf8mb4&collation=utf8mb4_unicode_ci`
+	uri := `root:@unix(localhost:3306)/?parseTime=true&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci`
 	opt := new(options.ConnectOptions)
 	str = ms.Connect(opt.ApplyURI(uri))
 	require.Equal(t, uri, str)

@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -30,7 +31,11 @@ func (ms MySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 }
 
 // DropTable :
-func (ms MySQL) DropTable(stmt db.Stmt, db, table string, exists bool) {
+func (ms MySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
+	if unsafe {
+		stmt.WriteString("SET FOREIGN_KEY_CHECKS=0;")
+		defer stmt.WriteString("SET FOREIGN_KEY_CHECKS=1;")
+	}
 	stmt.WriteString("DROP TABLE")
 	if exists {
 		stmt.WriteString(" IF EXISTS")
@@ -53,21 +58,20 @@ func (ms MySQL) HasTable(stmt db.Stmt, dbName, table string) {
 // CreateTable :
 func (ms MySQL) CreateTable(
 	stmt db.Stmt,
-	dbName, table, pk string,
+	dbName, table, pkName string,
 	info driver.Info,
 	fields []reflext.StructFielder,
 ) (err error) {
 	var (
 		col     *sql.Column
-		pkk     reflext.StructFielder
+		pk      reflext.StructFielder
 		k1, k2  string
 		virtual bool
 		stored  bool
 		ctx     = sql.Context(dbName, table)
 	)
 
-	stmt.WriteString("CREATE TABLE " + ms.TableName(dbName, table) + " ")
-	stmt.WriteByte('(')
+	stmt.WriteString("CREATE TABLE " + ms.TableName(dbName, table) + " (")
 
 	// Main columns :
 	for i, f := range fields {
@@ -84,11 +88,18 @@ func (ms MySQL) CreateTable(
 		tag := f.Tag()
 		// allow primary_key tag to override
 		if _, ok := tag.LookUp("primary_key"); ok {
-			pkk = f
+			pk = f
 		} else if _, ok := tag.LookUp("auto_increment"); ok {
-			pkk = f
-		} else if f.Name() == pk && pkk == nil {
-			pkk = f
+			pk = f
+		} else if f.Name() == pkName && pk == nil {
+			pk = f
+		} else if v, ok := tag.LookUp("foreign_key"); ok {
+			paths := strings.SplitN(v, ":", 2)
+			if len(paths) < 2 {
+				panic(fmt.Sprintf("invalid foreign key value %q", v))
+			}
+			stmt.WriteString("FOREIGN KEY (`" + f.Name() + "`) REFERENCES ")
+			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
 		idx := indexes.Index{Columns: indexes.Columns(f.Name())}
@@ -152,12 +163,10 @@ func (ms MySQL) CreateTable(
 		}
 
 	}
-	if pkk != nil {
-		stmt.WriteByte(',')
-		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Name()) + ")")
+	if pk != nil {
+		stmt.WriteString(",PRIMARY KEY (" + ms.Quote(pk.Name()) + ")")
 	}
-	stmt.WriteByte(')')
-	stmt.WriteString(" ENGINE=INNODB")
+	stmt.WriteString(") ENGINE=INNODB")
 	code := string(info.Charset())
 	if code == "" {
 		stmt.WriteString(" CHARACTER SET utf8mb4")
@@ -191,9 +200,9 @@ func (ms *MySQL) AlterTable(
 		virtual bool
 		stored  bool
 		ctx     = sql.Context(dbName, table)
+		suffix  = "FIRST"
 	)
 
-	suffix := "FIRST"
 	stmt.WriteString("ALTER TABLE " + ms.TableName(dbName, table) + " ")
 
 	for i, f := range fields {
@@ -207,17 +216,25 @@ func (ms *MySQL) AlterTable(
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
+
+		tag := f.Tag()
 		if !hasPk {
 			// allow primary_key tag to override
-			if _, ok := f.Tag().LookUp("primary_key"); ok {
+			if _, ok := tag.LookUp("primary_key"); ok {
 				pkk = f
 			}
 			if f.Name() == pk && pkk == nil {
 				pkk = f
 			}
+		} else if v, ok := tag.LookUp("foreign_key"); ok && idxs.IndexOf(f.Name()) < 0 {
+			paths := strings.SplitN(v, ":", 2)
+			if len(paths) < 2 {
+				panic(fmt.Sprintf("invalid foreign key value %q", v))
+			}
+			stmt.WriteString("ADD FOREIGN KEY (`" + f.Name() + "`) REFERENCES ")
+			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
-		tag := f.Tag()
 		_, ok1 := tag.LookUp("unique_index")
 		_, ok2 := tag.LookUp("auto_increment")
 		if ok1 || ok2 {

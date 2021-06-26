@@ -23,7 +23,7 @@ func TestDropTable(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 
 	{
-		ms.DropTable(stmt, "db", "table", true)
+		ms.DropTable(stmt, "db", "table", true, false)
 		require.Equal(t, "DROP TABLE IF EXISTS `db`.`table`;", stmt.String())
 		require.ElementsMatch(t, []interface{}{}, stmt.Args())
 	}
@@ -31,7 +31,7 @@ func TestDropTable(t *testing.T) {
 	stmt.Reset()
 
 	{
-		ms.DropTable(stmt, "db", "table", false)
+		ms.DropTable(stmt, "db", "table", false, false)
 		require.Equal(t, "DROP TABLE `db`.`table`;", stmt.String())
 		require.ElementsMatch(t, []interface{}{}, stmt.Args())
 	}

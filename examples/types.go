@@ -79,6 +79,11 @@ type normalStruct struct {
 	Model
 }
 
+type relativeNormalStruct struct {
+	ID             uuid.UUID `sqlike:",primary_key"`
+	NormalStructID string    `sqlike:",foreign_key=NormalStruct:ID"`
+}
+
 func (*normalStruct) Load(ctx context.Context) error {
 	log.Println("debug loading ====================++>")
 	log.Println(ctx)
