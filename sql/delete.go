@@ -10,7 +10,7 @@ type DeleteStmt struct {
 	Tables     []interface{}
 	Conditions primitive.Group
 	Sorts      []interface{}
-	Max        uint
+	RowCount   uint
 }
 
 // From :
@@ -33,7 +33,7 @@ func (stmt *DeleteStmt) OrderBy(fields ...interface{}) *DeleteStmt {
 // Limit :
 func (stmt *DeleteStmt) Limit(num uint) *DeleteStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
 	}
 	return stmt
 }
