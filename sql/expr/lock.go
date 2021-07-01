@@ -4,11 +4,11 @@ type Lock struct {
 }
 
 // ForShare :
-func ForShare() {
+func ForShare() (l Lock) {
 	return
 }
 
 // ForUpdate :
-func ForUpdate() {
+func ForUpdate() (l Lock) {
 	return
 }

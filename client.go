@@ -3,6 +3,7 @@ package sqlike
 import (
 	"context"
 	"database/sql"
+	"log"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
@@ -76,6 +77,9 @@ func newClient(
 	client.cache = reflext.DefaultMapper
 	client.codec = codec.DefaultRegistry
 	client.version = client.getVersion(ctx)
+	if mysql8.GreaterThan(client.version) {
+		log.Println("DEPRECATION: SQLike no longer support MySQL 5.7 in future, try to upgrade your MySQL Database to at least 8.0 !!!")
+	}
 	return client, nil
 }
 
