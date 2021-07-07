@@ -7,7 +7,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -44,7 +43,6 @@ func (tb *Table) FindOne(
 		tb.dbName,
 		tb.name,
 		tb.client.cache,
-		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -85,7 +83,6 @@ func (tb *Table) Find(
 		tb.dbName,
 		tb.name,
 		tb.client.cache,
-		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -103,7 +100,7 @@ func find(
 	ctx context.Context,
 	dbName, tbName string,
 	cache reflext.StructMapper,
-	cdc codec.Codecer,
+	// cdc codec.Codecer,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
 	logger logs.Logger,
@@ -120,7 +117,7 @@ func find(
 	rslt := new(Result)
 	rslt.ctx = sqlx.Context(act.Database, act.Table)
 	rslt.cache = cache
-	rslt.codec = cdc
+	rslt.dialect = dialect
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)

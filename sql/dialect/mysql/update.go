@@ -6,7 +6,7 @@ import (
 )
 
 // Update :
-func (ms *MySQL) Update(stmt db.Stmt, f *actions.UpdateActions) (err error) {
+func (ms *mySQL) Update(stmt db.Stmt, f *actions.UpdateActions) (err error) {
 	err = buildStatement(stmt, ms.parser, f)
 	if err != nil {
 		return

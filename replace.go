@@ -40,7 +40,6 @@ func (tb *Table) ReplaceOne(
 		tb.name,
 		tb.pk,
 		tb.client.cache,
-		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,

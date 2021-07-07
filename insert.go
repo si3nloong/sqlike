@@ -8,7 +8,6 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -47,7 +46,6 @@ func (tb *Table) InsertOne(
 		tb.name,
 		tb.pk,
 		tb.client.cache,
-		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -72,7 +70,6 @@ func (tb *Table) Insert(
 		tb.name,
 		tb.pk,
 		tb.client.cache,
-		tb.codec,
 		tb.driver,
 		tb.dialect,
 		tb.logger,
@@ -85,7 +82,6 @@ func insertMany(
 	ctx context.Context,
 	dbName, tbName, pk string,
 	cache reflext.StructMapper,
-	cdc codec.Codecer,
 	driver sqldriver.Driver,
 	dlct dialect.Dialect,
 	logger logs.Logger,
@@ -122,7 +118,6 @@ func insertMany(
 		tbName,
 		pk,
 		cache,
-		cdc,
 		def.Properties(),
 		v,
 		opt,

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -31,7 +30,6 @@ type Database struct {
 	client     *Client
 	driver     driver.Driver
 	dialect    dialect.Dialect
-	codec      codec.Codecer
 	logger     logs.Logger
 }
 
@@ -44,7 +42,6 @@ func (db *Database) Table(name string) *Table {
 		client:  db.client,
 		driver:  db.driver,
 		dialect: db.dialect,
-		codec:   db.codec,
 		logger:  db.logger,
 	}
 }
@@ -95,7 +92,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	}
 	rslt := new(Result)
 	rslt.cache = db.client.cache
-	rslt.codec = db.codec
+	rslt.dialect = db.dialect
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()
 	if rslt.err != nil {
@@ -117,10 +114,14 @@ func (db *Database) BeginTransaction(ctx context.Context, opts ...*sql.TxOptions
 }
 
 func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transaction, error) {
+	if ok := txnContext(ctx); ok {
+		return nil, ErrNestedTransaction
+	}
 	tx, err := db.client.BeginTx(ctx, opt)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Transaction{
 		Context: ctx,
 		dbName:  db.name,
@@ -129,12 +130,14 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 		driver:  tx,
 		dialect: db.dialect,
 		logger:  db.logger,
-		codec:   db.codec,
 	}, nil
 }
 
 // RunInTransaction :
 func (db *Database) RunInTransaction(ctx context.Context, cb txCallback, opts ...*options.TransactionOptions) error {
+	if ok := txnContext(ctx); ok {
+		return ErrNestedTransaction
+	}
 	opt := new(options.TransactionOptions)
 	if len(opts) > 0 && opts[0] != nil {
 		opt = opts[0]

@@ -14,7 +14,7 @@ import (
 )
 
 // HasPrimaryKey :
-func (ms MySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
+func (ms mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
 	stmt.WriteByte(';')
@@ -22,7 +22,7 @@ func (ms MySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 }
 
 // RenameTable :
-func (ms MySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
+func (ms mySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(" TO ")
@@ -31,7 +31,7 @@ func (ms MySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 }
 
 // DropTable :
-func (ms MySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
+func (ms mySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
 	if unsafe {
 		stmt.WriteString("SET FOREIGN_KEY_CHECKS=0;")
 		defer stmt.WriteString("SET FOREIGN_KEY_CHECKS=1;")
@@ -45,18 +45,18 @@ func (ms MySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bo
 }
 
 // TruncateTable :
-func (ms MySQL) TruncateTable(stmt db.Stmt, db, table string) {
+func (ms mySQL) TruncateTable(stmt db.Stmt, db, table string) {
 	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
 }
 
 // HasTable :
-func (ms MySQL) HasTable(stmt db.Stmt, dbName, table string) {
+func (ms mySQL) HasTable(stmt db.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs(dbName, table)
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(
+func (ms mySQL) CreateTable(
 	stmt db.Stmt,
 	dbName, table, pkName string,
 	info driver.Info,
@@ -182,7 +182,7 @@ func (ms MySQL) CreateTable(
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(
+func (ms *mySQL) AlterTable(
 	stmt db.Stmt,
 	dbName, table, pk string,
 	hasPk bool,

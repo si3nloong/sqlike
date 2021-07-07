@@ -10,7 +10,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
 	"github.com/si3nloong/sqlike/v2/x/primitive"
@@ -36,12 +35,12 @@ var operatorMap = map[primitive.Operator]string{
 }
 
 type mySQLBuilder struct {
-	registry codec.Codecer
+	registry db.Codecer
 	builder  *sqlstmt.StatementBuilder
 	sqlutil.MySQLUtil
 }
 
-func (b mySQLBuilder) SetRegistryAndBuilders(rg codec.Codecer, blr *sqlstmt.StatementBuilder) {
+func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.StatementBuilder) {
 	if rg == nil {
 		panic("missing required registry")
 	}

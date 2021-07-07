@@ -10,7 +10,7 @@ import (
 // TestConnect :
 func TestConnect(t *testing.T) {
 	var (
-		ms  = MySQL{}
+		ms  = New()
 		str string
 	)
 

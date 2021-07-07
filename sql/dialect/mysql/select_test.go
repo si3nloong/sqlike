@@ -15,6 +15,7 @@ func TestSelect(t *testing.T) {
 	var (
 		now = time.Now()
 		err error
+		ms  = New()
 	)
 
 	invalids := []interface{}{
@@ -37,7 +38,8 @@ func TestSelect(t *testing.T) {
 
 	// Complex select statement
 	{
-		stmt := sqlstmt.AcquireStmt(MySQL{})
+
+		stmt := sqlstmt.AcquireStmt(ms)
 		defer sqlstmt.ReleaseStmt(stmt)
 		err = New().Select(
 			stmt,
@@ -86,9 +88,8 @@ func TestSelect(t *testing.T) {
 			expr.Asc("C"),
 		).Limit(1)
 
-		x := New()
-		stmt2 := sqlstmt.NewStatement(x)
-		err := x.parser.BuildStatement(stmt2, stmt)
+		stmt2 := sqlstmt.NewStatement(ms)
+		err := ms.parser.BuildStatement(stmt2, stmt)
 		require.NoError(t, err)
 	}
 }

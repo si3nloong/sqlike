@@ -1,4 +1,4 @@
-package codec
+package mysql
 
 import (
 	"bytes"
@@ -16,6 +16,8 @@ import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/v2/jsonb"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/x/util"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
@@ -24,7 +26,7 @@ import (
 
 // DefaultDecoders :
 type DefaultDecoders struct {
-	codec *Registry
+	codec *codec.Registry
 }
 
 // DecodeByte :
@@ -166,7 +168,7 @@ func (dec DefaultDecoders) DecodeTime(ctx context.Context, it interface{}, v ref
 			return err
 		}
 	case []byte:
-		x, err = decodeTime(b2s(vi))
+		x, err = decodeTime(util.B2s(vi))
 		if err != nil {
 			return err
 		}
@@ -194,7 +196,7 @@ func (dec DefaultDecoders) DecodeCivilDate(ctx context.Context, it interface{}, 
 			return err
 		}
 	case []byte:
-		x, err = civil.ParseDate(b2s(vi))
+		x, err = civil.ParseDate(util.B2s(vi))
 		if err != nil {
 			return err
 		}
@@ -312,7 +314,7 @@ func (dec DefaultDecoders) DecodeBool(ctx context.Context, it interface{}, v ref
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseBool(b2s(vi))
+		x, err = strconv.ParseBool(util.B2s(vi))
 		if err != nil {
 			return err
 		}
@@ -345,7 +347,7 @@ func (dec DefaultDecoders) DecodeInt(ctx context.Context, it interface{}, v refl
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseInt(b2s(vi), 10, 64)
+		x, err = strconv.ParseInt(util.B2s(vi), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -377,7 +379,7 @@ func (dec DefaultDecoders) DecodeUint(ctx context.Context, it interface{}, v ref
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseUint(b2s(vi), 10, 64)
+		x, err = strconv.ParseUint(util.B2s(vi), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -411,7 +413,7 @@ func (dec DefaultDecoders) DecodeFloat(ctx context.Context, it interface{}, v re
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseFloat(b2s(vi), 64)
+		x, err = strconv.ParseFloat(util.B2s(vi), 64)
 		if err != nil {
 			return err
 		}

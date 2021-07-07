@@ -345,7 +345,7 @@ func (s mySQLSchema) ArrayDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (ms MySQL) buildSchemaByColumn(stmt db.Stmt, col *sql.Column) {
+func (ms mySQL) buildSchemaByColumn(stmt db.Stmt, col *sql.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
 	if col.Charset != nil {

@@ -1,4 +1,4 @@
-package codec
+package util
 
 import (
 	"testing"
@@ -8,5 +8,5 @@ import (
 
 func TestB2s(t *testing.T) {
 	str := `hello world`
-	require.Equal(t, str, b2s([]byte(str)))
+	require.Equal(t, str, B2s([]byte(str)))
 }

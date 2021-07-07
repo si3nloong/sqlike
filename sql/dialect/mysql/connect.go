@@ -6,7 +6,7 @@ import (
 )
 
 // Connect :
-func (ms MySQL) Connect(opt *options.ConnectOptions) (connStr string) {
+func (ms mySQL) Connect(opt *options.ConnectOptions) (connStr string) {
 	if opt.RawConnStr() != "" {
 		connStr = opt.RawConnStr()
 		return

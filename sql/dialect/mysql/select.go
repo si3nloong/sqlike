@@ -8,7 +8,7 @@ import (
 )
 
 // Select :
-func (ms *MySQL) Select(stmt db.Stmt, f *actions.FindActions, lck options.LockMode) (err error) {
+func (ms *mySQL) Select(stmt db.Stmt, f *actions.FindActions, lck options.LockMode) (err error) {
 	err = ms.parser.BuildStatement(stmt, f)
 	if err != nil {
 		return
@@ -24,7 +24,7 @@ func (ms *MySQL) Select(stmt db.Stmt, f *actions.FindActions, lck options.LockMo
 }
 
 // SelectStmt :
-func (ms *MySQL) SelectStmt(stmt db.Stmt, query interface{}) (err error) {
+func (ms *mySQL) SelectStmt(stmt db.Stmt, query interface{}) (err error) {
 	err = ms.parser.BuildStatement(stmt, query)
 	stmt.WriteByte(';')
 	return

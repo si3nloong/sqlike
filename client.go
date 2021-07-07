@@ -8,7 +8,6 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -51,8 +50,8 @@ type Client struct {
 	pk      string
 	logger  logs.Logger
 	cache   reflext.StructMapper
-	codec   codec.Codecer
 	dialect dialect.Dialect
+	// codec   codec.Codecer
 }
 
 // newClient : create a new client struct by providing driver, *sql.DB, dialect etc
@@ -75,7 +74,7 @@ func newClient(
 	client.charSet = code
 	client.collate = collate
 	client.cache = reflext.DefaultMapper
-	client.codec = codec.DefaultRegistry
+	// client.codec = codec.DefaultRegistry
 	client.version = client.getVersion(ctx)
 	if mysql8.GreaterThan(client.version) {
 		log.Println("DEPRECATION: SQLike no longer support MySQL 5.7 in future, try to upgrade your MySQL Database to at least 8.0 !!!")
@@ -98,13 +97,13 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 	return c
 }
 
-// SetCodec : Codec is a component which handling the :
-// 1. encoding between input data and driver.Valuer
-// 2. decoding between output data and sql.Scanner
-func (c *Client) SetCodec(cdc codec.Codecer) *Client {
-	c.codec = cdc
-	return c
-}
+// // SetCodec : Codec is a component which handling the :
+// // 1. encoding between input data and driver.Valuer
+// // 2. decoding between output data and sql.Scanner
+// func (c *Client) SetCodec(cdc codec.Codecer) *Client {
+// 	c.codec = cdc
+// 	return c
+// }
 
 // SetStructMapper : StructMapper is a mapper to reflect a struct on runtime and provide struct info
 func (c *Client) SetStructMapper(mapper reflext.StructMapper) *Client {
@@ -163,7 +162,6 @@ func (c *Client) Database(name string) *Database {
 		dialect:    c.dialect,
 		driver:     c.DB,
 		logger:     c.logger,
-		codec:      c.codec,
 	}
 }
 

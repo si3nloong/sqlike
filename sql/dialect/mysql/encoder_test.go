@@ -1,4 +1,4 @@
-package codec
+package mysql
 
 import (
 	"reflect"

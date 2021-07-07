@@ -8,7 +8,8 @@ import (
 
 	"errors"
 
-	"github.com/si3nloong/sqlike/v2/sql/codec"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -32,8 +33,8 @@ type Result struct {
 	ctx         context.Context
 	close       bool
 	rows        *sql.Rows
-	codec       codec.Codecer
 	cache       reflext.StructMapper
+	dialect     dialect.Dialect
 	columns     []string
 	columnTypes []*sql.ColumnType
 	err         error
@@ -95,7 +96,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 			return ErrUnaddressableEntity
 		}
 		fv = reflext.IndirectInit(fv)
-		decoder, err := r.codec.LookupDecoder(fv.Type())
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -142,7 +143,7 @@ func (r *Result) Decode(dst interface{}) error {
 			continue
 		}
 		fv := r.cache.FieldByIndexes(vv, idx)
-		decoder, err := r.codec.LookupDecoder(fv.Type())
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -186,7 +187,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 		}
 		slice = reflect.Append(slice, reflext.Zero(t))
 		fv := slice.Index(i)
-		decoder, err := r.codec.LookupDecoder(fv.Type())
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
 		if err != nil {
 			return err
 		}
@@ -224,7 +225,7 @@ func (r *Result) All(results interface{}) error {
 	slice := reflect.MakeSlice(t, 0, 0)
 	t = t.Elem()
 	idxs := r.cache.TraversalsByName(t, r.columns)
-	decoders := make([]codec.ValueDecoder, length)
+	decoders := make([]db.ValueDecoder, length)
 	for i := 0; r.rows.Next(); i++ {
 		values, err := r.values()
 		if err != nil {
@@ -237,7 +238,7 @@ func (r *Result) All(results interface{}) error {
 			}
 			fv := r.cache.FieldByIndexes(vv, idx)
 			if i < 1 {
-				decoder, err := r.codec.LookupDecoder(fv.Type())
+				decoder, err := r.dialect.LookupDecoder(fv.Type())
 				if err != nil {
 					return err
 				}

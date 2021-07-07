@@ -9,13 +9,13 @@ import (
 )
 
 // HasIndexByName :
-func (ms MySQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
+func (ms mySQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
 	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`)
 	stmt.AppendArgs(dbName, table, indexName)
 }
 
 // HasIndex :
-func (ms MySQL) HasIndex(stmt db.Stmt, dbName, table string, idx indexes.Index) {
+func (ms mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx indexes.Index) {
 	nonUnique, idxType := true, "BTREE"
 	switch idx.Type {
 	case indexes.Unique:
@@ -52,13 +52,13 @@ func (ms MySQL) HasIndex(stmt db.Stmt, dbName, table string, idx indexes.Index) 
 }
 
 // GetIndexes :
-func (ms MySQL) GetIndexes(stmt db.Stmt, dbName, table string) {
+func (ms mySQL) GetIndexes(stmt db.Stmt, dbName, table string) {
 	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
 	stmt.AppendArgs(dbName, table)
 }
 
 // CreateIndexes :
-func (ms MySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Index, supportDesc bool) {
+func (ms mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Index, supportDesc bool) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
@@ -104,7 +104,7 @@ func (ms MySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Ind
 }
 
 // DropIndexes :
-func (ms MySQL) DropIndexes(stmt db.Stmt, db, table string, idxs []string) {
+func (ms mySQL) DropIndexes(stmt db.Stmt, db, table string, idxs []string) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
 	for i, idx := range idxs {
 		if idx == "PRIMARY" {
@@ -120,7 +120,7 @@ func (ms MySQL) DropIndexes(stmt db.Stmt, db, table string, idxs []string) {
 	stmt.WriteByte(';')
 }
 
-func (ms MySQL) getIndexByType(k indexes.Type) (idx string) {
+func (ms mySQL) getIndexByType(k indexes.Type) (idx string) {
 	switch k {
 	case indexes.FullText:
 		idx = "FULLTEXT INDEX"

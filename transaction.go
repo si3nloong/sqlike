@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
@@ -32,8 +31,6 @@ type Transaction struct {
 	// sql dialect
 	dialect dialect.Dialect
 
-	// codec
-	codec  codec.Codecer
 	logger logs.Logger
 }
 

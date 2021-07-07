@@ -7,17 +7,15 @@ import (
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"github.com/si3nloong/sqlike/v2/x/spatial"
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(
+func (ms *mySQL) InsertInto(
 	stmt db.Stmt,
 	dbName, table, pk string,
 	cache reflext.StructMapper,
-	cdc codec.Codecer,
 	fields []reflext.StructFielder,
 	v reflect.Value,
 	opt *options.InsertOptions,
@@ -60,7 +58,7 @@ func (ms MySQL) InsertInto(
 	stmt.WriteString(") VALUES ")
 
 	length := len(fields)
-	encoders := make([]codec.ValueEncoder, length)
+	encoders := make([]db.ValueEncoder, length)
 	for i := 0; i < records; i++ {
 		if i > 0 {
 			stmt.WriteByte(',')
@@ -79,7 +77,7 @@ func (ms MySQL) InsertInto(
 			// first record only find encoders
 			if i == 0 {
 				// encoders[j], err = findEncoder(cdc, f, fv)
-				encoders[j], err = cdc.LookupEncoder(fv)
+				encoders[j], err = ms.LookupEncoder(fv)
 				if err != nil {
 					return err
 				}

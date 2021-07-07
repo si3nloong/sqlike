@@ -1,4 +1,4 @@
-package codec
+package mysql
 
 import (
 	"bytes"
@@ -14,6 +14,8 @@ import (
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"github.com/si3nloong/sqlike/v2/x/spatial"
 
@@ -24,7 +26,7 @@ import (
 
 // DefaultEncoders :
 type DefaultEncoders struct {
-	codec *Registry
+	codec *codec.Registry
 }
 
 // EncodeByte :
@@ -75,7 +77,7 @@ func (enc DefaultEncoders) EncodeTime(_ context.Context, v reflect.Value) (inter
 }
 
 // EncodeSpatial :
-func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) ValueEncoder {
+func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) db.ValueEncoder {
 	return func(ctx context.Context, v reflect.Value) (interface{}, error) {
 		if reflext.IsZero(v) {
 			return nil, nil

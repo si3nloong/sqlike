@@ -31,3 +31,8 @@ func ReleaseString(x *strings.Builder) {
 func UnsafeString(b []byte) string {
 	return *(*string)(unsafe.Pointer(&b))
 }
+
+// B2s :
+func B2s(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}

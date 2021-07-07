@@ -9,7 +9,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -44,8 +43,6 @@ type Table struct {
 	// sql dialect
 	dialect dialect.Dialect
 
-	// encoder and decoder for the value
-	codec  codec.Codecer
 	logger logs.Logger
 }
 

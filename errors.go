@@ -13,4 +13,6 @@ var (
 	ErrNilEntity = errors.New("sqlike: entity is <nil>")
 	// ErrNoColumn :
 	ErrNoColumn = errors.New("sqlike: no columns to create index")
+	// ErrNestedTransaction :
+	ErrNestedTransaction = errors.New("sqlike: nested transaction")
 )

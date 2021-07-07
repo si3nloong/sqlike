@@ -2,37 +2,38 @@ package mysql
 
 import (
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
 )
 
-// MySQL :
-type MySQL struct {
+type mySQL struct {
 	schema *schema.Builder
 	parser *sqlstmt.StatementBuilder
 	sqlutil.MySQLUtil
+	db.Codecer
 }
 
-var _ dialect.Dialect = (*(MySQL))(nil)
+var _ dialect.Dialect = (*(mySQL))(nil)
 
 // New :
-func New() *MySQL {
+func New() *mySQL {
 	sb := schema.NewBuilder()
 	pr := sqlstmt.NewStatementBuilder()
 
+	codec := buildDefaultRegistry()
 	mySQLSchema{}.SetBuilders(sb)
-	mySQLBuilder{}.SetRegistryAndBuilders(codec.DefaultRegistry, pr)
+	mySQLBuilder{}.SetRegistryAndBuilders(codec, pr)
 
-	return &MySQL{
-		schema: sb,
-		parser: pr,
+	return &mySQL{
+		schema:  sb,
+		parser:  pr,
+		Codecer: codec,
 	}
 }
 
 // GetVersion :
-func (ms MySQL) GetVersion(stmt db.Stmt) {
+func (ms mySQL) GetVersion(stmt db.Stmt) {
 	stmt.WriteString("SELECT VERSION();")
 }
