@@ -3,7 +3,6 @@ package examples
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"sort"
 	"time"
 
@@ -82,12 +81,6 @@ type normalStruct struct {
 type relativeNormalStruct struct {
 	ID             uuid.UUID `sqlike:",primary_key"`
 	NormalStructID string    `sqlike:",foreign_key=NormalStruct:ID"`
-}
-
-func (*normalStruct) Load(ctx context.Context) error {
-	log.Println("debug loading ====================++>")
-	log.Println(ctx)
-	return nil
 }
 
 type simpleStruct struct {
