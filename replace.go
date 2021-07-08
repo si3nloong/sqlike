@@ -40,7 +40,7 @@ func (tb *Table) ReplaceOne(
 		tb.name,
 		tb.pk,
 		tb.client.cache,
-		tb.driver,
+		getDriverFromContext(ctx, tb.driver),
 		tb.dialect,
 		tb.logger,
 		arr.Interface(),

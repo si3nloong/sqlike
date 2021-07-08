@@ -48,26 +48,17 @@ func (db *Database) Table(name string) *Table {
 
 // Exec :
 func (db *Database) Exec(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
-	if v, ok := ctx.(*Transaction); ok {
-		return v.driver.ExecContext(ctx, query, args...)
-	}
-	return db.driver.ExecContext(ctx, query, args...)
+	return getDriverFromContext(ctx, db.driver).ExecContext(ctx, query, args...)
 }
 
 // Query :
 func (db *Database) Query(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	if v, ok := ctx.(*Transaction); ok {
-		return v.driver.QueryContext(ctx, query, args...)
-	}
-	return db.driver.QueryContext(ctx, query, args...)
+	return getDriverFromContext(ctx, db.driver).QueryContext(ctx, query, args...)
 }
 
 // QueryRow :
 func (db *Database) QueryRow(ctx context.Context, query string, args ...interface{}) *sql.Row {
-	if v, ok := ctx.(*Transaction); ok {
-		return v.driver.QueryRowContext(ctx, query, args...)
-	}
-	return db.driver.QueryRowContext(ctx, query, args...)
+	return getDriverFromContext(ctx, db.driver).QueryRowContext(ctx, query, args...)
 }
 
 // QueryStmt :
