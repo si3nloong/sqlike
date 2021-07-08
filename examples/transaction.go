@@ -287,4 +287,22 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		).Decode(&user{})
 		require.Error(t, err)
 	}
+
+	// Nested transaction
+	{
+		// valid transaction
+		tx1, err := db.BeginTransaction(context.TODO())
+		require.NoError(t, err)
+		require.NotNil(t, tx1)
+
+		// shouldn't allow beginTransaction with nested transaction
+		tx2, err := db.BeginTransaction(tx1)
+		require.Error(t, err)
+		require.Nil(t, tx2)
+
+		// no matter how many level the context wrap with other context, it will still consider as nested transaction
+		tx2, err = db.BeginTransaction(context.WithValue(context.WithValue(tx1, "key", "lv2"), "key", "lv1"))
+		require.Error(t, err)
+		require.Nil(t, tx2)
+	}
 }

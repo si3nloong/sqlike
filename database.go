@@ -105,7 +105,7 @@ func (db *Database) BeginTransaction(ctx context.Context, opts ...*sql.TxOptions
 }
 
 func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transaction, error) {
-	if ok := txnContext(ctx); ok {
+	if ok := hasTxnCtx(ctx); ok {
 		return nil, ErrNestedTransaction
 	}
 	tx, err := db.client.BeginTx(ctx, opt)
@@ -126,7 +126,7 @@ func (db *Database) beginTrans(ctx context.Context, opt *sql.TxOptions) (*Transa
 
 // RunInTransaction :
 func (db *Database) RunInTransaction(ctx context.Context, cb txCallback, opts ...*options.TransactionOptions) error {
-	if ok := txnContext(ctx); ok {
+	if ok := hasTxnCtx(ctx); ok {
 		return ErrNestedTransaction
 	}
 	opt := new(options.TransactionOptions)

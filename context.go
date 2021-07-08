@@ -6,23 +6,23 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 )
 
-type contextKey struct{}
+var txnCtxKey struct{}
 
 func getDriverFromContext(ctx context.Context, dvr driver.Driver) driver.Driver {
 	if v, ok := ctx.(*Transaction); ok {
 		return v.driver
 	}
-	if v, ok := ctx.Value(contextKey{}).(*Transaction); ok {
+	if v, ok := ctx.Value(&txnCtxKey).(*Transaction); ok {
 		return v.driver
 	}
 	return dvr
 }
 
-func txnContext(ctx context.Context) bool {
+func hasTxnCtx(ctx context.Context) bool {
 	if _, ok := ctx.(*Transaction); ok {
 		return true
 	}
-	if _, ok := ctx.Value(contextKey{}).(*Transaction); ok {
+	if _, ok := ctx.Value(&txnCtxKey).(*Transaction); ok {
 		return true
 	}
 	return false

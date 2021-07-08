@@ -43,3 +43,11 @@ func (tx *Transaction) RollbackTransaction() error {
 func (tx *Transaction) CommitTransaction() error {
 	return tx.driver.Commit()
 }
+
+// Value :
+func (tx *Transaction) Value(key interface{}) interface{} {
+	if key == &txnCtxKey {
+		return tx
+	}
+	return tx.Context.Value(key)
+}
