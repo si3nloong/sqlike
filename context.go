@@ -9,9 +9,6 @@ import (
 var txnCtxKey struct{}
 
 func getDriverFromContext(ctx context.Context, dvr driver.Driver) driver.Driver {
-	if v, ok := ctx.(*Transaction); ok {
-		return v.driver
-	}
 	if v, ok := ctx.Value(&txnCtxKey).(*Transaction); ok {
 		return v.driver
 	}
@@ -19,9 +16,6 @@ func getDriverFromContext(ctx context.Context, dvr driver.Driver) driver.Driver 
 }
 
 func hasTxnCtx(ctx context.Context) bool {
-	if _, ok := ctx.(*Transaction); ok {
-		return true
-	}
 	if _, ok := ctx.Value(&txnCtxKey).(*Transaction); ok {
 		return true
 	}
