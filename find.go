@@ -10,7 +10,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -103,7 +102,7 @@ func find(
 	// cdc codec.Codecer,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger logs.Logger,
+	logger sqlx.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,
 	lock options.LockMode,

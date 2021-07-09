@@ -13,7 +13,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/plugin/opentracing"
 	"github.com/si3nloong/sqlike/v2/sql/instrumented"
-	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/stretchr/testify/require"
@@ -22,7 +21,7 @@ import (
 type Logger struct {
 }
 
-func (l Logger) Debug(stmt *sqlstmt.Statement) {
+func (l Logger) Debug(stmt interface{}) {
 	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
 }

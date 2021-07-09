@@ -3,8 +3,8 @@ package mysql
 import (
 	"testing"
 
+	"github.com/si3nloong/sqlike/v2/sql"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,9 +29,9 @@ func TestGetIndexes(t *testing.T) {
 
 func TestGetIndexByType(t *testing.T) {
 	ms := New()
-	require.Equal(t, "FULLTEXT INDEX", ms.getIndexByType(indexes.FullText))
-	require.Equal(t, "SPATIAL INDEX", ms.getIndexByType(indexes.Spatial))
-	require.Equal(t, "UNIQUE INDEX", ms.getIndexByType(indexes.Unique))
-	require.Equal(t, "PRIMARY KEY", ms.getIndexByType(indexes.Primary))
+	require.Equal(t, "FULLTEXT INDEX", ms.getIndexByType(sql.FullText))
+	require.Equal(t, "SPATIAL INDEX", ms.getIndexByType(sql.Spatial))
+	require.Equal(t, "UNIQUE INDEX", ms.getIndexByType(sql.Unique))
+	require.Equal(t, "PRIMARY KEY", ms.getIndexByType(sql.Primary))
 	require.Equal(t, "INDEX", ms.getIndexByType(0))
 }

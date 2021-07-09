@@ -15,4 +15,12 @@ var (
 	ErrNoColumn = errors.New("sqlike: no columns to create index")
 	// ErrNestedTransaction :
 	ErrNestedTransaction = errors.New("sqlike: nested transaction")
+	// ErrNoRecordAffected :
+	ErrNoRecordAffected = errors.New("sqlike: no record affected")
+	// ErrExpectedStruct :
+	ErrExpectedStruct = errors.New("sqlike: expected struct as a source")
+	// ErrEmptyFields :
+	ErrEmptyFields = errors.New("sqlike: empty fields")
+	// ErrInvalidCursor :
+	ErrInvalidCursor = errors.New("sqlike: invalid cursor")
 )

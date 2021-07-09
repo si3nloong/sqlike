@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/sql"
 )
 
 // HasIndexByName :
@@ -15,16 +15,16 @@ func (ms mySQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
 }
 
 // HasIndex :
-func (ms mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx indexes.Index) {
+func (ms mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) {
 	nonUnique, idxType := true, "BTREE"
 	switch idx.Type {
-	case indexes.Unique:
+	case sql.Unique:
 		nonUnique = false
-	case indexes.FullText:
+	case sql.FullText:
 		idxType = "FULLTEXT"
-	case indexes.Spatial:
+	case sql.Spatial:
 		idxType = "SPATIAL"
-	case indexes.Primary:
+	case sql.Primary:
 		nonUnique = false
 	}
 	args := []interface{}{dbName, table, idxType, nonUnique}
@@ -58,7 +58,7 @@ func (ms mySQL) GetIndexes(stmt db.Stmt, dbName, table string) {
 }
 
 // CreateIndexes :
-func (ms mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Index, supportDesc bool) {
+func (ms mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []sql.Index, supportDesc bool) {
 	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
@@ -67,7 +67,7 @@ func (ms mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Ind
 
 		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type) + " ")
 		name := idx.GetName()
-		if idx.Type == indexes.MultiValued {
+		if idx.Type == sql.MultiValued {
 			stmt.WriteString(name + "( (CAST(")
 			if regexp.MustCompile(`(?is).+\s*\-\>\s*.+`).MatchString(idx.Cast) {
 				stmt.WriteString(idx.Cast)
@@ -88,7 +88,7 @@ func (ms mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Ind
 				if !supportDesc {
 					continue
 				}
-				if col.Direction == indexes.Descending {
+				if col.Direction == sql.Descending {
 					stmt.WriteString(" DESC")
 				}
 			}
@@ -120,15 +120,15 @@ func (ms mySQL) DropIndexes(stmt db.Stmt, db, table string, idxs []string) {
 	stmt.WriteByte(';')
 }
 
-func (ms mySQL) getIndexByType(k indexes.Type) (idx string) {
+func (ms mySQL) getIndexByType(k sql.Type) (idx string) {
 	switch k {
-	case indexes.FullText:
+	case sql.FullText:
 		idx = "FULLTEXT INDEX"
-	case indexes.Spatial:
+	case sql.Spatial:
 		idx = "SPATIAL INDEX"
-	case indexes.Unique:
+	case sql.Unique:
 		idx = "UNIQUE INDEX"
-	case indexes.Primary:
+	case sql.Primary:
 		idx = "PRIMARY KEY"
 	default:
 		idx = "INDEX"

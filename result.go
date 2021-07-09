@@ -13,6 +13,12 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
+// ErrNoRows : is an alias for no record found
+var ErrNoRows = sql.ErrNoRows
+
+// EOF : is an alias for end of file
+var EOF = io.EOF
+
 // Resulter :
 type Resulter interface {
 	Scan(dests ...interface{}) error
@@ -21,12 +27,6 @@ type Resulter interface {
 	NextResultSet() bool
 	Close() error
 }
-
-// ErrNoRows : is an alias for no record found
-var ErrNoRows = sql.ErrNoRows
-
-// EOF : is an alias for end of file
-var EOF = io.EOF
 
 // Result :
 type Result struct {

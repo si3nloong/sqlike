@@ -5,10 +5,10 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // UpdateOne :
@@ -70,7 +70,7 @@ func update(
 	dbName, tbName string,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger logs.Logger,
+	logger sql.Logger,
 	act *actions.UpdateActions,
 	opt *options.UpdateOptions,
 ) (int64, error) {

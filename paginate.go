@@ -11,9 +11,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
-// ErrInvalidCursor :
-var ErrInvalidCursor = errors.New("sqlike: invalid cursor")
-
 // Paginate :
 func (tb *Table) Paginate(
 	ctx context.Context,

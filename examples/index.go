@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/si3nloong/sqlike/v2"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,8 +35,8 @@ func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		idx := table.Indexes()
 		err = idx.CreateOne(
 			ctx,
-			indexes.Index{
-				Columns: indexes.Columns("ID"),
+			sql.Index{
+				Columns: sql.IndexedColumns("ID"),
 			})
 		require.NoError(t, err)
 		idxs, err = idx.List(ctx)
@@ -103,16 +103,16 @@ func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	// Create multiple indexes
 	{
-		idxs := []indexes.Index{
+		idxs := []sql.Index{
 			{
 				Name:    "Bool_Int",
-				Type:    indexes.BTree,
-				Columns: indexes.Columns("Bool", "Int"),
+				Type:    sql.BTree,
+				Columns: sql.IndexedColumns("Bool", "Int"),
 			},
 			{
 				Name:    "DateTime_Timestamp",
-				Type:    indexes.BTree,
-				Columns: indexes.Columns("DateTime", "Timestamp"),
+				Type:    sql.BTree,
+				Columns: sql.IndexedColumns("DateTime", "Timestamp"),
 			},
 		}
 

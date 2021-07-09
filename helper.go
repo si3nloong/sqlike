@@ -1,12 +1,12 @@
 package sqlike
 
 import (
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/util"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
-func getLogger(logger logs.Logger, debug bool) logs.Logger {
+func getLogger(logger sql.Logger, debug bool) sql.Logger {
 	if debug {
 		return logger
 	}

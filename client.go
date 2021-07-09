@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -48,7 +48,7 @@ type Client struct {
 	*DriverInfo
 	*sql.DB
 	pk      string
-	logger  logs.Logger
+	logger  sqlx.Logger
 	cache   reflext.StructMapper
 	dialect dialect.Dialect
 	// codec   codec.Codecer
@@ -83,7 +83,7 @@ func newClient(
 }
 
 // SetLogger : this is to set the logger for debugging, it will panic if the logger input is nil
-func (c *Client) SetLogger(logger logs.Logger) *Client {
+func (c *Client) SetLogger(logger sqlx.Logger) *Client {
 	if logger == nil {
 		panic("logger cannot be nil")
 	}
@@ -96,14 +96,6 @@ func (c *Client) SetPrimaryKey(pk string) *Client {
 	c.pk = pk
 	return c
 }
-
-// // SetCodec : Codec is a component which handling the :
-// // 1. encoding between input data and driver.Valuer
-// // 2. decoding between output data and sql.Scanner
-// func (c *Client) SetCodec(cdc codec.Codecer) *Client {
-// 	c.codec = cdc
-// 	return c
-// }
 
 // SetStructMapper : StructMapper is a mapper to reflect a struct on runtime and provide struct info
 func (c *Client) SetStructMapper(mapper reflext.StructMapper) *Client {

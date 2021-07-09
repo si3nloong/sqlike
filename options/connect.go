@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // ConnectOptions :
@@ -19,7 +19,7 @@ type ConnectOptions struct {
 	Socket   string
 	Charset  charset.Code
 	Collate  string
-	Logger   logs.Logger
+	Logger   sql.Logger
 }
 
 // Connect :

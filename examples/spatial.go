@@ -10,8 +10,8 @@ import (
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,9 +49,9 @@ func SpatialExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		table.MustMigrate(ctx, Spatial{})
 		table.MustUnsafeMigrate(ctx, Spatial{})
 		iv := table.Indexes()
-		idx := indexes.Index{
-			Type:    indexes.Spatial,
-			Columns: indexes.Columns("Point"),
+		idx := sqlx.Index{
+			Type:    sqlx.Spatial,
+			Columns: sqlx.IndexedColumns("Point"),
 		}
 		err = iv.CreateOne(ctx, idx)
 		require.NoError(t, err)

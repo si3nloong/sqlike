@@ -1,4 +1,4 @@
-package indexes
+package sql
 
 import (
 	"crypto/md5"
@@ -8,12 +8,6 @@ import (
 
 	"github.com/valyala/bytebufferpool"
 )
-
-type writer interface {
-	io.Writer
-	io.StringWriter
-	io.ByteWriter
-}
 
 // Type :
 type Type int
@@ -51,7 +45,7 @@ type Index struct {
 	Cast    string
 	As      string
 	Type    Type
-	Columns []Col
+	Columns []IndexColumn
 	Comment string
 }
 
@@ -64,31 +58,31 @@ const (
 	Descending
 )
 
-// Columns :
-func Columns(names ...string) []Col {
-	columns := make([]Col, 0, len(names))
+// IndexedColumns :
+func IndexedColumns(names ...string) []IndexColumn {
+	columns := make([]IndexColumn, 0, len(names))
 	for _, n := range names {
-		columns = append(columns, Column(n))
+		columns = append(columns, IndexedColumn(n))
 	}
 	return columns
 }
 
-// Column :
-func Column(name string) Col {
+// IndexedColumn :
+func IndexedColumn(name string) IndexColumn {
 	dir := Ascending
 	name = strings.TrimSpace(name)
 	if name[0] == '-' {
 		name = name[1:]
 		dir = Descending
 	}
-	return Col{
+	return IndexColumn{
 		Name:      name,
 		Direction: dir,
 	}
 }
 
-// Col :
-type Col struct {
+// IndexColumn :
+type IndexColumn struct {
 	Name      string
 	Direction Direction
 }
@@ -101,7 +95,10 @@ func (idx Index) GetName() string {
 	return idx.HashName()
 }
 
-func (idx Index) buildName(w writer) {
+func (idx Index) buildName(w interface {
+	io.StringWriter
+	io.ByteWriter
+}) {
 	switch idx.Type {
 	case Primary:
 		w.WriteString("PRIMARY")
@@ -138,8 +135,8 @@ func (idx Index) buildName(w writer) {
 func (idx Index) HashName() string {
 	hash := md5.New()
 	buf := bytebufferpool.Get()
-	defer bytebufferpool.Put(buf)
 	idx.buildName(buf)
 	hash.Write(buf.Bytes())
+	bytebufferpool.Put(buf)
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }

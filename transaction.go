@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // SessionContext :
@@ -31,7 +31,7 @@ type Transaction struct {
 	// sql dialect
 	dialect dialect.Dialect
 
-	logger logs.Logger
+	logger sqlx.Logger
 }
 
 // RollbackTransaction : Rollback aborts the transaction.

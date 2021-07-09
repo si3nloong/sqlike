@@ -11,8 +11,9 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/stretchr/testify/require"
+
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 )
 
 // JSONExamples :
@@ -33,9 +34,9 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	// create index
 	{
-		err = table.Indexes().CreateOne(ctx, indexes.Index{
+		err = table.Indexes().CreateOne(ctx, sqlx.Index{
 			Name:    "words",
-			Type:    indexes.MultiValued,
+			Type:    sqlx.MultiValued,
 			Cast:    "StrArr",
 			As:      "CHAR(50) ARRAY",
 			Comment: "wording index",

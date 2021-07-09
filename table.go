@@ -2,7 +2,6 @@ package sqlike
 
 import (
 	"context"
-	"errors"
 	"reflect"
 	"strings"
 
@@ -12,17 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
-
-// ErrNoRecordAffected :
-var ErrNoRecordAffected = errors.New("no record affected")
-
-// ErrExpectedStruct :
-var ErrExpectedStruct = errors.New("expected struct as a source")
-
-// ErrEmptyFields :
-var ErrEmptyFields = errors.New("empty fields")
 
 // Table :
 type Table struct {
@@ -43,7 +32,7 @@ type Table struct {
 	// sql dialect
 	dialect dialect.Dialect
 
-	logger logs.Logger
+	logger sql.Logger
 }
 
 // Rename : rename the current table name to new table name

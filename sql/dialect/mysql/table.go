@@ -9,7 +9,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/util"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -102,7 +101,7 @@ func (ms mySQL) CreateTable(
 			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
-		idx := indexes.Index{Columns: indexes.Columns(f.Name())}
+		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
 		if _, ok := tag.LookUp("unique_index"); ok {
 			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 			stmt.WriteByte(',')
@@ -238,7 +237,7 @@ func (ms *mySQL) AlterTable(
 		_, ok1 := tag.LookUp("unique_index")
 		_, ok2 := tag.LookUp("auto_increment")
 		if ok1 || ok2 {
-			idx := indexes.Index{Columns: indexes.Columns(f.Name())}
+			idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
 				stmt.WriteString("ADD")
 				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")

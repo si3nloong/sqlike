@@ -10,8 +10,8 @@ import (
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
 
@@ -48,9 +48,9 @@ func New(ctx context.Context, table *sqlike.Table) (persist.FilteredAdapter, err
 	if err := a.table.Indexes().
 		CreateOneIfNotExists(
 			a.ctx,
-			indexes.Index{
-				Type: indexes.Primary,
-				Columns: indexes.Columns(
+			sql.Index{
+				Type: sql.Primary,
+				Columns: sql.IndexedColumns(
 					"PType",
 					"V0", "V1", "V2",
 					"V3", "V4", "V5",

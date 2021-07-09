@@ -8,10 +8,10 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/options"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -84,7 +84,7 @@ func insertMany(
 	cache reflext.StructMapper,
 	driver sqldriver.Driver,
 	dlct dialect.Dialect,
-	logger logs.Logger,
+	logger sqlx.Logger,
 	src interface{},
 	opt *options.InsertOptions,
 ) (sql.Result, error) {

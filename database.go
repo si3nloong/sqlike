@@ -12,11 +12,10 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/v2/options"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,7 +29,7 @@ type Database struct {
 	client     *Client
 	driver     driver.Driver
 	dialect    dialect.Dialect
-	logger     logs.Logger
+	logger     sqlx.Logger
 }
 
 // Table :
@@ -235,20 +234,20 @@ func (db *Database) readAndBuildIndexes(ctx context.Context, path string) error 
 
 	for _, idx := range id.Indexes {
 		length := len(idx.Columns)
-		columns := make([]indexes.Col, length)
+		columns := make([]sqlx.IndexColumn, length)
 		for i, col := range idx.Columns {
-			dir := indexes.Ascending
+			dir := sqlx.Ascending
 			col.Direction = strings.TrimSpace(strings.ToLower(col.Direction))
 			if col.Direction == "desc" || col.Direction == "descending" {
-				dir = indexes.Descending
+				dir = sqlx.Descending
 			}
-			columns[i] = indexes.Col{
+			columns[i] = sqlx.IndexColumn{
 				Name:      col.Name,
 				Direction: dir,
 			}
 		}
 
-		index := indexes.Index{
+		index := sqlx.Index{
 			Name:    strings.TrimSpace(idx.Name),
 			Type:    parseIndexType(idx.Type),
 			Cast:    strings.TrimSpace(idx.Cast),
@@ -279,26 +278,26 @@ func (db *Database) readAndBuildIndexes(ctx context.Context, path string) error 
 	return nil
 }
 
-func parseIndexType(name string) (idxType indexes.Type) {
+func parseIndexType(name string) (idxType sqlx.Type) {
 	name = strings.TrimSpace(strings.ToLower(name))
 	if name == "" {
-		idxType = indexes.BTree
+		idxType = sqlx.BTree
 		return
 	}
 
 	switch name {
 	case "spatial":
-		idxType = indexes.Spatial
+		idxType = sqlx.Spatial
 	case "unique":
-		idxType = indexes.Unique
+		idxType = sqlx.Unique
 	case "btree":
-		idxType = indexes.BTree
+		idxType = sqlx.BTree
 	case "fulltext":
-		idxType = indexes.FullText
+		idxType = sqlx.FullText
 	case "primary":
-		idxType = indexes.Primary
+		idxType = sqlx.Primary
 	case "multi-valued":
-		idxType = indexes.MultiValued
+		idxType = sqlx.MultiValued
 	default:
 		panic(fmt.Errorf("invalid index type %q", name))
 	}

@@ -11,7 +11,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/util"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -37,9 +36,9 @@ type Dialect interface {
 	TruncateTable(stmt db.Stmt, db, table string)
 	GetColumns(stmt db.Stmt, db, table string)
 	HasIndexByName(stmt db.Stmt, db, table, indexName string)
-	HasIndex(stmt db.Stmt, dbName, table string, idx indexes.Index)
+	HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index)
 	GetIndexes(stmt db.Stmt, db, table string)
-	CreateIndexes(stmt db.Stmt, db, table string, idxs []indexes.Index, supportDesc bool)
+	CreateIndexes(stmt db.Stmt, db, table string, idxs []sql.Index, supportDesc bool)
 	DropIndexes(stmt db.Stmt, db, table string, idxs []string)
 	CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error)
 	AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (err error)

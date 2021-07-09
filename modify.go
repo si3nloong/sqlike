@@ -7,11 +7,11 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -41,7 +41,7 @@ func modifyOne(
 	cache reflext.StructMapper,
 	dialect dialect.Dialect,
 	driver sqldriver.Driver,
-	logger logs.Logger,
+	logger sql.Logger,
 	update interface{},
 	opts []*options.ModifyOneOptions,
 ) error {

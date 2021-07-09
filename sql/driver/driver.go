@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 // Info :
@@ -29,7 +29,7 @@ type Driver interface {
 }
 
 // Execute :
-func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (result sql.Result, err error) {
+func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger sqlx.Logger) (result sql.Result, err error) {
 	if logger != nil {
 		stmt.StartTimer()
 		defer func() {
@@ -42,7 +42,7 @@ func Execute(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger
 }
 
 // Query :
-func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (rows *sql.Rows, err error) {
+func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger sqlx.Logger) (rows *sql.Rows, err error) {
 	if logger != nil {
 		stmt.StartTimer()
 		defer func() {
@@ -55,7 +55,7 @@ func Query(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger l
 }
 
 // QueryRowContext :
-func QueryRowContext(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger logs.Logger) (row *sql.Row) {
+func QueryRowContext(ctx context.Context, driver Driver, stmt *sqlstmt.Statement, logger sqlx.Logger) (row *sql.Row) {
 	if logger != nil {
 		stmt.StartTimer()
 		defer func() {

@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
-	"github.com/si3nloong/sqlike/v2/sqlike/indexes"
-	"github.com/si3nloong/sqlike/v2/sqlike/logs"
 )
 
 var mysql8 = semver.MustParse("8.0.0")
@@ -32,14 +31,14 @@ func (idv *IndexView) List(ctx context.Context) ([]Index, error) {
 }
 
 // CreateOne :
-func (idv *IndexView) CreateOne(ctx context.Context, idx indexes.Index) error {
-	return idv.Create(ctx, []indexes.Index{idx})
+func (idv *IndexView) CreateOne(ctx context.Context, idx sql.Index) error {
+	return idv.Create(ctx, []sql.Index{idx})
 }
 
 // Create :
-func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
+func (idv *IndexView) Create(ctx context.Context, idxs []sql.Index) error {
 	for _, idx := range idxs {
-		if idx.Type != indexes.MultiValued && len(idx.Columns) < 1 {
+		if idx.Type != sql.MultiValued && len(idx.Columns) < 1 {
 			return ErrNoColumn
 		}
 	}
@@ -56,13 +55,13 @@ func (idv *IndexView) Create(ctx context.Context, idxs []indexes.Index) error {
 }
 
 // CreateOneIfNotExists :
-func (idv *IndexView) CreateOneIfNotExists(ctx context.Context, idx indexes.Index) error {
-	return idv.CreateIfNotExists(ctx, []indexes.Index{idx})
+func (idv *IndexView) CreateOneIfNotExists(ctx context.Context, idx sql.Index) error {
+	return idv.CreateIfNotExists(ctx, []sql.Index{idx})
 }
 
 // CreateIfNotExists :
-func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []indexes.Index) error {
-	cols := make([]indexes.Index, 0, len(idxs))
+func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []sql.Index) error {
+	cols := make([]sql.Index, 0, len(idxs))
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	for _, idx := range idxs {
@@ -154,7 +153,7 @@ func isIndexExists(
 	dbName, table, indexName string,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger logs.Logger,
+	logger sql.Logger,
 ) (bool, error) {
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
