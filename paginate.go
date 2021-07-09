@@ -42,11 +42,11 @@ func (tb *Table) Paginate(
 	for i, sf := range x.Sorts {
 		fields[i] = sf.(primitive.Sort).Field
 	}
-	if x.Count == 1 {
+	if x.RowCount == 1 {
 		return nil, errors.New("sqlike: pagination required more than 1 limit")
 	}
-	if x.Count == 0 {
-		x.Count = 100
+	if x.RowCount == 0 {
+		x.RowCount = 100
 	}
 	return &Paginator{
 		ctx:    ctx,
@@ -76,9 +76,11 @@ func (pg *Paginator) NextCursor(ctx context.Context, cursor interface{}) (err er
 	if cursor == nil || reflext.IsZero(reflext.ValueOf(cursor)) {
 		return ErrInvalidCursor
 	}
-	fa := actions.FindOne().Select(pg.fields...).Where(
-		expr.Equal(pg.table.pk, cursor),
-	).(*actions.FindOneActions)
+	fa := actions.FindOne().
+		Select(pg.fields...).
+		Where(
+			expr.Equal(pg.table.pk, cursor),
+		).(*actions.FindOneActions)
 	fa.Limit(1)
 	result := find(
 		ctx,
@@ -130,6 +132,7 @@ func (pg *Paginator) buildAction() *actions.FindActions {
 		var v primitive.C
 		val := toString(pg.values[i])
 		x := sf.(primitive.Sort)
+		// last sort record
 		if i == length-1 {
 			if x.Order == primitive.Ascending {
 				fields = append(fields, expr.GreaterOrEqual(x.Field, val))

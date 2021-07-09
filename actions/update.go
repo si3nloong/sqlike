@@ -20,7 +20,7 @@ type UpdateActions struct {
 	Conditions []interface{}
 	Values     []primitive.KV
 	Sorts      []interface{}
-	Record     uint
+	RowCount   uint
 }
 
 // Where :
@@ -44,7 +44,7 @@ func (act *UpdateActions) OrderBy(fields ...interface{}) UpdateStatement {
 // Limit :
 func (act *UpdateActions) Limit(num uint) UpdateStatement {
 	if num > 0 {
-		act.Record = num
+		act.RowCount = num
 	}
 	return act
 }

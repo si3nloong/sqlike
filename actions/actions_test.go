@@ -26,7 +26,7 @@ func TestActions(t *testing.T) {
 
 	dlAction := new(DeleteActions)
 	dlAction.Limit(12)
-	require.Equal(t, uint(12), dlAction.Record)
+	require.Equal(t, uint(12), dlAction.RowCount)
 	dlAction.OrderBy(expr.Asc("A"), expr.Desc("B"))
 	require.ElementsMatch(t, []interface{}{
 		expr.Asc("A"),

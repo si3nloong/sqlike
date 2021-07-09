@@ -17,7 +17,7 @@ type DeleteActions struct {
 	Table      string
 	Conditions []interface{}
 	Sorts      []interface{}
-	Record     uint
+	RowCount   uint
 }
 
 // Where :
@@ -35,7 +35,7 @@ func (act *DeleteActions) OrderBy(fields ...interface{}) DeleteStatement {
 // Limit :
 func (act *DeleteActions) Limit(num uint) DeleteStatement {
 	if num > 0 {
-		act.Record = num
+		act.RowCount = num
 	}
 	return act
 }

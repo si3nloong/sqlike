@@ -607,7 +607,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it interface{}) error {
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Count, x.Skip)
+	b.appendLimitNOffset(stmt, x.RowCount, x.Skip)
 	return nil
 }
 
@@ -627,7 +627,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it interface{}) error {
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Record, 0)
+	b.appendLimitNOffset(stmt, x.RowCount, 0)
 	return nil
 }
 
@@ -641,7 +641,7 @@ func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it interface{}) error {
 	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.Record, 0)
+	b.appendLimitNOffset(stmt, x.RowCount, 0)
 	return nil
 }
 

@@ -79,7 +79,7 @@ func (act *PaginateActions) GroupBy(fields ...interface{}) PaginateStatement {
 // Limit :
 func (act *PaginateActions) Limit(num uint) PaginateStatement {
 	if num > 0 {
-		act.Count = num
+		act.RowCount = num
 	}
 	return act
 }

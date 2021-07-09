@@ -30,7 +30,7 @@ func (act *DeleteOneActions) OrderBy(fields ...interface{}) DeleteOneStatement {
 // Limit :
 func (act *DeleteOneActions) Limit(num uint) DeleteOneStatement {
 	if num > 0 {
-		act.Record = num
+		act.RowCount = num
 	}
 	return act
 }
