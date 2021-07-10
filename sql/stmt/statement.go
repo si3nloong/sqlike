@@ -40,11 +40,17 @@ func (sm *Statement) AppendArgs(args ...interface{}) {
 	sm.c = len(sm.args)
 }
 
+// WriteAppendArgs :
+func (sm *Statement) WriteAppendArgs(query string, args ...interface{}) {
+	sm.Builder.WriteString(query)
+	sm.args = append(sm.args, args...)
+	sm.c = len(sm.args)
+}
+
 // Format :
 func (sm *Statement) Format(state fmt.State, verb rune) {
 	if sm.fmt == nil {
-		state.Write([]byte(`missing formatter, unable to debug`))
-		return
+		panic("missing formatter, unable to debug")
 	}
 
 	str := sm.String()

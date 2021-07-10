@@ -12,4 +12,5 @@ type Stmt interface {
 	fmt.Stringer
 	Args() []interface{}
 	AppendArgs(args ...interface{})
+	WriteAppendArgs(query string, args ...interface{})
 }

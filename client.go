@@ -51,7 +51,6 @@ type Client struct {
 	logger  sqlx.Logger
 	cache   reflext.StructMapper
 	dialect dialect.Dialect
-	// codec   codec.Codecer
 }
 
 // newClient : create a new client struct by providing driver, *sql.DB, dialect etc
@@ -74,7 +73,6 @@ func newClient(
 	client.charSet = code
 	client.collate = collate
 	client.cache = reflext.DefaultMapper
-	// client.codec = codec.DefaultRegistry
 	client.version = client.getVersion(ctx)
 	if mysql8.GreaterThan(client.version) {
 		log.Println("DEPRECATION: SQLike no longer support MySQL 5.7 in future, try to upgrade your MySQL Database to at least 8.0 !!!")
