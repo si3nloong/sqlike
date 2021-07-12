@@ -8,6 +8,8 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 )
 
+var txnCtxKey struct{}
+
 // SessionContext :
 type SessionContext interface {
 	context.Context
