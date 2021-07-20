@@ -3,6 +3,7 @@ package options
 import (
 	"testing"
 
+	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,19 +43,19 @@ func TestFind(t *testing.T) {
 
 	t.Run("SetLockMode", func(it *testing.T) {
 		{
-			opt.SetLockMode(LockForShare)
-			require.Equal(it, LockForShare, opt.LockMode)
+			opt.SetLockMode(LockForShare())
+			require.Equal(it, primitive.Lock{Type: primitive.LockForShare}, opt.Lock)
 		}
 
 		{
-			opt.SetLockMode(LockForUpdate)
-			require.Equal(it, LockForUpdate, opt.LockMode)
+			opt.SetLockMode(LockForUpdate())
+			require.Equal(it, primitive.Lock{Type: primitive.LockForUpdate}, opt.Lock)
 		}
 
 		{
 			// default lock
-			ot := FindOne()
-			require.Equal(it, LockMode(0), ot.LockMode)
+			optOne := FindOne()
+			require.Equal(it, primitive.Lock{}, optOne.Lock)
 		}
 	})
 }

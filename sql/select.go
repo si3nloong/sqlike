@@ -21,7 +21,7 @@ type SelectStmt struct {
 	Sorts      []interface{}
 	RowCount   uint
 	Skip       uint
-	Options    []interface{}
+	Opts       []interface{}
 }
 
 // Select :
@@ -117,27 +117,17 @@ func (stmt *SelectStmt) Limit(num uint) *SelectStmt {
 	return stmt
 }
 
-// ForUpdate :
-func (stmt *SelectStmt) ForUpdate(num uint) *SelectStmt {
-	if num > 0 {
-		stmt.Skip = num
-	}
-	return stmt
-}
-
-// ForShare :
-func (stmt *SelectStmt) ForShare(num uint) *SelectStmt {
-	if num > 0 {
-		stmt.Skip = num
-	}
-	return stmt
-}
-
 // Offset :
 func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 	if num > 0 {
 		stmt.Skip = num
 	}
+	return stmt
+}
+
+// Option :
+func (stmt *SelectStmt) Option(opts ...interface{}) *SelectStmt {
+	stmt.Opts = opts
 	return stmt
 }
 

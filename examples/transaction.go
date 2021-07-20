@@ -186,7 +186,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 					Find(
 						sess,
 						nil, options.Find().
-							SetLockMode(options.LockForUpdate).
+							SetLockMode(options.LockForUpdate()).
 							SetDebug(true),
 					)
 				if err != nil {

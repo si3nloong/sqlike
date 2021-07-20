@@ -11,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/util"
+	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -43,7 +44,7 @@ type Dialect interface {
 	CreateTable(stmt db.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error)
 	AlterTable(stmt db.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (err error)
 	InsertInto(stmt db.Stmt, db, table, pk string, mapper reflext.StructMapper, fields []reflext.StructFielder, values reflect.Value, opts *options.InsertOptions) (err error)
-	Select(stmt db.Stmt, act *actions.FindActions, mode options.LockMode) (err error)
+	Select(stmt db.Stmt, act *actions.FindActions, lock primitive.Lock) (err error)
 	Update(stmt db.Stmt, act *actions.UpdateActions) (err error)
 	Delete(stmt db.Stmt, act *actions.DeleteActions) (err error)
 	SelectStmt(stmt db.Stmt, query interface{}) (err error)

@@ -1,11 +1,17 @@
 package options
 
-// LockMode :
-type LockMode int
-
-// Locking :
-const (
-	NoLock LockMode = iota
-	LockForUpdate
-	LockForShare
+import (
+	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
+
+// LockForUpdate :
+func LockForUpdate() (l primitive.Lock) {
+	l.Type = primitive.LockForUpdate
+	return
+}
+
+// LockForShare :
+func LockForShare() (l primitive.Lock) {
+	l.Type = primitive.LockForShare
+	return
+}

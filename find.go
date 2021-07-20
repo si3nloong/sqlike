@@ -47,7 +47,6 @@ func (tb *Table) FindOne(
 		tb.logger,
 		&x.FindActions,
 		&opt.FindOptions,
-		opt.FindOptions.LockMode,
 	)
 	csr.close = true
 	if csr.err != nil {
@@ -87,7 +86,6 @@ func (tb *Table) Find(
 		tb.logger,
 		x,
 		opt,
-		opt.LockMode,
 	)
 	if csr.err != nil {
 		return nil, csr.err
@@ -105,7 +103,6 @@ func find(
 	logger sqlx.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,
-	lock options.LockMode,
 ) *Result {
 	if act.Database == "" {
 		act.Database = dbName
@@ -120,7 +117,7 @@ func find(
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Select(stmt, act, lock); err != nil {
+	if err := dialect.Select(stmt, act, opt.Lock); err != nil {
 		rslt.err = err
 		return rslt
 	}

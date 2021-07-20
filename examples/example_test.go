@@ -97,7 +97,7 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 
 		InsertExamples(ctx, t, db)
 		FindExamples(ctx, t, db)
-		QueryExamples(ctx, t, db)
+		AdvanceQueryExamples(ctx, t, db)
 		TransactionExamples(ctx, t, db)
 		PaginationExamples(ctx, t, client)
 		UpdateExamples(ctx, t, db)

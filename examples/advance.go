@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// QueryExamples :
-func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
+// AdvanceQueryExamples :
+func AdvanceQueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	stmt := expr.Union(
 		sql.Select().
@@ -30,6 +30,9 @@ func QueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			OrderBy(
 				expr.Desc("NestedID"),
 				expr.Asc("Amount"),
+			).
+			Option(
+				expr.ForUpdate().NoWait(),
 			).
 			Limit(1).
 			Offset(1),

@@ -1,16 +1,18 @@
 package options
 
+import "github.com/si3nloong/sqlike/v2/x/primitive"
+
 // FindOptions :
 type FindOptions struct {
 	OmitFields []string
 	NoLimit    bool
-	LockMode   LockMode
+	Lock       primitive.Lock
 	Debug      bool
 }
 
 // Find :
 func Find() *FindOptions {
-	return &FindOptions{LockMode: NoLock}
+	return &FindOptions{Lock: primitive.Lock{}}
 }
 
 // SetNoLimit :
@@ -32,7 +34,7 @@ func (opt *FindOptions) SetOmitFields(fields ...string) *FindOptions {
 }
 
 // SetLockMode :
-func (opt *FindOptions) SetLockMode(lock LockMode) *FindOptions {
-	opt.LockMode = lock
+func (opt *FindOptions) SetLockMode(lock primitive.Lock) *FindOptions {
+	opt.Lock = lock
 	return opt
 }

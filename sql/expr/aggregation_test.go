@@ -12,5 +12,4 @@ func TestSum(t *testing.T) {
 		Field: wrapColumn("a"),
 		By:    primitive.Sum,
 	}, Sum("a"))
-	return
 }

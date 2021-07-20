@@ -8,6 +8,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,13 +44,15 @@ func TestSelect(t *testing.T) {
 		defer sqlstmt.ReleaseStmt(stmt)
 		err = New().Select(
 			stmt,
-			actions.Find().From("A", "Test").
+			actions.Find().
+				From("A", "Test").
 				Where(
 					expr.And(filters...),
 					expr.Or(filters...),
 					expr.Equal("E", uint(888)),
 					expr.NotBetween("Z", -10, 12933),
-				).(*actions.FindActions), 0,
+				).(*actions.FindActions),
+			primitive.Lock{},
 		)
 		require.NoError(t, err)
 		require.Equal(t, "SELECT * FROM `A`.`Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())

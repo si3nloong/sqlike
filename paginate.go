@@ -92,7 +92,6 @@ func (pg *Paginator) NextCursor(ctx context.Context, cursor interface{}) (err er
 		pg.table.logger,
 		&fa.FindActions,
 		&options.FindOptions{Debug: pg.option.Debug},
-		options.NoLock,
 	)
 	// prevent memory leak
 	defer result.Close()
@@ -115,7 +114,6 @@ func (pg *Paginator) All(results interface{}) error {
 		pg.table.logger,
 		pg.buildAction(),
 		pg.option,
-		options.NoLock,
 	)
 	return result.All(results)
 }
