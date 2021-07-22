@@ -7,7 +7,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/spatial"
 )
 
-//golint:ignore
 // ST_GeomFromText :
 func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeGeomFromText
@@ -33,7 +32,6 @@ func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // ST_AsText :
 func ST_AsText(g interface{}) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeAsText
@@ -54,7 +52,6 @@ func ST_AsText(g interface{}) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // ST_IsValid :
 func ST_IsValid(g interface{}) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeIsValid
@@ -75,7 +72,6 @@ func ST_IsValid(g interface{}) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // column, value, ST_GeomFromText(column), ST_GeomFromText(value)
 // ST_Distance :
 func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
@@ -98,7 +94,6 @@ func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // ST_Equals :
 func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeEquals
@@ -120,7 +115,6 @@ func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // ST_Intersects :
 func ST_Intersects(g1, g2 interface{}) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeIntersects
@@ -142,7 +136,6 @@ func ST_Intersects(g1, g2 interface{}) (f spatial.Func) {
 	return
 }
 
-//golint:ignore
 // ST_Within :
 func ST_Within(g1, g2 interface{}) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeWithin

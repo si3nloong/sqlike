@@ -7,6 +7,7 @@ import (
 )
 
 // JSON_QUOTE :
+// SELECT JSON_QUOTE(`Column` -> '$.type') FROM test;
 func JSON_QUOTE(doc interface{}) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_QUOTE
 	switch vi := doc.(type) {
@@ -149,18 +150,4 @@ func JSONColumn(column string, nested ...string) (c primitive.JSONColumn) {
 	c.Nested = nested
 	c.UnquoteResult = false
 	return
-}
-
-func wrapJSONColumn(it interface{}) interface{} {
-	switch vi := it.(type) {
-	case primitive.Column:
-		return primitive.CastAs{
-			Value:    vi,
-			DataType: primitive.JSON,
-		}
-	case primitive.JSONFunc:
-		return vi
-	default:
-		return primitive.Value{Raw: vi}
-	}
 }
