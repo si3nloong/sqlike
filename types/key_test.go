@@ -95,6 +95,9 @@ func TestKey(t *testing.T) {
 
 		idk := IDKey("Name", 217371238213213, nil)
 		require.Equal(it, "217371238213213", idk.ID())
+
+		var nilkey *Key
+		require.Equal(it, "", nilkey.ID())
 	})
 
 	t.Run("Empty Key", func(it *testing.T) {

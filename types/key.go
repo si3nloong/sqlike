@@ -85,8 +85,11 @@ func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column
 	}
 }
 
-// ID :
-func (k Key) ID() string {
+// ID : is a safe method to retrieve `IntID` or `NameID` value
+func (k *Key) ID() string {
+	if k == nil {
+		return ""
+	}
 	if k.NameID != "" {
 		return k.NameID
 	}
