@@ -11,6 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/sjson"
+	"golang.org/x/text/language"
 )
 
 type longStr string
@@ -215,6 +216,27 @@ func TestMarshal(t *testing.T) {
 		require.Equal(t, `zero ("initial value")`, uoutMap[0])
 		require.Equal(t, "🤖🤖", uoutMap[100])
 		require.Equal(t, "Long sentences here ..............", uoutMap[88])
+	})
+
+	t.Run("Test Map's Key with data type implements `MarshalText`", func(it *testing.T) {
+		langMap := make(map[language.Tag]string)
+		langMap[language.English] = "english"
+		langMap[language.Japanese] = "japanese"
+		langMap[language.Korean] = "korean"
+		langMap[language.Arabic] = "arabic"
+		langMap[language.Chinese] = "chinese"
+
+		b, err := Marshal(langMap)
+		require.NoError(t, err)
+
+		outMap := make(map[language.Tag]string)
+		err = Unmarshal(b, &outMap)
+		require.NoError(t, err)
+		require.Equal(t, langMap[language.English], outMap[language.English])
+		require.Equal(t, langMap[language.Japanese], outMap[language.Japanese])
+		require.Equal(t, langMap[language.Korean], outMap[language.Korean])
+		require.Equal(t, langMap[language.Arabic], outMap[language.Arabic])
+		require.Equal(t, langMap[language.Chinese], outMap[language.Chinese])
 	})
 }
 

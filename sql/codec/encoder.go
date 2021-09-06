@@ -156,18 +156,19 @@ func (enc DefaultEncoders) EncodeArray(_ reflext.StructFielder, v reflect.Value)
 
 // EncodeMap :
 func (enc DefaultEncoders) EncodeMap(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
-	t := v.Type()
-	k := t.Key()
-	if k.Kind() != reflect.String {
-		return nil, fmt.Errorf("codec: unsupported data type %q for map key, it must be string", k.Kind())
-	}
-	k = t.Elem()
-	if !isBaseType(k) {
-		return nil, fmt.Errorf("codec: unsupported data type %q for map value", k.Kind())
-	}
 	if v.IsNil() {
 		return string("null"), nil
 	}
+
+	// t := v.Type()
+	// k := t.Key()
+	// if k.Kind() != reflect.String {
+	// 	return nil, fmt.Errorf("codec: unsupported data type %q for map key, it must be string", k.Kind())
+	// }
+	// k = t.Elem()
+	// if !isBaseType(k) {
+	// 	return nil, fmt.Errorf("codec: unsupported data type %q for map value", k.Kind())
+	// }
 	return jsonb.Marshal(v)
 }
 
