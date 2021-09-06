@@ -82,26 +82,39 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 		stmt.WriteByte(')')
 	}
 
-	var column string
+	var (
+		column string
+		name   string
+	)
 	if opt.Mode == options.InsertOnDuplicate {
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
-		for i := range fields {
+		for _, f := range fields {
+			name = f.Name()
 			// skip primary key on duplicate update
-			if fields[i].Name() == pk {
-				next = false
+			if name == pk {
+				continue
+			}
+
+			// skip primary key on duplicate update
+			if _, ok := f.Tag().LookUp("primary_key"); ok {
+				continue
+			}
+
+			if _, ok := f.Tag().LookUp("auto_increment"); ok {
 				continue
 			}
 
 			// skip omit fields on update
-			if _, ok := omitField[fields[i].Name()]; ok {
+			if _, ok := omitField[name]; ok {
 				continue
 			}
+
 			if next {
 				stmt.WriteByte(',')
 			}
 
-			column = ms.Quote(fields[i].Name())
+			column = ms.Quote(name)
 			stmt.WriteString(column + "=VALUES(" + column + ")")
 			next = true
 		}

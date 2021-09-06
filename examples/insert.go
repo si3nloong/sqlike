@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
@@ -110,6 +112,29 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.NotEqual(t, o.BigInt, ns2.BigInt)
 		require.NotEqual(t, o.Emoji, ns2.Emoji)
 		require.Equal(t, o.Date.String(), ns2.Date.String())
+	}
+
+	// upsert with unordered primary key
+	{
+		type unorderedStruct struct {
+			Text   string
+			Number int8
+			ID     string `sqlike:",primary_key"`
+			Date   civil.Date
+		}
+
+		table := db.Table("unorderedStruct")
+		table.DropIfExists(ctx)
+		table.MustUnsafeMigrate(ctx, unorderedStruct{})
+		_, err = table.InsertOne(
+			ctx,
+			&unorderedStruct{
+				ID:   "224",
+				Date: civil.DateOf(time.Now()),
+			},
+			options.InsertOne().SetMode(options.InsertOnDuplicate),
+		)
+		require.NoError(t, err)
 	}
 
 	// Multiple insert
