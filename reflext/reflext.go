@@ -9,8 +9,8 @@ import (
 
 // Structer :
 type Structer interface {
-	Fields() Fields
-	Properties() Fields
+	Fields() []StructFielder
+	Properties() []StructFielder
 	LookUpFieldByName(name string) (StructFielder, bool)
 	GetByTraversal(index []int) StructFielder
 }
@@ -36,7 +36,7 @@ type StructFielder interface {
 
 	// if the field is struct, children will not be nil
 	// this will be the fields of current struct
-	Children() Fields
+	Children() []StructFielder
 
 	// determine the field is nullable
 	IsNullable() bool
@@ -115,7 +115,7 @@ func (sf *StructField) Parent() StructFielder {
 }
 
 // Children :
-func (sf *StructField) Children() Fields {
+func (sf *StructField) Children() []StructFielder {
 	return sf.children
 }
 
@@ -153,12 +153,12 @@ type Struct struct {
 var _ Structer = (*Struct)(nil)
 
 // Fields :
-func (s *Struct) Fields() Fields {
+func (s *Struct) Fields() []StructFielder {
 	return append(make(Fields, 0, len(s.fields)), s.fields...)
 }
 
 // Properties :
-func (s *Struct) Properties() Fields {
+func (s *Struct) Properties() []StructFielder {
 	return append(make(Fields, 0, len(s.properties)), s.properties...)
 }
 
