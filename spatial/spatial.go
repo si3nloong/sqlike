@@ -42,14 +42,23 @@ func (f function) String() string {
 		return "ST_IsValid"
 	case SpatialTypeIntersects:
 		return "ST_Intersects"
+	case SpatialTypeTransform:
+		return "ST_Transform"
+	case SpatialTypeX:
+		return "ST_X"
+	case SpatialTypeY:
+		return "ST_Y"
+	case SpatialTypeAsGeoJSON:
+		return "ST_AsGeoJSON"
+	case SpatialTypeArea:
+		return "ST_Area"
 	}
 	return "UNKNOWN FUNCTION"
 }
 
 // functions :
 const (
-	SpatialTypeGeomCollection function = iota + 1
-	SpatialTypeGeomFromText
+	SpatialTypeGeomFromText function = iota + 1
 	SpatialTypeDistance
 	SpatialTypeWithin
 	SpatialTypeEquals
@@ -62,7 +71,7 @@ const (
 	SpatialTypeAsText
 	SpatialTypeAsWKB
 	SpatialTypeAsWKT
-	SpatilaTypeAsGeoJSON
+	SpatialTypeAsGeoJSON
 	SpatialTypeSRID
 	SpatialTypeX
 	SpatialTypeY
