@@ -9,8 +9,8 @@ import (
 
 // Structer :
 type Structer interface {
-	Fields() []StructFielder
-	Properties() []StructFielder
+	Fields() Fields
+	Properties() Fields
 	LookUpFieldByName(name string) (StructFielder, bool)
 	GetByTraversal(index []int) StructFielder
 }
@@ -36,7 +36,7 @@ type StructFielder interface {
 
 	// if the field is struct, children will not be nil
 	// this will be the fields of current struct
-	Children() []StructFielder
+	Children() Fields
 
 	// determine the field is nullable
 	IsNullable() bool
@@ -115,7 +115,7 @@ func (sf *StructField) Parent() StructFielder {
 }
 
 // Children :
-func (sf *StructField) Children() []StructFielder {
+func (sf *StructField) Children() Fields {
 	return sf.children
 }
 
@@ -153,12 +153,12 @@ type Struct struct {
 var _ Structer = (*Struct)(nil)
 
 // Fields :
-func (s *Struct) Fields() []StructFielder {
+func (s *Struct) Fields() Fields {
 	return append(make(Fields, 0, len(s.fields)), s.fields...)
 }
 
 // Properties :
-func (s *Struct) Properties() []StructFielder {
+func (s *Struct) Properties() Fields {
 	return append(make(Fields, 0, len(s.properties)), s.properties...)
 }
 
@@ -187,6 +187,15 @@ func (s *Struct) GetByTraversal(index []int) StructFielder {
 
 // Fields :
 type Fields []StructFielder
+
+func (x Fields) FindIndex(cb func(f StructFielder) bool) int {
+	for idx, f := range x {
+		if cb(f) {
+			return idx
+		}
+	}
+	return -1
+}
 
 func (x Fields) Len() int { return len(x) }
 
@@ -294,12 +303,23 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 		names:      make(map[string]StructFielder),
 	}
 
+	lname := ""
 	sort.Sort(codec.fields)
 
 	for _, sf := range codec.fields {
 		codec.indexes[sf.(*StructField).id] = sf
 		if sf.Name() != "" && !sf.IsEmbedded() {
+			lname = strings.ToLower(sf.Name())
 			codec.names[sf.Name()] = sf
+
+			idx := codec.properties.FindIndex(func(each StructFielder) bool {
+				return strings.ToLower(each.Tag().name) == lname
+			})
+			if idx > -1 {
+				// remove item in the slice if the field name is same (overriding embedded struct field)
+				codec.properties = append(codec.properties[:idx], codec.properties[idx+1:]...)
+			}
+
 			prnt := sf.ParentByTraversal(func(f StructFielder) bool {
 				return !f.IsEmbedded()
 			})
@@ -307,6 +327,7 @@ func getCodec(t reflect.Type, tagName string, fmtFunc FormatFunc) *Struct {
 				sf.Parent() != nil && prnt != nil {
 				continue
 			}
+
 			// not nested embedded struct or embedded struct
 			codec.properties = append(codec.properties, sf)
 		}

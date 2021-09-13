@@ -221,6 +221,40 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		)
 		require.NoError(t, err)
 	}
+
+	{
+		table := db.Table("Override")
+		err := table.Truncate(ctx)
+		require.NoError(t, err)
+		table.MustUnsafeMigrate(ctx, overrideStruct{})
+		utcNow := time.Now().UTC()
+
+		os := overrideStruct{}
+		os.Amount = 9000
+		os.Amount = 100
+		os.ID = 1007
+		os.generatedStruct.ID = ""
+		os.CivilDate = civil.DateOf(utcNow)
+		os.CreatedAt = utcNow
+		os.UpdatedAt = utcNow
+		_, err = table.InsertOne(ctx, &os)
+		require.NoError(t, err)
+
+		var out overrideStruct
+		err = table.FindOne(ctx,
+			actions.FindOne().
+				Where(
+					expr.Equal("ID", os.ID),
+				),
+		).Decode(&out)
+		require.NoError(t, err)
+
+		require.Equal(t, os.ID, out.ID)
+		require.Equal(t, os.CreatedAt, out.CreatedAt)
+		require.Equal(t, os.UpdatedAt, out.UpdatedAt)
+		require.Equal(t, os.Amount, out.Amount)
+		require.Equal(t, os.CivilDate, out.CivilDate)
+	}
 }
 
 // InsertErrorExamples :

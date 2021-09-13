@@ -171,6 +171,13 @@ type generatedStruct struct {
 	Model `sqlike:"Date"`
 }
 
+type overrideStruct struct {
+	generatedStruct
+	ID     int64  `sqlike:",comment=Int64 ID"`      // override string ID of generatedStruct
+	Amount int    `sqlike:",comment=Int Amount"`    // override string Amount of generatedStruct
+	Nested string `sqlike:",comment=String Nested"` // override string Nested of generatedStruct
+}
+
 func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}
