@@ -5,6 +5,7 @@
 [![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
 [![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
 [![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike?ref=badge_shield)
 
 > A golang SQL ORM which anti toxic query and focus on latest features.
 
@@ -278,3 +279,6 @@ Thanks to these awesome companies for their support of Open Source developers ‚ù
 [MIT](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
 
 Copyright (c) 2019-present, SianLoong Lee
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike?ref=badge_large)
