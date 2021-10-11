@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/si3nloong/sqlike/proto";
+option go_package = "github.com/si3nloong/sqlike/protobuf";
 
-package proto;
+package sqlike.protobuf;
 
 message Key {
   string Namespace = 1;

@@ -20,7 +20,7 @@ import (
 	"errors"
 
 	"github.com/segmentio/ksuid"
-	pb "github.com/si3nloong/sqlike/proto"
+	pb "github.com/si3nloong/sqlike/protobuf"
 	"github.com/si3nloong/sqlike/reflext"
 	sqldriver "github.com/si3nloong/sqlike/sql/driver"
 	"github.com/si3nloong/sqlike/sqlike/columns"
