@@ -168,7 +168,7 @@ func (dec DefaultDecoders) DecodeTime(ctx context.Context, it interface{}, v ref
 			return err
 		}
 	case []byte:
-		x, err = decodeTime(util.B2s(vi))
+		x, err = decodeTime(util.BytesToString(vi))
 		if err != nil {
 			return err
 		}
@@ -196,7 +196,7 @@ func (dec DefaultDecoders) DecodeCivilDate(ctx context.Context, it interface{}, 
 			return err
 		}
 	case []byte:
-		x, err = civil.ParseDate(util.B2s(vi))
+		x, err = civil.ParseDate(util.BytesToString(vi))
 		if err != nil {
 			return err
 		}
@@ -314,7 +314,7 @@ func (dec DefaultDecoders) DecodeBool(ctx context.Context, it interface{}, v ref
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseBool(util.B2s(vi))
+		x, err = strconv.ParseBool(util.BytesToString(vi))
 		if err != nil {
 			return err
 		}
@@ -347,7 +347,7 @@ func (dec DefaultDecoders) DecodeInt(ctx context.Context, it interface{}, v refl
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseInt(util.B2s(vi), 10, 64)
+		x, err = strconv.ParseInt(util.BytesToString(vi), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -379,7 +379,7 @@ func (dec DefaultDecoders) DecodeUint(ctx context.Context, it interface{}, v ref
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseUint(util.B2s(vi), 10, 64)
+		x, err = strconv.ParseUint(util.BytesToString(vi), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -413,7 +413,7 @@ func (dec DefaultDecoders) DecodeFloat(ctx context.Context, it interface{}, v re
 	)
 	switch vi := it.(type) {
 	case []byte:
-		x, err = strconv.ParseFloat(util.B2s(vi), 64)
+		x, err = strconv.ParseFloat(util.BytesToString(vi), 64)
 		if err != nil {
 			return err
 		}

@@ -6,9 +6,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestB2s(t *testing.T) {
+func TestBytesToString(t *testing.T) {
 	str := `hello world`
-	require.Equal(t, str, B2s([]byte(str)))
+	require.Equal(t, str, BytesToString([]byte(str)))
+}
+
+func TestStringToBytes(t *testing.T) {
+	bytes := []byte(`hello world`)
+	require.Equal(t, bytes, StringToBytes(string(bytes)))
 }
 
 func TestString(t *testing.T) {
