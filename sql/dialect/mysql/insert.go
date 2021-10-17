@@ -96,26 +96,39 @@ func (ms *mySQL) InsertInto(
 		stmt.WriteByte(')')
 	}
 
-	var column string
+	var (
+		column string
+		name   string
+	)
 	if opt.Mode == options.InsertOnDuplicate {
 		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
 		next := false
 		for _, f := range fields {
+			name = f.Name()
 			// skip primary key on duplicate update
-			if f.Name() == pk {
-				next = false
+			if name == pk {
+				continue
+			}
+
+			// skip primary key on duplicate update
+			if _, ok := f.Tag().LookUp("primary_key"); ok {
+				continue
+			}
+
+			if _, ok := f.Tag().LookUp("auto_increment"); ok {
 				continue
 			}
 
 			// skip omit fields on update
-			if _, ok := omitField[f.Name()]; ok {
+			if _, ok := omitField[name]; ok {
 				continue
 			}
+
 			if next {
 				stmt.WriteByte(',')
 			}
 
-			column = ms.Quote(f.Name())
+			column = ms.Quote(name)
 			stmt.WriteString(column + "=VALUES(" + column + ")")
 			next = true
 		}

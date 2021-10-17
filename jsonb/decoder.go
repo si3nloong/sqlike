@@ -350,6 +350,7 @@ func (dec *DefaultDecoder) DecodeMap(r *Reader, v reflect.Value) error {
 		if key.Kind() != reflect.Ptr {
 			key = reflect.PtrTo(key)
 		}
+		// check if the map key is implements `encoding.TextUnmarshaler`
 		if !key.Implements(textUnmarshaler) {
 			return fmt.Errorf("jsonb: unsupported data type of map key, %q", t.Key().Kind())
 		}

@@ -1,17 +1,18 @@
 # sqlike
 
-[![Build](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=master)](https://github.com/si3nloong/sqlike/actions?query=workflow%3Abuild)
+[![Build](https://github.com/si3nloong/sqlike/workflows/build/badge.svg?branch=main)](https://github.com/si3nloong/sqlike/actions?query=workflow%3Abuild)
 [![Release](https://img.shields.io/github/v/tag/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/releases)
-[![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike/v2)](https://goreportcard.com/report/github.com/si3nloong/sqlike/v2)
-[![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/master/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
-[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/master/LICENSE)
+[![Go Report](https://goreportcard.com/badge/github.com/si3nloong/sqlike)](https://goreportcard.com/report/github.com/si3nloong/sqlike)
+[![Go Coverage](https://codecov.io/gh/si3nloong/sqlike/branch/main/graph/badge.svg)](https://codecov.io/gh/si3nloong/sqlike)
+[![LICENSE](https://img.shields.io/github/license/si3nloong/sqlike)](https://github.com/si3nloong/sqlike/blob/main/LICENSE)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike?ref=badge_shield)
 
-> A golang SQL ORM which anti toxic query and focus on latest features.
+> A Golang SQL ORM which anti-toxic query and focus on the latest features.
 
 ## 🔨 Installation
 
 ```console
-go get github.com/si3nloong/sqlike/v2
+go get github.com/si3nloong/sqlike
 ```
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
@@ -44,13 +45,14 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Support `Transactions`
 - Support cursor based pagination
 - Support advance and complex query statement
-- Support [civil.Date](https://cloud.google.com/go/civil), [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
+- Support [civil.Date](https://cloud.google.com/go/civil)
+- Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support authorization plugin [Casbin](https://github.com/casbin/casbin)
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
 - Developer friendly, (query is highly similar to native sql query)
 - Support `sqldump` for backup purpose **(experiment)**
 
-<!-- You can refer to [examples](https://github.com/si3nloong/sqlike/v2/tree/master/examples) folder to see what apis we offer and learn how to use those apis -->
+<!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/main/examples) folder to see what apis we offer and learn how to use those apis -->
 
 ## ⚠️ Limitation
 
@@ -70,10 +72,10 @@ package main
 
 import (
     "time"
-    "github.com/si3nloong/sqlike/v2/actions"
-    "github.com/si3nloong/sqlike/v2"
-    "github.com/si3nloong/sqlike/v2/options"
-    "github.com/si3nloong/sqlike/v2/sql/expr"
+    "github.com/si3nloong/sqlike/sqlike/actions"
+    "github.com/si3nloong/sqlike/sqlike"
+    "github.com/si3nloong/sqlike/sqlike/options"
+    "github.com/si3nloong/sqlike/sql/expr"
     "github.com/google/uuid"
     "context"
 
@@ -274,6 +276,9 @@ Thanks to these awesome companies for their support of Open Source developers �
 
 ## 📄 License
 
-[MIT](https://github.com/si3nloong/sqlike/v2/blob/master/LICENSE)
+[MIT](https://github.com/si3nloong/sqlike/blob/main/LICENSE)
 
 Copyright (c) 2019-present, SianLoong Lee
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike?ref=badge_large)

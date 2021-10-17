@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/si3nloong/sqlike/v2"
@@ -112,6 +113,29 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, o.Date.String(), ns2.Date.String())
 	}
 
+	// upsert with unordered primary key
+	{
+		type unorderedStruct struct {
+			Text   string
+			Number int8
+			ID     string `sqlike:",primary_key"`
+			Date   civil.Date
+		}
+
+		table := db.Table("unorderedStruct")
+		table.DropIfExists(ctx)
+		table.MustUnsafeMigrate(ctx, unorderedStruct{})
+		_, err = table.InsertOne(
+			ctx,
+			&unorderedStruct{
+				ID:   "224",
+				Date: civil.DateOf(time.Now()),
+			},
+			options.InsertOne().SetMode(options.InsertOnDuplicate),
+		)
+		require.NoError(t, err)
+	}
+
 	// Multiple insert
 	{
 		nss := [...]normalStruct{
@@ -195,6 +219,43 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			options.Insert().SetDebug(true),
 		)
 		require.NoError(t, err)
+	}
+
+	{
+		table := db.Table("Override")
+		err := table.Truncate(ctx)
+		require.NoError(t, err)
+		table.MustUnsafeMigrate(ctx, overrideStruct{})
+
+		now, err := time.Parse("2006-01-02 15:04:05", "2018-01-01 00:00:00")
+		require.NoError(t, err)
+
+		os := overrideStruct{}
+		os.Amount = 9000
+		os.Amount = 100
+		os.ID = 1007
+		os.generatedStruct.ID = ""
+		os.CivilDate = civil.DateOf(now)
+		os.CreatedAt = now
+		os.UpdatedAt = now
+		_, err = table.InsertOne(ctx, &os)
+		require.NoError(t, err)
+
+		var out overrideStruct
+		err = table.FindOne(
+			ctx,
+			actions.FindOne().
+				Where(
+					expr.Equal("ID", os.ID),
+				),
+		).Decode(&out)
+		require.NoError(t, err)
+
+		require.Equal(t, os.ID, out.ID)
+		require.Equal(t, now, out.CreatedAt)
+		require.Equal(t, now, out.UpdatedAt)
+		require.Equal(t, os.Amount, out.Amount)
+		require.Equal(t, os.CivilDate, out.CivilDate)
 	}
 }
 

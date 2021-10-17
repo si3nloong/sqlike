@@ -152,6 +152,52 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			Number int64  `sqlike:",auto_increment"`
 		}{})
 	}
+
+	// migrate with overriding fields
+	{
+		table := db.Table("Override")
+		err = table.DropIfExists(ctx)
+		require.NoError(t, err)
+		table.MustUnsafeMigrate(ctx, overrideStruct{})
+
+		cols, err := table.Columns().List(ctx)
+		require.NoError(t, err)
+
+		zero := "0"
+		require.Contains(t, cols, sqlike.Column{
+			Name:         "ID",
+			Position:     10,
+			Type:         "BIGINT",
+			DataType:     "BIGINT",
+			IsNullable:   false,
+			DefaultValue: &zero,
+			Comment:      "Int64 ID",
+		})
+		require.Contains(t, cols, sqlike.Column{
+			Name:         "Amount",
+			Position:     11,
+			Type:         "INT",
+			DataType:     "INT",
+			IsNullable:   false,
+			DefaultValue: &zero,
+			Comment:      "Int Amount",
+		})
+
+		emptyStr := ""
+		charset := "utf8mb4"
+		collate := "utf8mb4_unicode_ci"
+		require.Contains(t, cols, sqlike.Column{
+			Name:         "Nested",
+			Position:     12,
+			Type:         "VARCHAR(191)",
+			DataType:     "VARCHAR",
+			IsNullable:   false,
+			DefaultValue: &emptyStr,
+			Charset:      &charset,
+			Collation:    &collate,
+			Comment:      "String Nested",
+		})
+	}
 }
 
 // MigrateErrorExamples :

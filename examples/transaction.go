@@ -201,6 +201,9 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		require.NoError(t, err)
 	}
 
+	err = db.Table("UserAddress").DropIfExists(ctx)
+	require.NoError(t, err)
+
 	table := db.Table("user")
 	err = db.Table("UserAddress").DropIfExists(ctx)
 	require.NoError(t, err)

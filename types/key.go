@@ -88,8 +88,11 @@ func (k Key) ColumnDataType(ctx context.Context) *sqlx.Column {
 	}
 }
 
-// ID :
-func (k Key) ID() string {
+// ID : is a safe method to retrieve `IntID` or `NameID` value
+func (k *Key) ID() string {
+	if k == nil {
+		return ""
+	}
 	if k.NameID != "" {
 		return k.NameID
 	}

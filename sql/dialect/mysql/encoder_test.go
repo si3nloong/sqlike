@@ -38,12 +38,12 @@ func TestEncodeMap(t *testing.T) {
 		require.Equal(t, []byte(`{}`), it)
 	}
 
-	// Unsupported data type of map's key
+	// Map with interface value
 	{
 		intmap := make(map[int]interface{})
 		it, err = enc.EncodeMap(nil, reflect.ValueOf(intmap))
-		require.Error(t, err)
-		require.Nil(t, it)
+		require.NoError(t, err)
+		require.Equal(t, []byte(`{}`), it)
 	}
 
 }

@@ -203,6 +203,15 @@ func (s *Struct) GetByTraversal(index []int) StructFielder {
 // Fields :
 type Fields []StructFielder
 
+func (x Fields) FindIndex(cb func(f StructFielder) bool) int {
+	for idx, f := range x {
+		if cb(f) {
+			return idx
+		}
+	}
+	return -1
+}
+
 func (x Fields) Len() int { return len(x) }
 
 func (x Fields) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
@@ -309,12 +318,23 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 		names:      make(map[string]StructFielder),
 	}
 
+	lname := ""
 	sort.Sort(codec.fields)
 
 	for _, sf := range codec.fields {
 		codec.indexes[sf.(*StructField).id] = sf
 		if sf.Name() != "" && !sf.IsEmbedded() {
+			lname = strings.ToLower(sf.Name())
 			codec.names[sf.Name()] = sf
+
+			idx := codec.properties.FindIndex(func(each StructFielder) bool {
+				return strings.ToLower(each.Tag().Name()) == lname
+			})
+			if idx > -1 {
+				// remove item in the slice if the field name is same (overriding embedded struct field)
+				codec.properties = append(codec.properties[:idx], codec.properties[idx+1:]...)
+			}
+
 			prnt := sf.ParentByTraversal(func(f StructFielder) bool {
 				return !f.IsEmbedded()
 			})
@@ -322,6 +342,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				sf.Parent() != nil && prnt != nil {
 				continue
 			}
+
 			// not nested embedded struct or embedded struct
 			codec.properties = append(codec.properties, sf)
 		}

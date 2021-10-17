@@ -9,11 +9,11 @@ const (
 	jsonObject
 	jsonArray
 	jsonWhitespace
-	// jsonLiteral
 	jsonString
-	// jsonComma
 	jsonBoolean
 	jsonNumber
+	// jsonLiteral
+	// jsonComma
 )
 
 func (jt jsonType) String() (name string) {
@@ -22,6 +22,8 @@ func (jt jsonType) String() (name string) {
 		name = "invalid"
 	case jsonNull:
 		name = "null"
+	case jsonWhitespace:
+		name = "whitespace"
 	case jsonString:
 		name = "string"
 	case jsonBoolean:

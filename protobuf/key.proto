@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/si3nloong/sqlike/protobuf";
+
+package sqlike.protobuf;
+
+message Key {
+  string Namespace = 1;
+  string Kind = 2;
+  int64 IntID = 3;
+  string NameID = 4;
+  Key Parent = 5;
+}
+
