@@ -207,8 +207,9 @@ func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) erro
 
 // date format :
 var (
-	DDMMYYYY       = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
-	DDMMYYYYHHMMSS = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+	DDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
+	DDMMYYYYHHMMSS   = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+	DDMMYYYYHHMMSSTZ = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}\.\d+$`)
 )
 
 // DecodeTime : this will decode time by using multiple format
@@ -218,6 +219,8 @@ func decodeTime(str string) (t time.Time, err error) {
 		t, err = time.Parse("2006-01-02", str)
 	case DDMMYYYYHHMMSS.MatchString(str):
 		t, err = time.Parse("2006-01-02 15:04:05", str)
+	case DDMMYYYYHHMMSSTZ.MatchString(str):
+		t, err = time.Parse("2006-01-02 15:04:05.999999", str)
 	default:
 		t, err = time.Parse(time.RFC3339Nano, str)
 	}
