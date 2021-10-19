@@ -24,7 +24,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 ## 🪣 Minimum Requirements
 
 - **mysql 8.0** and above
-- **golang 1.15** and above
+- **golang 1.17** and above
 
 ## ❓ Why another ORM?
 
