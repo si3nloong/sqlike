@@ -17,7 +17,7 @@ type Codecer interface {
 }
 
 // ValueDecoder :
-type ValueDecoder func(context.Context, interface{}, reflect.Value) error
+type ValueDecoder func(interface{}, reflect.Value) error
 
 // ValueEncoder :
 type ValueEncoder func(context.Context, reflect.Value) (interface{}, error)

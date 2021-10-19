@@ -7,16 +7,16 @@ import (
 	"strings"
 )
 
-// Structer :
-type Structer interface {
-	Fields() []StructFielder
-	Properties() []StructFielder
-	LookUpFieldByName(name string) (StructFielder, bool)
-	GetByTraversal(index []int) StructFielder
+// StructInfo :
+type StructInfo interface {
+	Fields() []FieldInfo
+	Properties() []FieldInfo
+	LookUpFieldByName(name string) (FieldInfo, bool)
+	GetByTraversal(index []int) FieldInfo
 }
 
-// StructFielder :
-type StructFielder interface {
+// FieldInfo :
+type FieldInfo interface {
 	// New name of struct field
 	Name() string
 
@@ -31,13 +31,13 @@ type StructFielder interface {
 
 	// if the field is struct, parent will not be nil
 	// this will be the parent struct of current struct
-	Parent() StructFielder
+	Parent() FieldInfo
 
-	ParentByTraversal(cb func(StructFielder) bool) StructFielder
+	ParentByTraversal(cb func(FieldInfo) bool) FieldInfo
 
 	// if the field is struct, children will not be nil
 	// this will be the fields of current struct
-	Children() []StructFielder
+	Children() []FieldInfo
 
 	// determine the field is nullable
 	IsNullable() bool
@@ -98,11 +98,11 @@ type StructField struct {
 	null     bool
 	tag      StructTag
 	embed    bool
-	parent   StructFielder
-	children []StructFielder
+	parent   FieldInfo
+	children []FieldInfo
 }
 
-var _ StructFielder = (*StructField)(nil)
+var _ FieldInfo = (*StructField)(nil)
 
 // Name :
 func (sf *StructField) Name() string {
@@ -125,12 +125,12 @@ func (sf *StructField) Index() []int {
 }
 
 // Parent :
-func (sf *StructField) Parent() StructFielder {
+func (sf *StructField) Parent() FieldInfo {
 	return sf.parent
 }
 
 // Children :
-func (sf *StructField) Children() []StructFielder {
+func (sf *StructField) Children() []FieldInfo {
 	return sf.children
 }
 
@@ -145,7 +145,7 @@ func (sf *StructField) IsEmbedded() bool {
 }
 
 // ParentByTraversal :
-func (sf *StructField) ParentByTraversal(cb func(StructFielder) bool) StructFielder {
+func (sf *StructField) ParentByTraversal(cb func(FieldInfo) bool) FieldInfo {
 	prnt := sf.parent
 	for prnt != nil {
 		if cb(prnt) {
@@ -158,33 +158,33 @@ func (sf *StructField) ParentByTraversal(cb func(StructFielder) bool) StructFiel
 
 // Struct :
 type Struct struct {
-	tree       StructFielder
+	tree       FieldInfo
 	fields     Fields // all fields belong to this struct
 	properties Fields // available properties in sequence
-	indexes    map[string]StructFielder
-	names      map[string]StructFielder
+	indexes    map[string]FieldInfo
+	names      map[string]FieldInfo
 }
 
-var _ Structer = (*Struct)(nil)
+var _ StructInfo = (*Struct)(nil)
 
 // Fields :
-func (s *Struct) Fields() []StructFielder {
+func (s *Struct) Fields() []FieldInfo {
 	return append(make(Fields, 0, len(s.fields)), s.fields...)
 }
 
 // Properties :
-func (s *Struct) Properties() []StructFielder {
+func (s *Struct) Properties() []FieldInfo {
 	return append(make(Fields, 0, len(s.properties)), s.properties...)
 }
 
 // LookUpFieldByName :
-func (s *Struct) LookUpFieldByName(name string) (StructFielder, bool) {
+func (s *Struct) LookUpFieldByName(name string) (FieldInfo, bool) {
 	x, ok := s.names[name]
 	return x, ok
 }
 
 // GetByTraversal :
-func (s *Struct) GetByTraversal(index []int) StructFielder {
+func (s *Struct) GetByTraversal(index []int) FieldInfo {
 	if len(index) == 0 {
 		return nil
 	}
@@ -201,9 +201,9 @@ func (s *Struct) GetByTraversal(index []int) StructFielder {
 }
 
 // Fields :
-type Fields []StructFielder
+type Fields []FieldInfo
 
-func (x Fields) FindIndex(cb func(f StructFielder) bool) int {
+func (x Fields) FindIndex(cb func(f FieldInfo) bool) int {
 	for idx, f := range x {
 		if cb(f) {
 			return idx
@@ -235,7 +235,7 @@ type typeQueue struct {
 }
 
 func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
-	fields := make([]StructFielder, 0)
+	fields := make([]FieldInfo, 0)
 
 	root := &StructField{}
 	queue := []typeQueue{}
@@ -243,7 +243,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 
 	for len(queue) > 0 {
 		q := queue[0]
-		q.sf.children = make([]StructFielder, 0)
+		q.sf.children = make([]FieldInfo, 0)
 
 		for i := 0; i < q.t.NumField(); i++ {
 			f := q.t.Field(i)
@@ -265,7 +265,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				null:     q.sf.null || IsNullable(f.Type),
 				t:        f.Type,
 				tag:      tag,
-				children: make([]StructFielder, 0),
+				children: make([]FieldInfo, 0),
 			}
 
 			if len(q.sf.Index()) > 0 {
@@ -313,9 +313,9 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 	codec := &Struct{
 		tree:       root,
 		fields:     fields,
-		properties: make([]StructFielder, 0, len(fields)),
-		indexes:    make(map[string]StructFielder),
-		names:      make(map[string]StructFielder),
+		properties: make([]FieldInfo, 0, len(fields)),
+		indexes:    make(map[string]FieldInfo),
+		names:      make(map[string]FieldInfo),
 	}
 
 	lname := ""
@@ -327,7 +327,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 			lname = strings.ToLower(sf.Name())
 			codec.names[sf.Name()] = sf
 
-			idx := codec.properties.FindIndex(func(each StructFielder) bool {
+			idx := codec.properties.FindIndex(func(each FieldInfo) bool {
 				return strings.ToLower(each.Tag().Name()) == lname
 			})
 			if idx > -1 {
@@ -335,7 +335,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				codec.properties = append(codec.properties[:idx], codec.properties[idx+1:]...)
 			}
 
-			prnt := sf.ParentByTraversal(func(f StructFielder) bool {
+			prnt := sf.ParentByTraversal(func(f FieldInfo) bool {
 				return !f.IsEmbedded()
 			})
 			if len(sf.Index()) > 1 &&

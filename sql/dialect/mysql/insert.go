@@ -16,7 +16,7 @@ func (ms *mySQL) InsertInto(
 	stmt db.Stmt,
 	dbName, table, pk string,
 	cache reflext.StructMapper,
-	fields []reflext.StructFielder,
+	fields []reflext.FieldInfo,
 	v reflect.Value,
 	opt *options.InsertOptions,
 ) (err error) {

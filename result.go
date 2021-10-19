@@ -100,7 +100,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 		if err != nil {
 			return err
 		}
-		if err := decoder(r.ctx, v, fv); err != nil {
+		if err := decoder(v, fv); err != nil {
 			return err
 		}
 	}
@@ -147,7 +147,7 @@ func (r *Result) Decode(dst interface{}) error {
 		if err != nil {
 			return err
 		}
-		if err := decoder(r.ctx, values[j], fv); err != nil {
+		if err := decoder(values[j], fv); err != nil {
 			return err
 		}
 	}
@@ -191,7 +191,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 		if err != nil {
 			return err
 		}
-		if err := decoder(r.ctx, values[0], fv); err != nil {
+		if err := decoder(values[0], fv); err != nil {
 			return err
 		}
 	}
@@ -244,7 +244,7 @@ func (r *Result) All(results interface{}) error {
 				}
 				decoders[j] = decoder
 			}
-			if err := decoders[j](r.ctx, values[j], fv); err != nil {
+			if err := decoders[j](values[j], fv); err != nil {
 				return err
 			}
 		}

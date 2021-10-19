@@ -61,7 +61,7 @@ func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Map, s.JSONDataType)
 }
 
-func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) ByteDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "MEDIUMBLOB"
@@ -74,7 +74,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) UUIDDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
 	col.Name = sf.Name()
@@ -87,7 +87,7 @@ func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) DateDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) DateDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "DATE"
@@ -96,7 +96,7 @@ func (s mySQLSchema) DateDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) TimeDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
 	if v, exists := sf.Tag().LookUp("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
@@ -117,7 +117,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) JSONDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) JSONDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "JSON"
@@ -127,7 +127,7 @@ func (s mySQLSchema) JSONDataType(sf reflext.StructFielder) *sql.Column {
 }
 
 func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
-	return func(sf reflext.StructFielder) *sql.Column {
+	return func(sf reflext.FieldInfo) *sql.Column {
 		col := new(sql.Column)
 		col.Name = sf.Name()
 		col.DataType = dataType
@@ -145,7 +145,7 @@ func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
 	}
 }
 
-func (s mySQLSchema) StringDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.Nullable = sf.IsNullable()
@@ -222,7 +222,7 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) CharDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) CharDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	dflt := ""
 	switch sf.Type() {
@@ -244,7 +244,7 @@ func (s mySQLSchema) CharDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) BoolDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) BoolDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	dflt := "0"
 	col.Name = sf.Name()
@@ -255,7 +255,7 @@ func (s mySQLSchema) BoolDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) IntDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) IntDataType(sf reflext.FieldInfo) *sql.Column {
 	t := sf.Type()
 	tag := sf.Tag()
 	dflt := "0"
@@ -279,7 +279,7 @@ func (s mySQLSchema) IntDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) UintDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) UintDataType(sf reflext.FieldInfo) *sql.Column {
 	t := sf.Type()
 	tag := sf.Tag()
 	dflt := "0"
@@ -303,7 +303,7 @@ func (s mySQLSchema) UintDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) FloatDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) FloatDataType(sf reflext.FieldInfo) *sql.Column {
 	dflt := "0"
 	tag := sf.Tag()
 
@@ -325,7 +325,7 @@ func (s mySQLSchema) FloatDataType(sf reflext.StructFielder) *sql.Column {
 	return col
 }
 
-func (s mySQLSchema) ArrayDataType(sf reflext.StructFielder) *sql.Column {
+func (s mySQLSchema) ArrayDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.Nullable = sf.IsNullable()

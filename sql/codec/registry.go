@@ -153,7 +153,7 @@ func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) 
 	return x.Value()
 }
 
-func sqlScannerDecoder(_ context.Context, it interface{}, v reflect.Value) error {
+func sqlScannerDecoder(it interface{}, v reflect.Value) error {
 	if it == nil {
 		// Avoid from sql.scanner when the value is nil
 		v.Set(reflect.Zero(v.Type()))

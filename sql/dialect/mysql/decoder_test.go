@@ -1,87 +1,161 @@
 package mysql
 
 import (
-	"context"
 	"database/sql"
 	"encoding/base64"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
-func TestDecodeByte(t *testing.T) {
+func TestDecodeByte(a *testing.T) {
 	var (
-		ctx = context.TODO()
 		dd  = DefaultDecoders{}
 		err error
 	)
 
-	{
-		var b []byte
-		v := reflect.ValueOf(&b)
+	a.Run("Decode Byte with empty value", func(b *testing.T) {
+		var raw []byte
+		v := reflect.ValueOf(&raw)
+		err = dd.DecodeByte(nil, v.Elem())
+		require.NoError(b, err)
+		require.NotNil(b, b)
+		require.True(b, len(raw) == 0)
+	})
+
+	a.Run("Decode Byte with string value", func(b *testing.T) {
+		var raw []byte
+		v := reflect.ValueOf(&raw)
 		name := "john doe"
 		b64 := base64.StdEncoding.EncodeToString([]byte(name))
-		err = dd.DecodeByte(ctx, b64, v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, name, string(b))
-	}
+		err = dd.DecodeByte(b64, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, name, string(raw))
+	})
 
-	{
-		var b []byte
-		v := reflect.ValueOf(&b)
+	a.Run("Decode Byte with number value", func(b *testing.T) {
+		var raw []byte
+		v := reflect.ValueOf(&raw)
 		num := "88"
 		b64 := base64.StdEncoding.EncodeToString([]byte(num))
-		err = dd.DecodeByte(ctx, []byte(b64), v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, num, string(b))
-	}
+		err = dd.DecodeByte([]byte(b64), v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, num, string(raw))
+	})
 
-	{
-		var b []byte
-		v := reflect.ValueOf(&b)
-		err = dd.DecodeByte(ctx, nil, v.Elem())
-		require.NoError(t, err)
-		require.NotNil(t, b)
-		require.True(t, len(b) == 0)
-	}
 }
 
-func TestDecodeRawBytes(t *testing.T) {
+func TestDecodeRawBytes(a *testing.T) {
 	var (
-		dd  = DefaultDecoders{}
-		ctx = context.TODO()
+		dd = DefaultDecoders{}
 	)
 
-	{
-		var b sql.RawBytes
+	a.Run("Decode RawBytes to String", func(b *testing.T) {
+		var raw sql.RawBytes
 		str := "JOHN Cena"
-		v := reflect.ValueOf(&b)
-		err := dd.DecodeRawBytes(ctx, str, v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, sql.RawBytes(str), b)
-	}
+		v := reflect.ValueOf(&raw)
+		err := dd.DecodeRawBytes(str, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes(str), raw)
+	})
 
-	{
-		var b sql.RawBytes
-		i64 := int64(1231298738213812)
-		v := reflect.ValueOf(&b)
-		err := dd.DecodeRawBytes(ctx, i64, v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, sql.RawBytes("1231298738213812"), b)
-	}
+	a.Run("Decode RawBytes to Int64", func(b *testing.T) {
+		var raw sql.RawBytes
+		v := reflect.ValueOf(&raw)
+		i64 := int64(-1231298738213812)
+		err := dd.DecodeRawBytes(i64, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes("-1231298738213812"), raw)
+	})
 
-	{
-		var b sql.RawBytes
+	a.Run("Decode RawBytes to Uint64", func(b *testing.T) {
+		var raw sql.RawBytes
+		v := reflect.ValueOf(&raw)
+		ui64 := uint64(1231298738213812)
+		err := dd.DecodeRawBytes(ui64, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes("1231298738213812"), raw)
+	})
+
+	a.Run("Decode RawBytes to Boolean", func(b *testing.T) {
+		var raw sql.RawBytes
 		flag := true
-		v := reflect.ValueOf(&b)
-		err := dd.DecodeRawBytes(ctx, flag, v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, sql.RawBytes("true"), b)
+		v := reflect.ValueOf(&raw)
+		err := dd.DecodeRawBytes(flag, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes("true"), raw)
 
 		flag = false
-		err = dd.DecodeRawBytes(ctx, flag, v.Elem())
-		require.NoError(t, err)
-		require.Equal(t, sql.RawBytes("false"), b)
-	}
+		err = dd.DecodeRawBytes(flag, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes("false"), raw)
+	})
+
+	a.Run("Decode RawBytes to Time", func(b *testing.T) {
+		var raw sql.RawBytes
+		v := reflect.ValueOf(&raw)
+		tm := time.Time{}
+		err := dd.DecodeRawBytes(tm, v.Elem())
+		require.NoError(b, err)
+		require.Equal(b, sql.RawBytes("0001-01-01T00:00:00Z"), raw)
+	})
+}
+
+func TestDecodeTime(a *testing.T) {
+	var (
+		tm  time.Time
+		err error
+	)
+
+	a.Run("Time with YYYY-MM-DD", func(b *testing.T) {
+		tm, err = decodeTime("2021-10-17")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T00:00:00Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 1 digit milliseconds", func(b *testing.T) {
+		tm, err = decodeTime("2021-10-17 07:15:04.3")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.3Z", tm.Format(time.RFC3339Nano))
+
+		tm, err = decodeTime("2021-10-17 07:15:04.30")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.3Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 2 digit milliseconds", func(b *testing.T) {
+		tm, err := decodeTime("2021-10-17 07:15:04.36")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.36Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 3 digit milliseconds", func(b *testing.T) {
+		tm, err := decodeTime("2021-10-17 07:15:04.366")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.366Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 4 digit milliseconds", func(b *testing.T) {
+		tm, err := decodeTime("2021-10-17 07:15:04.3661")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.3661Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 5 digit milliseconds", func(b *testing.T) {
+		tm, err := decodeTime("2021-10-17 07:15:04.36617")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.36617Z", tm.Format(time.RFC3339Nano))
+	})
+
+	a.Run("Time with 6 digit milliseconds", func(b *testing.T) {
+		tm, err = decodeTime("2021-10-17 07:15:04.366170")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.36617Z", tm.Format(time.RFC3339Nano))
+
+		tm, err = decodeTime("2021-10-17 07:15:04.366176")
+		require.NoError(b, err)
+		require.Equal(b, "2021-10-17T07:15:04.366176Z", tm.Format(time.RFC3339Nano))
+	})
 }

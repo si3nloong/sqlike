@@ -35,15 +35,15 @@ func (f field) Tag() reflext.StructTager {
 	return reflext.StructTag{}
 }
 
-func (field) Parent() reflext.StructFielder {
+func (field) Parent() reflext.FieldInfo {
 	return nil
 }
 
-func (field) ParentByTraversal(cb func(reflext.StructFielder) bool) reflext.StructFielder {
+func (field) ParentByTraversal(cb func(reflext.FieldInfo) bool) reflext.FieldInfo {
 	return nil
 }
 
-func (field) Children() []reflext.StructFielder {
+func (field) Children() []reflext.FieldInfo {
 	return nil
 }
 
@@ -55,7 +55,7 @@ func (field) IsEmbedded() bool {
 	return false
 }
 
-var _ reflext.StructFielder = (*field)(nil)
+var _ reflext.FieldInfo = (*field)(nil)
 
 func TestKey(t *testing.T) {
 	var (

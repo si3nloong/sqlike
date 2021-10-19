@@ -12,7 +12,7 @@ type SQLCtx struct {
 	values map[string]interface{}
 }
 
-func (c *SQLCtx) SetField(v reflext.StructFielder) *SQLCtx {
+func (c *SQLCtx) SetField(v reflext.FieldInfo) *SQLCtx {
 	c.values["field"] = v
 	return c
 }
@@ -72,10 +72,10 @@ func GetTable(ctx context.Context) string {
 }
 
 // GetField :
-func GetField(ctx context.Context) reflext.StructFielder {
+func GetField(ctx context.Context) reflext.FieldInfo {
 	v, ok := ctx.(*SQLCtx)
 	if !ok {
 		return &reflext.StructField{}
 	}
-	return v.values["field"].(reflext.StructFielder)
+	return v.values["field"].(reflext.FieldInfo)
 }

@@ -303,7 +303,7 @@ func (tb *Table) migrateOne(ctx context.Context, cache reflext.StructMapper, ent
 	return tb.alterTable(ctx, fields, columns, idxs, unsafe)
 }
 
-func (tb *Table) createTable(ctx context.Context, fields []reflext.StructFielder) error {
+func (tb *Table) createTable(ctx context.Context, fields []reflext.FieldInfo) error {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	if err := tb.dialect.CreateTable(
@@ -327,7 +327,7 @@ func (tb *Table) createTable(ctx context.Context, fields []reflext.StructFielder
 	return nil
 }
 
-func (tb *Table) alterTable(ctx context.Context, fields []reflext.StructFielder, columns []Column, indexs []Index, unsafe bool) error {
+func (tb *Table) alterTable(ctx context.Context, fields []reflext.FieldInfo, columns []Column, indexs []Index, unsafe bool) error {
 	cols := make([]string, len(columns))
 	for i, col := range columns {
 		cols[i] = col.Name

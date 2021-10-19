@@ -7,11 +7,11 @@ import (
 )
 
 // DefaultMapper :
-var DefaultMapper = NewMapperFunc([]string{"sqlike"}, nil)
+var DefaultMapper = NewMapperFunc([]string{"sqlike", "db", "sql"}, nil)
 
 // StructMapper :
 type StructMapper interface {
-	CodecByType(t reflect.Type) Structer
+	CodecByType(t reflect.Type) StructInfo
 	FieldByName(v reflect.Value, name string) reflect.Value
 	FieldByIndexes(v reflect.Value, idxs []int) reflect.Value
 	FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value
@@ -21,7 +21,7 @@ type StructMapper interface {
 }
 
 // MapFunc :
-type MapFunc func(StructFielder) (skip bool)
+type MapFunc func(FieldInfo) (skip bool)
 
 // FormatFunc :
 type FormatFunc func(string) string
@@ -46,7 +46,7 @@ func NewMapperFunc(tags []string, fmtFunc FormatFunc) *Mapper {
 }
 
 // CodecByType :
-func (m *Mapper) CodecByType(t reflect.Type) Structer {
+func (m *Mapper) CodecByType(t reflect.Type) StructInfo {
 	mapping, ok := m.cache[t]
 	if !ok {
 		m.mutex.Lock()

@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
@@ -17,6 +16,7 @@ import (
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/v2/jsonb"
 	"github.com/si3nloong/sqlike/v2/sql/codec"
+
 	"github.com/si3nloong/sqlike/v2/x/util"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -30,7 +30,7 @@ type DefaultDecoders struct {
 }
 
 // DecodeByte :
-func (dec DefaultDecoders) DecodeByte(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeByte(it interface{}, v reflect.Value) error {
 	var (
 		x   []byte
 		err error
@@ -54,7 +54,7 @@ func (dec DefaultDecoders) DecodeByte(ctx context.Context, it interface{}, v ref
 }
 
 // DecodeRawBytes :
-func (dec DefaultDecoders) DecodeRawBytes(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeRawBytes(it interface{}, v reflect.Value) error {
 	var (
 		x sql.RawBytes
 	)
@@ -87,7 +87,7 @@ func (dec DefaultDecoders) DecodeRawBytes(ctx context.Context, it interface{}, v
 }
 
 // DecodeCurrency :
-func (dec DefaultDecoders) DecodeCurrency(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeCurrency(it interface{}, v reflect.Value) error {
 	var (
 		x   currency.Unit
 		err error
@@ -110,7 +110,7 @@ func (dec DefaultDecoders) DecodeCurrency(ctx context.Context, it interface{}, v
 }
 
 // DecodeLanguage :
-func (dec DefaultDecoders) DecodeLanguage(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeLanguage(it interface{}, v reflect.Value) error {
 	var (
 		x   language.Tag
 		str string
@@ -136,7 +136,7 @@ func (dec DefaultDecoders) DecodeLanguage(ctx context.Context, it interface{}, v
 }
 
 // DecodeJSONRaw :
-func (dec DefaultDecoders) DecodeJSONRaw(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeJSONRaw(it interface{}, v reflect.Value) error {
 	b := new(bytes.Buffer)
 	switch vi := it.(type) {
 	case string:
@@ -154,7 +154,7 @@ func (dec DefaultDecoders) DecodeJSONRaw(ctx context.Context, it interface{}, v 
 }
 
 // DecodeTime :
-func (dec DefaultDecoders) DecodeTime(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	var (
 		x   time.Time
 		err error
@@ -182,7 +182,7 @@ func (dec DefaultDecoders) DecodeTime(ctx context.Context, it interface{}, v ref
 }
 
 // DecodeCivilDate :
-func (dec DefaultDecoders) DecodeCivilDate(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) error {
 	var (
 		x   civil.Date
 		err error
@@ -209,7 +209,7 @@ func (dec DefaultDecoders) DecodeCivilDate(ctx context.Context, it interface{}, 
 }
 
 // DecodePoint :
-func (dec DefaultDecoders) DecodePoint(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodePoint(it interface{}, v reflect.Value) error {
 	var p orb.Point
 	if it == nil {
 		v.Set(reflect.ValueOf(p))
@@ -259,7 +259,7 @@ func (dec DefaultDecoders) DecodePoint(ctx context.Context, it interface{}, v re
 }
 
 // DecodeLineString :
-func (dec DefaultDecoders) DecodeLineString(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeLineString(it interface{}, v reflect.Value) error {
 	var ls orb.LineString
 	if it == nil {
 		v.Set(reflect.ValueOf(ls))
@@ -285,7 +285,7 @@ func (dec DefaultDecoders) DecodeLineString(ctx context.Context, it interface{},
 }
 
 // DecodeString :
-func (dec DefaultDecoders) DecodeString(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeString(it interface{}, v reflect.Value) error {
 	var x string
 	switch vi := it.(type) {
 	case string:
@@ -307,7 +307,7 @@ func (dec DefaultDecoders) DecodeString(ctx context.Context, it interface{}, v r
 }
 
 // DecodeBool :
-func (dec DefaultDecoders) DecodeBool(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeBool(it interface{}, v reflect.Value) error {
 	var (
 		x   bool
 		err error
@@ -340,7 +340,7 @@ func (dec DefaultDecoders) DecodeBool(ctx context.Context, it interface{}, v ref
 }
 
 // DecodeInt :
-func (dec DefaultDecoders) DecodeInt(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeInt(it interface{}, v reflect.Value) error {
 	var (
 		x   int64
 		err error
@@ -372,7 +372,7 @@ func (dec DefaultDecoders) DecodeInt(ctx context.Context, it interface{}, v refl
 }
 
 // DecodeUint :
-func (dec DefaultDecoders) DecodeUint(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeUint(it interface{}, v reflect.Value) error {
 	var (
 		x   uint64
 		err error
@@ -406,7 +406,7 @@ func (dec DefaultDecoders) DecodeUint(ctx context.Context, it interface{}, v ref
 }
 
 // DecodeFloat :
-func (dec DefaultDecoders) DecodeFloat(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeFloat(it interface{}, v reflect.Value) error {
 	var (
 		x   float64
 		err error
@@ -439,7 +439,7 @@ func (dec DefaultDecoders) DecodeFloat(ctx context.Context, it interface{}, v re
 }
 
 // DecodePtr :
-func (dec *DefaultDecoders) DecodePtr(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec *DefaultDecoders) DecodePtr(it interface{}, v reflect.Value) error {
 	t := v.Type()
 	if it == nil {
 		v.Set(reflect.Zero(t))
@@ -450,11 +450,11 @@ func (dec *DefaultDecoders) DecodePtr(ctx context.Context, it interface{}, v ref
 	if err != nil {
 		return err
 	}
-	return decoder(ctx, it, v.Elem())
+	return decoder(it, v.Elem())
 }
 
 // DecodeStruct :
-func (dec *DefaultDecoders) DecodeStruct(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec *DefaultDecoders) DecodeStruct(it interface{}, v reflect.Value) error {
 	var b []byte
 	switch vi := it.(type) {
 	case string:
@@ -466,7 +466,7 @@ func (dec *DefaultDecoders) DecodeStruct(ctx context.Context, it interface{}, v 
 }
 
 // DecodeArray :
-func (dec DefaultDecoders) DecodeArray(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeArray(it interface{}, v reflect.Value) error {
 	var b []byte
 	switch vi := it.(type) {
 	case string:
@@ -478,7 +478,7 @@ func (dec DefaultDecoders) DecodeArray(ctx context.Context, it interface{}, v re
 }
 
 // DecodeMap :
-func (dec DefaultDecoders) DecodeMap(ctx context.Context, it interface{}, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeMap(it interface{}, v reflect.Value) error {
 	var b []byte
 	switch vi := it.(type) {
 	case string:
@@ -491,8 +491,9 @@ func (dec DefaultDecoders) DecodeMap(ctx context.Context, it interface{}, v refl
 
 // date format :
 var (
-	DDMMYYYY       = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
-	DDMMYYYYHHMMSS = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+	DDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
+	DDMMYYYYHHMMSS   = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+	DDMMYYYYHHMMSSTZ = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}\.\d+$`)
 )
 
 // DecodeTime : this will decode time by using multiple format
@@ -502,6 +503,8 @@ func decodeTime(str string) (t time.Time, err error) {
 		t, err = time.Parse("2006-01-02", str)
 	case DDMMYYYYHHMMSS.MatchString(str):
 		t, err = time.Parse("2006-01-02 15:04:05", str)
+	case DDMMYYYYHHMMSSTZ.MatchString(str):
+		t, err = time.Parse("2006-01-02 15:04:05.999999", str)
 	default:
 		t, err = time.Parse(time.RFC3339Nano, str)
 	}

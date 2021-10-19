@@ -21,7 +21,7 @@ import (
 )
 
 // DataTypeFunc :
-type DataTypeFunc func(f reflext.StructFielder) *sql.Column
+type DataTypeFunc func(f reflext.FieldInfo) *sql.Column
 
 // Builder :
 type Builder struct {

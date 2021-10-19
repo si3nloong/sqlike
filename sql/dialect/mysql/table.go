@@ -59,11 +59,11 @@ func (ms mySQL) CreateTable(
 	stmt db.Stmt,
 	dbName, table, pkName string,
 	info driver.Info,
-	fields []reflext.StructFielder,
+	fields []reflext.FieldInfo,
 ) (err error) {
 	var (
 		col     *sql.Column
-		pk      reflext.StructFielder
+		pk      reflext.FieldInfo
 		k1, k2  string
 		virtual bool
 		stored  bool
@@ -186,14 +186,14 @@ func (ms *mySQL) AlterTable(
 	dbName, table, pk string,
 	hasPk bool,
 	info driver.Info,
-	fields []reflext.StructFielder,
+	fields []reflext.FieldInfo,
 	cols util.StringSlice,
 	idxs util.StringSlice,
 	unsafe bool,
 ) (err error) {
 	var (
 		col     *sql.Column
-		pkk     reflext.StructFielder
+		pkk     reflext.FieldInfo
 		idx     int
 		k1, k2  string
 		virtual bool
