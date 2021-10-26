@@ -14,7 +14,7 @@ require (
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/segmentio/ksuid v1.0.4
 	github.com/stretchr/testify v1.7.0
-	github.com/tidwall/sjson v1.2.2
+	github.com/tidwall/sjson v1.2.3
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
 	go.mongodb.org/mongo-driver v1.7.3
 	golang.org/x/net v0.0.0-20211008194852-3b03d305991f
