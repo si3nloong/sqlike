@@ -24,6 +24,19 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 		testDB := client.Database("test")
 		tb := testDB.Table("t1")
 		require.NotNil(t, tb)
+
+		tb.MustUnsafeMigrate(ctx, struct {
+			ID int64 `sqlike:",auto_increment"`
+		}{})
+
+		var o struct {
+			Rows uint `sqlike:"rows"`
+		}
+
+		err = testDB.QueryRow(ctx, "EXPLAIN SELECT * FROM `t1`;").Decode(&o)
+		require.NoError(t, err)
+		// empty table will treat as one record when using EXPLAIN
+		require.Equal(t, uint(1), o.Rows)
 	}
 
 	{
@@ -31,4 +44,5 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 		require.True(t, len(dbs) > 0)
 		require.NoError(t, err)
 	}
+
 }

@@ -49,16 +49,46 @@ func (db *Database) Table(name string) *Table {
 	}
 }
 
+func (db *Database) QueryRow(ctx context.Context, query string, args ...interface{}) SingleResult {
+	rslt := new(Result)
+	rslt.cache = db.client.cache
+	rslt.codec = db.codec
+	rows, err := db.driver.QueryContext(ctx, query, args...)
+	if err != nil {
+		rslt.err = err
+		return rslt
+	}
+
+	// release connection when it has error
+	defer func() {
+		if rslt.err != nil {
+			rslt.rows.Close()
+		}
+	}()
+
+	rslt.rows = rows
+	rslt.columnTypes, rslt.err = rows.ColumnTypes()
+	for _, col := range rslt.columnTypes {
+		rslt.columns = append(rslt.columns, col.Name())
+	}
+	if !rslt.Next() {
+		rslt.err = sql.ErrNoRows
+	}
+	return rslt
+}
+
 // QueryStmt :
 func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
-		return nil, errors.New("empty query statement")
+		return nil, errors.New("sqlike: empty query statement")
 	}
+
 	stmt := sqlstmt.AcquireStmt(db.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	if err := db.dialect.SelectStmt(stmt, query); err != nil {
 		return nil, err
 	}
+
 	rows, err := driver.Query(
 		ctx,
 		db.driver,
@@ -68,6 +98,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if err != nil {
 		return nil, err
 	}
+
 	rslt := new(Result)
 	rslt.cache = db.client.cache
 	rslt.codec = db.codec
