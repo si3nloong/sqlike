@@ -35,7 +35,12 @@ type Database struct {
 	logger     logs.Logger
 }
 
-// Table :
+// Name : to get current database name
+func (db Database) Name() string {
+	return db.name
+}
+
+// Table : use the table under this database
 func (db *Database) Table(name string) *Table {
 	return &Table{
 		dbName:  db.name,

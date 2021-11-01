@@ -16,12 +16,14 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 	)
 
 	{
-		err = client.DropDatabase(ctx, "test")
+		dbName := "test"
+		err = client.DropDatabase(ctx, dbName)
 		require.NoError(t, err)
-		err = client.CreateDatabase(ctx, "test")
+		err = client.CreateDatabase(ctx, dbName)
 		require.NoError(t, err)
 
-		testDB := client.Database("test")
+		testDB := client.Database(dbName)
+		require.Equal(t, dbName, testDB.Name())
 		tb := testDB.Table("t1")
 		require.NotNil(t, tb)
 
