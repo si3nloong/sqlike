@@ -36,7 +36,7 @@ type Database struct {
 }
 
 // Name : to get current database name
-func (db Database) Name() string {
+func (db *Database) Name() string {
 	return db.name
 }
 
