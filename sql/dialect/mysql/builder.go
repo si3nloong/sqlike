@@ -303,12 +303,14 @@ func (b *mySQLBuilder) BuildRaw(stmt sqlstmt.Stmt, it interface{}) error {
 
 // BuildAs :
 func (b *mySQLBuilder) BuildAs(stmt sqlstmt.Stmt, it interface{}) error {
+	stmt.WriteByte('(')
 	x := it.(primitive.As)
 	if err := b.getValue(stmt, x.Field); err != nil {
 		return err
 	}
 	stmt.WriteString(" AS ")
 	stmt.WriteString(b.Quote(x.Name))
+	stmt.WriteByte(')')
 	return nil
 }
 
