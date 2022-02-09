@@ -308,9 +308,9 @@ func (b *mySQLBuilder) BuildAs(stmt sqlstmt.Stmt, it interface{}) error {
 	if err := b.getValue(stmt, x.Field); err != nil {
 		return err
 	}
+	stmt.WriteByte(')')
 	stmt.WriteString(" AS ")
 	stmt.WriteString(b.Quote(x.Name))
-	stmt.WriteByte(')')
 	return nil
 }
 
