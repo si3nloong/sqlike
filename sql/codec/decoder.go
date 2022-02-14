@@ -205,6 +205,27 @@ func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) erro
 	return nil
 }
 
+func (dec DefaultDecoders) DecodeTimeLocation(it interface{}, v reflect.Value) error {
+	var x time.Location
+	switch vi := it.(type) {
+	case string:
+		tz, err := time.LoadLocation(vi)
+		if err != nil {
+			return err
+		}
+		x = *tz
+	case []byte:
+		tz, err := time.LoadLocation(string(vi))
+		if err != nil {
+			return err
+		}
+		x = *tz
+	case nil:
+	}
+	v.Set(reflect.ValueOf(x))
+	return nil
+}
+
 // date format :
 var (
 	DDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
