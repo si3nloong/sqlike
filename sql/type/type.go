@@ -24,6 +24,7 @@ const (
 	GeoPoint
 	Date
 	DateTime
+	Time
 	Timestamp
 	Struct
 	Array

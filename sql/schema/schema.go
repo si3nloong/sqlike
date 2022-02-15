@@ -93,6 +93,7 @@ func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.Char)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)
 	sb.SetType(reflect.TypeOf(civil.Date{}), sqltype.Date)
+	sb.SetType(reflect.TypeOf(civil.Time{}), sqltype.Time)
 	sb.SetType(reflect.TypeOf(json.RawMessage{}), sqltype.JSON)
 	sb.SetType(reflect.TypeOf(orb.Point{}), sqltype.Point)
 	sb.SetType(reflect.TypeOf(orb.LineString{}), sqltype.LineString)

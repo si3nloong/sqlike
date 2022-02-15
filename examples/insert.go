@@ -11,7 +11,6 @@ import (
 	"github.com/si3nloong/sqlike/sqlike"
 	"github.com/si3nloong/sqlike/sqlike/actions"
 	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,7 +76,7 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, int64(1), affected)
 
 		temp := ns2
-		temp.Date = types.Date{Year: 2020, Month: 12, Day: 7}
+		temp.Date = civil.Date{Year: 2020, Month: 12, Day: 7}
 		temp.BigUint = 188
 		temp.BigInt = 188
 		temp.Byte = []byte("testing 123")

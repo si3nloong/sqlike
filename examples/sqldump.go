@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
 	sqldump "github.com/si3nloong/sqlike/sql/dump"
@@ -36,14 +37,15 @@ type dumpStruct struct {
 	// LineString   orb.LineString
 	Enum        Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 	Set         types.Set `sqlike:",set=A|B|C"`
-	Date        types.Date
+	Date        civil.Date
 	DateTime    time.Time
 	PtrString   *string
 	PtrBool     *bool
 	PtrInt64    *int64
 	PtrUint64   *uint64
 	PtrJSONRaw  *json.RawMessage
-	PtrDate     *types.Date
+	PtrDate     *civil.Date
+	PtrTime     *civil.Time
 	PtrDateTime *time.Time
 }
 
@@ -146,7 +148,7 @@ func newDumpStruct() (o dumpStruct) {
 	o.Uint = uint(gofakeit.Uint32())
 	o.Uint64 = gofakeit.Uint64()
 	o.JSONRaw = []byte(`{"id": 100, "message": "hello world"}`)
-	o.Date = types.Date{Year: date.Year(), Month: int(date.Month()), Day: date.Day()}
+	o.Date = civil.Date{Year: date.Year(), Month: date.Month(), Day: date.Day()}
 	o.Enum = Enum(gofakeit.RandString([]string{
 		"SUCCESS",
 		"FAILED",

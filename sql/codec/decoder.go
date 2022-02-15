@@ -150,8 +150,8 @@ func (dec DefaultDecoders) DecodeJSONRaw(it interface{}, v reflect.Value) error 
 	return nil
 }
 
-// DecodeTime :
-func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
+// DecodeDateTime :
+func (dec DefaultDecoders) DecodeDateTime(it interface{}, v reflect.Value) error {
 	var (
 		x   time.Time
 		err error
@@ -199,6 +199,33 @@ func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) erro
 		}
 	case int64:
 		x = civil.DateOf(time.Unix(vi, 0))
+	case nil:
+	}
+	v.Set(reflect.ValueOf(x))
+	return nil
+}
+
+// DecodeCivilTime :
+func (dec DefaultDecoders) DecodeCivilTime(it interface{}, v reflect.Value) error {
+	var (
+		x   civil.Time
+		err error
+	)
+	switch vi := it.(type) {
+	case time.Time:
+		x = civil.TimeOf(vi)
+	case string:
+		x, err = civil.ParseTime(vi)
+		if err != nil {
+			return err
+		}
+	case []byte:
+		x, err = civil.ParseTime(b2s(vi))
+		if err != nil {
+			return err
+		}
+	case int64:
+		x = civil.TimeOf(time.Unix(vi, 0))
 	case nil:
 	}
 	v.Set(reflect.ValueOf(x))
