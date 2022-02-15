@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
@@ -80,6 +81,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Map["three"] = 3
 		ns.Map["eleven"] = 11
 		ns.Struct.VirtualStr = virtualColumn
+		ns.Date = civil.DateOf(now)
 		ns.DateTime = ts
 		ns.Timestamp = ts
 		ns.Language = lang

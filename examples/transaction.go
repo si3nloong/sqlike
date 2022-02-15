@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	uuid "github.com/google/uuid"
 
 	"github.com/si3nloong/sqlike/sql/expr"
@@ -40,6 +41,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 		ns = normalStruct{}
 		ns.ID = uid
+		ns.Date = civil.DateOf(now)
 		ns.DateTime = now
 		ns.Timestamp = now
 		ns.CreatedAt = now
@@ -63,6 +65,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 		ns = normalStruct{}
 		ns.ID = uid
+		ns.Date = civil.DateOf(now)
 		ns.DateTime = now
 		ns.Timestamp = now
 		ns.CreatedAt = now
@@ -98,6 +101,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 				ns = normalStruct{}
 				ns.ID = uid
+				ns.Date = civil.DateOf(now)
 				ns.DateTime = now
 				ns.Timestamp = now
 				ns.CreatedAt = now
@@ -142,6 +146,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 			ctx, func(sess sqlike.SessionContext) error {
 				ns = normalStruct{}
 				ns.ID = uid
+				ns.Date = civil.DateOf(now)
 				ns.DateTime = now
 				ns.Timestamp = now
 				ns.CreatedAt = now
