@@ -42,7 +42,7 @@ func buildDefaultRegistry() Codecer {
 	rg.RegisterTypeCodec(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
 	rg.RegisterTypeCodec(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
 	rg.RegisterTypeCodec(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeDateTime)
-  rg.RegisterTypeCodec(reflect.TypeOf(time.Location{}), enc.EncodeStringer, dec.DecodeTimeLocation)
+	rg.RegisterTypeCodec(reflect.TypeOf(time.Location{}), enc.EncodeStringer, dec.DecodeTimeLocation)
 	rg.RegisterTypeCodec(reflect.TypeOf(civil.Date{}), enc.EncodeStringer, dec.DecodeCivilDate)
 	rg.RegisterTypeCodec(reflect.TypeOf(civil.Time{}), enc.EncodeStringer, dec.DecodeCivilTime)
 	rg.RegisterTypeCodec(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
