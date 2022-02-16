@@ -45,7 +45,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Support `Transactions`
 - Support cursor based pagination
 - Support advance and complex query statement
-- Support [civil.Date](https://cloud.google.com/go/civil)
+- Support [civil.Date](https://cloud.google.com/go/civil#Date), [civil.Time](https://cloud.google.com/go/civil#Time) and [time.Location](https://pkg.go.dev/time#Time)
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support authorization plugin [Casbin](https://github.com/casbin/casbin)
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
@@ -279,6 +279,5 @@ Thanks to these awesome companies for their support of Open Source developers ‚ù
 [MIT](https://github.com/si3nloong/sqlike/blob/main/LICENSE)
 
 Copyright (c) 2019-present, SianLoong Lee
-
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fsi3nloong%2Fsqlike?ref=badge_large)
