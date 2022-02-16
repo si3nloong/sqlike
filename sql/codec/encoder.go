@@ -60,6 +60,12 @@ func (enc DefaultEncoders) EncodeStringer(_ reflext.StructFielder, v reflect.Val
 	return x.String(), nil
 }
 
+// EncodePointerStringer :
+func (enc DefaultEncoders) EncodePointerStringer(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+	x := v.Addr().Interface().(fmt.Stringer)
+	return x.String(), nil
+}
+
 // EncodeTime :
 func (enc DefaultEncoders) EncodeTime(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
 	x := v.Interface().(time.Time)
