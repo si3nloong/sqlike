@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/civil"
 	uuid "github.com/google/uuid"
 	"github.com/si3nloong/sqlike/sql/expr"
 	"github.com/si3nloong/sqlike/sqlike"
@@ -62,6 +63,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Emoji = cnp
 		ns.Enum = Success
 		ns.BigInt = bigInt
+		ns.Date = civil.DateOf(now)
 		ns.DateTime = now
 		ns.CreatedAt = now
 		ns.UpdatedAt = now

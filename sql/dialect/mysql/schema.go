@@ -30,8 +30,9 @@ type mySQLSchema struct {
 func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Byte, s.ByteDataType)
 	sb.SetTypeBuilder(sqltype.Date, s.DateDataType)
-	sb.SetTypeBuilder(sqltype.DateTime, s.TimeDataType)
-	sb.SetTypeBuilder(sqltype.Timestamp, s.TimeDataType)
+	sb.SetTypeBuilder(sqltype.Time, s.TimeDataType)
+	sb.SetTypeBuilder(sqltype.DateTime, s.DateTimeDataType)
+	sb.SetTypeBuilder(sqltype.Timestamp, s.DateTimeDataType)
 	sb.SetTypeBuilder(sqltype.UUID, s.UUIDDataType)
 	sb.SetTypeBuilder(sqltype.JSON, s.JSONDataType)
 	sb.SetTypeBuilder(sqltype.Point, s.SpatialDataType("POINT"))
@@ -94,6 +95,25 @@ func (s mySQLSchema) DateDataType(sf reflext.StructFielder) (col columns.Column)
 }
 
 func (s mySQLSchema) TimeDataType(sf reflext.StructFielder) (col columns.Column) {
+	size := "6"
+	if v, exists := sf.Tag().LookUp("size"); exists {
+		if _, err := strconv.Atoi(v); err == nil {
+			size = v
+		}
+	}
+
+	col.Name = sf.Name()
+	col.DataType = "TIME"
+	col.Type = "TIME(" + size + ")"
+	col.Nullable = sf.IsNullable()
+	// col.DefaultValue = &dflt
+	// if _, ok := sf.Tag().LookUp("on_update"); ok {
+	// 	col.Extra = "ON UPDATE " + dflt
+	// }
+	return
+}
+
+func (s mySQLSchema) DateTimeDataType(sf reflext.StructFielder) (col columns.Column) {
 	size := "6"
 	if v, exists := sf.Tag().LookUp("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
