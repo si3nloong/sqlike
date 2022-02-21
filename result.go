@@ -73,9 +73,7 @@ func (r *Result) values() ([]interface{}, error) {
 
 // Scan : will behave as similar as sql.Scan.
 func (r *Result) Scan(dests ...interface{}) error {
-	if r.close {
-		defer r.Close()
-	}
+	defer r.Close()
 	if r.err != nil {
 		return r.err
 	}
@@ -104,7 +102,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 			return err
 		}
 	}
-	return nil
+	return r.rows.Close()
 }
 
 // Decode will decode the current document into val, this will only accepting pointer of struct as an input.

@@ -181,7 +181,7 @@ type ptrStruct struct {
 	NullTimestamp *time.Time
 	NullKey       *types.Key
 	NullDate      *civil.Date
-	NullCivilDate *civil.Date
+	NullTime      *civil.Time
 	NullEnum      *Enum `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
 }
 
@@ -283,7 +283,8 @@ func newPtrStruct() ptrStruct {
 	u8 := uint8(88)
 	u64 := uint64(37128973897126)
 	enum := Success
-	dt := civil.DateOf(time.Now())
+	dt := civil.DateOf(now)
+	t := civil.TimeOf(now)
 
 	ps := ptrStruct{}
 	ps.NullStr = &str
@@ -297,8 +298,9 @@ func newPtrStruct() ptrStruct {
 	ps.NullUint8 = &u8
 	ps.NullUint64 = &u64
 	ps.NullJSONRaw = &jsonByte
+	ps.NullDate = &dt
+	ps.NullTime = &t
 	ps.NullTimestamp = &now
-	ps.NullCivilDate = &dt
 	ps.NullEnum = &enum
 	return ps
 }

@@ -159,3 +159,37 @@ func TestDecodeTime(a *testing.T) {
 		require.Equal(b, "2021-10-17T07:15:04.366176Z", tm.Format(time.RFC3339Nano))
 	})
 }
+
+func TestDecodeTimeLocation(a *testing.T) {
+	var (
+		dd  = DefaultDecoders{}
+		err error
+	)
+
+	a.Run("Decode TimeLocation with empty value", func(b *testing.T) {
+		var raw time.Location
+		v := reflect.ValueOf(&raw)
+		err = dd.DecodeTimeLocation(nil, v.Elem())
+		require.NoError(b, err)
+		require.NotNil(b, b)
+		require.True(b, raw.String() == "")
+	})
+
+	a.Run("Decode TimeLocation with valid string value", func(b *testing.T) {
+		var raw time.Location
+		v := reflect.ValueOf(&raw)
+		err = dd.DecodeTimeLocation("Asia/Kuala_Lumpur", v.Elem())
+		require.NoError(b, err)
+		require.NotNil(b, b)
+		require.True(b, raw.String() == "Asia/Kuala_Lumpur")
+	})
+
+	a.Run("Decode TimeLocation with valid []byte value", func(b *testing.T) {
+		var raw time.Location
+		v := reflect.ValueOf(&raw)
+		err = dd.DecodeTimeLocation([]byte("Asia/Kuala_Lumpur"), v.Elem())
+		require.NoError(b, err)
+		require.NotNil(b, b)
+		require.True(b, raw.String() == "Asia/Kuala_Lumpur")
+	})
+}

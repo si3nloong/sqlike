@@ -45,6 +45,7 @@ type dumpStruct struct {
 	PtrUint64   *uint64
 	PtrJSONRaw  *json.RawMessage
 	PtrDate     *civil.Date
+	PtrTime     *civil.Time
 	PtrDateTime *time.Time
 	PtrSet      *types.Set `sqlike:",set=A|B|C"`
 }

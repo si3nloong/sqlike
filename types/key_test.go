@@ -1,7 +1,9 @@
 package types
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"testing"
@@ -82,6 +84,16 @@ func TestKey(t *testing.T) {
 		require.True(it, col.Nullable)
 	})
 
+	t.Run("String and GoString", func(it *testing.T) {
+		k := NameKey("Child", "!@#$%^&*()'dajhdkhas", NameKey("Parent", "{}|askjdhkashy8q,L:\"><<", nil))
+
+		encodedKey := `Parent,'%7B%7D%7Caskjdhkashy8q%2CL:%22%3E%3C%3C'/Child,'%21@%23$%25%5E&%2A%28%29%27dajhdkhas'`
+		rawStrKey := `Parent,'{}|askjdhkashy8q,L:"><<'/Child,'!@#$%^&*()'dajhdkhas'`
+		require.Equal(it, encodedKey, k.String())
+		require.Equal(it, rawStrKey, k.GoString())
+		require.Equal(it, rawStrKey, fmt.Sprintf("%#v", k))
+	})
+
 	t.Run("ID", func(it *testing.T) {
 		nk := NameKey("Name", "name-value", nil)
 		require.Equal(it, "name-value", nk.ID())
@@ -101,11 +113,11 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("ParseKey", func(it *testing.T) {
-		str := `Parent,1288888/Name,'sianloong'`
+		str := `Parent,1288888/Name,'sianloong%40gmail.com'`
 		k, err = ParseKey(str)
 		require.NoError(it, err)
 		require.NotNil(it, k)
-		nk := NameKey("Name", "sianloong", IDKey("Parent", 1288888, nil))
+		nk := NameKey("Name", "sianloong@gmail.com", IDKey("Parent", 1288888, nil))
 		require.Equal(it, nk, k)
 		require.True(it, nk.Equal(k))
 	})
@@ -131,7 +143,12 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("Encode & Decode Unicode", func(it *testing.T) {
-		str := `Parent,1288888/Name,'🤔ヤマト'`
+		str := `Parent,1288888/Name,'%F0%9F%A4%94%E3%83%A4%E3%83%9E%E3%83%88'`
+		k, err = ParseKey(str)
+		require.NoError(it, err)
+		require.Equal(it, `EgROYW1lIg3wn6SU44Ok44Oe44OIKgwSBlBhcmVudBi41U4`, k.Encode())
+
+		str = `Parent,1288888/Name,'🤔ヤマト'`
 		k, err = ParseKey(str)
 		require.NoError(it, err)
 		require.Equal(it, `EgROYW1lIg3wn6SU44Ok44Oe44OIKgwSBlBhcmVudBi41U4`, k.Encode())
@@ -266,15 +283,15 @@ func TestKey(t *testing.T) {
 	})
 
 	t.Run("driver.Valuer", func(it *testing.T) {
-		k := NameKey("Parent", "hello-world", nil)
+		k := NameKey("Parent", "hello-world!", nil)
 		v, err := k.Value()
 		require.NoError(it, err)
-		require.Equal(it, `Parent,'hello-world'`, v)
+		require.Equal(it, `Parent,'hello-world%21'`, v)
 
-		nk := NameKey("Child", "hRTYUIO88191", k)
+		nk := NameKey("Child", "hRTYUI,O88191", k)
 		v, err = nk.Value()
 		require.NoError(it, err)
-		require.Equal(it, `Parent,'hello-world'/Child,'hRTYUIO88191'`, v)
+		require.Equal(it, `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`, v)
 
 		idk := IDKey("Parent", 187239123213, nil)
 		v, err = idk.Value()
@@ -290,6 +307,31 @@ func TestKey(t *testing.T) {
 		v, err = mk.Value()
 		require.NoError(it, err)
 		require.Equal(it, `Parent,187239123213/Mix,'Name-value'`, v)
+	})
+
+	t.Run("MarshalGQL and UnmarshalGQL", func(it *testing.T) {
+		k := NameKey("Parent", "hello-world!", nil)
+		w := new(bytes.Buffer)
+		k.MarshalGQL(w)
+		require.NoError(it, err)
+		require.Equal(it, `"EgZQYXJlbnQiDGhlbGxvLXdvcmxkIQ"`, w.String())
+
+		nk := NameKey("Child", "hRTYUI,O88191", k)
+		encoded := `"EgVDaGlsZCINaFJUWVVJLE84ODE5MSoWEgZQYXJlbnQiDGhlbGxvLXdvcmxkIQ"`
+		w.Reset()
+		nk.MarshalGQL(w)
+		require.NoError(it, err)
+		require.Equal(it, encoded, w.String())
+
+		w.Reset()
+		emptyk := new(Key)
+		emptyk.MarshalGQL(w)
+		require.NoError(it, err)
+		require.Equal(it, `null`, w.String())
+
+		err = emptyk.UnmarshalGQL(encoded)
+		require.NoError(t, err)
+		require.Equal(t, `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`, emptyk.String())
 	})
 
 	t.Run("Check Panic", func(it *testing.T) {
@@ -310,6 +352,9 @@ func TestKey(t *testing.T) {
 
 		require.Panics(it, func() {
 			nilKey.String()
+		})
+		require.Panics(it, func() {
+			nilKey.GoString()
 		})
 		require.Panics(it, func() {
 			nilKey.MarshalText()

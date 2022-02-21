@@ -81,6 +81,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Map["three"] = 3
 		ns.Map["eleven"] = 11
 		ns.Struct.VirtualStr = virtualColumn
+		ns.Date = civil.DateOf(now)
 		ns.DateTime = ts
 		ns.Timestamp = ts
 		ns.Date = civil.DateOf(ts)

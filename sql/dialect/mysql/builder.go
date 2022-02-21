@@ -304,11 +304,14 @@ func (b *mySQLBuilder) BuildRaw(stmt db.Stmt, it interface{}) error {
 
 // BuildAs :
 func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it interface{}) error {
+	stmt.WriteByte('(')
 	x := it.(primitive.As)
 	if err := b.getValue(stmt, x.Field); err != nil {
 		return err
 	}
-	stmt.WriteString(" AS " + b.Quote(x.Name))
+	stmt.WriteByte(')')
+	stmt.WriteString(" AS ")
+	stmt.WriteString(b.Quote(x.Name))
 	return nil
 }
 

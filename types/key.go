@@ -52,6 +52,7 @@ type Key struct {
 
 var (
 	_ db.ColumnDataTyper       = (*Key)(nil)
+	_ fmt.GoStringer           = (*Key)(nil)
 	_ driver.Valuer            = (*Key)(nil)
 	_ sql.Scanner              = (*Key)(nil)
 	_ fmt.Stringer             = (*Key)(nil)
@@ -326,10 +327,40 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	return k.unmarshal(v)
 }
 
+func (k Key) MarshalGQL(w io.Writer) {
+	if k.Incomplete() {
+		w.Write([]byte(`null`))
+		return
+	}
+	w.Write([]byte(`"` + k.Encode() + `"`))
+}
+
+func (k *Key) UnmarshalGQL(it interface{}) error {
+	switch vi := it.(type) {
+	case *Key:
+		*k = *vi
+	case []byte:
+		return k.UnmarshalJSON(vi)
+	case string:
+		return k.UnmarshalJSON([]byte(vi))
+	case nil:
+	default:
+		return fmt.Errorf("sqlike: %T is not a Key", it)
+	}
+	return nil
+}
+
+// GoString returns a string representation the raw string of key (without encoding).
+func (k Key) GoString() string {
+	b := bytes.NewBuffer(make([]byte, 0, 512))
+	marshal(&k, b, false)
+	return b.String()
+}
+
 // String returns a string representation of the key.
 func (k Key) String() string {
 	b := bytes.NewBuffer(make([]byte, 0, 512))
-	marshal(&k, b, false)
+	marshal(&k, b, true)
 	return b.String()
 }
 
@@ -343,7 +374,11 @@ func marshal(k *Key, w writer, escape bool) {
 	w.WriteByte(',')
 	if k.NameID != "" {
 		w.WriteByte('\'')
-		w.WriteString(url.PathEscape(k.NameID))
+		if escape {
+			w.WriteString(url.PathEscape(k.NameID))
+		} else {
+			w.WriteString(k.NameID)
+		}
 		w.WriteByte('\'')
 	} else {
 		w.WriteString(strconv.FormatInt(k.IntID, 10))
@@ -588,5 +623,20 @@ func NewNameKey(kind string, parent *Key) *Key {
 		Kind:      kind,
 		NameID:    ksuid.New().String(),
 		Parent:    parent,
+	}
+}
+
+func UnmarshalInt(v interface{}) (int, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.Atoi(v)
+	case int:
+		return v, nil
+	case int64:
+		return int(v), nil
+	case json.Number:
+		return strconv.Atoi(string(v))
+	default:
+		return 0, fmt.Errorf("%T is not an int", v)
 	}
 }

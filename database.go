@@ -32,7 +32,12 @@ type Database struct {
 	logger     sqlx.Logger
 }
 
-// Table :
+// Name : to get current database name
+func (db *Database) Name() string {
+	return db.name
+}
+
+// Table : use the table under this database
 func (db *Database) Table(name string) *Table {
 	return &Table{
 		dbName:  db.name,
@@ -63,7 +68,7 @@ func (db *Database) QueryRow(ctx context.Context, query string, args ...interfac
 // QueryStmt :
 func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
 	if query == nil {
-		return nil, errors.New("empty query statement")
+		return nil, errors.New("sqlike: empty query statement")
 	}
 
 	stmt := sqlstmt.AcquireStmt(db.dialect)
@@ -71,6 +76,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if err := db.dialect.SelectStmt(stmt, query); err != nil {
 		return nil, err
 	}
+
 	rows, err := driver.Query(
 		ctx,
 		getDriverFromContext(ctx, db.driver),
@@ -80,6 +86,7 @@ func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, 
 	if err != nil {
 		return nil, err
 	}
+
 	rslt := new(Result)
 	rslt.cache = db.client.cache
 	rslt.dialect = db.dialect
