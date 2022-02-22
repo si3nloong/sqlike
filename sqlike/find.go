@@ -34,7 +34,7 @@ func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, op
 		opt = opts[0]
 	}
 	x.Limit(1)
-	csr := find(
+	rslt := find(
 		ctx,
 		tb.dbName,
 		tb.name,
@@ -47,14 +47,14 @@ func (tb *Table) FindOne(ctx context.Context, act actions.SelectOneStatement, op
 		&opt.FindOptions,
 		opt.FindOptions.LockMode,
 	)
-	csr.close = true
-	if csr.err != nil {
-		return csr
+	rslt.close = true
+	if rslt.err != nil {
+		return rslt
 	}
-	if !csr.Next() {
-		csr.err = sql.ErrNoRows
+	if !rslt.Next() {
+		rslt.err = sql.ErrNoRows
 	}
-	return csr
+	return rslt
 }
 
 // Find : find multiple records on the table.

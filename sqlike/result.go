@@ -99,7 +99,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 			return err
 		}
 	}
-	return r.rows.Close()
+	return r.Close()
 }
 
 // Decode will decode the current document into val, this will only accepting pointer of struct as an input.
@@ -147,6 +147,9 @@ func (r *Result) Decode(dst interface{}) error {
 		}
 	}
 	reflext.Indirect(v).Set(reflext.Indirect(vv))
+	if r.close {
+		return r.Close()
+	}
 	return nil
 }
 

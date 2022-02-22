@@ -63,19 +63,15 @@ func (db *Database) QueryRow(ctx context.Context, query string, args ...interfac
 		rslt.err = err
 		return rslt
 	}
-
-	// release connection when it has error
-	defer func() {
-		if rslt.err != nil {
-			rslt.rows.Close()
-		}
-	}()
-
 	rslt.rows = rows
 	rslt.columnTypes, rslt.err = rows.ColumnTypes()
+	if rslt.err != nil {
+		defer rslt.rows.Close()
+	}
 	for _, col := range rslt.columnTypes {
 		rslt.columns = append(rslt.columns, col.Name())
 	}
+	rslt.close = true
 	if !rslt.Next() {
 		rslt.err = sql.ErrNoRows
 	}
