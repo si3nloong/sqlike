@@ -66,8 +66,8 @@ func (enc DefaultEncoders) EncodePointerStringer(_ reflext.StructFielder, v refl
 	return x.String(), nil
 }
 
-// EncodeTime :
-func (enc DefaultEncoders) EncodeTime(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+// EncodeDateTime :
+func (enc DefaultEncoders) EncodeDateTime(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
 	x := v.Interface().(time.Time)
 	// if x.IsZero() {
 	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")

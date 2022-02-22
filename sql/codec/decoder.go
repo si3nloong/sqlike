@@ -178,8 +178,8 @@ func (dec DefaultDecoders) DecodeDateTime(it interface{}, v reflect.Value) error
 	return nil
 }
 
-// DecodeCivilDate :
-func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) error {
+// DecodeDate :
+func (dec DefaultDecoders) DecodeDate(it interface{}, v reflect.Value) error {
 	var (
 		x   civil.Date
 		err error
@@ -227,8 +227,8 @@ func (dec DefaultDecoders) DecodeTimeLocation(it interface{}, v reflect.Value) e
 	return nil
 }
 
-// DecodeCivilTime :
-func (dec DefaultDecoders) DecodeCivilTime(it interface{}, v reflect.Value) error {
+// DecodeTime :
+func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	var (
 		x   civil.Time
 		err error

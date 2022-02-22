@@ -150,7 +150,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			"Float32", "Float64", "UFloat32",
 			"EmptyStruct", "Struct", "VirtualColumn",
 			"Struct.StoredStr", "JSONRaw", "Map",
-			"DateTime", "Timestamp", "Language", "Languages",
+			"DateTime", "Timestamp", "Location", "Language", "Languages",
 			"Currency", "Currencies",
 			"Enum", "Set",
 			"CreatedAt", "UpdatedAt",
