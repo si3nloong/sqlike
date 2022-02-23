@@ -69,6 +69,7 @@ type normalStruct struct {
 	Map        map[string]int
 	DateTime   time.Time `sqlike:",size=0"`
 	Timestamp  time.Time
+	Location   *time.Location
 	Language   language.Tag
 	Languages  []language.Tag
 	Currency   currency.Unit
@@ -179,6 +180,7 @@ type ptrStruct struct {
 	NullStruct    *struct{}
 	NullJSONRaw   *json.RawMessage
 	NullTimestamp *time.Time
+	NullLocation  *time.Location
 	NullKey       *types.Key
 	NullDate      *civil.Date
 	NullTime      *civil.Time
@@ -253,6 +255,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 	ns.Struct.NestedBool = true
 	ns.Date = civil.DateOf(now)
 	ns.DateTime = now
+	ns.Location, _ = time.LoadLocation("Asia/Kuala_Lumpur")
 	ns.Timestamp = now
 	ns.Language = language.English
 	ns.Currencies = []currency.Unit{

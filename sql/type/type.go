@@ -63,6 +63,7 @@ var names = map[Type]string{
 	Struct:          "struct",
 	Timestamp:       "timestamp",
 	DateTime:        "datetime",
+	Time:            "time",
 	JSON:            "json",
 	UUID:            "uuid",
 	Point:           "point",

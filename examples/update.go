@@ -103,6 +103,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.NotZero(t, ns2.DateTime)
 		require.NotZero(t, ns2.CreatedAt)
 		require.NotZero(t, ns2.UpdatedAt)
+		require.Nil(t, ns2.Location)
 	}
 
 	{

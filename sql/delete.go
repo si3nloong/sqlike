@@ -14,7 +14,24 @@ type DeleteStmt struct {
 }
 
 // From :
-func (stmt *DeleteStmt) From() *DeleteStmt {
+func (stmt *DeleteStmt) From(values ...interface{}) *DeleteStmt {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	switch length {
+	case 1:
+		stmt.Tables = append(stmt.Tables, values[0])
+	case 2:
+		stmt.Tables = append(stmt.Tables,
+			primitive.Column{
+				Table: mustString(values[0]),
+				Name:  mustString(values[1]),
+			},
+		)
+	default:
+		panic("invalid length of arguments")
+	}
 	return stmt
 }
 

@@ -181,8 +181,8 @@ func (dec DefaultDecoders) DecodeDateTime(it interface{}, v reflect.Value) error
 	return nil
 }
 
-// DecodeCivilDate :
-func (dec DefaultDecoders) DecodeCivilDate(it interface{}, v reflect.Value) error {
+// DecodeDate :
+func (dec DefaultDecoders) DecodeDate(it interface{}, v reflect.Value) error {
 	var (
 		x   civil.Date
 		err error
@@ -230,8 +230,8 @@ func (dec DefaultDecoders) DecodeTimeLocation(it interface{}, v reflect.Value) e
 	return nil
 }
 
-// DecodeCivilTime :
-func (dec DefaultDecoders) DecodeCivilTime(it interface{}, v reflect.Value) error {
+// DecodeTime :
+func (dec DefaultDecoders) DecodeTime(it interface{}, v reflect.Value) error {
 	var (
 		x   civil.Time
 		err error
@@ -245,7 +245,7 @@ func (dec DefaultDecoders) DecodeCivilTime(it interface{}, v reflect.Value) erro
 			return err
 		}
 	case []byte:
-		x, err = civil.ParseTime(b2s(vi))
+		x, err = civil.ParseTime(string(vi))
 		if err != nil {
 			return err
 		}
@@ -255,28 +255,6 @@ func (dec DefaultDecoders) DecodeCivilTime(it interface{}, v reflect.Value) erro
 	}
 	v.Set(reflect.ValueOf(x))
 	return nil
-}
-
-// date format :
-var (
-	DDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
-	DDMMYYYYHHMMSS   = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
-	DDMMYYYYHHMMSSTZ = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}\.\d+$`)
-)
-
-// DecodeTime : this will decode time by using multiple format
-func decodeTime(str string) (t time.Time, err error) {
-	switch {
-	case DDMMYYYY.MatchString(str):
-		t, err = time.Parse("2006-01-02", str)
-	case DDMMYYYYHHMMSS.MatchString(str):
-		t, err = time.Parse("2006-01-02 15:04:05", str)
-	case DDMMYYYYHHMMSSTZ.MatchString(str):
-		t, err = time.Parse("2006-01-02 15:04:05.999999", str)
-	default:
-		t, err = time.Parse(time.RFC3339Nano, str)
-	}
-	return
 }
 
 // DecodePoint :

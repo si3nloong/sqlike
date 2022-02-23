@@ -31,14 +31,14 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 			ID int64 `sqlike:",auto_increment"`
 		}{})
 
-		var o struct {
-			Rows uint `sqlike:"rows"`
-		}
+		// var o struct {
+		// 	Rows uint `sqlike:"rows"`
+		// }
 
-		err = testDB.QueryRow(ctx, "EXPLAIN SELECT * FROM `t1`;").Decode(&o)
-		require.NoError(t, err)
-		// empty table will treat as one record when using EXPLAIN
-		require.Equal(t, uint(1), o.Rows)
+		// err = testDB.QueryRow(ctx, "EXPLAIN SELECT * FROM `t1`;").Decode(&o)
+		// require.NoError(t, err)
+		// // empty table will treat as one record when using EXPLAIN
+		// require.Equal(t, uint(1), o.Rows)
 	}
 
 	{

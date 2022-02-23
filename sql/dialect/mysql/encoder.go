@@ -66,7 +66,7 @@ func (enc DefaultEncoders) EncodeStringer(_ context.Context, v reflect.Value) (i
 }
 
 // EncodeTime :
-func (enc DefaultEncoders) EncodeTime(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeDateTime(_ context.Context, v reflect.Value) (interface{}, error) {
 	x := v.Interface().(time.Time)
 	// if x.IsZero() {
 	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")

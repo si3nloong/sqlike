@@ -105,6 +105,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 		}
 	}
 
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "TIME"
 	col.Type = "TIME(" + size + ")"
@@ -113,10 +114,10 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	// if _, ok := sf.Tag().LookUp("on_update"); ok {
 	// 	col.Extra = "ON UPDATE " + dflt
 	// }
-	return
+	return col
 }
 
-func (s mySQLSchema) DateTimeDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) DateTimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
 	if v, exists := sf.Tag().LookUp("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {

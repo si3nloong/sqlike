@@ -65,7 +65,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			"EmptyStruct",
 			"Struct", "VirtualColumn", "Struct.StoredStr",
 			"JSONRaw", "Map",
-			"DateTime", "Timestamp",
+			"DateTime", "Timestamp", "Location",
 			"Language", "Languages", "Currency", "Currencies",
 			"Enum", "Set", "CreatedAt", "UpdatedAt",
 		}, columns)
