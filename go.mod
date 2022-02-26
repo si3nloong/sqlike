@@ -6,14 +6,13 @@ require (
 	cloud.google.com/go v0.100.2
 	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.41.0
+	github.com/casbin/casbin/v2 v2.41.1
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/paulmach/orb v0.4.0
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/segmentio/ksuid v1.0.4
-	github.com/si3nloong/sqlike v1.7.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/sjson v1.2.4
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
