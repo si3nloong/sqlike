@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
@@ -153,7 +154,7 @@ func isIndexExists(
 	dbName, table, indexName string,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger sql.Logger,
+	logger db.Logger,
 ) (bool, error) {
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)

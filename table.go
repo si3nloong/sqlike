@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 
@@ -32,7 +33,8 @@ type Table struct {
 	// sql dialect
 	dialect dialect.Dialect
 
-	logger sql.Logger
+	// logger
+	logger db.Logger
 }
 
 // Rename : rename the current table name to new table name

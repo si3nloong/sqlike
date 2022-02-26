@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
@@ -41,7 +41,7 @@ func modifyOne(
 	cache reflext.StructMapper,
 	dialect dialect.Dialect,
 	driver sqldriver.Driver,
-	logger sql.Logger,
+	logger db.Logger,
 	update interface{},
 	opts []*options.ModifyOneOptions,
 ) error {

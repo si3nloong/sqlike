@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
@@ -92,7 +92,7 @@ func deleteMany(
 	dbName, tbName string,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger sql.Logger,
+	logger db.Logger,
 	act *actions.DeleteActions,
 	opt *options.DeleteOptions,
 ) (int64, error) {
@@ -129,7 +129,7 @@ func destroyOne(
 	cache reflext.StructMapper,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger sql.Logger,
+	logger db.Logger,
 	delete interface{},
 	opt *options.DestroyOneOptions,
 ) error {

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
@@ -100,7 +101,7 @@ func find(
 	// cdc codec.Codecer,
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
-	logger sqlx.Logger,
+	logger db.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,
 ) *Result {

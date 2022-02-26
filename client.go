@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
-	sqlx "github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
@@ -48,7 +48,7 @@ type Client struct {
 	*DriverInfo
 	*sql.DB
 	pk      string
-	logger  sqlx.Logger
+	logger  db.Logger
 	cache   reflext.StructMapper
 	dialect dialect.Dialect
 }
@@ -81,7 +81,7 @@ func newClient(
 }
 
 // SetLogger : this is to set the logger for debugging, it will panic if the logger input is nil
-func (c *Client) SetLogger(logger sqlx.Logger) *Client {
+func (c *Client) SetLogger(logger db.Logger) *Client {
 	if logger == nil {
 		panic("logger cannot be nil")
 	}

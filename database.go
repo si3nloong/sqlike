@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
@@ -29,7 +30,7 @@ type Database struct {
 	client     *Client
 	driver     driver.Driver
 	dialect    dialect.Dialect
-	logger     sqlx.Logger
+	logger     db.Logger
 }
 
 // Name : to get current database name

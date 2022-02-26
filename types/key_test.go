@@ -33,7 +33,7 @@ func (field) Index() []int {
 	return nil
 }
 
-func (f field) Tag() reflext.StructTager {
+func (f field) Tag() reflext.FieldTag {
 	return reflext.StructTag{}
 }
 

@@ -27,7 +27,7 @@ type FieldInfo interface {
 	Index() []int
 
 	// get struct tag info
-	Tag() StructTager
+	Tag() FieldTag
 
 	// if the field is struct, parent will not be nil
 	// this will be the parent struct of current struct
@@ -46,11 +46,14 @@ type FieldInfo interface {
 	IsEmbedded() bool
 }
 
-// StructTager :
-type StructTager interface {
+// FieldTag :
+type FieldTag interface {
 	Name() string
 	FieldName() string
+
+	// look up tag value using key
 	LookUp(key string) (val string, exists bool)
+
 	Get(key string) string
 }
 
@@ -115,7 +118,7 @@ func (sf *StructField) Type() reflect.Type {
 }
 
 // Tag :
-func (sf *StructField) Tag() StructTager {
+func (sf *StructField) Tag() FieldTag {
 	return sf.tag
 }
 
