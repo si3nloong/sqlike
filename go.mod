@@ -19,6 +19,6 @@ require (
 	go.mongodb.org/mongo-driver v1.8.4
 	golang.org/x/net v0.0.0-20211008194852-3b03d305991f
 	golang.org/x/text v0.3.7
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
