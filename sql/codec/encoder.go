@@ -178,24 +178,24 @@ func (enc DefaultEncoders) EncodeMap(_ reflext.StructFielder, v reflect.Value) (
 	return jsonb.Marshal(v)
 }
 
-func isBaseType(t reflect.Type) bool {
-	for {
-		k := t.Kind()
-		switch k {
-		case reflect.String:
-			return true
-		case reflect.Bool:
-			return true
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return true
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return true
-		case reflect.Float32, reflect.Float64:
-			return true
-		case reflect.Ptr:
-			t = t.Elem()
-		default:
-			return false
-		}
-	}
-}
+// func isBaseType(t reflect.Type) bool {
+// 	for {
+// 		k := t.Kind()
+// 		switch k {
+// 		case reflect.String:
+// 			return true
+// 		case reflect.Bool:
+// 			return true
+// 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+// 			return true
+// 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+// 			return true
+// 		case reflect.Float32, reflect.Float64:
+// 			return true
+// 		case reflect.Ptr:
+// 			t = t.Elem()
+// 		default:
+// 			return false
+// 		}
+// 	}
+// }
