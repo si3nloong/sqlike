@@ -3,8 +3,9 @@ package sqlike
 import (
 	"testing"
 
+	"context"
+
 	"github.com/stretchr/testify/require"
-	"golang.org/x/net/context"
 )
 
 func TestBuildIndexes(t *testing.T) {

@@ -261,12 +261,6 @@ func main() {
 
 Inspired by [gorm](https://github.com/jinzhu/gorm), [mongodb-go-driver](https://github.com/mongodb/mongo-go-driver) and [sqlx](https://github.com/jmoiron/sqlx).
 
-## 🔋 Special Sponsors
-
-<p>
-    <img src="https://asset.wetix.my/images/logo/wetix.png" alt="WeTix" width="180px" style="margin:5px 10px;">
-</p>
-
 ## 🎉 Big Thanks To
 
 Thanks to these awesome companies for their support of Open Source developers ❤
