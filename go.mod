@@ -3,7 +3,7 @@ module github.com/si3nloong/sqlike
 go 1.18
 
 require (
-	cloud.google.com/go v0.102.0
+	cloud.google.com/go v0.102.1
 	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.47.2
@@ -38,5 +38,5 @@ require (
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 )
