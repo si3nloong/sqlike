@@ -21,7 +21,7 @@ type Dialect interface {
 	TableName(db, table string) string
 	Var(i int) string
 	Quote(n string) string
-	Format(v interface{}) (val string)
+	Format(v any) (val string)
 	Connect(opt *options.ConnectOptions) (connStr string)
 	UseDatabase(stmt db.Stmt, db string)
 	GetVersion(stmt db.Stmt)
@@ -47,7 +47,7 @@ type Dialect interface {
 	Select(stmt db.Stmt, act *actions.FindActions, lock primitive.Lock) (err error)
 	Update(stmt db.Stmt, act *actions.UpdateActions) (err error)
 	Delete(stmt db.Stmt, act *actions.DeleteActions) (err error)
-	SelectStmt(stmt db.Stmt, query interface{}) (err error)
+	SelectStmt(stmt db.Stmt, query any) (err error)
 	Replace(stmt db.Stmt, db, table string, columns []string, query *sql.SelectStmt) (err error)
 }
 

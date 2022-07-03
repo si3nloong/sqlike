@@ -149,7 +149,7 @@ func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
 }
 
 // MustMigrate : this will ensure the migrate is complete, otherwise it will panic
-func (tb Table) MustMigrate(ctx context.Context, entity interface{}) {
+func (tb Table) MustMigrate(ctx context.Context, entity any) {
 	err := tb.Migrate(ctx, entity)
 	if err != nil {
 		panic(err)
@@ -157,17 +157,17 @@ func (tb Table) MustMigrate(ctx context.Context, entity interface{}) {
 }
 
 // Migrate : migrate will create a new table follows by the definition of struct tag, alter when the table already exists
-func (tb *Table) Migrate(ctx context.Context, entity interface{}) error {
+func (tb *Table) Migrate(ctx context.Context, entity any) error {
 	return tb.migrateOne(ctx, tb.client.cache, entity, false)
 }
 
 // UnsafeMigrate : unsafe migration will delete non-exist index and columns, beware when you use this
-func (tb *Table) UnsafeMigrate(ctx context.Context, entity interface{}) error {
+func (tb *Table) UnsafeMigrate(ctx context.Context, entity any) error {
 	return tb.migrateOne(ctx, tb.client.cache, entity, true)
 }
 
 // MustUnsafeMigrate : this will panic if it get error on unsafe migrate
-func (tb *Table) MustUnsafeMigrate(ctx context.Context, entity interface{}) {
+func (tb *Table) MustUnsafeMigrate(ctx context.Context, entity any) {
 	err := tb.migrateOne(ctx, tb.client.cache, entity, true)
 	if err != nil {
 		panic(err)
@@ -273,7 +273,7 @@ func (tb *Table) HasIndexByName(ctx context.Context, name string) (bool, error) 
 	)
 }
 
-func (tb *Table) migrateOne(ctx context.Context, cache reflext.StructMapper, entity interface{}, unsafe bool) error {
+func (tb *Table) migrateOne(ctx context.Context, cache reflext.StructMapper, entity any, unsafe bool) error {
 	v := reflext.ValueOf(entity)
 	if !v.IsValid() {
 		return ErrInvalidInput

@@ -11,27 +11,27 @@ import (
 // SelectStmt :
 type SelectStmt struct {
 	DistinctOn bool
-	Tables     []interface{}
-	Exprs      []interface{}
-	Joins      []interface{}
+	Tables     []any
+	Exprs      []any
+	Joins      []any
 	IndexHints string
 	Conditions primitive.Group
 	Havings    primitive.Group
-	Groups     []interface{}
-	Sorts      []interface{}
+	Groups     []any
+	Sorts      []any
 	RowCount   uint
 	Skip       uint
-	Opts       []interface{}
+	Opts       []any
 }
 
 // Select :
-func Select(fields ...interface{}) *SelectStmt {
+func Select(fields ...any) *SelectStmt {
 	stmt := new(SelectStmt)
 	return stmt.Select(fields...)
 }
 
 // Select :
-func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Select(fields ...any) *SelectStmt {
 	if len(fields) == 1 {
 		switch fields[0].(type) {
 		case primitive.As, *SelectStmt:
@@ -50,7 +50,7 @@ func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 }
 
 // From :
-func (stmt *SelectStmt) From(values ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) From(values ...any) *SelectStmt {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
@@ -86,25 +86,25 @@ func (stmt *SelectStmt) Distinct() *SelectStmt {
 }
 
 // Where :
-func (stmt *SelectStmt) Where(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Where(fields ...any) *SelectStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 
 // Having :
-func (stmt *SelectStmt) Having(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Having(fields ...any) *SelectStmt {
 	stmt.Havings = expr.And(fields...)
 	return stmt
 }
 
 // OrderBy :
-func (stmt *SelectStmt) OrderBy(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) OrderBy(fields ...any) *SelectStmt {
 	stmt.Sorts = fields
 	return stmt
 }
 
 // GroupBy :
-func (stmt *SelectStmt) GroupBy(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) GroupBy(fields ...any) *SelectStmt {
 	stmt.Groups = fields
 	return stmt
 }
@@ -126,12 +126,12 @@ func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 }
 
 // Option :
-func (stmt *SelectStmt) Option(opts ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Option(opts ...any) *SelectStmt {
 	stmt.Opts = opts
 	return stmt
 }
 
-func mustString(it interface{}) string {
+func mustString(it any) string {
 	v := reflext.Indirect(reflext.ValueOf(it))
 	if v.Kind() != reflect.String {
 		panic("unsupported data type")

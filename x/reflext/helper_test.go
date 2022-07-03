@@ -58,7 +58,7 @@ func TestTypeOf(t *testing.T) {
 		ptr *string
 		// multiptrint *****int
 		// nilSlice    []string
-		// nilMap      map[string]interface{}
+		// nilMap      map[string]any
 		// v           reflect.Value
 	)
 
@@ -76,7 +76,7 @@ func TestValueOf(t *testing.T) {
 		ptr         *string
 		multiptrint *****int
 		nilSlice    []string
-		nilMap      map[string]interface{}
+		nilMap      map[string]any
 		v           reflect.Value
 	)
 
@@ -101,7 +101,7 @@ func TestValueOf(t *testing.T) {
 
 func TestNull(t *testing.T) {
 	var (
-		it      interface{}
+		it      any
 		pstr    *string
 		text    = "hello world"
 		integer int
@@ -109,7 +109,7 @@ func TestNull(t *testing.T) {
 		arr     = make([]string, 0)
 		nilMap  map[string]string
 		initMap = make(map[string]string)
-		itv     interface{}
+		itv     any
 	)
 
 	itv = "testing"
@@ -127,7 +127,7 @@ func TestNull(t *testing.T) {
 
 func TestIsNullable(t *testing.T) {
 	var (
-		it          interface{}
+		it          any
 		str         string
 		i           int
 		i64         int64
@@ -171,7 +171,7 @@ func TestZero(t *testing.T) {
 
 func TestIsKind(t *testing.T) {
 	var (
-		it          interface{}
+		it          any
 		str         string
 		i           int
 		i8          int8
@@ -226,7 +226,7 @@ func (z zero) IsZero() bool {
 
 func TestIsZero(t *testing.T) {
 	var (
-		it           interface{}
+		it           any
 		str          string
 		i            int
 		i8           int8

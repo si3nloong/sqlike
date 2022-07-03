@@ -18,7 +18,7 @@ func TestActions(t *testing.T) {
 
 	foAction := new(FindOneActions)
 	foAction.OrderBy(expr.Asc("Aa"), expr.Desc("Bb"), expr.Desc("Cc"))
-	require.ElementsMatch(t, []interface{}{
+	require.ElementsMatch(t, []any{
 		expr.Asc("Aa"),
 		expr.Desc("Bb"),
 		expr.Desc("Cc"),
@@ -28,7 +28,7 @@ func TestActions(t *testing.T) {
 	dlAction.Limit(12)
 	require.Equal(t, uint(12), dlAction.RowCount)
 	dlAction.OrderBy(expr.Asc("A"), expr.Desc("B"))
-	require.ElementsMatch(t, []interface{}{
+	require.ElementsMatch(t, []any{
 		expr.Asc("A"),
 		expr.Desc("B"),
 	}, dlAction.Sorts)

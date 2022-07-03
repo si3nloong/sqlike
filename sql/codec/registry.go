@@ -138,11 +138,11 @@ func (r *Registry) LookupDecoder(t reflect.Type) (db.ValueDecoder, error) {
 }
 
 // NilEncoder :
-func NilEncoder(_ context.Context, _ reflect.Value) (interface{}, error) {
+func NilEncoder(_ context.Context, _ reflect.Value) (any, error) {
 	return nil, nil
 }
 
-func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) {
+func encodeDriverValue(_ context.Context, v reflect.Value) (any, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
 		return nil, nil
 	}
@@ -153,7 +153,7 @@ func encodeDriverValue(_ context.Context, v reflect.Value) (interface{}, error) 
 	return x.Value()
 }
 
-func sqlScannerDecoder(it interface{}, v reflect.Value) error {
+func sqlScannerDecoder(it any, v reflect.Value) error {
 	if it == nil {
 		// Avoid from sql.scanner when the value is nil
 		v.Set(reflect.Zero(v.Type()))

@@ -30,7 +30,7 @@ func TestRegistry(t *testing.T) {
 	rg.RegisterTypeDecoder(typeof, nil)
 
 	tByte := reflect.TypeOf([]byte{})
-	byteEncoder := func(_ context.Context, v reflect.Value) (interface{}, error) {
+	byteEncoder := func(_ context.Context, v reflect.Value) (any, error) {
 		return v.Bytes(), nil
 	}
 	rg.RegisterTypeCodec(tByte, byteEncoder, nil)
@@ -54,7 +54,7 @@ func TestEncodeValue(t *testing.T) {
 	}
 
 	{
-		var it interface{}
+		var it any
 		it = num{}
 		x := it.(driver.Valuer)
 		it, err := encodeDriverValue(context.TODO(), reflect.ValueOf(x))
@@ -66,7 +66,7 @@ func TestEncodeValue(t *testing.T) {
 func TestNilEncoder(t *testing.T) {
 	var (
 		v   reflect.Value
-		it  interface{}
+		it  any
 		err error
 	)
 

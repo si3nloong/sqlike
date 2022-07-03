@@ -18,7 +18,7 @@ func TestEncodeMap(t *testing.T) {
 	// uninitialized map
 	{
 		w = new(Writer)
-		var uninitmap map[string]interface{}
+		var uninitmap map[string]any
 		v = reflect.ValueOf(uninitmap)
 		err = enc.EncodeMap(w, v)
 		require.NoError(t, err)
@@ -28,7 +28,7 @@ func TestEncodeMap(t *testing.T) {
 	// initiliazed map
 	{
 		w = new(Writer)
-		initmap := make(map[string]interface{})
+		initmap := make(map[string]any)
 		v = reflect.ValueOf(initmap)
 		err = enc.EncodeMap(w, v)
 		require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestEncodeMap(t *testing.T) {
 
 	{
 		w = new(Writer)
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		m["a"] = "v1"
 		m["b"] = -2246
 		m["c"] = float64(10.888)

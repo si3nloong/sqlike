@@ -140,7 +140,7 @@ func (k Key) Value() (driver.Value, error) {
 }
 
 // Scan :
-func (k *Key) Scan(it interface{}) error {
+func (k *Key) Scan(it any) error {
 	switch vi := it.(type) {
 	case []byte:
 		if err := k.unmarshal(string(vi)); err != nil {
@@ -335,7 +335,7 @@ func (k Key) MarshalGQL(w io.Writer) {
 	w.Write([]byte(`"` + k.Encode() + `"`))
 }
 
-func (k *Key) UnmarshalGQL(it interface{}) error {
+func (k *Key) UnmarshalGQL(it any) error {
 	switch vi := it.(type) {
 	case *Key:
 		*k = *vi
@@ -626,7 +626,7 @@ func NewNameKey(kind string, parent *Key) *Key {
 	}
 }
 
-func UnmarshalInt(v interface{}) (int, error) {
+func UnmarshalInt(v any) (int, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.Atoi(v)

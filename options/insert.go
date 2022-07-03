@@ -41,6 +41,6 @@ func (opt *InsertOptions) SetOmitFields(fields ...string) *InsertOptions {
 }
 
 // // SetOnConflict :
-// func (opt *InsertOptions) SetOnConflict(src []interface{}) *InsertOptions {
+// func (opt *InsertOptions) SetOnConflict(src []any) *InsertOptions {
 // 	return opt
 // }

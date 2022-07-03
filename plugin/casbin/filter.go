@@ -6,6 +6,6 @@ import (
 )
 
 // Filter :
-func Filter(fields ...interface{}) primitive.Group {
+func Filter(fields ...any) primitive.Group {
 	return expr.And(fields...)
 }

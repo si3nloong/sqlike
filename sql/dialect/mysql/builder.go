@@ -82,7 +82,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 }
 
 // BuildCastAs :
-func (b *mySQLBuilder) BuildCastAs(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildCastAs(stmt db.Stmt, it any) error {
 	x := it.(primitive.CastAs)
 	stmt.WriteString("CAST(")
 	if err := b.builder.BuildStatement(stmt, x.Value); err != nil {
@@ -100,7 +100,7 @@ func (b *mySQLBuilder) BuildCastAs(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildFunction :
-func (b *mySQLBuilder) BuildFunction(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildFunction(stmt db.Stmt, it any) error {
 	x := it.(primitive.Func)
 	stmt.WriteString(x.Name)
 	stmt.WriteByte('(')
@@ -117,7 +117,7 @@ func (b *mySQLBuilder) BuildFunction(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildJSONFunction :
-func (b *mySQLBuilder) BuildJSONFunction(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildJSONFunction(stmt db.Stmt, it any) error {
 	x := it.(primitive.JSONFunc)
 	if x.Prefix != nil {
 		if err := b.getValue(stmt, x.Prefix); err != nil {
@@ -140,14 +140,14 @@ func (b *mySQLBuilder) BuildJSONFunction(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildString :
-func (b *mySQLBuilder) BuildString(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildString(stmt db.Stmt, it any) error {
 	v := reflect.ValueOf(it)
 	stmt.WriteString(b.Quote(v.String()))
 	return nil
 }
 
 // BuildLike :
-func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it any) error {
 	x := it.(primitive.L)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -195,7 +195,7 @@ func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildField :
-func (b *mySQLBuilder) BuildField(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildField(stmt db.Stmt, it any) error {
 	x := it.(primitive.Field)
 	stmt.WriteString("FIELD")
 	stmt.WriteByte('(')
@@ -211,7 +211,7 @@ func (b *mySQLBuilder) BuildField(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildValue :
-func (b *mySQLBuilder) BuildValue(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildValue(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.Value)
 	v := reflext.ValueOf(x.Raw)
 	if !v.IsValid() {
@@ -235,7 +235,7 @@ func (b *mySQLBuilder) BuildValue(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildColumn :
-func (b *mySQLBuilder) BuildColumn(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildColumn(stmt db.Stmt, it any) error {
 	x := it.(primitive.Column)
 	if x.Table != "" {
 		stmt.WriteString(b.Quote(x.Table))
@@ -246,7 +246,7 @@ func (b *mySQLBuilder) BuildColumn(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildJSONColumn :
-func (b *mySQLBuilder) BuildJSONColumn(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildJSONColumn(stmt db.Stmt, it any) error {
 	/*
 		Expected columns ( JSON_EXTRACT )
 		Column : Address
@@ -280,7 +280,7 @@ func (b *mySQLBuilder) BuildJSONColumn(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildNil :
-func (b *mySQLBuilder) BuildNil(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildNil(stmt db.Stmt, it any) error {
 	x := it.(primitive.Nil)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -294,7 +294,7 @@ func (b *mySQLBuilder) BuildNil(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildRaw :
-func (b *mySQLBuilder) BuildRaw(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildRaw(stmt db.Stmt, it any) error {
 	x, ok := it.(primitive.Raw)
 	if ok {
 		stmt.WriteString(x.Value)
@@ -303,7 +303,7 @@ func (b *mySQLBuilder) BuildRaw(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildAs :
-func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it any) error {
 	stmt.WriteByte('(')
 	x := it.(primitive.As)
 	if err := b.getValue(stmt, x.Field); err != nil {
@@ -316,7 +316,7 @@ func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildAggregate :
-func (b *mySQLBuilder) BuildAggregate(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildAggregate(stmt db.Stmt, it any) error {
 	x := it.(primitive.Aggregate)
 	switch x.By {
 	case primitive.Sum:
@@ -344,7 +344,7 @@ func (b *mySQLBuilder) BuildAggregate(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildOperator :
-func (b *mySQLBuilder) BuildOperator(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildOperator(stmt db.Stmt, it any) error {
 	x := it.(primitive.Operator)
 	stmt.WriteByte(' ')
 	stmt.WriteString(operatorMap[x])
@@ -353,7 +353,7 @@ func (b *mySQLBuilder) BuildOperator(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildClause :
-func (b *mySQLBuilder) BuildClause(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildClause(stmt db.Stmt, it any) error {
 	x := it.(primitive.C)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -372,7 +372,7 @@ func (b *mySQLBuilder) BuildClause(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildSort :
-func (b *mySQLBuilder) BuildSort(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildSort(stmt db.Stmt, it any) error {
 	x := it.(primitive.Sort)
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
@@ -384,14 +384,14 @@ func (b *mySQLBuilder) BuildSort(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildKeyValue :
-func (b *mySQLBuilder) BuildKeyValue(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildKeyValue(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.KV)
 	stmt.WriteString(b.Quote(string(x.Field)) + " = ")
 	return b.getValue(stmt, x.Value)
 }
 
 // BuildMath :
-func (b *mySQLBuilder) BuildMath(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildMath(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.Math)
 	stmt.WriteString(b.Quote(string(x.Field)) + " ")
 	if x.Mode == primitive.Add {
@@ -404,7 +404,7 @@ func (b *mySQLBuilder) BuildMath(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildCase :
-func (b *mySQLBuilder) BuildCase(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildCase(stmt db.Stmt, it any) error {
 	x := it.(*primitive.Case)
 	stmt.WriteString("(CASE")
 	for _, w := range x.WhenClauses {
@@ -428,7 +428,7 @@ func (b *mySQLBuilder) BuildCase(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildSpatialFunc :
-func (b *mySQLBuilder) BuildSpatialFunc(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildSpatialFunc(stmt db.Stmt, it any) (err error) {
 	x := it.(spatial.Func)
 	stmt.WriteString(x.Type.String())
 	stmt.WriteByte('(')
@@ -445,7 +445,7 @@ func (b *mySQLBuilder) BuildSpatialFunc(stmt db.Stmt, it interface{}) (err error
 }
 
 // BuildGroup :
-func (b *mySQLBuilder) BuildGroup(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildGroup(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.Group)
 	for len(x.Values) > 0 {
 		if err := b.getValue(stmt, x.Values[0]); err != nil {
@@ -457,7 +457,7 @@ func (b *mySQLBuilder) BuildGroup(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildRange :
-func (b *mySQLBuilder) BuildRange(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildRange(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.R)
 	v := reflext.ValueOf(x.From)
 	encoder, err := b.registry.LookupEncoder(v)
@@ -485,7 +485,7 @@ func (b *mySQLBuilder) BuildRange(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildEncoding :
-func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.Encoding)
 	if x.Charset != nil {
 		if (*x.Charset)[0] != '_' {
@@ -502,7 +502,7 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildTypeSafe :
-func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it any) (err error) {
 	ts := it.(primitive.TypeSafe)
 	switch ts.Type {
 	case reflect.String:
@@ -543,7 +543,7 @@ func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it interface{}) (err error) {
 }
 
 // BuildSelectStmt :
-func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {
 	x := it.(*sql.SelectStmt)
 	stmt.WriteString("SELECT ")
 	if x.DistinctOn {
@@ -570,7 +570,7 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildUpdateStmt :
-func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it any) error {
 	x := it.(*sql.UpdateStmt)
 	stmt.WriteString("UPDATE " + b.TableName(x.Database, x.Table) + " ")
 	if err := b.appendSet(stmt, x.Values); err != nil {
@@ -587,7 +587,7 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildFindActions :
-func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it any) error {
 	x := it.(*actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
@@ -615,7 +615,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildUpdateActions :
-func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it any) error {
 	x, ok := it.(*actions.UpdateActions)
 	if !ok {
 		return errors.New("data type not match")
@@ -635,7 +635,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it interface{}) error {
 }
 
 // BuildDeleteActions :
-func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it interface{}) error {
+func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it any) error {
 	x := it.(*actions.DeleteActions)
 	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
@@ -648,7 +648,7 @@ func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) getValue(stmt db.Stmt, it interface{}) (err error) {
+func (b *mySQLBuilder) getValue(stmt db.Stmt, it any) (err error) {
 	v := reflext.ValueOf(it)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
@@ -678,7 +678,7 @@ func (b *mySQLBuilder) getValue(stmt db.Stmt, it interface{}) (err error) {
 	return
 }
 
-func (b *mySQLBuilder) appendSelect(stmt db.Stmt, pjs []interface{}) error {
+func (b *mySQLBuilder) appendSelect(stmt db.Stmt, pjs []any) error {
 	if len(pjs) > 0 {
 		length := len(pjs)
 		for i := 0; i < length; i++ {
@@ -695,7 +695,7 @@ func (b *mySQLBuilder) appendSelect(stmt db.Stmt, pjs []interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) appendTable(stmt db.Stmt, fields []interface{}) error {
+func (b *mySQLBuilder) appendTable(stmt db.Stmt, fields []any) error {
 	length := len(fields)
 	if length > 0 {
 		for i := 0; i < length; i++ {
@@ -710,7 +710,7 @@ func (b *mySQLBuilder) appendTable(stmt db.Stmt, fields []interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) appendWhere(stmt db.Stmt, conds []interface{}) error {
+func (b *mySQLBuilder) appendWhere(stmt db.Stmt, conds []any) error {
 	length := len(conds)
 	if length > 0 {
 		stmt.WriteString(" WHERE ")
@@ -723,7 +723,7 @@ func (b *mySQLBuilder) appendWhere(stmt db.Stmt, conds []interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) appendGroupBy(stmt db.Stmt, fields []interface{}) error {
+func (b *mySQLBuilder) appendGroupBy(stmt db.Stmt, fields []any) error {
 	length := len(fields)
 	if length > 0 {
 		stmt.WriteString(" GROUP BY ")
@@ -739,7 +739,7 @@ func (b *mySQLBuilder) appendGroupBy(stmt db.Stmt, fields []interface{}) error {
 	return nil
 }
 
-func (b *mySQLBuilder) appendOrderBy(stmt db.Stmt, sorts []interface{}) error {
+func (b *mySQLBuilder) appendOrderBy(stmt db.Stmt, sorts []any) error {
 	length := len(sorts)
 	if length < 1 {
 		return nil

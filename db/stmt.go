@@ -10,7 +10,7 @@ type Stmt interface {
 	io.StringWriter
 	io.ByteWriter
 	fmt.Stringer
-	Args() []interface{}
-	AppendArgs(args ...interface{})
-	WriteAppendArgs(query string, args ...interface{})
+	Args() []any
+	AppendArgs(args ...any)
+	WriteAppendArgs(query string, args ...any)
 }

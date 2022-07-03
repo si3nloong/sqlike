@@ -14,20 +14,20 @@ func TestExpression(t *testing.T) {
 		str *string
 	)
 
-	invalids := []interface{}{
+	invalids := []any{
 		And(),
 		nil,
 		struct{}{},
 		Or(),
-		make([]interface{}, 0),
-		[]interface{}{},
-		[]interface{}(nil),
+		make([]any, 0),
+		[]any{},
+		[]any(nil),
 		map[string]string(nil),
 		str,
 	}
 
 	now := time.Now()
-	filters := []interface{}{
+	filters := []any{
 		Equal("A", 1),
 		Like("B", "abc%"),
 		Between("DateTime", now, now.Add(5*time.Minute)),
@@ -45,7 +45,7 @@ func TestExpression(t *testing.T) {
 	t.Run("And", func(ti *testing.T) {
 		grp = And(filters...)
 		require.Equal(ti, primitive.Group{
-			Values: []interface{}{
+			Values: []any{
 				Raw("("),
 				Equal("A", 1),
 				primitive.And,
@@ -60,7 +60,7 @@ func TestExpression(t *testing.T) {
 	t.Run("Or", func(ti *testing.T) {
 		grp = Or(filters...)
 		require.Equal(ti, primitive.Group{
-			Values: []interface{}{
+			Values: []any{
 				Raw("("),
 				Equal("A", 1),
 				primitive.Or,

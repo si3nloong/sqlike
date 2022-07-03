@@ -14,7 +14,7 @@ type Marshaler interface {
 }
 
 // Marshal :
-func Marshal(src interface{}) (b []byte, err error) {
+func Marshal(src any) (b []byte, err error) {
 	v := reflext.ValueOf(src)
 	if src == nil || !v.IsValid() || reflext.IsNull(v) {
 		b = []byte(null)

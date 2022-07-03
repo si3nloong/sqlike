@@ -50,7 +50,7 @@ type normalStruct struct {
 	Byte              []byte
 	Bool              bool
 	priv              int
-	Skip              interface{}
+	Skip              any
 	Int               int
 	TinyInt           int8
 	SmallInt          int16
@@ -65,7 +65,7 @@ type normalStruct struct {
 	Float64           float64
 	UFloat32          float32
 	EmptyArray        []string
-	EmptyMap          map[string]interface{}
+	EmptyMap          map[string]any
 	EmptyStruct       struct{}
 	JSONRaw           json.RawMessage
 	Timestamp         time.Time
@@ -145,7 +145,7 @@ func TestMarshal(t *testing.T) {
 		i.DecimalStr = 10.688
 		i.EmptyByte = bytes
 		i.EmptyArray = make([]string, 0)
-		i.EmptyMap = make(map[string]interface{})
+		i.EmptyMap = make(map[string]any)
 		i.NullStr = &symbolStr
 		i.NullInt = &i32
 		i.NullKey = k
@@ -157,7 +157,7 @@ func TestMarshal(t *testing.T) {
 		dataByte, _ = sjson.SetBytes(dataByte, "DecimalStr", "10.69")
 		dataByte, _ = sjson.SetBytes(dataByte, "EmptyByte", base64.StdEncoding.EncodeToString(bytes))
 		dataByte, _ = sjson.SetBytes(dataByte, "EmptyArray", make([]string, 0))
-		dataByte, _ = sjson.SetBytes(dataByte, "EmptyMap", make(map[string]interface{}))
+		dataByte, _ = sjson.SetBytes(dataByte, "EmptyMap", make(map[string]any))
 		dataByte, _ = sjson.SetRawBytes(dataByte, "NullStr", []byte(jsonEscapeStr))
 		dataByte, _ = sjson.SetBytes(dataByte, "NullInt", i32)
 		dataByte, _ = sjson.SetBytes(dataByte, "NullKey", k.String())

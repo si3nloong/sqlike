@@ -6,7 +6,7 @@ import (
 )
 
 // ToSQL :
-func ToSQL(src interface{}) error {
+func ToSQL(src any) error {
 	ms := dialect.GetDialectByDriver("mysql")
 	sqlstmt.NewStatement(ms)
 	return nil

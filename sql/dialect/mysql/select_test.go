@@ -19,18 +19,18 @@ func TestSelect(t *testing.T) {
 		ms  = New()
 	)
 
-	invalids := []interface{}{
+	invalids := []any{
 		expr.And(),
 		nil,
 		struct{}{},
 		expr.Or(),
-		make([]interface{}, 0),
-		[]interface{}{},
-		[]interface{}(nil),
+		make([]any, 0),
+		[]any{},
+		[]any(nil),
 		map[string]string(nil),
 	}
 
-	filters := []interface{}{
+	filters := []any{
 		expr.Equal("A", 1),
 		expr.Like("B", "abc%"),
 		expr.Between("DateTime", now, now.Add(5*time.Minute)),
@@ -40,18 +40,24 @@ func TestSelect(t *testing.T) {
 	// Complex select statement
 	{
 
+		act := actions.Find().
+			Where(
+				expr.And(filters...),
+				expr.Or(filters...),
+				expr.Equal("E", uint(888)),
+				expr.NotBetween("Z", -10, 12933),
+			)
+
+		v, ok := act.(*actions.FindActions)
+		require.True(t, ok)
+		v.Database = "A"
+		v.Table = "Test"
+
 		stmt := sqlstmt.AcquireStmt(ms)
 		defer sqlstmt.ReleaseStmt(stmt)
 		err = New().Select(
 			stmt,
-			actions.Find().
-				From("A", "Test").
-				Where(
-					expr.And(filters...),
-					expr.Or(filters...),
-					expr.Equal("E", uint(888)),
-					expr.NotBetween("Z", -10, 12933),
-				).(*actions.FindActions),
+			v,
 			primitive.Lock{},
 		)
 		require.NoError(t, err)

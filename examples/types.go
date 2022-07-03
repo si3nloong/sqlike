@@ -43,8 +43,8 @@ type normalStruct struct {
 	Byte          []byte
 	Bool          bool
 	priv          int
-	Skip          interface{} `sqlike:"-"`
-	Int           int         `sqlike:",default=100"`
+	Skip          any `sqlike:"-"`
+	Int           int `sqlike:",default=100"`
 	TinyInt       int8
 	SmallInt      int16
 	MediumInt     int32

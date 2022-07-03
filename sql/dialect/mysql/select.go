@@ -24,13 +24,13 @@ func (ms *mySQL) Select(stmt db.Stmt, f *actions.FindActions, lck primitive.Lock
 }
 
 // SelectStmt :
-func (ms *mySQL) SelectStmt(stmt db.Stmt, query interface{}) (err error) {
+func (ms *mySQL) SelectStmt(stmt db.Stmt, query any) (err error) {
 	err = ms.parser.BuildStatement(stmt, query)
 	stmt.WriteByte(';')
 	return
 }
 
-func buildStatement(stmt db.Stmt, parser *sqlstmt.StatementBuilder, f interface{}) error {
+func buildStatement(stmt db.Stmt, parser *sqlstmt.StatementBuilder, f any) error {
 	if err := parser.BuildStatement(stmt, f); err != nil {
 		return err
 	}

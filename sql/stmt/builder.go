@@ -11,23 +11,23 @@ import (
 )
 
 // BuildStatementFunc :
-type BuildStatementFunc func(stmt db.Stmt, it interface{}) error
+type BuildStatementFunc func(stmt db.Stmt, it any) error
 
 // StatementBuilder :
 type StatementBuilder struct {
 	mutex    sync.Mutex
-	builders map[interface{}]BuildStatementFunc
+	builders map[any]BuildStatementFunc
 }
 
 // NewStatementBuilder :
 func NewStatementBuilder() *StatementBuilder {
 	return &StatementBuilder{
-		builders: make(map[interface{}]BuildStatementFunc),
+		builders: make(map[any]BuildStatementFunc),
 	}
 }
 
 // SetBuilder :
-func (sb *StatementBuilder) SetBuilder(it interface{}, p BuildStatementFunc) {
+func (sb *StatementBuilder) SetBuilder(it any, p BuildStatementFunc) {
 	sb.mutex.Lock()
 	defer sb.mutex.Unlock()
 	sb.builders[it] = p
@@ -40,7 +40,7 @@ func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFun
 }
 
 // BuildStatement :
-func (sb *StatementBuilder) BuildStatement(stmt db.Stmt, it interface{}) error {
+func (sb *StatementBuilder) BuildStatement(stmt db.Stmt, it any) error {
 	v := reflext.ValueOf(it)
 	if cb, ok := sb.builders[v.Type()]; ok {
 		return cb(stmt, it)

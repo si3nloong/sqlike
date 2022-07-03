@@ -83,7 +83,7 @@ const (
 // Func :
 type Func struct {
 	Type function
-	Args []interface{}
+	Args []any
 }
 
 // Geometry :
@@ -94,6 +94,6 @@ type Geometry struct {
 }
 
 // Value :
-func (g Geometry) Value() (interface{}, error) {
+func (g Geometry) Value() (any, error) {
 	return g.WKT, nil
 }

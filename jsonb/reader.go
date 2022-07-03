@@ -121,7 +121,7 @@ func (r *Reader) ReadBytes() ([]byte, error) {
 }
 
 // ReadValue :
-func (r *Reader) ReadValue() (interface{}, error) {
+func (r *Reader) ReadValue() (any, error) {
 	typ := r.peekType()
 	switch typ {
 	case jsonString:
@@ -140,7 +140,7 @@ func (r *Reader) ReadValue() (interface{}, error) {
 		}
 		return nil, nil
 	case jsonArray:
-		var v []interface{}
+		var v []any
 		if err := r.ReadArray(func(it *Reader) error {
 			x, err := it.ReadValue()
 			if err != nil {
@@ -153,10 +153,10 @@ func (r *Reader) ReadValue() (interface{}, error) {
 		}
 		return v, nil
 	case jsonObject:
-		var v map[string]interface{}
+		var v map[string]any
 		if err := r.ReadObject(func(it *Reader, k string) error {
 			if v == nil {
-				v = make(map[string]interface{})
+				v = make(map[string]any)
 			}
 			x, err := it.ReadValue()
 			if err != nil {

@@ -188,7 +188,7 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		_, err = table.InsertOne(
 			ctx,
 			&struct {
-				Interface interface{}
+				Interface any
 			}{},
 		)
 		require.Error(t, err)
@@ -198,7 +198,7 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		_, err = table.InsertOne(ctx, empty)
 		require.Error(t, err)
 
-		_, err = table.Insert(ctx, []interface{}{})
+		_, err = table.Insert(ctx, []any{})
 		require.Error(t, err)
 	}
 

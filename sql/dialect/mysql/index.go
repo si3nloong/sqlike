@@ -27,7 +27,7 @@ func (ms mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) {
 	case sql.Primary:
 		nonUnique = false
 	}
-	args := []interface{}{dbName, table, idxType, nonUnique}
+	args := []any{dbName, table, idxType, nonUnique}
 	stmt.WriteString("SELECT COUNT(1) FROM (")
 	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c FROM INFORMATION_SCHEMA.STATISTICS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? ")

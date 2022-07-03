@@ -2,7 +2,6 @@ package examples
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -13,8 +12,8 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/v2"
-	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
 	sqldump "github.com/si3nloong/sqlike/v2/sql/dump"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/si3nloong/sqlike/v2/types"
@@ -101,15 +100,14 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 			// check how many records return or backup
 			affected, err := dumper.BackupTo(
 				ctx,
-				actions.Find().
-					From("sqlike", "sqldump").
+				sql.Select().From("sqlike", "sqldump").
 					Where(filter).
 					Offset(offset).
 					Limit(limit),
 				file,
 			)
 			if err != nil {
-				if err != sql.ErrNoRows {
+				if err != sqlike.ErrNoRows {
 					require.NoError(t, err)
 				}
 				break

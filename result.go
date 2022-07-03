@@ -21,7 +21,7 @@ var EOF = io.EOF
 
 // Resulter :
 type Resulter interface {
-	Scan(dests ...interface{}) error
+	Scan(dests ...any) error
 	Columns() []string
 	Next() bool
 	NextResultSet() bool
@@ -52,16 +52,16 @@ func (r *Result) ColumnTypes() ([]*sql.ColumnType, error) {
 	return r.columnTypes, nil
 }
 
-func (r *Result) nextValues() ([]interface{}, error) {
+func (r *Result) nextValues() ([]any, error) {
 	if !r.Next() {
 		return nil, EOF
 	}
 	return r.values()
 }
 
-func (r *Result) values() ([]interface{}, error) {
+func (r *Result) values() ([]any, error) {
 	length := len(r.columns)
-	values := make([]interface{}, length)
+	values := make([]any, length)
 	for j := 0; j < length; j++ {
 		values[j] = &values[j]
 	}
@@ -72,7 +72,7 @@ func (r *Result) values() ([]interface{}, error) {
 }
 
 // Scan : will behave as similar as sql.Scan.
-func (r *Result) Scan(dests ...interface{}) error {
+func (r *Result) Scan(dests ...any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err
@@ -106,7 +106,7 @@ func (r *Result) Scan(dests ...interface{}) error {
 }
 
 // Decode will decode the current document into val, this will only accepting pointer of struct as an input.
-func (r *Result) Decode(dst interface{}) error {
+func (r *Result) Decode(dst any) error {
 	if r.close {
 		defer r.Close()
 	}
@@ -157,7 +157,7 @@ func (r *Result) Decode(dst interface{}) error {
 }
 
 // ScanSlice :
-func (r *Result) ScanSlice(results interface{}) error {
+func (r *Result) ScanSlice(results any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err
@@ -201,7 +201,7 @@ func (r *Result) ScanSlice(results interface{}) error {
 }
 
 // All : this will map all the records from sql to a slice of struct.
-func (r *Result) All(results interface{}) error {
+func (r *Result) All(results any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err

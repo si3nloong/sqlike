@@ -137,7 +137,7 @@ func (ms *mySQL) InsertInto(
 	return
 }
 
-func convertSpatial(stmt db.Stmt, val interface{}) {
+func convertSpatial(stmt db.Stmt, val any) {
 	switch vi := val.(type) {
 	case spatial.Geometry:
 		switch vi.Type {

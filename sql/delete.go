@@ -7,14 +7,14 @@ import (
 
 // DeleteStmt :
 type DeleteStmt struct {
-	Tables     []interface{}
+	Tables     []any
 	Conditions primitive.Group
-	Sorts      []interface{}
+	Sorts      []any
 	RowCount   uint
 }
 
 // From :
-func (stmt *DeleteStmt) From(values ...interface{}) *DeleteStmt {
+func (stmt *DeleteStmt) From(values ...any) *DeleteStmt {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
@@ -36,13 +36,13 @@ func (stmt *DeleteStmt) From(values ...interface{}) *DeleteStmt {
 }
 
 // Where :
-func (stmt *DeleteStmt) Where(fields ...interface{}) *DeleteStmt {
+func (stmt *DeleteStmt) Where(fields ...any) *DeleteStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 
 // OrderBy :
-func (stmt *DeleteStmt) OrderBy(fields ...interface{}) *DeleteStmt {
+func (stmt *DeleteStmt) OrderBy(fields ...any) *DeleteStmt {
 	stmt.Sorts = fields
 	return stmt
 }

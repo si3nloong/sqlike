@@ -9,7 +9,7 @@ import (
 )
 
 type SQLCtx struct {
-	values map[string]interface{}
+	values map[string]any
 }
 
 func (c *SQLCtx) SetField(v reflext.FieldInfo) *SQLCtx {
@@ -29,7 +29,7 @@ func (*SQLCtx) Err() error {
 	return nil
 }
 
-func (c *SQLCtx) Value(key interface{}) interface{} {
+func (c *SQLCtx) Value(key any) any {
 	if c.values == nil {
 		return nil
 	}
@@ -46,7 +46,7 @@ func Context(
 	table string,
 ) *SQLCtx {
 	ctx := new(SQLCtx)
-	ctx.values = map[string]interface{}{
+	ctx.values = map[string]any{
 		"db":    dbName,
 		"table": table,
 	}

@@ -8,7 +8,7 @@ import (
 
 var (
 	strBldrPool = &sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			return new(strings.Builder)
 		},
 	}

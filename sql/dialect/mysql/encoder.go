@@ -30,7 +30,7 @@ type DefaultEncoders struct {
 }
 
 // EncodeByte :
-func (enc DefaultEncoders) EncodeByte(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeByte(_ context.Context, v reflect.Value) (any, error) {
 	b := v.Bytes()
 	if b == nil {
 		return make([]byte, 0), nil
@@ -40,12 +40,12 @@ func (enc DefaultEncoders) EncodeByte(_ context.Context, v reflect.Value) (inter
 }
 
 // EncodeRawBytes :
-func (enc DefaultEncoders) EncodeRawBytes(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeRawBytes(_ context.Context, v reflect.Value) (any, error) {
 	return sql.RawBytes(v.Bytes()), nil
 }
 
 // EncodeJSONRaw :
-func (enc DefaultEncoders) EncodeJSONRaw(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeJSONRaw(_ context.Context, v reflect.Value) (any, error) {
 	if v.IsNil() {
 		return []byte("null"), nil
 	}
@@ -60,13 +60,13 @@ func (enc DefaultEncoders) EncodeJSONRaw(_ context.Context, v reflect.Value) (in
 }
 
 // EncodeStringer :
-func (enc DefaultEncoders) EncodeStringer(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeStringer(_ context.Context, v reflect.Value) (any, error) {
 	x := v.Interface().(fmt.Stringer)
 	return x.String(), nil
 }
 
 // EncodeTime :
-func (enc DefaultEncoders) EncodeDateTime(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeDateTime(_ context.Context, v reflect.Value) (any, error) {
 	x := v.Interface().(time.Time)
 	// if x.IsZero() {
 	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
@@ -78,7 +78,7 @@ func (enc DefaultEncoders) EncodeDateTime(_ context.Context, v reflect.Value) (i
 
 // EncodeSpatial :
 func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) db.ValueEncoder {
-	return func(ctx context.Context, v reflect.Value) (interface{}, error) {
+	return func(ctx context.Context, v reflect.Value) (any, error) {
 		if reflext.IsZero(v) {
 			return nil, nil
 		}
@@ -122,7 +122,7 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) db.ValueEncoder {
 }
 
 // EncodeString :
-func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (any, error) {
 	str := v.String()
 	f := sqlx.GetField(ctx)
 	if str == "" {
@@ -138,12 +138,12 @@ func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (i
 }
 
 // EncodeBool :
-func (enc DefaultEncoders) EncodeBool(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeBool(_ context.Context, v reflect.Value) (any, error) {
 	return v.Bool(), nil
 }
 
 // EncodeInt :
-func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (any, error) {
 	f := sqlx.GetField(ctx)
 	if _, ok := f.Tag().LookUp("auto_increment"); ok {
 		return nil, nil
@@ -152,7 +152,7 @@ func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (inte
 }
 
 // EncodeUint :
-func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (any, error) {
 	f := sqlx.GetField(ctx)
 	if _, ok := f.Tag().LookUp("auto_increment"); ok {
 		return nil, nil
@@ -161,12 +161,12 @@ func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (int
 }
 
 // EncodeFloat :
-func (enc DefaultEncoders) EncodeFloat(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeFloat(_ context.Context, v reflect.Value) (any, error) {
 	return v.Float(), nil
 }
 
 // EncodePtr :
-func (enc *DefaultEncoders) EncodePtr(ctx context.Context, v reflect.Value) (interface{}, error) {
+func (enc *DefaultEncoders) EncodePtr(ctx context.Context, v reflect.Value) (any, error) {
 	if !v.IsValid() || v.IsNil() {
 		return nil, nil
 	}
@@ -179,17 +179,17 @@ func (enc *DefaultEncoders) EncodePtr(ctx context.Context, v reflect.Value) (int
 }
 
 // EncodeStruct :
-func (enc DefaultEncoders) EncodeStruct(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeStruct(_ context.Context, v reflect.Value) (any, error) {
 	return jsonb.Marshal(v)
 }
 
 // EncodeArray :
-func (enc DefaultEncoders) EncodeArray(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeArray(_ context.Context, v reflect.Value) (any, error) {
 	return jsonb.Marshal(v)
 }
 
 // EncodeMap :
-func (enc DefaultEncoders) EncodeMap(_ context.Context, v reflect.Value) (interface{}, error) {
+func (enc DefaultEncoders) EncodeMap(_ context.Context, v reflect.Value) (any, error) {
 	if v.IsNil() {
 		return string("null"), nil
 	}

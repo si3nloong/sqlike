@@ -26,14 +26,14 @@ type DataTypeFunc func(f reflext.FieldInfo) *sql.Column
 // Builder :
 type Builder struct {
 	mutex    sync.Mutex
-	typeMap  map[interface{}]sqltype.Type
+	typeMap  map[any]sqltype.Type
 	builders map[sqltype.Type]DataTypeFunc
 }
 
 // NewBuilder :
 func NewBuilder() *Builder {
 	sb := &Builder{
-		typeMap:  make(map[interface{}]sqltype.Type),
+		typeMap:  make(map[any]sqltype.Type),
 		builders: make(map[sqltype.Type]DataTypeFunc),
 	}
 	sb.SetDefaultTypes()
@@ -41,7 +41,7 @@ func NewBuilder() *Builder {
 }
 
 // SetType :
-func (sb *Builder) SetType(it interface{}, t sqltype.Type) {
+func (sb *Builder) SetType(it any, t sqltype.Type) {
 	sb.mutex.Lock()
 	defer sb.mutex.Unlock()
 	sb.typeMap[it] = t

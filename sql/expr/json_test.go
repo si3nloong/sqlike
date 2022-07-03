@@ -10,14 +10,14 @@ import (
 
 func TestJSON(t *testing.T) {
 	var (
-		it interface{}
+		it any
 	)
 
 	t.Run("JSON_QUOTE", func(tst *testing.T) {
 		it = JSON_QUOTE("a")
 		require.Equal(tst, primitive.JSONFunc{
 			Type: primitive.JSON_QUOTE,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: "a"},
 			},
 		}, it)
@@ -27,7 +27,7 @@ func TestJSON(t *testing.T) {
 		it = JSON_CONTAINS(Column("a"), Column("b"))
 		require.Equal(tst, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Column{Name: "a"},
 				primitive.Column{Name: "b"},
 			},
@@ -36,7 +36,7 @@ func TestJSON(t *testing.T) {
 		it = JSON_CONTAINS(`["a", "b"]`, Column("b"))
 		require.Equal(tst, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: `["a", "b"]`},
 				primitive.Column{Name: "b"},
 			},
@@ -46,7 +46,7 @@ func TestJSON(t *testing.T) {
 		it = JSON_CONTAINS(raw, Column("b"))
 		require.Equal(tst, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: raw},
 				primitive.Column{Name: "b"},
 			},

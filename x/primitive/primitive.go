@@ -50,71 +50,71 @@ type Alias struct {
 
 // CastAs :
 type CastAs struct {
-	Value    interface{}
+	Value    any
 	DataType DataType
 }
 
 // Func :
 type Func struct {
 	Name string
-	Args []interface{}
+	Args []any
 }
 
 // Encoding :
 type Encoding struct {
 	Charset *string
-	Column  interface{}
+	Column  any
 	Collate string
 }
 
 // TypeSafe :
 type TypeSafe struct {
 	Type  reflect.Kind
-	Value interface{}
+	Value any
 }
 
 // JSONFunc :
 type JSONFunc struct {
-	Prefix interface{}
+	Prefix any
 	Type   jsonFunction
-	Args   []interface{}
+	Args   []any
 }
 
 // Group :
 type Group struct {
-	Values []interface{}
+	Values []any
 }
 
 // R :
 type R struct {
-	From interface{}
-	To   interface{}
+	From any
+	To   any
 }
 
 // Field :
 type Field struct {
 	Name   string
-	Values []interface{}
+	Values []any
 }
 
 // L :
 type L struct {
-	Field interface{}
+	Field any
 	IsNot bool
-	Value interface{}
+	Value any
 }
 
 // C :
 type C struct {
-	Field    interface{}
+	Field    any
 	Operator Operator
-	Value    interface{}
+	Value    any
 }
 
 // KV :
 type KV struct {
 	Field string
-	Value interface{}
+	Value any
 }
 
 type operator int
@@ -142,19 +142,19 @@ const (
 
 // Nil :
 type Nil struct {
-	Field interface{}
+	Field any
 	IsNot bool
 }
 
 // Sort :
 type Sort struct {
-	Field interface{}
+	Field any
 	Order order
 }
 
 // Value :
 type Value struct {
-	Raw interface{}
+	Raw any
 }
 
 type aggregate int
@@ -170,12 +170,12 @@ const (
 
 // Aggregate :
 type Aggregate struct {
-	Field interface{}
+	Field any
 	By    aggregate
 }
 
 // As :
 type As struct {
-	Field interface{}
+	Field any
 	Name  string
 }

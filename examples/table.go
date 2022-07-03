@@ -223,10 +223,10 @@ func MigrateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 		err = db.Table("NormalStruct").Migrate(ctx, bool(false))
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(ctx, map[string]interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, map[string]any{})
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(ctx, []interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, []any{})
 		require.Error(t, err)
 	}
 }

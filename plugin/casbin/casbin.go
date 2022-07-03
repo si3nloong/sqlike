@@ -80,11 +80,11 @@ func (a *Adapter) LoadPolicy(model model.Model) error {
 }
 
 // LoadFilteredPolicy :
-func (a *Adapter) LoadFilteredPolicy(model model.Model, filter interface{}) error {
+func (a *Adapter) LoadFilteredPolicy(model model.Model, filter any) error {
 	var policies []*Policy
 	x, ok := filter.(primitive.Group)
 	if !ok {
-		return errors.New("invalid filter data type, expected []interface{}")
+		return errors.New("invalid filter data type, expected []any")
 	}
 
 	act := new(actions.FindActions)

@@ -14,7 +14,7 @@ func TestGetColumns(t *testing.T) {
 	ms.GetColumns(stmt, "db", "table")
 	require.Equal(t, `SELECT ORDINAL_POSITION, COLUMN_NAME, COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE,
 	DATA_TYPE, CHARACTER_SET_NAME, COLLATION_NAME, COLUMN_COMMENT, EXTRA FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION;`, stmt.String())
-	require.ElementsMatch(t, []interface{}{"db", "table"}, stmt.Args())
+	require.ElementsMatch(t, []any{"db", "table"}, stmt.Args())
 }
 
 func TestRenameColumn(t *testing.T) {
@@ -23,7 +23,7 @@ func TestRenameColumn(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 	ms.RenameColumn(stmt, "db", "table", "c1", "_column_")
 	require.Equal(t, "ALTER TABLE `db`.`table` RENAME COLUMN `c1` TO `_column_`;", stmt.String())
-	require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	require.ElementsMatch(t, []any{}, stmt.Args())
 }
 
 func TestDropColumn(t *testing.T) {
@@ -32,5 +32,5 @@ func TestDropColumn(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 	ms.DropColumn(stmt, "db", "table", "c1")
 	require.Equal(t, "ALTER TABLE `db`.`table` DROP COLUMN `c1`;", stmt.String())
-	require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	require.ElementsMatch(t, []any{}, stmt.Args())
 }

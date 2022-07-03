@@ -6,8 +6,8 @@ import (
 
 // DeleteOneStatement :
 type DeleteOneStatement interface {
-	Where(fields ...interface{}) DeleteOneStatement
-	OrderBy(fields ...interface{}) DeleteOneStatement
+	Where(fields ...any) DeleteOneStatement
+	OrderBy(fields ...any) DeleteOneStatement
 }
 
 // DeleteOneActions :
@@ -16,13 +16,13 @@ type DeleteOneActions struct {
 }
 
 // Where :
-func (act *DeleteOneActions) Where(fields ...interface{}) DeleteOneStatement {
+func (act *DeleteOneActions) Where(fields ...any) DeleteOneStatement {
 	act.Conditions = expr.And(fields...).Values
 	return act
 }
 
 // OrderBy :
-func (act *DeleteOneActions) OrderBy(fields ...interface{}) DeleteOneStatement {
+func (act *DeleteOneActions) OrderBy(fields ...any) DeleteOneStatement {
 	act.Sorts = fields
 	return act
 }

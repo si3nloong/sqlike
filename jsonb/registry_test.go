@@ -34,7 +34,7 @@ func TestRegistry(t *testing.T) {
 	}
 
 	{
-		ch := make(chan interface{})
+		ch := make(chan any)
 		v := reflect.ValueOf(ch)
 		_, err = rg.LookupDecoder(v.Type())
 		require.Error(t, err)

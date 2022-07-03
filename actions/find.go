@@ -1,8 +1,6 @@
 package actions
 
 import (
-	"strings"
-
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
@@ -10,12 +8,11 @@ import (
 // SelectStatement :
 type SelectStatement interface {
 	Distinct() SelectStatement
-	Select(fields ...interface{}) SelectStatement
-	From(values ...string) SelectStatement
-	Where(fields ...interface{}) SelectStatement
-	Having(fields ...interface{}) SelectStatement
-	GroupBy(fields ...interface{}) SelectStatement
-	OrderBy(fields ...interface{}) SelectStatement
+	Select(fields ...any) SelectStatement
+	Where(fields ...any) SelectStatement
+	Having(fields ...any) SelectStatement
+	GroupBy(fields ...any) SelectStatement
+	OrderBy(fields ...any) SelectStatement
 	Limit(num uint) SelectStatement
 	Offset(num uint) SelectStatement
 }
@@ -25,18 +22,18 @@ type FindActions struct {
 	DistinctOn  bool
 	Database    string
 	Table       string
-	Projections []interface{}
+	Projections []any
 	IndexHints  string
 	Conditions  primitive.Group
 	Havings     primitive.Group
-	GroupBys    []interface{}
-	Sorts       []interface{}
+	GroupBys    []any
+	Sorts       []any
 	Skip        uint
 	RowCount    uint
 }
 
 // Select :
-func (act *FindActions) Select(fields ...interface{}) SelectStatement {
+func (act *FindActions) Select(fields ...any) SelectStatement {
 	act.Projections = fields
 	return act
 }
@@ -47,48 +44,26 @@ func (act *FindActions) Distinct() SelectStatement {
 	return act
 }
 
-// From :
-func (act *FindActions) From(values ...string) SelectStatement {
-	length := len(values)
-	if length == 0 {
-		panic("empty table name")
-	}
-	switch length {
-	case 1:
-		act.Table = strings.TrimSpace(values[0])
-	case 2:
-		act.Database = strings.TrimSpace(values[0])
-		act.Table = strings.TrimSpace(values[1])
-	case 3:
-		act.Database = strings.TrimSpace(values[0])
-		act.Table = strings.TrimSpace(values[1])
-		act.IndexHints = strings.TrimSpace(values[3])
-	default:
-		panic("invalid length of arguments")
-	}
-	return act
-}
-
 // Where :
-func (act *FindActions) Where(fields ...interface{}) SelectStatement {
+func (act *FindActions) Where(fields ...any) SelectStatement {
 	act.Conditions = expr.And(fields...)
 	return act
 }
 
 // Having :
-func (act *FindActions) Having(fields ...interface{}) SelectStatement {
+func (act *FindActions) Having(fields ...any) SelectStatement {
 	act.Havings = expr.And(fields...)
 	return act
 }
 
 // OrderBy :
-func (act *FindActions) OrderBy(fields ...interface{}) SelectStatement {
+func (act *FindActions) OrderBy(fields ...any) SelectStatement {
 	act.Sorts = fields
 	return act
 }
 
 // GroupBy :
-func (act *FindActions) GroupBy(fields ...interface{}) SelectStatement {
+func (act *FindActions) GroupBy(fields ...any) SelectStatement {
 	act.GroupBys = fields
 	return act
 }

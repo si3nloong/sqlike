@@ -17,13 +17,13 @@ type Codecer interface {
 }
 
 // ValueDecoder :
-type ValueDecoder func(interface{}, reflect.Value) error
+type ValueDecoder func(any, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(context.Context, reflect.Value) (interface{}, error)
+type ValueEncoder func(context.Context, reflect.Value) (any, error)
 
 // ValueCodec :
 type ValueCodec interface {
-	DecodeValue(interface{}, reflect.Value) error
-	EncodeValue(reflect.Value) (interface{}, error)
+	DecodeValue(any, reflect.Value) error
+	EncodeValue(reflect.Value) (any, error)
 }

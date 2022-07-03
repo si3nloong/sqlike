@@ -48,7 +48,7 @@ func (tx *Transaction) CommitTransaction() error {
 }
 
 // Value :
-func (tx *Transaction) Value(key interface{}) interface{} {
+func (tx *Transaction) Value(key any) any {
 	if key == &txnCtxKey {
 		return tx
 	}

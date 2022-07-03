@@ -13,6 +13,7 @@ import (
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/si3nloong/sqlike/v2/types"
 	"github.com/stretchr/testify/require"
@@ -339,8 +340,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			ctx,
 			actions.Find().
 				Where(
-					expr.In("$Key", actions.Find().
-						Select("$Key").
+					expr.In("$Key", sql.Select("$Key").
 						From("sqlike", "NormalStruct").
 						Where(
 							expr.Between("Tinyint", 1, 100),
@@ -350,8 +350,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 						),
 					),
 					expr.Exists(
-						actions.Find().
-							Select(expr.Raw("1")).
+						sql.Select(expr.Raw("1")).
 							From("sqlike", "NormalStruct"),
 					),
 				).

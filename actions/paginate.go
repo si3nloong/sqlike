@@ -9,12 +9,12 @@ import (
 // PaginateStatement :
 type PaginateStatement interface {
 	Distinct() PaginateStatement
-	Select(fields ...interface{}) PaginateStatement
+	Select(fields ...any) PaginateStatement
 	From(values ...string) PaginateStatement
-	Where(fields ...interface{}) PaginateStatement
-	Having(fields ...interface{}) PaginateStatement
-	GroupBy(fields ...interface{}) PaginateStatement
-	OrderBy(fields ...interface{}) PaginateStatement
+	Where(fields ...any) PaginateStatement
+	Having(fields ...any) PaginateStatement
+	GroupBy(fields ...any) PaginateStatement
+	OrderBy(fields ...any) PaginateStatement
 	Limit(num uint) PaginateStatement
 	Offset(num uint) PaginateStatement
 }
@@ -25,7 +25,7 @@ type PaginateActions struct {
 }
 
 // Select :
-func (act *PaginateActions) Select(fields ...interface{}) PaginateStatement {
+func (act *PaginateActions) Select(fields ...any) PaginateStatement {
 	act.Projections = fields
 	return act
 }
@@ -53,25 +53,25 @@ func (act *PaginateActions) From(values ...string) PaginateStatement {
 }
 
 // Where :
-func (act *PaginateActions) Where(fields ...interface{}) PaginateStatement {
+func (act *PaginateActions) Where(fields ...any) PaginateStatement {
 	act.Conditions = expr.And(fields...)
 	return act
 }
 
 // Having :
-func (act *PaginateActions) Having(fields ...interface{}) PaginateStatement {
+func (act *PaginateActions) Having(fields ...any) PaginateStatement {
 	act.Havings = expr.And(fields...)
 	return act
 }
 
 // OrderBy :
-func (act *PaginateActions) OrderBy(fields ...interface{}) PaginateStatement {
+func (act *PaginateActions) OrderBy(fields ...any) PaginateStatement {
 	act.Sorts = fields
 	return act
 }
 
 // GroupBy :
-func (act *PaginateActions) GroupBy(fields ...interface{}) PaginateStatement {
+func (act *PaginateActions) GroupBy(fields ...any) PaginateStatement {
 	act.GroupBys = fields
 	return act
 }

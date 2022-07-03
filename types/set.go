@@ -60,7 +60,7 @@ func (s Set) Value() (driver.Value, error) {
 }
 
 // Scan :
-func (s *Set) Scan(it interface{}) error {
+func (s *Set) Scan(it any) error {
 	switch vi := it.(type) {
 	case []byte:
 		s.unmarshal(string(vi))

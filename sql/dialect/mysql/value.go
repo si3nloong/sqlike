@@ -12,7 +12,7 @@ import (
 )
 
 // Format :
-func (ms mySQL) Format(it interface{}) (val string) {
+func (ms mySQL) Format(it any) (val string) {
 	switch vi := it.(type) {
 	case []byte:
 		val = strconv.Quote(util.UnsafeString(vi))

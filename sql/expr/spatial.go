@@ -5,10 +5,11 @@ import (
 	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/spatial"
+	"golang.org/x/exp/constraints"
 )
 
 // ST_GeomFromText :
-func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
+func ST_GeomFromText[S constraints.Unsigned](g any, srid ...S) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeGeomFromText
 	switch vi := g.(type) {
 	case string:
@@ -33,7 +34,7 @@ func ST_GeomFromText(g interface{}, srid ...uint) (f spatial.Func) {
 }
 
 // ST_AsText :
-func ST_AsText(g interface{}) (f spatial.Func) {
+func ST_AsText(g any) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeAsText
 	switch vi := g.(type) {
 	case string:
@@ -53,7 +54,7 @@ func ST_AsText(g interface{}) (f spatial.Func) {
 }
 
 // ST_IsValid :
-func ST_IsValid(g interface{}) (f spatial.Func) {
+func ST_IsValid(g any) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeIsValid
 	switch vi := g.(type) {
 	case string:
@@ -74,9 +75,9 @@ func ST_IsValid(g interface{}) (f spatial.Func) {
 
 // column, value, ST_GeomFromText(column), ST_GeomFromText(value)
 // ST_Distance :
-func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
+func ST_Distance(g1, g2 any, unit ...string) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeDistance
-	for _, arg := range []interface{}{g1, g2} {
+	for _, arg := range []any{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
 		case orb.Geometry:
@@ -95,9 +96,9 @@ func ST_Distance(g1, g2 interface{}, unit ...string) (f spatial.Func) {
 }
 
 // ST_Equals :
-func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
+func ST_Equals(g1, g2 any) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeEquals
-	for _, arg := range []interface{}{g1, g2} {
+	for _, arg := range []any{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
 		case orb.Geometry:
@@ -116,9 +117,9 @@ func ST_Equals(g1, g2 interface{}) (f spatial.Func) {
 }
 
 // ST_Intersects :
-func ST_Intersects(g1, g2 interface{}) (f spatial.Func) {
+func ST_Intersects(g1, g2 any) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeIntersects
-	for _, arg := range []interface{}{g1, g2} {
+	for _, arg := range []any{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
 		case orb.Geometry:
@@ -137,9 +138,9 @@ func ST_Intersects(g1, g2 interface{}) (f spatial.Func) {
 }
 
 // ST_Within :
-func ST_Within(g1, g2 interface{}) (f spatial.Func) {
+func ST_Within(g1, g2 any) (f spatial.Func) {
 	f.Type = spatial.SpatialTypeWithin
-	for _, arg := range []interface{}{g1, g2} {
+	for _, arg := range []any{g1, g2} {
 		switch vi := arg.(type) {
 		case string:
 		case orb.Geometry:

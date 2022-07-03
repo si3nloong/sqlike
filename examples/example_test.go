@@ -21,7 +21,7 @@ import (
 type Logger struct {
 }
 
-func (l Logger) Debug(stmt interface{}) {
+func (l Logger) Debug(stmt any) {
 	// log.Printf("%v", stmt)
 	log.Printf("%+v", stmt)
 }

@@ -218,7 +218,7 @@ func (ms *mySQL) AlterTable(
 
 		tag := f.Tag()
 		if !hasPk {
-			// allow primary_key tag to override
+			// allow `primary_key` tag to override
 			if _, ok := tag.LookUp("primary_key"); ok {
 				pkk = f
 			}
@@ -333,7 +333,7 @@ func (ms *mySQL) AlterTable(
 		}
 	}
 
-	// TODO: character set
+	// TODO: allow user to character set
 	stmt.WriteByte(',')
 	stmt.WriteString(`CHARACTER SET utf8mb4`)
 	stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)

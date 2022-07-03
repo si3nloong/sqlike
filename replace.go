@@ -12,7 +12,7 @@ import (
 // ReplaceOne :
 func (tb *Table) ReplaceOne(
 	ctx context.Context,
-	src interface{},
+	src any,
 	opts ...*options.InsertOneOptions,
 ) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)

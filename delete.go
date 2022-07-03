@@ -17,7 +17,7 @@ import (
 // DestroyOne : hard delete a record on the table using primary key. You should alway have primary key defined in your struct in order to use this api.
 func (tb *Table) DestroyOne(
 	ctx context.Context,
-	delete interface{},
+	delete any,
 	opts ...*options.DestroyOneOptions,
 ) error {
 	opt := new(options.DestroyOneOptions)
@@ -130,7 +130,7 @@ func destroyOne(
 	driver sqldriver.Driver,
 	dialect dialect.Dialect,
 	logger db.Logger,
-	delete interface{},
+	delete any,
 	opt *options.DestroyOneOptions,
 ) error {
 	v := reflext.ValueOf(delete)
@@ -146,7 +146,7 @@ func destroyOne(
 
 	var (
 		fieldName string
-		value     interface{}
+		value     any
 	)
 	for _, sf := range cdc.Properties() {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())

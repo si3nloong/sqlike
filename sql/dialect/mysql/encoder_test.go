@@ -10,7 +10,7 @@ import (
 func TestEncodeMap(t *testing.T) {
 	var (
 		enc = DefaultEncoders{}
-		it  interface{}
+		it  any
 		err error
 	)
 
@@ -40,7 +40,7 @@ func TestEncodeMap(t *testing.T) {
 
 	// Map with interface value
 	{
-		intmap := make(map[int]interface{})
+		intmap := make(map[int]any)
 		it, err = enc.EncodeMap(nil, reflect.ValueOf(intmap))
 		require.NoError(t, err)
 		require.Equal(t, []byte(`{}`), it)

@@ -5,7 +5,7 @@
 - [x] Support `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` or else.
 - [x] Support `sqldump`.
 - [x] `StructMapper` as an interface and enable to set in `Client` object.
-- [x] Change `StructField` to `interface{}`.
+- [x] Change `StructField` to `any`.
 - [x] Support index with files instead of single file (index.yaml).
 - [x] `Codec` as an interface and enable to set in `Client` object.
 - [x] Support unmarshal map key using `TextUnmarshaler` interface.

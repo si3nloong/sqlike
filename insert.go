@@ -18,7 +18,7 @@ import (
 // InsertOne : insert single record. You should always pass in the address of input.
 func (tb *Table) InsertOne(
 	ctx context.Context,
-	src interface{},
+	src any,
 	opts ...*options.InsertOneOptions,
 ) (sql.Result, error) {
 	opt := new(options.InsertOneOptions)
@@ -57,7 +57,7 @@ func (tb *Table) InsertOne(
 // Insert : insert multiple records. You should always pass in the address of the slice.
 func (tb *Table) Insert(
 	ctx context.Context,
-	src interface{},
+	src any,
 	opts ...*options.InsertOptions,
 ) (sql.Result, error) {
 	opt := new(options.InsertOptions)
@@ -85,7 +85,7 @@ func insertMany(
 	driver sqldriver.Driver,
 	dlct dialect.Dialect,
 	logger db.Logger,
-	src interface{},
+	src any,
 	opt *options.InsertOptions,
 ) (sql.Result, error) {
 	v := reflext.ValueOf(src)

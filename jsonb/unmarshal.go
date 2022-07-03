@@ -18,7 +18,7 @@ type Unmarshaler interface {
 }
 
 // Unmarshal :
-func Unmarshal(data []byte, dst interface{}) error {
+func Unmarshal(data []byte, dst any) error {
 	v := reflext.ValueOf(dst)
 	if !v.IsValid() {
 		return errors.New("invalid value for Unmarshal")

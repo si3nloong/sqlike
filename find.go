@@ -16,8 +16,8 @@ import (
 
 // SingleResult : single result is an interface implementing apis as similar as driver.Result
 type SingleResult interface {
-	Scan(dest ...interface{}) error
-	Decode(dest interface{}) error
+	Scan(dest ...any) error
+	Decode(dest any) error
 	Columns() []string
 	ColumnTypes() ([]*sql.ColumnType, error)
 	Error() error

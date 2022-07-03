@@ -5,35 +5,35 @@ import (
 )
 
 // Sum :
-func Sum(field interface{}) (a primitive.Aggregate) {
+func Sum[T string | int](field T) (a primitive.Aggregate) {
 	a.Field = wrapColumn(field)
 	a.By = primitive.Sum
 	return
 }
 
 // Count :
-func Count(field interface{}) (a primitive.Aggregate) {
+func Count(field any) (a primitive.Aggregate) {
 	a.Field = wrapColumn(field)
 	a.By = primitive.Count
 	return
 }
 
 // Average :
-func Average(field interface{}) (a primitive.Aggregate) {
+func Average(field any) (a primitive.Aggregate) {
 	a.Field = wrapColumn(field)
 	a.By = primitive.Average
 	return
 }
 
 // Max :
-func Max(field interface{}) (a primitive.Aggregate) {
+func Max(field any) (a primitive.Aggregate) {
 	a.Field = wrapColumn(field)
 	a.By = primitive.Max
 	return
 }
 
 // Min :
-func Min(field interface{}) (a primitive.Aggregate) {
+func Min(field any) (a primitive.Aggregate) {
 	a.Field = wrapColumn(field)
 	a.By = primitive.Min
 	return

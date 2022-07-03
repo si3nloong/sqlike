@@ -35,7 +35,7 @@ func IndirectInit(v reflect.Value) reflect.Value {
 }
 
 // ValueOf : this is the replacement for reflect.ValueOf()
-func ValueOf(i interface{}) reflect.Value {
+func ValueOf(i any) reflect.Value {
 	if x, ok := i.(reflect.Value); ok {
 		return x
 	}
@@ -43,7 +43,7 @@ func ValueOf(i interface{}) reflect.Value {
 }
 
 // TypeOf : this is the replacement for reflect.TypeOf()
-func TypeOf(i interface{}) reflect.Type {
+func TypeOf(i any) reflect.Type {
 	if x, ok := i.(reflect.Type); ok {
 		return x
 	}

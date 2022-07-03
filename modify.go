@@ -18,7 +18,7 @@ import (
 // ModifyOne :
 func (tb *Table) ModifyOne(
 	ctx context.Context,
-	update interface{},
+	update any,
 	opts ...*options.ModifyOneOptions,
 ) error {
 	return modifyOne(
@@ -42,7 +42,7 @@ func modifyOne(
 	dialect dialect.Dialect,
 	driver sqldriver.Driver,
 	logger db.Logger,
-	update interface{},
+	update any,
 	opts []*options.ModifyOneOptions,
 ) error {
 	v := reflext.ValueOf(update)
@@ -69,7 +69,7 @@ func modifyOne(
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 
-	var pkv = [2]interface{}{}
+	var pkv = [2]any{}
 	for _, sf := range fields {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
 		if _, ok := sf.Tag().LookUp("primary_key"); ok {

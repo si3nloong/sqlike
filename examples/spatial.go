@@ -208,8 +208,8 @@ func SpatialExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				Select(
 					expr.As(expr.ST_Distance(expr.Column("Point"), origin), "dist"),
 					expr.ST_Distance(
-						expr.ST_GeomFromText(p1, 4326),
-						expr.ST_GeomFromText(p2, 4326),
+						expr.ST_GeomFromText(p1, uint(4326)),
+						expr.ST_GeomFromText(p2, uint(4326)),
 					),
 					expr.ST_AsText(expr.Column("Point")),
 				).

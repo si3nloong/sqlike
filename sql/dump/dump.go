@@ -97,7 +97,7 @@ func (dump *Dumper) RegisterParser(dataType string, parser Parser) {
 }
 
 // BackupTo :
-func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) (affected int64, err error) {
+func (dump *Dumper) BackupTo(ctx context.Context, query any, wr io.Writer) (affected int64, err error) {
 	w := bufio.NewWriter(wr)
 
 	var (
@@ -209,7 +209,7 @@ UNLOCK TABLES;
 			w.WriteByte('\n')
 		}
 		length := len(cols)
-		data := make([]interface{}, length)
+		data := make([]any, length)
 		for i := 0; i < length; i++ {
 			data[i] = new(sql.RawBytes)
 		}

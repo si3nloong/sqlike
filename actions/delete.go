@@ -6,8 +6,8 @@ import (
 
 // DeleteStatement :
 type DeleteStatement interface {
-	Where(fields ...interface{}) DeleteStatement
-	OrderBy(fields ...interface{}) DeleteStatement
+	Where(fields ...any) DeleteStatement
+	OrderBy(fields ...any) DeleteStatement
 	Limit(num uint) DeleteStatement
 }
 
@@ -15,19 +15,19 @@ type DeleteStatement interface {
 type DeleteActions struct {
 	Database   string
 	Table      string
-	Conditions []interface{}
-	Sorts      []interface{}
+	Conditions []any
+	Sorts      []any
 	RowCount   uint
 }
 
 // Where :
-func (act *DeleteActions) Where(fields ...interface{}) DeleteStatement {
+func (act *DeleteActions) Where(fields ...any) DeleteStatement {
 	act.Conditions = expr.And(fields...).Values
 	return act
 }
 
 // OrderBy :
-func (act *DeleteActions) OrderBy(fields ...interface{}) DeleteStatement {
+func (act *DeleteActions) OrderBy(fields ...any) DeleteStatement {
 	act.Sorts = fields
 	return act
 }

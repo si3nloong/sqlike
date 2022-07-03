@@ -10,23 +10,23 @@ type UpdateStmt struct {
 	Table      string
 	Conditions primitive.Group
 	Values     []primitive.KV
-	Sorts      []interface{}
+	Sorts      []any
 	RowCount   uint
 }
 
 // Update :
-func Update(tables ...interface{}) *UpdateStmt {
+func Update(tables ...any) *UpdateStmt {
 	stmt := new(UpdateStmt)
 	return stmt.Update(tables...)
 }
 
 // Update :
-func (stmt *UpdateStmt) Update(fields ...interface{}) *UpdateStmt {
+func (stmt *UpdateStmt) Update(fields ...any) *UpdateStmt {
 	return stmt
 }
 
 // Where :
-func (stmt *UpdateStmt) Where(fields ...interface{}) *UpdateStmt {
+func (stmt *UpdateStmt) Where(fields ...any) *UpdateStmt {
 	// stmt.Conditions = expr.And(fields...)
 	return stmt
 }
@@ -38,7 +38,7 @@ func (stmt *UpdateStmt) Set(values ...primitive.KV) *UpdateStmt {
 }
 
 // OrderBy :
-func (stmt *UpdateStmt) OrderBy(fields ...interface{}) *UpdateStmt {
+func (stmt *UpdateStmt) OrderBy(fields ...any) *UpdateStmt {
 	stmt.Sorts = fields
 	return stmt
 }

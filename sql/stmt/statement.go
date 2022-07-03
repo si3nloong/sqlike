@@ -8,7 +8,7 @@ import (
 
 // Formatter :
 type Formatter interface {
-	Format(it interface{}) string
+	Format(it any) string
 	Var(i int) string
 }
 
@@ -19,7 +19,7 @@ type Statement struct {
 	elapsed time.Duration
 	fmt     Formatter
 	c       int
-	args    []interface{}
+	args    []any
 }
 
 // NewStatement :
@@ -30,18 +30,18 @@ func NewStatement(fmt Formatter) (sm *Statement) {
 }
 
 // Args :
-func (sm *Statement) Args() []interface{} {
+func (sm *Statement) Args() []any {
 	return sm.args
 }
 
 // AppendArgs :
-func (sm *Statement) AppendArgs(args ...interface{}) {
+func (sm *Statement) AppendArgs(args ...any) {
 	sm.args = append(sm.args, args...)
 	sm.c = len(sm.args)
 }
 
 // WriteAppendArgs :
-func (sm *Statement) WriteAppendArgs(query string, args ...interface{}) {
+func (sm *Statement) WriteAppendArgs(query string, args ...any) {
 	sm.Builder.WriteString(query)
 	sm.args = append(sm.args, args...)
 	sm.c = len(sm.args)

@@ -97,7 +97,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 
 	var (
 		users  []User
-		cursor interface{}
+		cursor any
 	)
 
 	sort.SliceStable(data, func(i, j int) bool {
@@ -232,7 +232,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 		var nilslice []string
 		err = pg.NextCursor(ctx, nilslice)
 		require.Error(t, err)
-		var nilmap map[string]interface{}
+		var nilmap map[string]any
 		err = pg.NextCursor(ctx, nilmap)
 		require.Error(t, err)
 		err = pg.NextCursor(ctx, "")

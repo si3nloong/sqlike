@@ -7,9 +7,9 @@ import (
 
 // UpdateOneStatement :
 type UpdateOneStatement interface {
-	Where(fields ...interface{}) UpdateOneStatement
+	Where(fields ...any) UpdateOneStatement
 	Set(values ...primitive.KV) UpdateOneStatement
-	OrderBy(fields ...interface{}) UpdateOneStatement
+	OrderBy(fields ...any) UpdateOneStatement
 }
 
 // UpdateOneActions :
@@ -18,7 +18,7 @@ type UpdateOneActions struct {
 }
 
 // Where :
-func (act *UpdateOneActions) Where(fields ...interface{}) UpdateOneStatement {
+func (act *UpdateOneActions) Where(fields ...any) UpdateOneStatement {
 	act.Conditions = expr.And(fields...).Values
 	return act
 }
@@ -30,7 +30,7 @@ func (act *UpdateOneActions) Set(values ...primitive.KV) UpdateOneStatement {
 }
 
 // OrderBy :
-func (act *UpdateOneActions) OrderBy(fields ...interface{}) UpdateOneStatement {
+func (act *UpdateOneActions) OrderBy(fields ...any) UpdateOneStatement {
 	act.Sorts = fields
 	return act
 }

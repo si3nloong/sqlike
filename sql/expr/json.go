@@ -8,7 +8,7 @@ import (
 
 // JSON_QUOTE :
 // SELECT JSON_QUOTE(`Column` -> '$.type') FROM test;
-func JSON_QUOTE(doc interface{}) (f primitive.JSONFunc) {
+func JSON_QUOTE(doc any) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_QUOTE
 	switch vi := doc.(type) {
 	case string:
@@ -20,7 +20,7 @@ func JSON_QUOTE(doc interface{}) (f primitive.JSONFunc) {
 }
 
 // JSON_UNQUOTE :
-func JSON_UNQUOTE(doc interface{}) (f primitive.JSONFunc) {
+func JSON_UNQUOTE(doc any) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_UNQUOTE
 	switch vi := doc.(type) {
 	case string:
@@ -32,7 +32,7 @@ func JSON_UNQUOTE(doc interface{}) (f primitive.JSONFunc) {
 }
 
 // JSON_EXTRACT :
-func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (f primitive.JSONFunc) {
+func JSON_EXTRACT(doc any, path string, otherPaths ...string) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_EXTRACT
 	f.Args = append(f.Args, doc)
 	for _, p := range append([]string{path}, otherPaths...) {
@@ -42,7 +42,7 @@ func JSON_EXTRACT(doc interface{}, path string, otherPaths ...string) (f primiti
 }
 
 // JSON_KEYS :
-func JSON_KEYS(doc interface{}, paths ...string) (f primitive.JSONFunc) {
+func JSON_KEYS(doc any, paths ...string) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_KEYS
 	f.Args = append(f.Args, doc)
 	for _, p := range paths {
@@ -54,7 +54,7 @@ func JSON_KEYS(doc interface{}, paths ...string) (f primitive.JSONFunc) {
 }
 
 // JSON_SET :
-func JSON_SET(doc interface{}, path string, value interface{}, pathValues ...interface{}) (f primitive.JSONFunc) {
+func JSON_SET(doc any, path string, value any, pathValues ...any) (f primitive.JSONFunc) {
 	length := len(pathValues)
 	if length > 0 && length%2 != 0 {
 		panic("invalid argument len for JSON_SET(json_doc, path, val[, path, val] ...)")
@@ -66,7 +66,7 @@ func JSON_SET(doc interface{}, path string, value interface{}, pathValues ...int
 }
 
 // JSON_INSERT :
-func JSON_INSERT(doc interface{}, path string, value interface{}, pathValues ...interface{}) (f primitive.JSONFunc) {
+func JSON_INSERT(doc any, path string, value any, pathValues ...any) (f primitive.JSONFunc) {
 	length := len(pathValues)
 	if length > 0 && length%2 != 0 {
 		panic("invalid argument len for JSON_INSERT(json_doc, path, val[, path, val] ...)")
@@ -78,7 +78,7 @@ func JSON_INSERT(doc interface{}, path string, value interface{}, pathValues ...
 }
 
 // JSON_REMOVE :
-func JSON_REMOVE(doc interface{}, path string, paths ...string) (f primitive.JSONFunc) {
+func JSON_REMOVE(doc any, path string, paths ...string) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_REMOVE
 	f.Args = append(f.Args, doc, wrapRaw(path))
 	for _, p := range paths {
@@ -88,7 +88,7 @@ func JSON_REMOVE(doc interface{}, path string, paths ...string) (f primitive.JSO
 }
 
 // JSON_REPLACE :
-func JSON_REPLACE(doc interface{}, path string, value interface{}, pathValues ...interface{}) (f primitive.JSONFunc) {
+func JSON_REPLACE(doc any, path string, value any, pathValues ...any) (f primitive.JSONFunc) {
 	length := len(pathValues)
 	if length > 0 && length%2 != 0 {
 		panic("invalid argument len for JSON_REPLACE(json_doc, path, val[, path, val] ...)")
@@ -100,16 +100,16 @@ func JSON_REPLACE(doc interface{}, path string, value interface{}, pathValues ..
 }
 
 // JSON_VALID :
-func JSON_VALID(val interface{}) (f primitive.JSONFunc) {
+func JSON_VALID(val any) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_VALID
 	f.Args = append(f.Args, val)
 	return
 }
 
 // JSON_CONTAINS :
-func JSON_CONTAINS(target, candidate interface{}, paths ...string) (f primitive.JSONFunc) {
+func JSON_CONTAINS(target, candidate any, paths ...string) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_CONTAINS
-	for _, arg := range []interface{}{target, candidate} {
+	for _, arg := range []any{target, candidate} {
 		switch vi := arg.(type) {
 		case string, json.RawMessage:
 			f.Args = append(f.Args, primitive.Value{
@@ -130,14 +130,14 @@ func JSON_CONTAINS(target, candidate interface{}, paths ...string) (f primitive.
 }
 
 // JSON_TYPE :
-func JSON_TYPE(val interface{}) (f primitive.JSONFunc) {
+func JSON_TYPE(val any) (f primitive.JSONFunc) {
 	f.Type = primitive.JSON_TYPE
 	f.Args = append(f.Args, val)
 	return
 }
 
 // MemberOf : mysql 8.0.17
-func MemberOf(val interface{}, arr interface{}) (f primitive.JSONFunc) {
+func MemberOf(val any, arr any) (f primitive.JSONFunc) {
 	f.Prefix = val
 	f.Type = primitive.MEMBER_OF
 	f.Args = append(f.Args, wrapColumn(arr))

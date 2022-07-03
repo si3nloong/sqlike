@@ -52,22 +52,22 @@ func (db *Database) Table(name string) *Table {
 }
 
 // Exec :
-func (db *Database) Exec(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+func (db *Database) Exec(ctx context.Context, query string, args ...any) (sql.Result, error) {
 	return getDriverFromContext(ctx, db.driver).ExecContext(ctx, query, args...)
 }
 
 // Query :
-func (db *Database) Query(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+func (db *Database) Query(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	return getDriverFromContext(ctx, db.driver).QueryContext(ctx, query, args...)
 }
 
 // QueryRow :
-func (db *Database) QueryRow(ctx context.Context, query string, args ...interface{}) *sql.Row {
+func (db *Database) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
 	return getDriverFromContext(ctx, db.driver).QueryRowContext(ctx, query, args...)
 }
 
 // QueryStmt :
-func (db *Database) QueryStmt(ctx context.Context, query interface{}) (*Result, error) {
+func (db *Database) QueryStmt(ctx context.Context, query any) (*Result, error) {
 	if query == nil {
 		return nil, errors.New("sqlike: empty query statement")
 	}

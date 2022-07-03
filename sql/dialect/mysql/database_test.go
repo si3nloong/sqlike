@@ -13,7 +13,7 @@ func TestUseDatabase(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 	ms.UseDatabase(stmt, "db")
 	require.Equal(t, "USE `db`;", stmt.String())
-	require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	require.ElementsMatch(t, []any{}, stmt.Args())
 }
 
 func TestCreateDatabase(t *testing.T) {
@@ -24,7 +24,7 @@ func TestCreateDatabase(t *testing.T) {
 	{
 		ms.CreateDatabase(stmt, "db", false)
 		require.Equal(t, "CREATE DATABASE `db`;", stmt.String())
-		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+		require.ElementsMatch(t, []any{}, stmt.Args())
 	}
 
 	stmt.Reset()
@@ -32,7 +32,7 @@ func TestCreateDatabase(t *testing.T) {
 	{
 		ms.CreateDatabase(stmt, "db", true)
 		require.Equal(t, "CREATE DATABASE IF NOT EXISTS `db`;", stmt.String())
-		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+		require.ElementsMatch(t, []any{}, stmt.Args())
 	}
 }
 
@@ -44,7 +44,7 @@ func TestDropDatabase(t *testing.T) {
 	{
 		ms.DropDatabase(stmt, "db", false)
 		require.Equal(t, "DROP SCHEMA `db`;", stmt.String())
-		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+		require.ElementsMatch(t, []any{}, stmt.Args())
 	}
 
 	stmt.Reset()
@@ -52,7 +52,7 @@ func TestDropDatabase(t *testing.T) {
 	{
 		ms.DropDatabase(stmt, "db", true)
 		require.Equal(t, "DROP SCHEMA IF EXISTS `db`;", stmt.String())
-		require.ElementsMatch(t, []interface{}{}, stmt.Args())
+		require.ElementsMatch(t, []any{}, stmt.Args())
 	}
 }
 
@@ -62,5 +62,5 @@ func TestGetDatabases(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 	ms.GetDatabases(stmt)
 	require.Equal(t, "SHOW DATABASES;", stmt.String())
-	require.ElementsMatch(t, []interface{}{}, stmt.Args())
+	require.ElementsMatch(t, []any{}, stmt.Args())
 }
