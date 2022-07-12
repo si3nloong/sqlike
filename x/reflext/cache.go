@@ -6,8 +6,12 @@ import (
 	"sync"
 )
 
-// DefaultMapper :
-var DefaultMapper = NewMapperFunc([]string{"sqlike", "db", "sql"}, nil)
+var defaultMapper = NewMapperFunc([]string{"sqlike", "db", "sql"}, nil)
+
+// DefaultMapper : return a default struct mapper
+func DefaultMapper() StructMapper {
+	return defaultMapper
+}
 
 // StructMapper :
 type StructMapper interface {
@@ -26,19 +30,18 @@ type MapFunc func(FieldInfo) (skip bool)
 // FormatFunc :
 type FormatFunc func(string) string
 
-// Mapper :
-type Mapper struct {
+type mapper struct {
 	mutex   sync.Mutex
 	tags    []string
 	cache   map[reflect.Type]*Struct
 	fmtFunc FormatFunc
 }
 
-var _ StructMapper = (*Mapper)(nil)
+var _ StructMapper = (*mapper)(nil)
 
 // NewMapperFunc :
-func NewMapperFunc(tags []string, fmtFunc FormatFunc) *Mapper {
-	return &Mapper{
+func NewMapperFunc(tags []string, fmtFunc FormatFunc) StructMapper {
+	return &mapper{
 		cache:   make(map[reflect.Type]*Struct),
 		tags:    tags,
 		fmtFunc: fmtFunc,
@@ -46,7 +49,7 @@ func NewMapperFunc(tags []string, fmtFunc FormatFunc) *Mapper {
 }
 
 // CodecByType :
-func (m *Mapper) CodecByType(t reflect.Type) StructInfo {
+func (m *mapper) CodecByType(t reflect.Type) StructInfo {
 	mapping, ok := m.cache[t]
 	if !ok {
 		m.mutex.Lock()
@@ -61,7 +64,7 @@ func (m *Mapper) CodecByType(t reflect.Type) StructInfo {
 }
 
 // FieldByName : get reflect.Value from struct by field name
-func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
+func (m *mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 	v = Indirect(v)
 	mustBe(v, reflect.Struct)
 
@@ -74,17 +77,17 @@ func (m *Mapper) FieldByName(v reflect.Value, name string) reflect.Value {
 }
 
 // FieldByIndexes : get reflect.Value from struct by indexes. If the reflect.Value is nil, it will get initialized
-func (m *Mapper) FieldByIndexes(v reflect.Value, idxs []int) reflect.Value {
+func (m *mapper) FieldByIndexes(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexes(v, idxs)
 }
 
 // FieldByIndexesReadOnly : get reflect.Value from struct by indexes without initialized
-func (m *Mapper) FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value {
+func (m *mapper) FieldByIndexesReadOnly(v reflect.Value, idxs []int) reflect.Value {
 	return FieldByIndexesReadOnly(v, idxs)
 }
 
 // LookUpFieldByName : lookup reflect.Value from struct by field name
-func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
+func (m *mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value, bool) {
 	v = Indirect(v)
 	mustBe(v, reflect.Struct)
 
@@ -97,7 +100,7 @@ func (m *Mapper) LookUpFieldByName(v reflect.Value, name string) (reflect.Value,
 }
 
 // TraversalsByName :
-func (m *Mapper) TraversalsByName(t reflect.Type, names []string) (idxs [][]int) {
+func (m *mapper) TraversalsByName(t reflect.Type, names []string) (idxs [][]int) {
 	idxs = make([][]int, 0, len(names))
 	m.TraversalsByNameFunc(t, names, func(i int, idx []int) {
 		if idxs != nil {
@@ -110,7 +113,7 @@ func (m *Mapper) TraversalsByName(t reflect.Type, names []string) (idxs [][]int)
 }
 
 // TraversalsByNameFunc :
-func (m *Mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int) {
+func (m *mapper) TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int) {
 	t = Deref(t)
 	mustBe(t, reflect.Struct)
 
