@@ -3,7 +3,7 @@ package options
 import (
 	"testing"
 
-	"github.com/si3nloong/sqlike/v2/x/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/stretchr/testify/require"
 )
 

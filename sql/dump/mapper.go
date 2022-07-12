@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/si3nloong/sqlike/v2/x/util"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
 var null = []byte(`null`)

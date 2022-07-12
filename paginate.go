@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 

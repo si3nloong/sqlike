@@ -7,11 +7,11 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/util"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 

@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/types"
-	"github.com/si3nloong/sqlike/v2/x/util"
 
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )

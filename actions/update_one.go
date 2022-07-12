@@ -1,8 +1,8 @@
 package actions
 
 import (
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
 
 // UpdateOneStatement :

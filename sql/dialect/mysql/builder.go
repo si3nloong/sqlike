@@ -9,12 +9,12 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"github.com/si3nloong/sqlike/v2/sql"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
-	"github.com/si3nloong/sqlike/v2/x/spatial"
 )
 
 var operatorMap = map[primitive.Operator]string{

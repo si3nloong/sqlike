@@ -39,8 +39,14 @@ type mapper struct {
 
 var _ StructMapper = (*mapper)(nil)
 
-// NewMapperFunc :
-func NewMapperFunc(tags []string, fmtFunc FormatFunc) StructMapper {
+// NewMapperFunc : return an object which complied to `StructMapper` interface
+func NewMapperFunc(tags []string, formatter ...FormatFunc) StructMapper {
+	fmtFunc := func(v string) string {
+		return v
+	}
+	if len(formatter) > 0 {
+		fmtFunc = formatter[0]
+	}
 	return &mapper{
 		cache:   make(map[reflect.Type]*Struct),
 		tags:    tags,

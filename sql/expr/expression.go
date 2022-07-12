@@ -3,31 +3,35 @@ package expr
 import (
 	"reflect"
 
-	"github.com/si3nloong/sqlike/v2/x/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
+type ColumnConstraints interface {
+	~string | primitive.Column | primitive.JSONColumn
+}
+
 // Equal :
-func Equal(field, value any) (c primitive.C) {
+func Equal[C ColumnConstraints](field C, value any) (c primitive.C) {
 	c = clause(field, primitive.Equal, value)
 	return
 }
 
 // NotEqual :
-func NotEqual(field, value any) (c primitive.C) {
+func NotEqual[C ColumnConstraints](field C, value any) (c primitive.C) {
 	c = clause(field, primitive.NotEqual, value)
 	return
 }
 
 // IsNull :
-func IsNull(field string) (c primitive.Nil) {
+func IsNull[C ColumnConstraints](field C) (c primitive.Nil) {
 	c.Field = wrapColumn(field)
 	c.IsNot = true
 	return
 }
 
 // NotNull :
-func NotNull(field string) (c primitive.Nil) {
+func NotNull[C ColumnConstraints](field C) (c primitive.Nil) {
 	c.Field = wrapColumn(field)
 	return
 }
@@ -45,7 +49,7 @@ func NotIn(field, values any) (c primitive.C) {
 }
 
 // Like :
-func Like[T string, V string | primitive.Raw](field T, value V) (p primitive.L) {
+func Like[F ColumnConstraints, V string | primitive.Raw](field F, value V) (p primitive.L) {
 	p.Field = wrapColumn(field)
 	p.Value = value
 	return

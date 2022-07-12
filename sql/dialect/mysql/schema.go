@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
 	"github.com/si3nloong/sqlike/v2/sql/schema"
 	sqltype "github.com/si3nloong/sqlike/v2/sql/type"
 	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
-	"github.com/si3nloong/sqlike/v2/x/util"
 	"golang.org/x/text/currency"
 )
 

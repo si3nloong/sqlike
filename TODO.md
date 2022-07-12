@@ -78,9 +78,11 @@
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support migration like `django`.
 - [ ] Comprehensive `testcase`.
+- [ ] Refactor `Paginate`.
+- [x] Refactor `reflext`, set public struct to private struct.
 - [ ] Support insert with map.
-- [ ] Support foreign key.
-- [ ] Support multiple tag (reflext).
+- [x] Support foreign key.
+- [x] Support multiple tag (reflext).
 - [ ] Support proxy mode for master-slave topology.
 - [ ] Support any of [index](https://dev.mysql.com/doc/refman/8.0/en/create-index.html).
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).

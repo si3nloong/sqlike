@@ -9,10 +9,10 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 )
 
 // Adapter :

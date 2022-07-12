@@ -16,6 +16,7 @@ const (
 	SkipLocked
 )
 
+// FIXME:
 type Lock struct {
 	Ofs    []ColumnPath
 	Type   LockType
