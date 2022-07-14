@@ -30,6 +30,6 @@ func JoinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		defer result.Close()
 	})
 
-	panic("")
+	// panic("")
 
 }

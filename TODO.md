@@ -78,7 +78,7 @@
 - [ ] BeforeSave and AfterLoad hook.
 - [ ] Support migration like `django`.
 - [ ] Comprehensive `testcase`.
-- [ ] Refactor `Paginate`.
+- [ ] Refactor `Paginate`, add `PrevCursor` and `NextCursor`.
 - [x] Refactor `reflext`, set public struct to private struct.
 - [ ] Support insert with map.
 - [x] Support foreign key.

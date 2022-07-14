@@ -135,7 +135,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			}
 			require.Equal(t, data[i].ID, users[0].ID)
 			cursor = users[len(users)-1].ID
-			if pg.NextCursor(ctx, cursor) != nil {
+			if pg.Cursor(ctx, cursor) != nil {
 				break
 			}
 		}
@@ -197,7 +197,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			require.True(t, len(users) > i)
 
 			require.Equal(t, results[0], users[i])
-			if err := pg.NextCursor(ctx, cursor); err != nil {
+			if err := pg.Cursor(ctx, cursor); err != nil {
 				require.NoError(t, err)
 			}
 
@@ -225,25 +225,25 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 
 	// Expected paginate with error
 	{
-		err = pg.NextCursor(ctx, nil)
+		err = pg.Cursor(ctx, nil)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, []string{})
+		err = pg.Cursor(ctx, []string{})
 		require.Error(t, err)
 		var nilslice []string
-		err = pg.NextCursor(ctx, nilslice)
+		err = pg.Cursor(ctx, nilslice)
 		require.Error(t, err)
 		var nilmap map[string]any
-		err = pg.NextCursor(ctx, nilmap)
+		err = pg.Cursor(ctx, nilmap)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, "")
+		err = pg.Cursor(ctx, "")
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, 0)
+		err = pg.Cursor(ctx, 0)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, false)
+		err = pg.Cursor(ctx, false)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, float64(0))
+		err = pg.Cursor(ctx, float64(0))
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, []byte(nil))
+		err = pg.Cursor(ctx, []byte(nil))
 		require.Error(t, err)
 	}
 
@@ -274,7 +274,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			}
 			// require.ElementsMatch(t, actuals[i], users)
 			cursor = users[len(users)-1].ID
-			if pg.NextCursor(ctx, cursor) != nil {
+			if pg.Cursor(ctx, cursor) != nil {
 				break
 			}
 		}

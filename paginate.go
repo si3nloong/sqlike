@@ -48,6 +48,7 @@ func (tb *Table) Paginate(
 	if x.RowCount == 0 {
 		x.RowCount = 100
 	}
+	x.RowCount++
 	return &Paginator{
 		ctx:    ctx,
 		table:  tb,
@@ -68,8 +69,8 @@ type Paginator struct {
 	err    error
 }
 
-// NextCursor :
-func (pg *Paginator) NextCursor(ctx context.Context, cursor any) (err error) {
+// Cursor :
+func (pg *Paginator) Cursor(ctx context.Context, cursor any) (err error) {
 	if pg.err != nil {
 		return pg.err
 	}
