@@ -3,7 +3,8 @@ package reflext
 import (
 	"reflect"
 	"runtime"
-	"sync"
+
+	"github.com/si3nloong/sqlike/v2/internal/lrucache"
 )
 
 var defaultMapper = NewMapperFunc([]string{"sqlike", "db", "sql"}, nil)
@@ -31,9 +32,8 @@ type MapFunc func(FieldInfo) (skip bool)
 type FormatFunc func(string) string
 
 type mapper struct {
-	mutex   sync.Mutex
 	tags    []string
-	cache   map[reflect.Type]*Struct
+	cache   lrucache.LRUCache[*Struct]
 	fmtFunc FormatFunc
 }
 
@@ -48,7 +48,7 @@ func NewMapperFunc(tags []string, formatter ...FormatFunc) StructMapper {
 		fmtFunc = formatter[0]
 	}
 	return &mapper{
-		cache:   make(map[reflect.Type]*Struct),
+		cache:   lrucache.New[*Struct](500),
 		tags:    tags,
 		fmtFunc: fmtFunc,
 	}
@@ -56,15 +56,17 @@ func NewMapperFunc(tags []string, formatter ...FormatFunc) StructMapper {
 
 // CodecByType :
 func (m *mapper) CodecByType(t reflect.Type) StructInfo {
-	mapping, ok := m.cache[t]
+	mapping, ok := m.cache.Get(t)
 	if !ok {
-		m.mutex.Lock()
+		// m.mutex.Lock()
+		// mapping = getCodec(t, m.tags, m.fmtFunc)
+		// _, ok = m.cache[t]
+		// if !ok {
+		// 	m.cache[t] = mapping
+		// }
+		// m.mutex.Unlock()
 		mapping = getCodec(t, m.tags, m.fmtFunc)
-		_, ok = m.cache[t]
-		if !ok {
-			m.cache[t] = mapping
-		}
-		m.mutex.Unlock()
+		m.cache.Set(t, mapping)
 	}
 	return mapping
 }
