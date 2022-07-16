@@ -72,7 +72,7 @@ func newClient(
 	client.driverName = driver
 	client.charSet = code
 	client.collate = collate
-	client.cache = reflext.DefaultMapper
+	client.cache = reflext.DefaultMapper()
 	client.version = client.getVersion(ctx)
 	if mysql8.GreaterThan(client.version) {
 		log.Println("DEPRECATION: SQLike no longer support MySQL 5.7 in future, try to upgrade your MySQL Database to at least 8.0 !!!")

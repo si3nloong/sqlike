@@ -251,7 +251,7 @@ func (dec *DefaultDecoder) DecodePtr(r *Reader, v reflect.Value) error {
 
 // DecodeStruct :
 func (dec *DefaultDecoder) DecodeStruct(r *Reader, v reflect.Value) error {
-	mapper := reflext.DefaultMapper
+	mapper := reflext.DefaultMapper()
 	if r.IsNull() {
 		v.Set(reflect.Zero(v.Type()))
 		return r.skipNull()

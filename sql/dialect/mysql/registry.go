@@ -9,8 +9,8 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/paulmach/orb"
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"github.com/si3nloong/sqlike/v2/sql/codec"
-	"github.com/si3nloong/sqlike/v2/x/spatial"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )

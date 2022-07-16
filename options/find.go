@@ -1,6 +1,6 @@
 package options
 
-import "github.com/si3nloong/sqlike/v2/x/primitive"
+import "github.com/si3nloong/sqlike/v2/internal/primitive"
 
 // FindOptions :
 type FindOptions struct {

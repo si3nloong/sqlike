@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -48,6 +48,7 @@ func (tb *Table) Paginate(
 	if x.RowCount == 0 {
 		x.RowCount = 100
 	}
+	// x.RowCount++
 	return &Paginator{
 		ctx:    ctx,
 		table:  tb,
@@ -68,8 +69,12 @@ type Paginator struct {
 	err    error
 }
 
-// NextCursor :
-func (pg *Paginator) NextCursor(ctx context.Context, cursor any) (err error) {
+// Paginate the records with after cursor.
+//
+// 	if err := pg.After(context.Background(), 1); err != nil {
+// 		panic(err)
+// 	}
+func (pg *Paginator) After(ctx context.Context, cursor any) (err error) {
 	if pg.err != nil {
 		return pg.err
 	}

@@ -3,8 +3,8 @@ package expr
 import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
-	"github.com/si3nloong/sqlike/v2/x/spatial"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"golang.org/x/exp/constraints"
 )
 

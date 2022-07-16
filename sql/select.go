@@ -3,8 +3,8 @@ package sql
 import (
 	"reflect"
 
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
-	"github.com/si3nloong/sqlike/v2/x/primitive"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -87,6 +87,17 @@ func (stmt *SelectStmt) Distinct() *SelectStmt {
 
 // Where :
 func (stmt *SelectStmt) Where(fields ...any) *SelectStmt {
+	stmt.Conditions = expr.And(fields...)
+	return stmt
+}
+
+// LeftJoin :
+func (stmt *SelectStmt) LeftJoin(fields ...any) *SelectStmt {
+	stmt.Conditions = expr.And(fields...)
+	return stmt
+}
+
+func (stmt *SelectStmt) InnerJoin(fields ...any) *SelectStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }

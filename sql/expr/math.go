@@ -3,7 +3,7 @@ package expr
 import (
 	"golang.org/x/exp/constraints"
 
-	"github.com/si3nloong/sqlike/v2/x/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
 // Increment :

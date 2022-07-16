@@ -97,6 +97,7 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 
 		InsertExamples(ctx, t, db)
 		FindExamples(ctx, t, db)
+		JoinExamples(ctx, t, db)
 		AdvanceQueryExamples(ctx, t, db)
 		TransactionExamples(ctx, t, db)
 		PaginationExamples(ctx, t, client)
@@ -104,9 +105,9 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		DeleteExamples(ctx, t, db)
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
-		SpatialExamples(ctx, t, db)
+		// SpatialExamples(ctx, t, db)
 
-		SQLDumpExamples(ctx, t, client)
+		// SQLDumpExamples(ctx, t, client)
 
 		ExtraExamples(ctx, t, db, mg)
 	}

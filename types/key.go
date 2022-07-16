@@ -22,10 +22,10 @@ import (
 
 	"github.com/segmentio/ksuid"
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 	pb "github.com/si3nloong/sqlike/v2/protobuf"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
-	"github.com/si3nloong/sqlike/v2/x/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"

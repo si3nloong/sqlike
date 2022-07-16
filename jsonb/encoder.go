@@ -122,7 +122,7 @@ func (enc *DefaultEncoder) EncodePtr(w *Writer, v reflect.Value) error {
 // EncodeStruct :
 func (enc *DefaultEncoder) EncodeStruct(w *Writer, v reflect.Value) error {
 	w.WriteRune('{')
-	mapper := reflext.DefaultMapper
+	mapper := reflext.DefaultMapper()
 	cdc := mapper.CodecByType(v.Type())
 	for i, sf := range cdc.Properties() {
 		if i > 0 {

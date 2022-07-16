@@ -15,9 +15,9 @@ import (
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkt"
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
-	"github.com/si3nloong/sqlike/v2/x/spatial"
 
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
 

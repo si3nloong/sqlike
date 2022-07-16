@@ -5,10 +5,10 @@ import (
 	"reflect"
 
 	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"github.com/si3nloong/sqlike/v2/options"
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
-	"github.com/si3nloong/sqlike/v2/x/spatial"
 )
 
 // InsertInto :

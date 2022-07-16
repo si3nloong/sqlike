@@ -17,7 +17,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/jsonb"
 	"github.com/si3nloong/sqlike/v2/sql/codec"
 
-	"github.com/si3nloong/sqlike/v2/x/util"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 

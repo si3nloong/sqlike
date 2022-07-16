@@ -1,6 +1,6 @@
 package expr
 
-import "github.com/si3nloong/sqlike/v2/x/primitive"
+import "github.com/si3nloong/sqlike/v2/internal/primitive"
 
 type selectStmt interface {
 	// Where(fields ...any) selectStmt
