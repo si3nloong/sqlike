@@ -20,6 +20,9 @@ type listItem[V any] struct {
 	next  *listItem[V]
 }
 
+// FIXME: Supposingly we should make key as generic type,
+// but current golang version (up to v1.18) doesn't support generic for comparable.
+// See this : https://github.com/golang/go/issues/51179
 type lru[V any] struct {
 	// maximum entry of the lru cache
 	size int
