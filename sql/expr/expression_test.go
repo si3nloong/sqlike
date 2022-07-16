@@ -34,17 +34,17 @@ func TestExpression(t *testing.T) {
 	}
 	filters = append(filters, invalids...)
 
-	t.Run("Empty And", func(ti *testing.T) {
+	t.Run("Empty And", func(t *testing.T) {
 		grp = And()
-		require.Equal(ti, primitive.Group{}, grp)
+		require.Equal(t, primitive.Group{}, grp)
 
 		grp = And(invalids...)
-		require.Equal(ti, primitive.Group{}, grp)
+		require.Equal(t, primitive.Group{}, grp)
 	})
 
-	t.Run("And", func(ti *testing.T) {
+	t.Run("And", func(t *testing.T) {
 		grp = And(filters...)
-		require.Equal(ti, primitive.Group{
+		require.Equal(t, primitive.Group{
 			Values: []any{
 				Raw("("),
 				Equal("A", 1),
@@ -57,9 +57,9 @@ func TestExpression(t *testing.T) {
 		}, grp)
 	})
 
-	t.Run("Or", func(ti *testing.T) {
+	t.Run("Or", func(t *testing.T) {
 		grp = Or(filters...)
-		require.Equal(ti, primitive.Group{
+		require.Equal(t, primitive.Group{
 			Values: []any{
 				Raw("("),
 				Equal("A", 1),

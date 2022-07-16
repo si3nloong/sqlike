@@ -199,7 +199,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				Set(
 					expr.ColumnValue("Emoji", "<😗>"),
 					expr.ColumnValue("SID", expr.Column("LongStr")),
-					expr.ColumnValue("Int", expr.Increment("Int", 100)),
+					expr.ColumnValue("Int", expr.Increment("Int", uint(100))),
 					expr.ColumnValue("Tinyint", expr.Raw("80")),
 				),
 			options.UpdateOne().SetDebug(true),

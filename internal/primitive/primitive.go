@@ -129,7 +129,7 @@ const (
 type Math struct {
 	Field string
 	Mode  operator
-	Value int
+	Value uint
 }
 
 type order int

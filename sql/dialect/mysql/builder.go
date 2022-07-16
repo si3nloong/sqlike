@@ -399,7 +399,7 @@ func (b *mySQLBuilder) BuildMath(stmt db.Stmt, it any) (err error) {
 	} else {
 		stmt.WriteByte('-')
 	}
-	stmt.WriteString(" " + strconv.Itoa(x.Value))
+	stmt.WriteString(" " + strconv.FormatUint(uint64(x.Value), 10))
 	return
 }
 

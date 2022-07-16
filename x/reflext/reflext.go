@@ -69,7 +69,7 @@ func (st StructTag) Name() string {
 	return st.name
 }
 
-// FieldName :
+// FieldName : returns the original field name on struct
 func (st StructTag) FieldName() string {
 	return st.fieldName
 }
@@ -172,12 +172,16 @@ var _ StructInfo = (*Struct)(nil)
 
 // Fields :
 func (s *Struct) Fields() []FieldInfo {
-	return append(make(Fields, 0, len(s.fields)), s.fields...)
+	clone := make(Fields, len(s.fields))
+	copy(clone, s.fields)
+	return clone
 }
 
 // Properties :
 func (s *Struct) Properties() []FieldInfo {
-	return append(make(Fields, 0, len(s.properties)), s.properties...)
+	clone := make(Fields, len(s.properties))
+	copy(clone, s.properties)
+	return clone
 }
 
 // LookUpFieldByName :
@@ -354,8 +358,8 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 	return codec
 }
 
-func appendSlice(s []int, i int) []int {
-	x := make([]int, len(s)+1)
+func appendSlice[T any](s []T, i T) []T {
+	x := make([]T, len(s)+1)
 	copy(x, s)
 	x[len(x)-1] = i
 	return x
@@ -373,6 +377,7 @@ func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st 
 	}
 	st.name = name
 	st.opts = make(map[string]string)
+	// FIXME: combine multiple tags
 	// for _, tagName := range tagNames {
 	// 	parts := strings.Split(f.Tag.Get(tagName), ",")
 	// 	name := strings.TrimSpace(parts[0])

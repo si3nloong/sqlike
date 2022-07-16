@@ -25,9 +25,6 @@ type StructMapper interface {
 	TraversalsByNameFunc(t reflect.Type, names []string, fn func(int, []int)) (idxs [][]int)
 }
 
-// MapFunc :
-type MapFunc func(FieldInfo) (skip bool)
-
 // FormatFunc :
 type FormatFunc func(string) string
 

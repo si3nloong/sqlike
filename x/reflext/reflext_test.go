@@ -104,6 +104,7 @@ func TestCodec(t *testing.T) {
 		typeof reflect.Type
 		codec  *Struct
 		i      struct {
+			// if multiple tag is defined, the last one will override it
 			Name   string `db:"columnName" sqlike:",default=TEST"`
 			Nested struct {
 				embeddedStruct
@@ -119,9 +120,8 @@ func TestCodec(t *testing.T) {
 
 		require.Equal(t, len(codec.fields), 13)
 		require.Equal(t, len(codec.properties), 4)
-		// require.NotNil(t, codec.names["columnName"])
-		// v, _ := codec.names["columnName"].Tag().LookUp("default")
-		// require.Equal(t, v, "TEST")
+		v, _ := codec.names["Name"].Tag().LookUp("default")
+		require.Equal(t, "TEST", v)
 		require.NotNil(t, codec.names["Nested.Enum"])
 	}
 

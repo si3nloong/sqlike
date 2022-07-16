@@ -7,20 +7,20 @@ import (
 )
 
 // Increment :
-func Increment[T constraints.Integer](field string, value T) primitive.Math {
+func Increment[T constraints.Unsigned](field string, value T) primitive.Math {
 	return primitive.Math{
 		Field: field,
 		Mode:  primitive.Add,
-		Value: int(value),
+		Value: uint(value),
 	}
 }
 
 // Decrement :
-func Decrement[T constraints.Integer](field string, value T) primitive.Math {
+func Decrement[T constraints.Unsigned](field string, value T) primitive.Math {
 	return primitive.Math{
 		Field: field,
 		Mode:  primitive.Deduct,
-		Value: int(value),
+		Value: uint(value),
 	}
 }
 

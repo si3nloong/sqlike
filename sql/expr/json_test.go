@@ -13,9 +13,9 @@ func TestJSON(t *testing.T) {
 		it any
 	)
 
-	t.Run("JSON_QUOTE", func(tst *testing.T) {
+	t.Run("JSON_QUOTE", func(t *testing.T) {
 		it = JSON_QUOTE("a")
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_QUOTE,
 			Args: []any{
 				primitive.Value{Raw: "a"},
@@ -23,9 +23,9 @@ func TestJSON(t *testing.T) {
 		}, it)
 	})
 
-	t.Run("JSON_CONTAINS", func(tst *testing.T) {
+	t.Run("JSON_CONTAINS", func(t *testing.T) {
 		it = JSON_CONTAINS(Column("a"), Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
 			Args: []any{
 				primitive.Column{Name: "a"},
@@ -34,7 +34,7 @@ func TestJSON(t *testing.T) {
 		}, it)
 
 		it = JSON_CONTAINS(`["a", "b"]`, Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
 			Args: []any{
 				primitive.Value{Raw: `["a", "b"]`},
@@ -44,7 +44,7 @@ func TestJSON(t *testing.T) {
 
 		raw := json.RawMessage(`["A","B","C"]`)
 		it = JSON_CONTAINS(raw, Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
 			Args: []any{
 				primitive.Value{Raw: raw},
