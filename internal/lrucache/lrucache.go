@@ -10,7 +10,8 @@ type Cache[V any] interface {
 	Get(reflect.Type) (V, bool)
 	Set(reflect.Type, V)
 	Size() int
-	Reset()
+	Len() int
+	Purge()
 }
 
 type listItem[V any] struct {
@@ -90,13 +91,18 @@ func (l *lru[V]) Set(t reflect.Type, value V) {
 	l.mu.Unlock()
 }
 
-// Returns the size of the cache.
+// Len returns the number of items in the cache.
+func (l *lru[V]) Len() int {
+	return len(l.appendix)
+}
+
+// Size returns the size of the cache.
 func (l *lru[V]) Size() int {
 	return l.size
 }
 
-// Reset all the entries inside the cache.
-func (l *lru[V]) Reset() {
+// Purge clear all the entries inside the cache.
+func (l *lru[V]) Purge() {
 	l.mu.Lock()
 	l.current = nil
 	l.list = nil

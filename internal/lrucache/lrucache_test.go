@@ -48,6 +48,8 @@ func TestLRUCache(t *testing.T) {
 			ok          bool
 		)
 
+		require.Equal(t, 0, cache.Len())
+
 		type A struct{ A string }
 		type B struct{ B string }
 		type C struct{ C string }
@@ -85,7 +87,9 @@ func TestLRUCache(t *testing.T) {
 		require.Equal(t, 5, returnValue)
 		require.True(t, ok)
 
-		cache.Reset()
+		require.Equal(t, 3, cache.Len())
+
+		cache.Purge()
 
 		// after reset, it should be empty
 
@@ -104,5 +108,7 @@ func TestLRUCache(t *testing.T) {
 		returnValue, ok = cache.Get(reflect.TypeOf(E{}))
 		require.Zero(t, returnValue)
 		require.False(t, ok)
+
+		require.Equal(t, 0, cache.Len())
 	})
 }
