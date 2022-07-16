@@ -97,7 +97,8 @@ func TestSelect(t *testing.T) {
 			expr.Asc("C"),
 		).Limit(1)
 
-		stmt2 := sqlstmt.NewStatement(ms)
+		stmt2 := sqlstmt.AcquireStmt(ms)
+		defer sqlstmt.ReleaseStmt(stmt2)
 		err := ms.parser.BuildStatement(stmt2, stmt)
 		require.NoError(t, err)
 	}

@@ -8,6 +8,7 @@ import (
 // ToSQL :
 func ToSQL(src any) error {
 	ms := dialect.GetDialectByDriver("mysql")
-	sqlstmt.NewStatement(ms)
+	stmt := sqlstmt.AcquireStmt(ms)
+	defer sqlstmt.ReleaseStmt(stmt)
 	return nil
 }

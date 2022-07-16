@@ -22,13 +22,6 @@ type Statement struct {
 	args    []any
 }
 
-// NewStatement :
-func NewStatement(fmt Formatter) (sm *Statement) {
-	sm = new(Statement)
-	sm.fmt = fmt
-	return
-}
-
 // Args :
 func (sm *Statement) Args() []any {
 	return sm.args
@@ -99,5 +92,7 @@ func (sm *Statement) TimeElapsed() time.Duration {
 // Reset : implement resetter as strings.Builer
 func (sm *Statement) Reset() {
 	sm.args = nil
+	sm.start = time.Time{}
+	sm.elapsed = time.Duration(0)
 	sm.Builder.Reset()
 }

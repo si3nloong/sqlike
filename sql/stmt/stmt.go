@@ -22,6 +22,7 @@ func AcquireStmt(fmt Formatter) *Statement {
 // ReleaseStmt :
 func ReleaseStmt(x *Statement) {
 	if x != nil {
+		// this will reset everything including timer, query statement and arguments
 		x.Reset()
 		x.fmt = nil
 		defer stmtPool.Put(x)

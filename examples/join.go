@@ -12,6 +12,10 @@ import (
 // JoinExamples :
 func JoinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
+	// setup databases
+	db.Table("User").MustMigrate(ctx, User{})
+	db.Table("UserAddress").MustMigrate(ctx, UserAddress{})
+
 	t.Run("LeftJoin", func(t *testing.T) {
 		result, err := db.QueryStmt(ctx, sql.Select().
 			From(db.Name(), "User").
