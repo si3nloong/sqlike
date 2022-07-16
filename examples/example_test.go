@@ -105,9 +105,9 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		DeleteExamples(ctx, t, db)
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
-		SpatialExamples(ctx, t, db)
+		// SpatialExamples(ctx, t, db)
 
-		SQLDumpExamples(ctx, t, client)
+		// SQLDumpExamples(ctx, t, client)
 
 		ExtraExamples(ctx, t, db, mg)
 	}

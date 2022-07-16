@@ -244,7 +244,7 @@ func main() {
                 break
             }
             cursor := users[length-1].ID
-            if err := pg.Cursor(ctx, cursor); err != nil {
+            if err := pg.After(ctx, cursor); err != nil {
                 if err == sqlike.ErrInvalidCursor {
                     break
                 }
