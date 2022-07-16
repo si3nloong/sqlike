@@ -98,7 +98,10 @@ func (l *lru[V]) Size() int {
 // Reset all the entries inside the cache.
 func (l *lru[V]) Reset() {
 	l.mu.Lock()
-	l.appendix = make(map[reflect.Type]*listItem[V])
+	l.current = nil
 	l.list = nil
+	for k := range l.appendix {
+		delete(l.appendix, k)
+	}
 	l.mu.Unlock()
 }
