@@ -69,6 +69,7 @@ func modifyOne(
 	x := new(actions.UpdateActions)
 	x.Table = tbName
 
+	// FIXME: shouldn't use any tuple, strong type recommended
 	var pkv = [2]any{}
 	for _, sf := range fields {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
