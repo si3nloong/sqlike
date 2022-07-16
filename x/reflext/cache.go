@@ -7,7 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/internal/lrucache"
 )
 
-var defaultMapper = NewMapperFunc([]string{"sqlike", "db", "sql"}, nil)
+var defaultMapper = NewMapperFunc(500, []string{"sqlike", "db", "sql"})
 
 // DefaultMapper : return a default struct mapper
 func DefaultMapper() StructMapper {
@@ -33,14 +33,14 @@ type FormatFunc func(string) string
 
 type mapper struct {
 	tags    []string
-	cache   lrucache.LRUCache[*Struct]
+	cache   lrucache.Cache[*Struct]
 	fmtFunc FormatFunc
 }
 
 var _ StructMapper = (*mapper)(nil)
 
 // NewMapperFunc : return an object which complied to `StructMapper` interface
-func NewMapperFunc(tags []string, formatter ...FormatFunc) StructMapper {
+func NewMapperFunc(size int, tags []string, formatter ...FormatFunc) StructMapper {
 	fmtFunc := func(v string) string {
 		return v
 	}
@@ -48,7 +48,7 @@ func NewMapperFunc(tags []string, formatter ...FormatFunc) StructMapper {
 		fmtFunc = formatter[0]
 	}
 	return &mapper{
-		cache:   lrucache.New[*Struct](500),
+		cache:   lrucache.New[*Struct](size),
 		tags:    tags,
 		fmtFunc: fmtFunc,
 	}

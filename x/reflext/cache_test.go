@@ -15,7 +15,7 @@ type dbStruct struct {
 
 func TestMapper(t *testing.T) {
 	var (
-		mapper = NewMapperFunc([]string{"db"})
+		mapper = NewMapperFunc(100, []string{"db"})
 		ok     bool
 	)
 
