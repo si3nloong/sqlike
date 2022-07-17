@@ -9,7 +9,6 @@ import (
 	"errors"
 
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -34,7 +33,7 @@ type Result struct {
 	close       bool
 	rows        *sql.Rows
 	cache       reflext.StructMapper
-	dialect     dialect.Dialect
+	dialect     db.Dialect
 	columns     []string
 	columnTypes []*sql.ColumnType
 	err         error

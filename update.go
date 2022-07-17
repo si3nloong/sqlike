@@ -6,8 +6,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
@@ -68,8 +66,8 @@ func (tb *Table) Update(
 func update(
 	ctx context.Context,
 	dbName, tbName string,
-	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	driver db.Driver,
+	dialect db.Dialect,
 	logger db.Logger,
 	act *actions.UpdateActions,
 	opt *options.UpdateOptions,
@@ -88,7 +86,7 @@ func update(
 	if err := dialect.Update(stmt, act); err != nil {
 		return 0, err
 	}
-	result, err := sqldriver.Execute(
+	result, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,

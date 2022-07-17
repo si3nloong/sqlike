@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
 	"github.com/si3nloong/sqlike/v2/sql/schema"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
@@ -15,7 +14,7 @@ type mySQL struct {
 	db.Codecer
 }
 
-var _ dialect.Dialect = (*(mySQL))(nil)
+var _ db.Dialect = (*(mySQL))(nil)
 
 // New :
 func New() *mySQL {

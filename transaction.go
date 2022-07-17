@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
 )
 
 var txnCtxKey struct{}
@@ -31,7 +30,7 @@ type Transaction struct {
 	driver *sql.Tx
 
 	// sql dialect
-	dialect dialect.Dialect
+	dialect db.Dialect
 
 	// logger
 	logger db.Logger

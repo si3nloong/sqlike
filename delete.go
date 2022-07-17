@@ -7,8 +7,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
@@ -90,8 +88,8 @@ func (tb *Table) Delete(
 func deleteMany(
 	ctx context.Context,
 	dbName, tbName string,
-	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	driver db.Driver,
+	dialect db.Dialect,
 	logger db.Logger,
 	act *actions.DeleteActions,
 	opt *options.DeleteOptions,
@@ -111,7 +109,7 @@ func deleteMany(
 	if err := dialect.Delete(stmt, act); err != nil {
 		return 0, err
 	}
-	result, err := sqldriver.Execute(
+	result, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,
@@ -127,8 +125,8 @@ func destroyOne(
 	ctx context.Context,
 	dbName, tbName, pk string,
 	cache reflext.StructMapper,
-	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	driver db.Driver,
+	dialect db.Dialect,
 	logger db.Logger,
 	delete any,
 	opt *options.DestroyOneOptions,
@@ -174,7 +172,7 @@ func destroyOne(
 	if err := dialect.Delete(stmt, x); err != nil {
 		return err
 	}
-	result, err := sqldriver.Execute(
+	result, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,

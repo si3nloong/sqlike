@@ -7,7 +7,6 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/util"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
@@ -58,7 +57,7 @@ func (ms mySQL) HasTable(stmt db.Stmt, dbName, table string) {
 func (ms mySQL) CreateTable(
 	stmt db.Stmt,
 	dbName, table, pkName string,
-	info driver.Info,
+	info db.Info,
 	fields []reflext.FieldInfo,
 ) (err error) {
 	var (
@@ -185,7 +184,7 @@ func (ms *mySQL) AlterTable(
 	stmt db.Stmt,
 	dbName, table, pk string,
 	hasPk bool,
-	info driver.Info,
+	info db.Info,
 	fields []reflext.FieldInfo,
 	cols util.StringSlice,
 	idxs util.StringSlice,

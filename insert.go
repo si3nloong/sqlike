@@ -9,8 +9,6 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
@@ -82,8 +80,8 @@ func insertMany(
 	ctx context.Context,
 	dbName, tbName, pk string,
 	cache reflext.StructMapper,
-	driver sqldriver.Driver,
-	dlct dialect.Dialect,
+	driver db.Driver,
+	dlct db.Dialect,
 	logger db.Logger,
 	src any,
 	opt *options.InsertOptions,
@@ -124,7 +122,7 @@ func insertMany(
 	); err != nil {
 		return nil, err
 	}
-	return sqldriver.Execute(
+	return db.Execute(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,

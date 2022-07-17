@@ -12,9 +12,9 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/internal/util"
 	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	"github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/types"
 
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
@@ -57,13 +57,13 @@ type Column struct {
 type Dumper struct {
 	sync.Mutex
 	driver  string
-	conn    driver.Queryer
-	dialect dialect.Dialect
+	conn    db.Queryer
+	dialect db.Dialect
 	mapper  map[string]Parser
 }
 
 // NewDumper :
-func NewDumper(driver string, conn driver.Queryer) *Dumper {
+func NewDumper(driver string, conn db.Queryer) *Dumper {
 	dumper := new(Dumper)
 	dumper.driver = strings.TrimSpace(strings.ToLower(driver))
 	dumper.conn = conn

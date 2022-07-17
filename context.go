@@ -3,10 +3,10 @@ package sqlike
 import (
 	"context"
 
-	"github.com/si3nloong/sqlike/v2/sql/driver"
+	"github.com/si3nloong/sqlike/v2/db"
 )
 
-func getDriverFromContext(ctx context.Context, dvr driver.Driver) driver.Driver {
+func getDriverFromContext(ctx context.Context, dvr db.Driver) db.Driver {
 	if v, ok := ctx.Value(&txnCtxKey).(*Transaction); ok {
 		return v.driver
 	}

@@ -8,8 +8,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
@@ -98,9 +96,8 @@ func find(
 	ctx context.Context,
 	dbName, tbName string,
 	cache reflext.StructMapper,
-	// cdc codec.Codecer,
-	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	driver db.Driver,
+	dialect db.Dialect,
 	logger db.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,
@@ -122,7 +119,7 @@ func find(
 		rslt.err = err
 		return rslt
 	}
-	rows, err := sqldriver.Query(
+	rows, err := db.Query(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,

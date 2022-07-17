@@ -3,7 +3,7 @@ package sqlike
 import (
 	"context"
 
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
+	"github.com/si3nloong/sqlike/v2/db"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/types"
 )
@@ -56,7 +56,7 @@ func (cv *ColumnView) Rename(ctx context.Context, oldColName, newColName string)
 	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	cv.tb.dialect.RenameColumn(stmt, cv.tb.dbName, cv.tb.name, oldColName, newColName)
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, cv.tb.driver),
 		stmt,
@@ -70,7 +70,7 @@ func (cv *ColumnView) DropOne(ctx context.Context, name string) error {
 	stmt := sqlstmt.AcquireStmt(cv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	cv.tb.dialect.DropColumn(stmt, cv.tb.dbName, cv.tb.name, name)
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, cv.tb.driver),
 		stmt,

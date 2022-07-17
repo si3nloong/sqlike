@@ -8,8 +8,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
@@ -39,8 +37,8 @@ func modifyOne(
 	ctx context.Context,
 	dbName, tbName, pk string,
 	cache reflext.StructMapper,
-	dialect dialect.Dialect,
-	driver sqldriver.Driver,
+	dialect db.Dialect,
+	driver db.Driver,
 	logger db.Logger,
 	update any,
 	opts []*options.ModifyOneOptions,
@@ -104,7 +102,7 @@ func modifyOne(
 		return err
 	}
 
-	result, err := sqldriver.Execute(
+	result, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, driver),
 		stmt,

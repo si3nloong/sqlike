@@ -6,8 +6,6 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
@@ -46,7 +44,7 @@ func (idv *IndexView) Create(ctx context.Context, idxs []sql.Index) error {
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, idxs, idv.isSupportDesc())
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
@@ -71,7 +69,7 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []sql.Index) e
 		}
 		idv.tb.dialect.HasIndex(stmt, idv.tb.dbName, idv.tb.name, idx)
 		var count int
-		if err := sqldriver.QueryRowContext(
+		if err := db.QueryRowContext(
 			ctx,
 			idv.tb.driver,
 			stmt,
@@ -89,7 +87,7 @@ func (idv *IndexView) CreateIfNotExists(ctx context.Context, idxs []sql.Index) e
 		return nil
 	}
 	idv.tb.dialect.CreateIndexes(stmt, idv.tb.dbName, idv.tb.name, cols, idv.isSupportDesc())
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
@@ -103,7 +101,7 @@ func (idv *IndexView) DropOne(ctx context.Context, name string) error {
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, []string{name})
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
@@ -125,7 +123,7 @@ func (idv *IndexView) DropAll(ctx context.Context) error {
 	stmt := sqlstmt.AcquireStmt(idv.tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	idv.tb.dialect.DropIndexes(stmt, idv.tb.dbName, idv.tb.name, names)
-	if _, err := sqldriver.Execute(
+	if _, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, idv.tb.driver),
 		stmt,
@@ -152,15 +150,15 @@ func (idv *IndexView) isSupportDesc() bool {
 func isIndexExists(
 	ctx context.Context,
 	dbName, table, indexName string,
-	driver sqldriver.Driver,
-	dialect dialect.Dialect,
+	driver db.Driver,
+	dialect db.Dialect,
 	logger db.Logger,
 ) (bool, error) {
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	dialect.HasIndexByName(stmt, dbName, table, indexName)
 	var count int
-	if err := sqldriver.QueryRowContext(
+	if err := db.QueryRowContext(
 		ctx,
 		driver,
 		stmt,

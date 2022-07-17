@@ -9,8 +9,6 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql/charset"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
@@ -50,7 +48,7 @@ type Client struct {
 	pk      string
 	logger  db.Logger
 	cache   reflext.StructMapper
-	dialect dialect.Dialect
+	dialect db.Dialect
 }
 
 // newClient : create a new client struct by providing driver, *sql.DB, dialect etc
@@ -58,7 +56,7 @@ func newClient(
 	ctx context.Context,
 	driver string,
 	db *sql.DB,
-	dialect dialect.Dialect,
+	dialect db.Dialect,
 	code charset.Code,
 	collate string,
 ) (*Client, error) {
@@ -116,7 +114,7 @@ func (c *Client) ListDatabases(ctx context.Context) ([]string, error) {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	c.dialect.GetDatabases(stmt)
-	rows, err := driver.Query(
+	rows, err := db.Query(
 		ctx,
 		getDriverFromContext(ctx, c.DB),
 		stmt,
@@ -141,7 +139,7 @@ func (c *Client) Database(name string) *Database {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	c.dialect.UseDatabase(stmt, name)
-	if _, err := driver.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
+	if _, err := db.Execute(context.Background(), c.DB, stmt, c.logger); err != nil {
 		panic(err)
 	}
 	return &Database{
@@ -164,7 +162,7 @@ func (c *Client) getVersion(ctx context.Context) (version *semver.Version) {
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	c.dialect.GetVersion(stmt)
-	err = driver.QueryRowContext(
+	err = db.QueryRowContext(
 		ctx,
 		getDriverFromContext(ctx, c.DB),
 		stmt,
@@ -186,7 +184,7 @@ func (c *Client) createDB(ctx context.Context, name string, checkExists bool) er
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	c.dialect.CreateDatabase(stmt, name, checkExists)
-	_, err := driver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, c.DB),
 		stmt,
@@ -200,7 +198,7 @@ func (c *Client) dropDB(ctx context.Context, name string, checkExists bool) erro
 	stmt := sqlstmt.AcquireStmt(c.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	c.dialect.DropDatabase(stmt, name, checkExists)
-	_, err := driver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, c.DB),
 		stmt,

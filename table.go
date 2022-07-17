@@ -9,8 +9,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	sqldriver "github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
@@ -28,10 +26,10 @@ type Table struct {
 	client *Client
 
 	// sql driver
-	driver sqldriver.Driver
+	driver db.Driver
 
 	// sql dialect
-	dialect dialect.Dialect
+	dialect db.Dialect
 
 	// logger
 	logger db.Logger
@@ -42,7 +40,7 @@ func (tb *Table) Rename(ctx context.Context, name string) error {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.RenameTable(stmt, tb.dbName, tb.name, name)
-	_, err := sqldriver.Execute(
+	_, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -57,7 +55,7 @@ func (tb *Table) Exists(ctx context.Context) bool {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.HasTable(stmt, tb.dbName, tb.name)
-	if err := sqldriver.QueryRowContext(
+	if err := db.QueryRowContext(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -78,7 +76,7 @@ func (tb *Table) ListColumns(ctx context.Context) ([]Column, error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.GetColumns(stmt, tb.dbName, tb.name)
-	rows, err := sqldriver.Query(
+	rows, err := db.Query(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -121,7 +119,7 @@ func (tb *Table) ListIndexes(ctx context.Context) ([]Index, error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.GetIndexes(stmt, tb.dbName, tb.name)
-	rows, err := sqldriver.Query(
+	rows, err := db.Query(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -179,7 +177,7 @@ func (tb *Table) Truncate(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.TruncateTable(stmt, tb.dbName, tb.name)
-	_, err = sqldriver.Execute(
+	_, err = db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -193,7 +191,7 @@ func (tb *Table) DropIfExists(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true, false)
-	_, err = sqldriver.Execute(
+	_, err = db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -207,7 +205,7 @@ func (tb *Table) Drop(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.DropTable(stmt, tb.dbName, tb.name, false, false)
-	_, err = sqldriver.Execute(
+	_, err = db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -221,7 +219,7 @@ func (tb *Table) UnsafeDrop(ctx context.Context) (err error) {
 	stmt := sqlstmt.AcquireStmt(tb.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.DropTable(stmt, tb.dbName, tb.name, true, true)
-	_, err = sqldriver.Execute(
+	_, err = db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -244,7 +242,7 @@ func (tb *Table) Replace(ctx context.Context, fields []string, query *sql.Select
 		return err
 	}
 
-	if _, err := sqldriver.Execute(
+	if _, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -318,7 +316,7 @@ func (tb *Table) createTable(ctx context.Context, fields []reflext.FieldInfo) er
 	); err != nil {
 		return err
 	}
-	if _, err := sqldriver.Execute(
+	if _, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,
@@ -342,7 +340,7 @@ func (tb *Table) alterTable(ctx context.Context, fields []reflext.FieldInfo, col
 	defer sqlstmt.ReleaseStmt(stmt)
 	tb.dialect.HasPrimaryKey(stmt, tb.dbName, tb.name)
 	var count uint
-	if err := sqldriver.QueryRowContext(
+	if err := db.QueryRowContext(
 		ctx,
 		tb.driver,
 		stmt,
@@ -359,7 +357,7 @@ func (tb *Table) alterTable(ctx context.Context, fields []reflext.FieldInfo, col
 	); err != nil {
 		return err
 	}
-	if _, err := sqldriver.Execute(
+	if _, err := db.Execute(
 		ctx,
 		getDriverFromContext(ctx, tb.driver),
 		stmt,

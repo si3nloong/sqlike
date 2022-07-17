@@ -12,10 +12,9 @@ import (
 	"time"
 
 	"github.com/si3nloong/sqlike/v2/db"
+	sqldb "github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
 	sqlx "github.com/si3nloong/sqlike/v2/sql"
-	"github.com/si3nloong/sqlike/v2/sql/dialect"
-	"github.com/si3nloong/sqlike/v2/sql/driver"
 	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"gopkg.in/yaml.v3"
 )
@@ -28,8 +27,8 @@ type Database struct {
 	name       string
 	pk         string
 	client     *Client
-	driver     driver.Driver
-	dialect    dialect.Dialect
+	driver     db.Driver
+	dialect    db.Dialect
 	logger     db.Logger
 }
 
@@ -78,7 +77,7 @@ func (db *Database) QueryStmt(ctx context.Context, query any) (*Result, error) {
 		return nil, err
 	}
 
-	rows, err := driver.Query(
+	rows, err := sqldb.Query(
 		ctx,
 		getDriverFromContext(ctx, db.driver),
 		stmt,
