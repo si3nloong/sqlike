@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "github.com/si3nloong/sqlike/v2/protobuf";
 
-package sqlike.protobuf;
+// package sqlike.v2.protobuf;
 
 message Key {
   string Namespace = 1;

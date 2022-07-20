@@ -61,7 +61,6 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 	blr.SetBuilder(reflect.TypeOf(primitive.JSONColumn{}), b.BuildJSONColumn)
 	blr.SetBuilder(reflect.TypeOf(primitive.C{}), b.BuildClause)
 	blr.SetBuilder(reflect.TypeOf(primitive.L{}), b.BuildLike)
-	blr.SetBuilder(reflect.TypeOf(primitive.TypeSafe{}), b.BuildTypeSafe)
 	blr.SetBuilder(reflect.TypeOf(primitive.Operator(0)), b.BuildOperator)
 	blr.SetBuilder(reflect.TypeOf(primitive.Group{}), b.BuildGroup)
 	blr.SetBuilder(reflect.TypeOf(primitive.R{}), b.BuildRange)
@@ -501,46 +500,46 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it any) (err error) {
 	return
 }
 
-// BuildTypeSafe :
-func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it any) (err error) {
-	ts := it.(primitive.TypeSafe)
-	switch ts.Type {
-	case reflect.String:
-		stmt.WriteString(strconv.Quote(ts.Value.(string)))
-	case reflect.Bool:
-		v := ts.Value.(bool)
-		if v {
-			stmt.WriteString("1")
-		} else {
-			stmt.WriteString("0")
-		}
-	case reflect.Int:
-		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int)), 10))
-	case reflect.Int8:
-		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int8)), 10))
-	case reflect.Int16:
-		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int16)), 10))
-	case reflect.Int32:
-		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int32)), 10))
-	case reflect.Int64:
-		stmt.WriteString(strconv.FormatInt(ts.Value.(int64), 10))
-	case reflect.Uint:
-		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint)), 10))
-	case reflect.Uint8:
-		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint8)), 10))
-	case reflect.Uint16:
-		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint16)), 10))
-	case reflect.Uint32:
-		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint32)), 10))
-	case reflect.Uint64:
-		stmt.WriteString(strconv.FormatUint(ts.Value.(uint64), 10))
-	case reflect.Float32:
-		stmt.WriteString(strconv.FormatFloat(float64(ts.Value.(float32)), 'e', -1, 64))
-	case reflect.Float64:
-		stmt.WriteString(strconv.FormatFloat(ts.Value.(float64), 'e', -1, 64))
-	}
-	return
-}
+// // BuildTypeSafe :
+// func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it any) (err error) {
+// 	ts := it.(primitive.TypeSafe)
+// 	switch ts.Type {
+// 	case reflect.String:
+// 		stmt.WriteString(strconv.Quote(ts.Value.(string)))
+// 	case reflect.Bool:
+// 		v := ts.Value.(bool)
+// 		if v {
+// 			stmt.WriteString("1")
+// 		} else {
+// 			stmt.WriteString("0")
+// 		}
+// 	case reflect.Int:
+// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int)), 10))
+// 	case reflect.Int8:
+// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int8)), 10))
+// 	case reflect.Int16:
+// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int16)), 10))
+// 	case reflect.Int32:
+// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int32)), 10))
+// 	case reflect.Int64:
+// 		stmt.WriteString(strconv.FormatInt(ts.Value.(int64), 10))
+// 	case reflect.Uint:
+// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint)), 10))
+// 	case reflect.Uint8:
+// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint8)), 10))
+// 	case reflect.Uint16:
+// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint16)), 10))
+// 	case reflect.Uint32:
+// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint32)), 10))
+// 	case reflect.Uint64:
+// 		stmt.WriteString(strconv.FormatUint(ts.Value.(uint64), 10))
+// 	case reflect.Float32:
+// 		stmt.WriteString(strconv.FormatFloat(float64(ts.Value.(float32)), 'e', -1, 64))
+// 	case reflect.Float64:
+// 		stmt.WriteString(strconv.FormatFloat(ts.Value.(float64), 'e', -1, 64))
+// 	}
+// 	return
+// }
 
 // BuildSelectStmt :
 func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {

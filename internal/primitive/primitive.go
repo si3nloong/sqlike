@@ -2,7 +2,6 @@ package primitive
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -65,12 +64,6 @@ type Encoding struct {
 	Charset *string
 	Column  any
 	Collate string
-}
-
-// TypeSafe :
-type TypeSafe struct {
-	Type  reflect.Kind
-	Value any
 }
 
 // JSONFunc :
