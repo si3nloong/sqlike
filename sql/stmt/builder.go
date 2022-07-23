@@ -15,7 +15,7 @@ type BuildStatementFunc func(stmt db.Stmt, it any) error
 
 // StatementBuilder :
 type StatementBuilder struct {
-	mutex    sync.Mutex
+	mu       sync.Mutex
 	builders map[any]BuildStatementFunc
 }
 
@@ -28,9 +28,9 @@ func NewStatementBuilder() *StatementBuilder {
 
 // SetBuilder :
 func (sb *StatementBuilder) SetBuilder(it any, p BuildStatementFunc) {
-	sb.mutex.Lock()
-	defer sb.mutex.Unlock()
+	sb.mu.Lock()
 	sb.builders[it] = p
+	sb.mu.Unlock()
 }
 
 // LookupBuilder :

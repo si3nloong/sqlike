@@ -1,6 +1,8 @@
 package util
 
-import "strings"
+import "regexp"
+
+var sqlFuncRegexp = regexp.MustCompile(`\([\w\_]+\)$`)
 
 // MySQLUtil :
 type MySQLUtil struct{}
@@ -27,8 +29,8 @@ func (util MySQLUtil) Wrap(n string) string {
 
 // WrapOnlyValue :
 func (util MySQLUtil) WrapOnlyValue(n string) string {
-	// TODO: regex to check the string with () symbols
-	if strings.Contains(n, "(") {
+	// eg. CURRENT_TIMESTAMP(6)
+	if sqlFuncRegexp.MatchString(n) {
 		return n
 	}
 	return util.Wrap(n)

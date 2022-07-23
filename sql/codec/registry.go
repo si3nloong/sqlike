@@ -40,45 +40,45 @@ func NewRegistry() *Registry {
 // RegisterTypeCodec :
 func (r *Registry) RegisterTypeCodec(t reflect.Type, enc db.ValueEncoder, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
 	r.typeDecoders[t] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterTypeEncoder :
 func (r *Registry) RegisterTypeEncoder(t reflect.Type, enc db.ValueEncoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
+	r.mutex.Unlock()
 }
 
 // RegisterTypeDecoder :
 func (r *Registry) RegisterTypeDecoder(t reflect.Type, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeDecoders[t] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterKindCodec :
 func (r *Registry) RegisterKindCodec(k reflect.Kind, enc db.ValueEncoder, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
 	r.kindDecoders[k] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterKindEncoder :
 func (r *Registry) RegisterKindEncoder(k reflect.Kind, enc db.ValueEncoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
+	r.mutex.Unlock()
 }
 
 // RegisterKindDecoder :
 func (r *Registry) RegisterKindDecoder(k reflect.Kind, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindDecoders[k] = dec
+	r.mutex.Unlock()
 }
 
 // LookupEncoder :

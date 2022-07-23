@@ -14,12 +14,18 @@ type Formatter interface {
 
 // Statement :
 type Statement struct {
-	strings.Builder
+	*strings.Builder
 	start   time.Time
 	elapsed time.Duration
-	fmt     Formatter
-	c       int
-	args    []any
+
+	// SQL formatter (different driver different formatter)
+	fmt Formatter
+
+	// arguments count
+	c int
+
+	// SQL query arguments
+	args []any
 }
 
 // Args :
@@ -92,6 +98,7 @@ func (sm *Statement) TimeElapsed() time.Duration {
 // Reset : implement resetter as strings.Builer
 func (sm *Statement) Reset() {
 	sm.args = nil
+	sm.c = 0
 	sm.start = time.Time{}
 	sm.elapsed = time.Duration(0)
 	sm.Builder.Reset()

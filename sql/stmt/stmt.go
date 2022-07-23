@@ -1,13 +1,17 @@
 package sqlstmt
 
 import (
+	"strings"
 	"sync"
 )
 
 var (
 	stmtPool = &sync.Pool{
 		New: func() any {
-			return new(Statement)
+			stmt := &Statement{
+				Builder: new(strings.Builder),
+			}
+			return stmt
 		},
 	}
 )
@@ -25,6 +29,6 @@ func ReleaseStmt(x *Statement) {
 		// this will reset everything including timer, query statement and arguments
 		x.Reset()
 		x.fmt = nil
-		defer stmtPool.Put(x)
+		stmtPool.Put(x)
 	}
 }

@@ -13,3 +13,21 @@ type postgreSQL struct {
 	sqlutil.PostgresUtil
 	db.Codecer
 }
+
+// var _ db.Dialect = (*(postgreSQL))(nil)
+
+// New :
+func New() *postgreSQL {
+	sb := schema.NewBuilder()
+	pr := sqlstmt.NewStatementBuilder()
+
+	// codec := buildDefaultRegistry()
+	// postgreSQL{}.SetBuilders(sb)
+	// postgreSQL{}.SetRegistryAndBuilders(codec, pr)
+
+	return &postgreSQL{
+		schema: sb,
+		parser: pr,
+		// Codecer: codec,
+	}
+}
