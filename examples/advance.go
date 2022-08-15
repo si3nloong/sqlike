@@ -32,7 +32,7 @@ func AdvanceQueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 				expr.Asc("Amount"),
 			).
 			Option(
-				expr.ForUpdate().NoWait(),
+				expr.ForUpdate[string]().NoWait(),
 			).
 			Limit(1).
 			Offset(1),

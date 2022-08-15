@@ -1,7 +1,9 @@
 package reflext
 
 import (
+	"log"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,9 +25,15 @@ type PublicStruct struct {
 	ID string
 }
 
+type directEmbed struct {
+	ID string
+	No int
+}
+
 type embeddedStruct struct {
-	tagStruct    `sqlike:"test"`
-	PublicStruct `sqlike:"public"`
+	tagStruct    `json:"test" sqlike:"test"`
+	PublicStruct `json:"public" sqlike:"public"`
+	directEmbed
 }
 
 func TestStructTag(t *testing.T) {
@@ -83,7 +91,6 @@ func TestStructField(t *testing.T) {
 		sf = StructField{
 			id:    "",
 			idx:   []int{0, 5},
-			name:  "Name",
 			path:  "",
 			t:     reflect.TypeOf(""),
 			null:  false,
@@ -91,6 +98,7 @@ func TestStructField(t *testing.T) {
 		}
 	)
 
+	require.Equal(t, "", sf.Name())
 	require.Equal(t, []int{0, 5}, sf.Index())
 	require.Equal(t, reflect.TypeOf("str"), sf.Type())
 	require.Nil(t, sf.Children())
@@ -104,7 +112,8 @@ func TestCodec(t *testing.T) {
 		typeof reflect.Type
 		codec  *Struct
 		i      struct {
-			// if multiple tag is defined, the last one will override it
+			// If multiple tag is defined, the last one will override it
+			// In this case, the field name will be `Name`, option value will be `default=TEST`
 			Name   string `db:"columnName" sqlike:",default=TEST"`
 			Nested struct {
 				embeddedStruct
@@ -112,26 +121,90 @@ func TestCodec(t *testing.T) {
 			}
 			embeddedStruct
 		}
+
+		/*
+			{
+				Name,
+				Nested: {
+					Enum
+				}
+				test
+				public.ID,
+				ID,
+
+			}
+		*/
 	)
 
-	{
+	// b, _ := json.Marshal(i)
+	// log.Println(string(b))
+	// panic("")
+
+	t.Run("Parse codec with embedded struct", func(t *testing.T) {
+		var (
+			f  FieldInfo
+			ok bool
+		)
+
 		typeof = reflect.TypeOf(i)
 		codec = getCodec(typeof, []string{"sqlike", "db"}, nil)
 
-		require.Equal(t, len(codec.fields), 13)
-		require.Equal(t, len(codec.properties), 4)
-		v, _ := codec.names["Name"].Tag().LookUp("default")
-		require.Equal(t, "TEST", v)
-		require.NotNil(t, codec.names["Nested.Enum"])
-	}
+		log.Println("debug start =======================>")
+		for _, f := range codec.fields {
+			log.Println(f.Name(), f.Type())
+		}
+		log.Println("debug ended =======================>")
 
-	{
+		log.Println("debug start =======================>")
+		for _, f := range codec.properties {
+			log.Println(f.Name(), f.Type())
+		}
+		log.Println("debug ended =======================>")
+
+		require.Equal(t, 19, len(codec.fields))
+		require.Equal(t, 5, len(codec.properties))
+
+		f, ok = codec.LookUpFieldByName("columnName")
+		require.True(t, ok)
+		require.NotNil(t, f)
+
+		v, ok := f.Tag().LookUp("default")
+		require.True(t, ok)
+		require.Equal(t, "TEST", v)
+
+		f, ok = codec.LookUpFieldByName("Nested.Enum")
+		require.True(t, ok)
+		require.NotNil(t, f)
+	})
+
+	t.Run("Parse codec with recursive struct", func(t *testing.T) {
+		var f FieldInfo
+
 		typeof = reflect.TypeOf(recursiveStruct{})
 		codec = getCodec(typeof, []string{"sqlike"}, nil)
 
 		require.Equal(t, len(codec.fields), 2)
 		require.Equal(t, len(codec.properties), 2)
-		require.NotNil(t, codec.names["Name"])
-		require.NotNil(t, codec.names["Recursive"])
-	}
+
+		f, _ = codec.LookUpFieldByName("Name")
+		require.NotNil(t, f)
+
+		f, _ = codec.LookUpFieldByName("Recursive")
+		require.NotNil(t, f)
+	})
+}
+
+func TestParseTag(t *testing.T) {
+
+	t.Run("Parse tag with multiple tag keys", func(t *testing.T) {
+		tag := parseTag(reflect.StructField{
+			Tag: `db:"Name" sql:"Name2"`,
+		}, []string{"db", "sql"}, strconv.Quote)
+
+		require.Equal(t, "Name2", tag.Name())
+		require.Equal(t, "Name2", tag.Name())
+		require.Equal(t, "Name2", tag.Name())
+		require.Equal(t, "Name2", tag.Name())
+	})
+
 }

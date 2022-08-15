@@ -1,6 +1,7 @@
 package reflext
 
 import (
+	"log"
 	"reflect"
 	"sort"
 	"strconv"
@@ -48,7 +49,10 @@ type FieldInfo interface {
 
 // FieldTag :
 type FieldTag interface {
+	// name based on struct tag value
 	Name() string
+
+	// original field name on struct
 	FieldName() string
 
 	// look up tag value using key
@@ -95,7 +99,6 @@ func (st StructTag) LookUp(key string) (val string, exist bool) {
 type StructField struct {
 	id       string
 	idx      []int
-	name     string
 	path     string
 	t        reflect.Type
 	null     bool
@@ -236,9 +239,11 @@ func (x Fields) Less(i, j int) bool {
 }
 
 type typeQueue struct {
+	// struct type to inspect
 	t  reflect.Type
 	sf *StructField
-	pp string // parent path
+	// parent path
+	pp string
 }
 
 func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
@@ -249,38 +254,35 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 	queue = append(queue, typeQueue{Deref(t), root, ""})
 
 	for len(queue) > 0 {
+		// Pop the first item
 		q := queue[0]
 		q.sf.children = make([]FieldInfo, 0)
 
-		for i := 0; i < q.t.NumField(); i++ {
+		noOfField := q.t.NumField()
+		for i := 0; i < noOfField; i++ {
 			f := q.t.Field(i)
 
-			// skip unexported fields
+			// Skip unexported fields
 			if len(f.PkgPath) != 0 && !f.Anonymous {
 				continue
 			}
 
 			tag := parseTag(f, tagNames, fmtFunc)
+			// If the tag value is "-", we skip the field
 			if tag.name == "-" {
 				continue
 			}
 
 			sf := &StructField{
-				id:       strings.TrimLeft(q.sf.id+"."+strconv.Itoa(i), "."),
-				name:     f.Name,
-				path:     tag.name,
-				null:     q.sf.null || IsNullable(f.Type),
-				t:        f.Type,
-				tag:      tag,
-				children: make([]FieldInfo, 0),
+				id:   strings.TrimLeft(q.sf.id+"."+strconv.Itoa(i), "."),
+				path: tag.name,
+				null: q.sf.null || IsNullable(f.Type),
+				t:    f.Type,
+				tag:  tag,
 			}
 
 			if len(q.sf.Index()) > 0 {
 				sf.parent = q.sf
-			}
-
-			if sf.path == "" {
-				sf.path = sf.tag.name
 			}
 
 			if q.pp != "" {
@@ -292,25 +294,32 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 			sf.idx = appendSlice(q.sf.idx, i)
 			sf.embed = ft.Kind() == reflect.Struct && f.Anonymous
 
+			// If the struct property is a `struct`
 			if ft.Kind() == reflect.Struct {
-				// check recursive, prevent infinite loop
+				// Check recursive, prevent infinite loop
 				if q.t == ft {
-					goto nextStep
+					goto nextField
 				}
 
-				// embedded struct
+				// If the struct is embedded struct
 				path := sf.path
 				if f.Anonymous {
-					if sf.tag.FieldName() == "" {
+					// If the struct poperty is embedded and the tag value is empty,
+					// mean it will respect to parent path name
+					if sf.tag.name == "" {
+						log.Println("embedded is empty")
 						path = q.pp
+						// queue = append(queue, typeQueue{ft, sf, q.pp})
 					}
-					// queue = append(queue, typeQueue{ft, sf, path})
+					log.Println("FieldName =>", q.pp, "Name =>", sf.tag.Name(), "Path =>", path)
+					// queue = append(queue, typeQueue{ft, sf, q.pp})
+					// goto nextStep
 				}
 
 				queue = append(queue, typeQueue{ft, sf, path})
 			}
 
-		nextStep:
+		nextField:
 			fields = append(fields, sf)
 		}
 
@@ -365,41 +374,39 @@ func appendSlice[T any](s []T, i T) []T {
 	return x
 }
 
-func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st StructTag) {
-	parts := strings.Split(f.Tag.Get(tagNames[0]), ",")
-	name := strings.TrimSpace(parts[0])
-	st.fieldName = name
-	if name == "" {
-		name = f.Name
-		if fmtFunc != nil {
-			name = fmtFunc(name)
+func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (tag StructTag) {
+	tag.fieldName = f.Name
+	tag.opts = make(map[string]string)
+
+	for _, tagName := range tagNames {
+		name, exists := f.Tag.Lookup(tagName)
+		if !exists && f.Anonymous {
+			continue
 		}
-	}
-	st.name = name
-	st.opts = make(map[string]string)
-	// FIXME: combine multiple tags
-	// for _, tagName := range tagNames {
-	// 	parts := strings.Split(f.Tag.Get(tagName), ",")
-	// 	name := strings.TrimSpace(parts[0])
-	// 	if name != "" {
-	// 		if fmtFunc != nil {
-	// 			name = fmtFunc(name)
-	// 		}
-	// 		st.name = name
-	// 	}
-	if len(parts) > 1 {
-		for _, opt := range parts[1:] {
-			opt = strings.TrimSpace(opt)
-			if strings.Contains(opt, "=") {
-				kv := strings.SplitN(opt, "=", 2)
-				k := strings.TrimSpace(strings.ToLower(kv[0]))
-				st.opts[k] = strings.TrimSpace(kv[1])
-				continue
+
+		values := strings.Split(name, ",")
+		name = strings.TrimSpace(values[0])
+		if name == "" {
+			name = f.Name
+			if fmtFunc != nil {
+				name = fmtFunc(name)
 			}
-			opt = strings.ToLower(opt)
-			st.opts[opt] = ""
+		}
+
+		tag.name = name
+		if len(values) > 1 {
+			for _, opt := range values[1:] {
+				opt = strings.TrimSpace(opt)
+				if strings.Contains(opt, "=") {
+					kv := strings.SplitN(opt, "=", 2)
+					k := strings.TrimSpace(strings.ToLower(kv[0]))
+					tag.opts[k] = strings.TrimSpace(kv[1])
+					continue
+				}
+				opt = strings.ToLower(opt)
+				tag.opts[opt] = ""
+			}
 		}
 	}
-	// }
 	return
 }

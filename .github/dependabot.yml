@@ -1,9 +1,13 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "v2"
+    schedule:
+      interval: "daily"
+
   - package-ecosystem: gomod
     directory: "/"
+    target-branch: "v2"
     schedule:
       interval: daily
-      time: "21:00"
-    open-pull-requests-limit: 10
-    target-branch: "v2"
