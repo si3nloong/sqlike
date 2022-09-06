@@ -268,6 +268,14 @@ Thanks to these awesome companies for their support of Open Source developers �
 [![GitHub](https://jstools.dev/img/badges/github.svg)](https://github.com/open-source)
 [![NPM](https://jstools.dev/img/badges/npm.svg)](https://www.npmjs.com/)
 
+## 🧲 Adopters 
+
+<img src="https://camo.githubusercontent.com/2c975785e2902b4ca4d1a9e9fd4bd21b3e576395631f1dc7c49f170cdeb7f1f8/68747470733a2f2f61737365742e77657469782e6d792f696d616765732f6c6f676f2f77657469782e706e67"
+width="120px" style="margin-right: 10px" />
+<img src="https://user-images.githubusercontent.com/28108597/188676138-59b5fa89-9788-48ce-9a12-bdcc378bb8b7.png" width="150px" style="margin-right: 10px" />
+<img src="https://user-images.githubusercontent.com/28108597/188675656-af6fb714-0460-40b3-8935-f0eeaa0886b1.png" width="130px" style="margin-right: 10px" />
+<img src="https://user-images.githubusercontent.com/28108597/188676512-59a6f5bd-5c57-4051-bbd9-9275402b415f.png" width="70px" />
+
 ## 📄 License
 
 [MIT](https://github.com/si3nloong/sqlike/blob/main/LICENSE)
