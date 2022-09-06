@@ -48,6 +48,11 @@ func NotIn(field, values any) (c primitive.C) {
 	return
 }
 
+// Any :
+func Any[T any](values []T) (c primitive.C) {
+	return
+}
+
 // Like :
 func Like[F ColumnConstraints, V string | primitive.Raw](field F, value V) (p primitive.L) {
 	p.Field = wrapColumn(field)
