@@ -29,7 +29,7 @@ type ValueEncoder func(*Writer, reflect.Value) error
 
 // Registry :
 type Registry struct {
-	mutex        sync.Mutex
+	mutex        *sync.Mutex
 	typeEncoders map[reflect.Type]ValueEncoder
 	typeDecoders map[reflect.Type]ValueDecoder
 	kindEncoders map[reflect.Kind]ValueEncoder
@@ -72,6 +72,7 @@ func buildDefaultRegistry() *Registry {
 // NewRegistry creates a new empty Registry.
 func NewRegistry() *Registry {
 	return &Registry{
+		mutex:        new(sync.Mutex),
 		typeEncoders: make(map[reflect.Type]ValueEncoder),
 		typeDecoders: make(map[reflect.Type]ValueDecoder),
 		kindEncoders: make(map[reflect.Kind]ValueEncoder),

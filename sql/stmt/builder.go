@@ -14,13 +14,14 @@ type BuildStatementFunc func(stmt Stmt, it interface{}) error
 
 // StatementBuilder :
 type StatementBuilder struct {
-	mutex    sync.Mutex
+	mutex    *sync.Mutex
 	builders map[interface{}]BuildStatementFunc
 }
 
 // NewStatementBuilder :
 func NewStatementBuilder() *StatementBuilder {
 	return &StatementBuilder{
+		mutex:    new(sync.Mutex),
 		builders: make(map[interface{}]BuildStatementFunc),
 	}
 }

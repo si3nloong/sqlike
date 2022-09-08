@@ -55,7 +55,7 @@ type Column struct {
 
 // Dumper :
 type Dumper struct {
-	sync.Mutex
+	mu      *sync.Mutex
 	driver  string
 	conn    driver.Queryer
 	dialect dialect.Dialect
@@ -65,6 +65,7 @@ type Dumper struct {
 // NewDumper :
 func NewDumper(driver string, conn driver.Queryer) *Dumper {
 	dumper := new(Dumper)
+	dumper.mu = new(sync.Mutex)
 	dumper.driver = strings.TrimSpace(strings.ToLower(driver))
 	dumper.conn = conn
 	dumper.dialect = dialect.GetDialectByDriver(driver)
@@ -87,17 +88,17 @@ func NewDumper(driver string, conn driver.Queryer) *Dumper {
 }
 
 // RegisterParser :
-func (dump *Dumper) RegisterParser(dataType string, parser Parser) {
+func (d *Dumper) RegisterParser(dataType string, parser Parser) {
 	if parser == nil {
 		panic("parser cannot be nil")
 	}
-	dump.Lock()
-	defer dump.Unlock()
-	dump.mapper[dataType] = parser
+	d.mu.Lock()
+	defer d.mu.Lock()
+	d.mapper[dataType] = parser
 }
 
 // BackupTo :
-func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) (affected int64, err error) {
+func (d *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) (affected int64, err error) {
 	w := bufio.NewWriter(wr)
 
 	var (
@@ -115,25 +116,25 @@ func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Write
 		return 0, errors.New("unsupported input")
 	}
 
-	columns, err := dump.getColumns(ctx, dbName, table)
+	columns, err := d.getColumns(ctx, dbName, table)
 	if err != nil {
 		return 0, err
 	}
 
-	stmt := sqlstmt.AcquireStmt(dump.dialect)
+	stmt := sqlstmt.AcquireStmt(d.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 
-	if err := dump.dialect.SelectStmt(stmt, query); err != nil {
+	if err := d.dialect.SelectStmt(stmt, query); err != nil {
 		return 0, err
 	}
 
-	rows, err := dump.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
+	rows, err := d.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
 		return 0, err
 	}
 	defer rows.Close()
 
-	version, err := dump.getVersion(ctx)
+	version, err := d.getVersion(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -146,7 +147,7 @@ func (dump *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Write
 # https://github.com/si3nloong/sqlike
 #
 `)
-	w.WriteString("# Driver: " + dump.driver + "\n")
+	w.WriteString("# Driver: " + d.driver + "\n")
 	w.WriteString("# Version: " + version + "\n")
 	// w.WriteString("# Host: rm-zf86x4n0wvyy6830yyo.mysql.kualalumpur.rds.aliyuncs.com\n")
 	w.WriteString("# Database: " + dbName + "\n")
@@ -165,7 +166,7 @@ SET NAMES utf8mb4;
 
 `)
 
-	table = dump.dialect.Quote(table)
+	table = d.dialect.Quote(table)
 
 	w.WriteString(fmt.Sprintf(`
 LOCK TABLES %s WRITE;
@@ -196,7 +197,7 @@ UNLOCK TABLES;
 		if i > 0 {
 			w.WriteByte(',')
 		}
-		w.WriteString(dump.dialect.Quote(col))
+		w.WriteString(d.dialect.Quote(col))
 	}
 	w.WriteByte(')')
 	w.WriteByte('\n')
@@ -230,7 +231,7 @@ UNLOCK TABLES;
 				continue
 			}
 
-			parse, ok := dump.mapper[col.DataType]
+			parse, ok := d.mapper[col.DataType]
 			if !ok {
 				w.WriteString(byteToString(x))
 				continue
@@ -250,12 +251,12 @@ UNLOCK TABLES;
 	return
 }
 
-func (dump *Dumper) getVersion(ctx context.Context) (string, error) {
-	stmt := sqlstmt.AcquireStmt(dump.dialect)
+func (d *Dumper) getVersion(ctx context.Context) (string, error) {
+	stmt := sqlstmt.AcquireStmt(d.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 
-	dump.dialect.GetVersion(stmt)
-	rows, err := dump.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
+	d.dialect.GetVersion(stmt)
+	rows, err := d.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
 		return "", err
 	}
@@ -271,12 +272,12 @@ func (dump *Dumper) getVersion(ctx context.Context) (string, error) {
 	return version, nil
 }
 
-func (dump *Dumper) getColumns(ctx context.Context, dbName, table string) ([]Column, error) {
-	stmt := sqlstmt.AcquireStmt(dump.dialect)
+func (d *Dumper) getColumns(ctx context.Context, dbName, table string) ([]Column, error) {
+	stmt := sqlstmt.AcquireStmt(d.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	dump.dialect.GetColumns(stmt, dbName, table)
+	d.dialect.GetColumns(stmt, dbName, table)
 
-	rows, err := dump.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
+	rows, err := d.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
 		return nil, err
 	}

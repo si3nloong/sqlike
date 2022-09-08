@@ -29,7 +29,7 @@ type DataTypeFunc func(sf reflext.StructFielder) columns.Column
 
 // Builder :
 type Builder struct {
-	mutex    sync.Mutex
+	mutex    *sync.Mutex
 	typeMap  map[interface{}]sqltype.Type
 	builders map[sqltype.Type]DataTypeFunc
 }
@@ -37,6 +37,7 @@ type Builder struct {
 // NewBuilder :
 func NewBuilder() *Builder {
 	sb := &Builder{
+		mutex:    new(sync.Mutex),
 		typeMap:  make(map[interface{}]sqltype.Type),
 		builders: make(map[sqltype.Type]DataTypeFunc),
 	}

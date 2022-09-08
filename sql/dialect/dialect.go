@@ -57,7 +57,7 @@ type Dialect interface {
 }
 
 var (
-	mutex    sync.Mutex
+	mutex    = new(sync.RWMutex)
 	dialects = make(map[string]Dialect)
 )
 
@@ -73,6 +73,8 @@ func RegisterDialect(driver string, dialect Dialect) {
 
 // GetDialectByDriver :
 func GetDialectByDriver(driver string) Dialect {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	driver = strings.TrimSpace(strings.ToLower(driver))
 	return dialects[driver]
 }
