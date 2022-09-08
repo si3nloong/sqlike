@@ -12,7 +12,7 @@ import (
 func testRace(ctx context.Context, t *testing.T) {
 	registry := codec.DefaultRegistry
 	wg := new(sync.WaitGroup)
-	getStruct := func(v any) {
+	getStruct := func(v interface{}) {
 		defer wg.Done()
 		to := reflect.TypeOf(v)
 		if _, err := registry.LookupDecoder(to); err != nil {
