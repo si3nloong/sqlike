@@ -12,6 +12,7 @@ import (
 func testRace(ctx context.Context, t *testing.T) {
 	registry := codec.DefaultRegistry
 	wg := new(sync.WaitGroup)
+	wg.Add(3)
 	getStruct := func(v interface{}) {
 		defer wg.Done()
 		to := reflect.TypeOf(v)
@@ -31,6 +32,5 @@ func testRace(ctx context.Context, t *testing.T) {
 		Name string
 		Age  int
 	}{})
-	wg.Add(3)
 	wg.Wait()
 }
