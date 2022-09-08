@@ -81,6 +81,8 @@ func TestExamples(t *testing.T) {
 		testCase(ctx, t, client)
 	}
 
+	testRace(ctx, t)
+
 }
 
 func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
