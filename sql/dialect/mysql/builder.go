@@ -141,7 +141,7 @@ func (b *mySQLBuilder) BuildJSONFunction(stmt sqlstmt.Stmt, it interface{}) erro
 // BuildString :
 func (b *mySQLBuilder) BuildString(stmt sqlstmt.Stmt, it interface{}) error {
 	v := reflect.ValueOf(it)
-	stmt.WriteString(b.Quote(v.String()))
+	stmt.WriteString(v.String())
 	return nil
 }
 
