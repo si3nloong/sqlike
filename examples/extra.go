@@ -173,6 +173,12 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 		}
 	}
 
+	// query
+	{
+		_, err := db.QueryStmt(ctx, expr.Raw("SELECT * FROM USER"))
+		require.NoError(t, err)
+	}
+
 	// MongoDB :
 	// {
 	// 	ctx := context.Background()
