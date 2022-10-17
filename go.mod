@@ -18,7 +18,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
 	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75
-	golang.org/x/text v0.3.8
+	golang.org/x/text v0.4.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v3 v3.0.1
 )
