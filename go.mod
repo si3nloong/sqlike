@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go v0.105.0
-	github.com/Masterminds/semver/v3 v3.1.1
+	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.56.0
 	github.com/go-sql-driver/mysql v1.6.0
