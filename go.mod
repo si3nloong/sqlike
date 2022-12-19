@@ -3,22 +3,22 @@ module github.com/si3nloong/sqlike/v2
 go 1.18
 
 require (
-	cloud.google.com/go v0.104.0
-	github.com/Masterminds/semver/v3 v3.1.1
+	cloud.google.com/go v0.107.0
+	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.55.1
-	github.com/go-sql-driver/mysql v1.6.0
+	github.com/casbin/casbin/v2 v2.60.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/paulmach/orb v0.7.1
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/segmentio/ksuid v1.0.4
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/sjson v1.2.5
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
-	go.mongodb.org/mongo-driver v1.10.3
-	golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75
-	golang.org/x/text v0.3.8
+	go.mongodb.org/mongo-driver v1.11.1
+	golang.org/x/exp v0.0.0-20221217163422-3c43f8badb15
+	golang.org/x/text v0.5.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v3 v3.0.1
 )
