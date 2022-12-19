@@ -29,12 +29,12 @@ func (idv *IndexView) List(ctx context.Context) ([]Index, error) {
 	return idv.tb.ListIndexes(ctx)
 }
 
-// CreateOne :
+// CreateOne : create single index on the table.
 func (idv *IndexView) CreateOne(ctx context.Context, idx sql.Index) error {
 	return idv.Create(ctx, []sql.Index{idx})
 }
 
-// Create :
+// Create : create multiple indexes on the table.
 func (idv *IndexView) Create(ctx context.Context, idxs []sql.Index) error {
 	for _, idx := range idxs {
 		if idx.Type != sql.MultiValued && len(idx.Columns) < 1 {

@@ -75,7 +75,7 @@
 - [x] Support comment.
 - [ ] Support spatial `Polygon`.
 - [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] BeforeSave and AfterLoad hook.
+- [ ] `BeforeSave` and `AfterLoad` hook.
 - [ ] Support migration like `django`.
 - [ ] Comprehensive `testcase`.
 - [ ] Refactor `Paginate`, add `PrevCursor` and `NextCursor`.
@@ -87,3 +87,4 @@
 - [ ] Support any of [index](https://dev.mysql.com/doc/refman/8.0/en/create-index.html).
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
+- [ ] Support **JOIN**.

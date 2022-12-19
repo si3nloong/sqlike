@@ -23,6 +23,7 @@ type Table struct {
 	// default primary key
 	pk string
 
+	// sql client
 	client *Client
 
 	// sql driver
