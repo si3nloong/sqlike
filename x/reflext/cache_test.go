@@ -24,12 +24,14 @@ func TestMapper(t *testing.T) {
 	fv := mapper.FieldByName(v, "name")
 	require.NotNil(t, fv)
 
-	require.Panics(t, func() {
-		mapper.FieldByName(reflect.ValueOf(0), "unknown")
-		mapper.FieldByName(reflect.ValueOf(""), "unknown")
-	})
-	require.Panics(t, func() {
-		mapper.FieldByName(v, "unknown")
+	t.Run("FieldByName with non-existed fields should panic", func(t *testing.T) {
+		require.Panics(t, func() {
+			mapper.FieldByName(reflect.ValueOf(0), "unknown")
+			mapper.FieldByName(reflect.ValueOf(""), "unknown")
+		})
+		require.Panics(t, func() {
+			mapper.FieldByName(v, "unknown")
+		})
 	})
 
 	// FieldByIndexesReadOnly will not initialise the field even if it's nil
@@ -86,5 +88,4 @@ func TestMapper(t *testing.T) {
 		_, ok = codec.LookUpFieldByName("skip")
 		require.False(t, ok)
 	}
-
 }

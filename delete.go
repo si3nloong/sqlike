@@ -148,7 +148,7 @@ func destroyOne(
 	)
 	for _, sf := range cdc.Properties() {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
-		if _, ok := sf.Tag().LookUp("primary_key"); ok {
+		if _, ok := sf.Tag().Option("primary_key"); ok {
 			fieldName = sf.Name()
 			value = fv.Interface()
 			break

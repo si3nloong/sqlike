@@ -49,12 +49,17 @@ type FieldInfo interface {
 // FieldTag :
 type FieldTag interface {
 	Name() string
+
+	// The struct field name
 	FieldName() string
 
-	// look up tag value using key
-	LookUp(key string) (val string, exists bool)
+	// Look up option using key
+	Option(key string) (val string, exists bool)
 
-	Get(key string) string
+	// Look up tag value using key
+	// LookUp(key string) (val string, exists bool)
+
+	// Get(key string) string
 }
 
 // StructTag :
@@ -64,7 +69,7 @@ type StructTag struct {
 	opts      map[string]string
 }
 
-// Name :
+// Name : returns the name of the struct field
 func (st StructTag) Name() string {
 	return st.name
 }
@@ -82,14 +87,22 @@ func (st StructTag) Get(key string) string {
 	return st.opts[key]
 }
 
-// LookUp :
-func (st StructTag) LookUp(key string) (val string, exist bool) {
+func (st StructTag) Option(key string) (val string, exist bool) {
 	if st.opts == nil {
 		return
 	}
 	val, exist = st.opts[key]
 	return
 }
+
+// LookUp :
+// func (st StructTag) LookUp(key string) (val string, exist bool) {
+// 	if st.opts == nil {
+// 		return
+// 	}
+// 	val, exist = st.opts[key]
+// 	return
+// }
 
 // StructField :
 type StructField struct {
@@ -161,11 +174,16 @@ func (sf *StructField) ParentByTraversal(cb func(FieldInfo) bool) FieldInfo {
 
 // Struct :
 type Struct struct {
-	tree       FieldInfo
-	fields     Fields // all fields belong to this struct
-	properties Fields // available properties in sequence
-	indexes    map[string]FieldInfo
-	names      map[string]FieldInfo
+	// tree representation of the struct
+	tree FieldInfo
+	// all fields belong to this struct
+	fields Fields
+	// available properties in sequence
+	properties Fields
+	// store all field using their index
+	indexes map[string]FieldInfo
+	// store all field using their name
+	names map[string]FieldInfo
 }
 
 var _ StructInfo = (*Struct)(nil)
@@ -184,7 +202,7 @@ func (s *Struct) Properties() []FieldInfo {
 	return clone
 }
 
-// LookUpFieldByName :
+// LookUpFieldByName : find the field using name
 func (s *Struct) LookUpFieldByName(name string) (FieldInfo, bool) {
 	x, ok := s.names[name]
 	return x, ok
@@ -243,7 +261,6 @@ type typeQueue struct {
 
 func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 	fields := make([]FieldInfo, 0)
-
 	root := &StructField{}
 	queue := []typeQueue{}
 	queue = append(queue, typeQueue{Deref(t), root, ""})
@@ -255,12 +272,14 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 		for i := 0; i < q.t.NumField(); i++ {
 			f := q.t.Field(i)
 
-			// skip unexported fields
+			// skip unexported fields (private property)
 			if len(f.PkgPath) != 0 && !f.Anonymous {
 				continue
 			}
 
 			tag := parseTag(f, tagNames, fmtFunc)
+			// log.Println(tag.FieldName(), tag.Name(), tag, f)
+			// skip when it's hyphen
 			if tag.name == "-" {
 				continue
 			}
@@ -275,10 +294,12 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				children: make([]FieldInfo, 0),
 			}
 
+			// set parent when it has parent
 			if len(q.sf.Index()) > 0 {
 				sf.parent = q.sf
 			}
 
+			// if tag name is empty, set to field name
 			if sf.path == "" {
 				sf.path = sf.tag.name
 			}
@@ -291,6 +312,8 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 			q.sf.children = append(q.sf.children, sf)
 			sf.idx = appendSlice(q.sf.idx, i)
 			sf.embed = ft.Kind() == reflect.Struct && f.Anonymous
+
+			// log.Println(sf.id, sf.Name(), sf.path, sf)
 
 			if ft.Kind() == reflect.Struct {
 				// check recursive, prevent infinite loop
@@ -330,6 +353,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 
 	for _, sf := range codec.fields {
 		codec.indexes[sf.(*StructField).id] = sf
+		// if it's an embedded field and name is declare, we should preserve the name
 		if sf.Name() != "" && !sf.IsEmbedded() {
 			lname = strings.ToLower(sf.Name())
 			codec.names[sf.Name()] = sf
@@ -342,11 +366,11 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				codec.properties = append(codec.properties[:idx], codec.properties[idx+1:]...)
 			}
 
-			prnt := sf.ParentByTraversal(func(f FieldInfo) bool {
+			parent := sf.ParentByTraversal(func(f FieldInfo) bool {
 				return !f.IsEmbedded()
 			})
 			if len(sf.Index()) > 1 &&
-				sf.Parent() != nil && prnt != nil {
+				sf.Parent() != nil && parent != nil {
 				continue
 			}
 
@@ -366,28 +390,28 @@ func appendSlice[T any](s []T, i T) []T {
 }
 
 func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st StructTag) {
-	parts := strings.Split(f.Tag.Get(tagNames[0]), ",")
-	name := strings.TrimSpace(parts[0])
-	st.fieldName = name
-	if name == "" {
-		name = f.Name
-		if fmtFunc != nil {
-			name = fmtFunc(name)
-		}
-	}
-	st.name = name
-	st.opts = make(map[string]string)
-	// FIXME: combine multiple tags
-	// for _, tagName := range tagNames {
-	// 	parts := strings.Split(f.Tag.Get(tagName), ",")
-	// 	name := strings.TrimSpace(parts[0])
-	// 	if name != "" {
-	// 		if fmtFunc != nil {
-	// 			name = fmtFunc(name)
-	// 		}
-	// 		st.name = name
+	// parts := strings.Split(f.Tag.Get(tagNames[0]), ",")
+	// name := strings.TrimSpace(parts[0])
+	// if name == "" {
+	// 	name = f.Name
+	// 	if fmtFunc != nil {
+	// 		name = fmtFunc(name)
 	// 	}
-	if len(parts) > 1 {
+	// }
+	// st.name = name
+	st.fieldName = f.Name
+	st.opts = make(map[string]string)
+	var name string
+	for _, tagName := range tagNames {
+		parts := strings.Split(f.Tag.Get(tagName), ",")
+		name = strings.TrimSpace(parts[0])
+		// if name != "" {
+		// 	if fmtFunc != nil {
+		// 		name = fmtFunc(name)
+		// 	}
+		// 	st.name = name
+		// }
+
 		for _, opt := range parts[1:] {
 			opt = strings.TrimSpace(opt)
 			if strings.Contains(opt, "=") {
@@ -400,6 +424,9 @@ func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st 
 			st.opts[opt] = ""
 		}
 	}
-	// }
+	if fmtFunc != nil {
+		name = fmtFunc(name)
+	}
+	st.name = name
 	return
 }

@@ -71,7 +71,7 @@ func modifyOne(
 	var pkv = [2]any{}
 	for _, sf := range fields {
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
-		if _, ok := sf.Tag().LookUp("primary_key"); ok {
+		if _, ok := sf.Tag().Option("primary_key"); ok {
 			if pkv[0] != nil {
 				x.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))
 			}
