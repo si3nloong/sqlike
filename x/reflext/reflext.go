@@ -59,7 +59,7 @@ type FieldTag interface {
 	// Look up tag value using key
 	LookUp(key string) (val string, exists bool)
 
-	// Get(key string) string
+	Get(key string) string
 }
 
 // StructTag :
