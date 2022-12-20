@@ -21,6 +21,7 @@ func TestMapper(t *testing.T) {
 
 	tmp := dbStruct{Name: "John"}
 	v := reflect.ValueOf(&tmp)
+	typeof := v.Type()
 	fv := mapper.FieldByName(v, "name")
 	require.NotNil(t, fv)
 
@@ -34,8 +35,13 @@ func TestMapper(t *testing.T) {
 		})
 	})
 
+	t.Run("TraversalsByName", func(t *testing.T) {
+		require.ElementsMatch(t, [][]int{{0}}, mapper.TraversalsByName(typeof, []string{"name"}))
+		require.ElementsMatch(t, [][]int{{2}}, mapper.TraversalsByName(typeof, []string{"Email"}))
+	})
+
 	// FieldByIndexesReadOnly will not initialise the field even if it's nil
-	{
+	t.Run("FieldByIndexesReadOnly", func(t *testing.T) {
 		fv := mapper.FieldByIndexesReadOnly(v, []int{0})
 		require.Equal(t, reflect.String, fv.Kind())
 		require.Equal(t, "John", fv.Interface().(string))
@@ -46,10 +52,10 @@ func TestMapper(t *testing.T) {
 		require.Panics(t, func() {
 			mapper.FieldByIndexesReadOnly(v, []int{1000000})
 		})
-	}
+	})
 
 	// FieldByIndexes will initialise if the field is nil
-	{
+	t.Run("FieldByIndexes", func(t *testing.T) {
 		fv := mapper.FieldByIndexes(v, []int{2})
 		require.NotNil(t, fv.Interface())
 		require.Equal(t, "", fv.Elem().Interface().(string))
@@ -57,7 +63,7 @@ func TestMapper(t *testing.T) {
 		require.Panics(t, func() {
 			mapper.FieldByIndexes(v, []int{1000000})
 		})
-	}
+	})
 
 	{
 		fv, ok := mapper.LookUpFieldByName(v, "name")
@@ -72,20 +78,20 @@ func TestMapper(t *testing.T) {
 	codec := mapper.CodecByType(v.Type())
 
 	// lookup an existed field
-	{
+	t.Run("LookUpFieldByName with existed field", func(t *testing.T) {
 		_, ok = codec.LookUpFieldByName("name")
 		require.True(t, ok)
-	}
+	})
 
 	// lookup unexists field
-	{
+	t.Run("LookUpFieldByName with non-existed field", func(t *testing.T) {
 		_, ok = codec.LookUpFieldByName("Unknown")
 		require.False(t, ok)
-	}
+	})
 
 	// lookup private field
-	{
+	t.Run("LookUpFieldByName with private field", func(t *testing.T) {
 		_, ok = codec.LookUpFieldByName("skip")
 		require.False(t, ok)
-	}
+	})
 }
