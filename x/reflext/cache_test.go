@@ -15,9 +15,13 @@ type dbStruct struct {
 
 func TestMapper(t *testing.T) {
 	var (
-		mapper = NewMapperFunc(100, []string{"db"})
-		ok     bool
+		mapper = NewMapperFunc(100, []string{"db"}, func(s string) string {
+			return s
+		})
+		ok bool
 	)
+
+	require.NotNil(t, DefaultMapper())
 
 	tmp := dbStruct{Name: "John"}
 	v := reflect.ValueOf(&tmp)

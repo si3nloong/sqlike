@@ -295,6 +295,9 @@ func TestKey(t *testing.T) {
 
 		err = k.Scan(`unknown`)
 		require.Error(t, err)
+
+		err = k.Scan([]byte(`wrong key`))
+		require.Error(t, err)
 	})
 
 	t.Run("driver.Valuer", func(it *testing.T) {
