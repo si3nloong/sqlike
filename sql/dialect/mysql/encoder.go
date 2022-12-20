@@ -86,7 +86,7 @@ func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) db.ValueEncoder {
 		f := sqlx.GetField(ctx)
 		x := v.Interface().(orb.Geometry)
 		// var srid uint
-		tag, ok := f.Tag().LookUp("srid")
+		tag, ok := f.Tag().Option("srid")
 		if ok {
 			integer, _ := strconv.Atoi(tag)
 			if integer > 0 {
@@ -127,7 +127,7 @@ func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (a
 	f := sqlx.GetField(ctx)
 	if str == "" {
 		tag := f.Tag()
-		if val, ok := tag.LookUp("enum"); ok {
+		if val, ok := tag.Option("enum"); ok {
 			enums := strings.Split(val, "|")
 			if len(enums) > 0 {
 				return enums[0], nil
@@ -145,7 +145,7 @@ func (enc DefaultEncoders) EncodeBool(_ context.Context, v reflect.Value) (any, 
 // EncodeInt :
 func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (any, error) {
 	f := sqlx.GetField(ctx)
-	if _, ok := f.Tag().LookUp("auto_increment"); ok {
+	if _, ok := f.Tag().Option("auto_increment"); ok {
 		return nil, nil
 	}
 	return v.Int(), nil
@@ -154,7 +154,7 @@ func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (any,
 // EncodeUint :
 func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (any, error) {
 	f := sqlx.GetField(ctx)
-	if _, ok := f.Tag().LookUp("auto_increment"); ok {
+	if _, ok := f.Tag().Option("auto_increment"); ok {
 		return nil, nil
 	}
 	return v.Uint(), nil

@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-// Zeroer :
+// Zeroer : interface to check whether the value is zero
 type Zeroer interface {
 	IsZero() bool
 }
@@ -83,7 +83,7 @@ func IsNull(v reflect.Value) bool {
 		k == reflect.Func) && v.IsNil()
 }
 
-// Zero :
+// Zero : create a runtime value from reflect.Type
 func Zero(t reflect.Type) (v reflect.Value) {
 	v = reflect.New(t)
 	vi := v.Elem()
@@ -131,9 +131,9 @@ func IsZero(v reflect.Value) bool {
 	}
 
 	it := v.Interface()
-	x, ok := it.(Zeroer)
+	vi, ok := it.(Zeroer)
 	if ok {
-		return x.IsZero()
+		return vi.IsZero()
 	}
 
 	switch v.Kind() {
@@ -159,11 +159,10 @@ func IsZero(v reflect.Value) bool {
 	}
 
 	// Compare other types directly:
-	z := reflect.Zero(v.Type())
-	return it == z.Interface()
+	return it == reflect.Zero(v.Type()).Interface()
 }
 
-// Set :
+// Set : set value to reflect.Value
 func Set(src, v reflect.Value) {
 	IndirectInit(src).Set(v)
 }

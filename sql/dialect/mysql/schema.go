@@ -69,7 +69,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Type = "MEDIUMBLOB"
 	col.Nullable = sf.IsNullable()
 	tag := sf.Tag()
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		col.DefaultValue = &v
 	}
 	return col
@@ -99,7 +99,7 @@ func (s mySQLSchema) DateDataType(sf reflext.FieldInfo) *sql.Column {
 
 func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
-	if v, exists := sf.Tag().LookUp("size"); exists {
+	if v, exists := sf.Tag().Option("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
 			size = v
 		}
@@ -111,7 +111,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Type = "TIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
 	// col.DefaultValue = &dflt
-	// if _, ok := sf.Tag().LookUp("on_update"); ok {
+	// if _, ok := sf.Tag().Option("on_update"); ok {
 	// 	col.Extra = "ON UPDATE " + dflt
 	// }
 	return col
@@ -119,7 +119,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 
 func (s mySQLSchema) DateTimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
-	if v, exists := sf.Tag().LookUp("size"); exists {
+	if v, exists := sf.Tag().Option("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
 			size = v
 		}
@@ -132,7 +132,7 @@ func (s mySQLSchema) DateTimeDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Type = "DATETIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := sf.Tag().LookUp("on_update"); ok {
+	if _, ok := sf.Tag().Option("on_update"); ok {
 		col.Extra = "ON UPDATE " + dflt
 	}
 	return col
@@ -156,7 +156,7 @@ func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
 		if sf.Type().Kind() == reflect.Ptr {
 			col.Nullable = true
 		}
-		if v, ok := sf.Tag().LookUp("srid"); ok {
+		if v, ok := sf.Tag().Option("srid"); ok {
 			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
 				panic("sqlike: SRID mosu be a number")
 			}
@@ -175,7 +175,7 @@ func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 	collation := charsetMap[charset]
 	dflt := ""
 	tag := sf.Tag()
-	cs, ok1 := tag.LookUp("charset")
+	cs, ok1 := tag.Option("charset")
 	if ok1 {
 		charset = strings.ToLower(cs)
 		collation = charsetMap[charset]
@@ -184,11 +184,11 @@ func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 	col.DefaultValue = &dflt
 	col.Charset = &charset
 	col.Collation = &collation
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		col.DefaultValue = &v
 	}
 
-	if enum, ok := tag.LookUp("enum"); ok {
+	if enum, ok := tag.Option("enum"); ok {
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
 			panic("invalid enum formats")
@@ -216,14 +216,14 @@ func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 		col.Type = blr.String()
 		col.DefaultValue = &dflt
 		return col
-	} else if char, ok := tag.LookUp("char"); ok {
+	} else if char, ok := tag.Option("char"); ok {
 		if _, err := strconv.Atoi(char); err != nil {
 			panic("invalid value for char data type")
 		}
 		col.DataType = "CHAR"
 		col.Type = "CHAR(" + char + ")"
 		return col
-	} else if _, ok := tag.LookUp("longtext"); ok {
+	} else if _, ok := tag.Option("longtext"); ok {
 		col.DataType = "TEXT"
 		col.Type = "TEXT"
 		col.DefaultValue = nil
@@ -232,7 +232,7 @@ func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 		return col
 	}
 
-	size, _ := tag.LookUp("size")
+	size, _ := tag.Option("size")
 	charLen, _ := strconv.Atoi(size)
 	if charLen < 1 {
 		charLen = 191
@@ -288,10 +288,10 @@ func (s mySQLSchema) IntDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Type = dataType
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := tag.LookUp("auto_increment"); ok {
+	if _, ok := tag.Option("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
-	} else if v, ok := tag.LookUp("default"); ok {
+	} else if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
 			panic("int default value should be integer")
 		}
@@ -312,10 +312,10 @@ func (s mySQLSchema) UintDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Type = dataType + " UNSIGNED"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := tag.LookUp("auto_increment"); ok {
+	if _, ok := tag.Option("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
-	} else if v, ok := tag.LookUp("default"); ok {
+	} else if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
 			panic("uint default value should be unsigned integer")
 		}
@@ -332,12 +332,12 @@ func (s mySQLSchema) FloatDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Name = sf.Name()
 	col.DataType = "REAL"
 	col.Type = "REAL"
-	if _, ok := tag.LookUp("unsigned"); ok {
+	if _, ok := tag.Option("unsigned"); ok {
 		col.Type += " UNSIGNED"
 	}
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseFloat(v, 64); err != nil {
 			panic("float default value should be decimal number")
 		}

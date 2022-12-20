@@ -85,13 +85,13 @@ func (ms mySQL) CreateTable(
 
 		tag := f.Tag()
 		// allow primary_key tag to override
-		if _, ok := tag.LookUp("primary_key"); ok {
+		if _, ok := tag.Option("primary_key"); ok {
 			pk = f
-		} else if _, ok := tag.LookUp("auto_increment"); ok {
+		} else if _, ok := tag.Option("auto_increment"); ok {
 			pk = f
 		} else if f.Name() == pkName && pk == nil {
 			pk = f
-		} else if v, ok := tag.LookUp("foreign_key"); ok {
+		} else if v, ok := tag.Option("foreign_key"); ok {
 			paths := strings.SplitN(v, ":", 2)
 			if len(paths) < 2 {
 				panic(fmt.Sprintf("invalid foreign key value %q", v))
@@ -101,14 +101,14 @@ func (ms mySQL) CreateTable(
 		}
 
 		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
-		if _, ok := tag.LookUp("unique_index"); ok {
+		if _, ok := tag.Option("unique_index"); ok {
 			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 			stmt.WriteByte(',')
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := tag.LookUp("comment"); ok {
+		if v, ok := tag.Option("comment"); ok {
 			if len(v) > 60 {
 				panic("sqlike: maximum length of comment is 60 characters")
 			}
@@ -125,8 +125,8 @@ func (ms mySQL) CreateTable(
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
-			k1, virtual = tg.LookUp("virtual_column")
-			k2, stored = tg.LookUp("stored_column")
+			k1, virtual = tg.Option("virtual_column")
+			k2, stored = tg.Option("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
 
@@ -218,13 +218,13 @@ func (ms *mySQL) AlterTable(
 		tag := f.Tag()
 		if !hasPk {
 			// allow `primary_key` tag to override
-			if _, ok := tag.LookUp("primary_key"); ok {
+			if _, ok := tag.Option("primary_key"); ok {
 				pkk = f
 			}
 			if f.Name() == pk && pkk == nil {
 				pkk = f
 			}
-		} else if v, ok := tag.LookUp("foreign_key"); ok && idxs.IndexOf(f.Name()) < 0 {
+		} else if v, ok := tag.Option("foreign_key"); ok && idxs.IndexOf(f.Name()) < 0 {
 			paths := strings.SplitN(v, ":", 2)
 			if len(paths) < 2 {
 				panic(fmt.Sprintf("invalid foreign key value %q", v))
@@ -233,8 +233,8 @@ func (ms *mySQL) AlterTable(
 			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
-		_, ok1 := tag.LookUp("unique_index")
-		_, ok2 := tag.LookUp("auto_increment")
+		_, ok1 := tag.Option("unique_index")
+		_, ok2 := tag.Option("auto_increment")
 		if ok1 || ok2 {
 			idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
@@ -253,7 +253,7 @@ func (ms *mySQL) AlterTable(
 
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := f.Tag().LookUp("comment"); ok {
+		if v, ok := f.Tag().Option("comment"); ok {
 			if len(v) > 60 {
 				panic("maximum length of comment is 60 characters")
 			}
@@ -273,8 +273,8 @@ func (ms *mySQL) AlterTable(
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
-			k1, virtual = tg.LookUp("virtual_column")
-			k2, stored = tg.LookUp("stored_column")
+			k1, virtual = tg.Option("virtual_column")
+			k2, stored = tg.Option("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
 				ctx.SetField(child)

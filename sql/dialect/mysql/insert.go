@@ -43,7 +43,7 @@ func (ms *mySQL) InsertInto(
 		}
 
 		// omit all the struct field with `generated_column` tag, it shouldn't include when inserting to the db
-		if _, ok := fields[i].Tag().LookUp("generated_column"); ok {
+		if _, ok := fields[i].Tag().Option("generated_column"); ok {
 			fields = append(fields[:i], fields[i+1:]...)
 			continue
 		}
@@ -111,11 +111,11 @@ func (ms *mySQL) InsertInto(
 			}
 
 			// skip primary key on duplicate update
-			if _, ok := f.Tag().LookUp("primary_key"); ok {
+			if _, ok := f.Tag().Option("primary_key"); ok {
 				continue
 			}
 
-			if _, ok := f.Tag().LookUp("auto_increment"); ok {
+			if _, ok := f.Tag().Option("auto_increment"); ok {
 				continue
 			}
 

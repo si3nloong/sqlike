@@ -69,13 +69,13 @@ func (k Key) ColumnDataType(ctx context.Context) *sqlx.Column {
 	f := sqlx.GetField(ctx)
 	tag := f.Tag()
 	size, charset, collate := "512", "latin1", "latin1_bin"
-	if v, ok := tag.LookUp("charset"); ok {
+	if v, ok := tag.Option("charset"); ok {
 		charset = v
 	}
-	if v, ok := tag.LookUp("collate"); ok {
+	if v, ok := tag.Option("collate"); ok {
 		collate = v
 	}
-	if v, ok := tag.LookUp("size"); ok {
+	if v, ok := tag.Option("size"); ok {
 		size = v
 	}
 
@@ -623,20 +623,5 @@ func NewNameKey(kind string, parent *Key) *Key {
 		Kind:      kind,
 		NameID:    ksuid.New().String(),
 		Parent:    parent,
-	}
-}
-
-func UnmarshalInt(v any) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case int64:
-		return int(v), nil
-	case json.Number:
-		return strconv.Atoi(string(v))
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
 	}
 }

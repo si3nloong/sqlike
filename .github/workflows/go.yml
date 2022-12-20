@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - main
+      - v2
   pull_request:
     branches:
       - main
+      - v2
 
 jobs:
   build:
@@ -47,7 +49,7 @@ jobs:
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Codecov
-        uses: codecov/codecov-action@v2.0.3
+        uses: codecov/codecov-action@v3
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           

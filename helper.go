@@ -19,7 +19,7 @@ func skipColumns(sfs []reflext.FieldInfo, omits util.StringSlice) (fields []refl
 	length := len(omits)
 	for _, sf := range sfs {
 		// omit all the struct field with `generated_column` tag, it shouldn't include when inserting to the db
-		if _, ok := sf.Tag().LookUp("generated_column"); ok {
+		if _, ok := sf.Tag().Option("generated_column"); ok {
 			continue
 		}
 		// omit all the field provided by user

@@ -10,30 +10,38 @@ import (
 func TestInit(t *testing.T) {
 
 	// init nil pointer
-	{
+	t.Run("Init nil pointer", func(t *testing.T) {
 		var ptrStr *string
 		v := reflect.ValueOf(&ptrStr)
 		v = Init(v)
 		require.NotNil(t, v.Interface())
 		// init should only initialise first level
 		require.Nil(t, v.Elem().Interface())
-	}
+	})
+
+	t.Run("Init initialized pointer", func(t *testing.T) {
+		var ptrStr = new(string)
+		v := reflect.ValueOf(&ptrStr)
+		v = Init(v)
+		require.NotNil(t, v.Interface())
+		require.Empty(t, v.Elem().Interface())
+	})
 
 	// init slice
-	{
+	t.Run("Init nil slice", func(t *testing.T) {
 		var nilSlice []string
 		v := reflect.ValueOf(&nilSlice)
 		v = Init(v)
 		require.NotNil(t, v.Interface())
-	}
+	})
 
 	// init map
-	{
+	t.Run("Init nil map", func(t *testing.T) {
 		var nilMap map[string]string
 		v := reflect.ValueOf(&nilMap)
 		v = Init(v)
 		require.NotNil(t, v.Interface())
-	}
+	})
 }
 
 func TestIndirectInit(t *testing.T) {
@@ -64,11 +72,20 @@ func TestTypeOf(t *testing.T) {
 
 	str := "hello world"
 
-	{
+	t.Run("TypeOf reflect.TypeOf", func(t *testing.T) {
 		rt := reflect.TypeOf(&str)
 		require.Equal(t, rt, TypeOf(ptr))
 		require.Equal(t, rt, TypeOf(rt))
-	}
+	})
+
+	t.Run("TypeOf primitive type", func(t *testing.T) {
+		require.Equal(t, reflect.TypeOf(""), TypeOf(""))
+		require.Equal(t, reflect.TypeOf(true), TypeOf(true))
+		require.Equal(t, reflect.TypeOf(int8(0)), TypeOf(int8(0)))
+		require.Equal(t, reflect.TypeOf(int16(0)), TypeOf(int16(0)))
+		require.Equal(t, reflect.TypeOf(int32(0)), TypeOf(int32(0)))
+		require.Equal(t, reflect.TypeOf(int64(0)), TypeOf(int64(0)))
+	})
 }
 
 func TestValueOf(t *testing.T) {
@@ -80,11 +97,11 @@ func TestValueOf(t *testing.T) {
 		v           reflect.Value
 	)
 
-	{
+	t.Run("ValueOf nil", func(t *testing.T) {
 		require.True(t, IsNull(reflect.ValueOf(ptr)))
 		require.True(t, IsNull(reflect.ValueOf(nilSlice)))
 		require.True(t, IsNull(reflect.ValueOf(nilMap)))
-	}
+	})
 
 	{
 		rt := reflect.TypeOf(multiptrint)
@@ -103,6 +120,7 @@ func TestNull(t *testing.T) {
 	var (
 		it      any
 		pstr    *string
+		mptr    **bool
 		text    = "hello world"
 		integer int
 		slice   []string
@@ -112,17 +130,24 @@ func TestNull(t *testing.T) {
 		itv     any
 	)
 
-	itv = "testing"
+	t.Run("Null is true", func(t *testing.T) {
+		require.True(t, IsNull(reflect.ValueOf(it)))
+		require.True(t, IsNull(reflect.ValueOf(mptr)))
+		require.True(t, IsNull(reflect.ValueOf(pstr)))
+		require.True(t, IsNull(reflect.ValueOf(slice)))
+		require.True(t, IsNull(reflect.ValueOf(nilMap)))
+		require.True(t, IsNull(reflect.ValueOf(itv)))
+	})
 
-	require.True(t, IsNull(reflect.ValueOf(it)))
-	require.True(t, IsNull(reflect.ValueOf(pstr)))
-	require.False(t, IsNull(reflect.ValueOf(text)))
-	require.False(t, IsNull(reflect.ValueOf(integer)))
-	require.True(t, IsNull(reflect.ValueOf(slice)))
-	require.False(t, IsNull(reflect.ValueOf(arr)))
-	require.True(t, IsNull(reflect.ValueOf(nilMap)))
-	require.False(t, IsNull(reflect.ValueOf(initMap)))
-	require.False(t, IsNull(reflect.ValueOf(itv)))
+	t.Run("Null is false", func(t *testing.T) {
+		itv = "testing"
+
+		require.False(t, IsNull(reflect.ValueOf(text)))
+		require.False(t, IsNull(reflect.ValueOf(integer)))
+		require.False(t, IsNull(reflect.ValueOf(arr)))
+		require.False(t, IsNull(reflect.ValueOf(initMap)))
+		require.False(t, IsNull(reflect.ValueOf(itv)))
+	})
 }
 
 func TestIsNullable(t *testing.T) {
@@ -166,7 +191,29 @@ func TestIsNullable(t *testing.T) {
 }
 
 func TestZero(t *testing.T) {
+	t.Run("Zero with primitive types", func(t *testing.T) {
+		require.Equal(t, "", Zero(reflect.TypeOf("")).Interface())
+		require.Equal(t, false, Zero(reflect.TypeOf(true)).Interface())
+		require.Equal(t, int8(0), Zero(reflect.TypeOf(int8(-10))).Interface())
+		require.Equal(t, int16(0), Zero(reflect.TypeOf(int16(-100))).Interface())
+		require.Equal(t, int32(0), Zero(reflect.TypeOf(int32(99))).Interface())
+		require.Equal(t, int64(0), Zero(reflect.TypeOf(int64(1))).Interface())
+		require.Equal(t, uint8(0), Zero(reflect.TypeOf(uint8(88))).Interface())
+		require.Equal(t, uint16(0), Zero(reflect.TypeOf(uint16(88))).Interface())
+		require.Equal(t, uint32(0), Zero(reflect.TypeOf(uint32(88))).Interface())
+		require.Equal(t, uint64(0), Zero(reflect.TypeOf(uint64(0))).Interface())
+		require.Equal(t, float32(0), Zero(reflect.TypeOf(float32(10.98))).Interface())
+		require.Equal(t, float64(0), Zero(reflect.TypeOf(float64(10.98))).Interface())
+	})
 
+	t.Run("Zero with pointers", func(t *testing.T) {
+		str := "hello"
+		require.Equal(t, new(string), Zero(reflect.TypeOf(&str)).Interface())
+		flag := true
+		require.Equal(t, new(bool), Zero(reflect.TypeOf(&flag)).Interface())
+		b := byte('x')
+		require.Equal(t, new(byte), Zero(reflect.TypeOf(&b)).Interface())
+	})
 }
 
 func TestIsKind(t *testing.T) {
@@ -281,4 +328,80 @@ func TestIsZero(t *testing.T) {
 	require.True(t, IsZero(reflect.ValueOf(uninitStruct)))
 
 	require.False(t, IsZero(reflect.ValueOf([2]string{"a", "b"})))
+}
+
+func TestSet(t *testing.T) {
+	t.Run("Set string", func(t *testing.T) {
+		var str string
+		v := reflect.ValueOf(&str)
+		Set(v, reflect.ValueOf("hello world"))
+		require.Equal(t, "hello world", v.Elem().Interface())
+	})
+
+	t.Run("Set bool", func(t *testing.T) {
+		var flag bool
+		v := reflect.ValueOf(&flag)
+		Set(v, reflect.ValueOf(true))
+		require.Equal(t, true, v.Elem().Interface())
+	})
+
+	t.Run("Set integer", func(t *testing.T) {
+		t.Run("int8", func(t *testing.T) {
+			var n int8
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int8(-12)))
+			require.Equal(t, int8(-12), v.Elem().Interface())
+		})
+
+		t.Run("int16", func(t *testing.T) {
+			var n int16
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int16(-124)))
+			require.Equal(t, int16(-124), v.Elem().Interface())
+		})
+
+		t.Run("int32", func(t *testing.T) {
+			var n int32
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int32(12421321)))
+			require.Equal(t, int32(12421321), v.Elem().Interface())
+		})
+
+		t.Run("int64", func(t *testing.T) {
+			var n int64
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int64(-12421321)))
+			require.Equal(t, int64(-12421321), v.Elem().Interface())
+		})
+	})
+
+	t.Run("Set float", func(t *testing.T) {
+		t.Run("float32", func(t *testing.T) {
+			var f float32
+			v := reflect.ValueOf(&f)
+			Set(v, reflect.ValueOf(float32(-88.245)))
+			require.Equal(t, float32(-88.245), v.Elem().Interface())
+		})
+
+		t.Run("float64", func(t *testing.T) {
+			var f float64
+			v := reflect.ValueOf(&f)
+			Set(v, reflect.ValueOf(float64(88.245)))
+			require.Equal(t, float64(88.245), v.Elem().Interface())
+		})
+	})
+
+	t.Run("Set using unaddressable value should panics", func(t *testing.T) {
+		require.Panics(t, func() {
+			var flag bool
+			v := reflect.ValueOf(flag)
+			Set(v, reflect.ValueOf(true))
+		})
+
+		require.Panics(t, func() {
+			var str string
+			v := reflect.ValueOf(str)
+			Set(v, reflect.ValueOf(true))
+		})
+	})
 }

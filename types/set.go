@@ -28,7 +28,7 @@ func (s *Set) ColumnDataType(ctx context.Context) *sql.Column {
 	blr.WriteString("SET(")
 	blr.WriteByte('\'')
 
-	val, ok := f.Tag().LookUp("set")
+	val, ok := f.Tag().Option("set")
 	if ok {
 		paths := strings.Split(val, "|")
 		if len(paths) >= 64 {
