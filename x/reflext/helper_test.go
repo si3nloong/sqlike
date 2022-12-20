@@ -329,3 +329,79 @@ func TestIsZero(t *testing.T) {
 
 	require.False(t, IsZero(reflect.ValueOf([2]string{"a", "b"})))
 }
+
+func TestSet(t *testing.T) {
+	t.Run("Set string", func(t *testing.T) {
+		var str string
+		v := reflect.ValueOf(&str)
+		Set(v, reflect.ValueOf("hello world"))
+		require.Equal(t, "hello world", v.Elem().Interface())
+	})
+
+	t.Run("Set bool", func(t *testing.T) {
+		var flag bool
+		v := reflect.ValueOf(&flag)
+		Set(v, reflect.ValueOf(true))
+		require.Equal(t, true, v.Elem().Interface())
+	})
+
+	t.Run("Set integer", func(t *testing.T) {
+		t.Run("int8", func(t *testing.T) {
+			var n int8
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int8(-12)))
+			require.Equal(t, int8(-12), v.Elem().Interface())
+		})
+
+		t.Run("int16", func(t *testing.T) {
+			var n int16
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int16(-124)))
+			require.Equal(t, int16(-124), v.Elem().Interface())
+		})
+
+		t.Run("int32", func(t *testing.T) {
+			var n int32
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int32(12421321)))
+			require.Equal(t, int32(12421321), v.Elem().Interface())
+		})
+
+		t.Run("int64", func(t *testing.T) {
+			var n int64
+			v := reflect.ValueOf(&n)
+			Set(v, reflect.ValueOf(int64(-12421321)))
+			require.Equal(t, int64(-12421321), v.Elem().Interface())
+		})
+	})
+
+	t.Run("Set float", func(t *testing.T) {
+		t.Run("float32", func(t *testing.T) {
+			var f float32
+			v := reflect.ValueOf(&f)
+			Set(v, reflect.ValueOf(float32(-88.245)))
+			require.Equal(t, float32(-88.245), v.Elem().Interface())
+		})
+
+		t.Run("float64", func(t *testing.T) {
+			var f float64
+			v := reflect.ValueOf(&f)
+			Set(v, reflect.ValueOf(float64(88.245)))
+			require.Equal(t, float64(88.245), v.Elem().Interface())
+		})
+	})
+
+	t.Run("Set using unaddressable value should panics", func(t *testing.T) {
+		require.Panics(t, func() {
+			var flag bool
+			v := reflect.ValueOf(flag)
+			Set(v, reflect.ValueOf(true))
+		})
+
+		require.Panics(t, func() {
+			var str string
+			v := reflect.ValueOf(str)
+			Set(v, reflect.ValueOf(true))
+		})
+	})
+}

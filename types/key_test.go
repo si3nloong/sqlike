@@ -282,6 +282,21 @@ func TestKey(t *testing.T) {
 		require.Equal(it, &Key{}, k3)
 	})
 
+	t.Run("sql.Scanner", func(t *testing.T) {
+		var k = new(Key)
+		var keystr = `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`
+		err := k.Scan(keystr)
+		require.NoError(t, err)
+		require.Equal(t, keystr, k.String())
+
+		err = k.Scan([]byte(keystr))
+		require.NoError(t, err)
+		require.Equal(t, keystr, k.String())
+
+		err = k.Scan(`unknown`)
+		require.Error(t, err)
+	})
+
 	t.Run("driver.Valuer", func(it *testing.T) {
 		k := NameKey("Parent", "hello-world!", nil)
 		v, err := k.Value()
