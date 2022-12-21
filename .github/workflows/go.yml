@@ -59,5 +59,3 @@ jobs:
       #     go get -u golang.org/x/lint/golint
       #     golangci-lint run
       #     golint -set_exit_status
-      # - name: Test
-      #   run: go test ./... -v
