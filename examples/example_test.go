@@ -7,7 +7,6 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
-	_ "github.com/go-sql-driver/mysql"
 	mysql "github.com/go-sql-driver/mysql"
 
 	"github.com/si3nloong/sqlike/v2/options"
@@ -21,9 +20,9 @@ import (
 type Logger struct {
 }
 
-func (l Logger) Debug(stmt any) {
+func (l Logger) Debug(args ...any) {
 	// log.Printf("%v", stmt)
-	log.Printf("%+v", stmt)
+	log.Printf("%+v", args...)
 }
 
 // TestExamples :
@@ -79,8 +78,6 @@ func TestExamples(t *testing.T) {
 		defer client.Close()
 		testCase(ctx, t, client)
 	}
-
-	testRace(ctx, t)
 
 }
 

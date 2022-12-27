@@ -206,6 +206,40 @@ type overrideStruct struct {
 	Nested string `sqlike:",comment=String Nested"` // override string Nested of generatedStruct
 }
 
+type userStatus string
+
+const (
+	userStatusActive  userStatus = "ACTIVE"
+	userStatusSuspend userStatus = "SUSPEND"
+)
+
+// User :
+type User struct {
+	ID        int64 `sqlike:",auto_increment"`
+	Name      string
+	Age       int
+	Status    userStatus `sqlike:",enum=ACTIVE|SUSPEND"`
+	CreatedAt time.Time  `sqlike:",default=CURRENT_TIMESTAMP"`
+}
+
+// Users :
+type Users []User
+
+// Len is part of sort.Interface.
+func (usrs Users) Len() int {
+	return len(usrs)
+}
+
+// Swap is part of sort.Interface.
+func (usrs Users) Swap(i, j int) {
+	usrs[i], usrs[j] = usrs[j], usrs[i]
+}
+
+type UserAddress struct {
+	ID     int64 `sqlike:",auto_increment"`
+	UserID int64 `sqlike:",foreign_key=User:ID"`
+}
+
 func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}

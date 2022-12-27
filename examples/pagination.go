@@ -4,7 +4,6 @@ import (
 	"context"
 	"sort"
 	"testing"
-	"time"
 
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
@@ -12,40 +11,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
-
-type status string
-
-const (
-	statusActive  status = "ACTIVE"
-	statusSuspend status = "SUSPEND"
-)
-
-// User :
-type User struct {
-	ID        int64 `sqlike:",auto_increment"`
-	Name      string
-	Age       int
-	Status    status `sqlike:",enum=ACTIVE|SUSPEND"`
-	CreatedAt time.Time
-}
-
-// Users :
-type Users []User
-
-// Len is part of sort.Interface.
-func (usrs Users) Len() int {
-	return len(usrs)
-}
-
-// Swap is part of sort.Interface.
-func (usrs Users) Swap(i, j int) {
-	usrs[i], usrs[j] = usrs[j], usrs[i]
-}
-
-type UserAddress struct {
-	ID     int64 `sqlike:",auto_increment"`
-	UserID int64 `sqlike:",foreign_key=User:ID"`
-}
 
 // PaginationExamples :
 func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
@@ -56,9 +21,10 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 
 	db := c.SetPrimaryKey("ID").Database("sqlike")
 	table := db.Table("User")
+	addressTable := db.Table("UserAddress")
 
 	{
-		err = db.Table("UserAddress").DropIfExists(ctx)
+		err = addressTable.DropIfExists(ctx)
 		require.NoError(t, err)
 
 		err = table.DropIfExists(ctx)
@@ -71,26 +37,37 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	}
 
 	{
-		err = db.Table("UserAddress").Migrate(ctx, UserAddress{})
+		err = addressTable.Migrate(ctx, UserAddress{})
 		require.NoError(t, err)
 	}
 
 	data := []User{
-		{1, "User A", 18, statusActive, time.Now().UTC()},
-		{2, "User B", 12, statusActive, time.Now().UTC()},
-		{3, "User F", 20, statusActive, time.Now().UTC()},
-		{4, "User C", 16, statusSuspend, time.Now().UTC()},
-		{5, "User C", 16, statusActive, time.Now().UTC()},
-		{6, "User G", 10, statusSuspend, time.Now().UTC()},
-		{7, "User C", 16, statusActive, time.Now().UTC()},
-		{8, "User D", 23, statusActive, time.Now().UTC()},
-		{9, "User E", 30, statusSuspend, time.Now().UTC()},
+		{ID: 1, Name: "User A", Age: 18, Status: userStatusActive},
+		{ID: 2, Name: "User B", Age: 12, Status: userStatusActive},
+		{ID: 3, Name: "User F", Age: 20, Status: userStatusActive},
+		{ID: 4, Name: "User C", Age: 16, Status: userStatusSuspend},
+		{ID: 5, Name: "User C", Age: 16, Status: userStatusActive},
+		{ID: 6, Name: "User G", Age: 10, Status: userStatusSuspend},
+		{ID: 7, Name: "User C", Age: 16, Status: userStatusActive},
+		{ID: 8, Name: "User D", Age: 23, Status: userStatusActive},
+		{ID: 9, Name: "User E", Age: 30, Status: userStatusSuspend},
 	}
 
 	{
 		_, err = table.Insert(
 			ctx,
 			data, options.Insert().SetDebug(true),
+		)
+		require.NoError(t, err)
+
+		_, err = addressTable.Insert(
+			ctx,
+			&[]UserAddress{
+				{UserID: data[0].ID},
+				{UserID: data[3].ID},
+				{UserID: data[2].ID},
+				{UserID: data[6].ID},
+			}, options.Insert().SetDebug(true),
 		)
 		require.NoError(t, err)
 	}
