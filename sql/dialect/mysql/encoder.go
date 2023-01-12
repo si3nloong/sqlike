@@ -66,12 +66,22 @@ func (enc DefaultEncoders) EncodeStringer(_ context.Context, v reflect.Value) (a
 }
 
 // EncodeTime :
-func (enc DefaultEncoders) EncodeDateTime(_ context.Context, v reflect.Value) (any, error) {
+func (enc DefaultEncoders) EncodeDateTime(ctx context.Context, v reflect.Value) (any, error) {
 	x := v.Interface().(time.Time)
-	// if x.IsZero() {
-	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
-	// 	return x, nil
-	// }
+	// TODO:
+	// If `CURRENT_TIMESTAMP` is define, we will pass `nil` value
+	// elseif the datetime is zero, we will pass the current datetime of the machine
+	// else we will pass the value of it instead
+	//
+	// And we should handle the TIMESTAMP type as well
+	f := sqlx.GetField(ctx)
+	def, ok := f.Tag().LookUp("default")
+	if ok && strings.EqualFold(def, "CURRENT_TIMESTAMP") {
+		return nil, nil
+	} else if x.IsZero() {
+		x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
+		return x, nil
+	}
 	// convert to UTC before storing into DB
 	return x.UTC(), nil
 }
