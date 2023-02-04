@@ -123,7 +123,6 @@ func (r *Result) Decode(dst any) error {
 		return ErrUnaddressableEntity
 	}
 
-	v = reflext.Indirect(v)
 	t = reflext.Deref(t)
 	if !reflext.IsKind(t, reflect.Struct) {
 		return errors.New("sqlike: it must be a struct to decode")
@@ -148,7 +147,7 @@ func (r *Result) Decode(dst any) error {
 			return err
 		}
 	}
-	reflext.Indirect(v).Set(reflext.Indirect(vv))
+	reflext.IndirectInit(v).Set(reflext.Indirect(vv))
 	if r.close {
 		return r.Close()
 	}
