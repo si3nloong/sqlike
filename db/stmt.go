@@ -10,6 +10,7 @@ type Stmt interface {
 	io.StringWriter
 	io.ByteWriter
 	fmt.Stringer
+	Pos() int
 	Args() []any
 	AppendArgs(args ...any)
 	WriteAppendArgs(query string, args ...any)
@@ -17,11 +18,6 @@ type Stmt interface {
 	StartTimer()
 	StopTimer()
 }
-
-// this is to enable struct to implement sql clause interface
-type BaseClause struct{}
-
-func (b BaseClause) isSqlClause() {}
 
 type Clause interface {
 	isSqlClause()

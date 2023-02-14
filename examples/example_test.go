@@ -17,8 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type Logger struct {
-}
+type Logger struct{}
 
 func (l Logger) Debug(args ...any) {
 	// log.Printf("%v", stmt)
@@ -31,8 +30,17 @@ func TestExamples(t *testing.T) {
 		ctx = context.Background()
 	)
 
+	// t.Run("Connect with missing driver", func(t *testing.T) {
+	// 	sqlike.MustConnect(
+	// 		ctx,
+	// 		"common",
+	// 		options.Connect().
+	// 			ApplyURI(`root:abcd1234@tcp()/sqlike?parseTime=true&multiStatements=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
+	// 	)
+	// })
+
 	// normal connect
-	{
+	t.Run("Connect without tracing", func(t *testing.T) {
 		client := sqlike.MustConnect(
 			ctx,
 			"mysql",
@@ -46,10 +54,9 @@ func TestExamples(t *testing.T) {
 		}
 
 		testCase(ctx, t, client)
-	}
+	})
 
-	// with tracing (OpenTracing)
-	{
+	t.Run("Connect with tracing", func(t *testing.T) {
 		driver := "mysql"
 		username := "root"
 
@@ -77,7 +84,7 @@ func TestExamples(t *testing.T) {
 		client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
 		defer client.Close()
 		testCase(ctx, t, client)
-	}
+	})
 
 }
 

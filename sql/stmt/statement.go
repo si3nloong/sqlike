@@ -28,6 +28,10 @@ type Statement struct {
 	args []any
 }
 
+func (sm *Statement) Pos() int {
+	return sm.c
+}
+
 // Args :
 func (sm *Statement) Args() []any {
 	return sm.args

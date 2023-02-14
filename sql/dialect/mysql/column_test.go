@@ -29,7 +29,10 @@ func TestRenameColumn(t *testing.T) {
 func TestDropColumn(t *testing.T) {
 	ms := New()
 	stmt := sqlstmt.AcquireStmt(ms)
-	defer sqlstmt.ReleaseStmt(stmt)
+
+	t.Cleanup(func() {
+		sqlstmt.ReleaseStmt(stmt)
+	})
 	ms.DropColumn(stmt, "db", "table", "c1")
 	require.Equal(t, "ALTER TABLE `db`.`table` DROP COLUMN `c1`;", stmt.String())
 	require.ElementsMatch(t, []any{}, stmt.Args())

@@ -105,6 +105,10 @@ type jsonStruct struct {
 	NullableFloat *float64
 }
 
+type uuidStruct struct {
+	ID string `sql:"id,uuid"`
+}
+
 // LongStr :
 type LongStr string
 
