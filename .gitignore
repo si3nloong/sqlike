@@ -2,7 +2,6 @@ main
 main.go
 vendor/*
 .idea/
-.vscode/*
 *.sql
 .DS_STORE
 node_modules
