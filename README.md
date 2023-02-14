@@ -12,7 +12,7 @@
 ## 🔨 Installation
 
 ```console
-go get github.com/si3nloong/sqlike
+go get github.com/si3nloong/sqlike/v2
 ```
 
 Fully compatible with native library `database/sql`, which mean you are allow to use `driver.Valuer` and `sql.Scanner`.
@@ -33,8 +33,8 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 
 ## ✨ What do we provide apart from native package (database/sql)?
 
-- Support `ENUM` and `SET`
 - Support `UUID` (^8.0)
+- Support `ENUM` and `SET`
 - Support `JSON`
 - Support `descending index` (^8.0)
 - Support `multi-valued` index (^8.0.17)
@@ -43,13 +43,13 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 - Extra custom type such as `Date`, `Key`, `Boolean`
 - Support `struct` on `Find`, `FindOne`, `InsertOne`, `Insert`, `ModifyOne`, `DeleteOne`, `Delete`, `DestroyOne` and `Paginate` apis
 - Support `Transactions`
-- Support cursor based pagination
+- Support offset based and cursor based pagination
 - Support advance and complex query statement
 - Support [civil.Date](https://cloud.google.com/go/civil#Date), [civil.Time](https://cloud.google.com/go/civil#Time) and [time.Location](https://pkg.go.dev/time#Time)
 - Support [language.Tag](https://godoc.org/golang.org/x/text/language#example-Tag--Values) and [currency.Unit](https://godoc.org/golang.org/x/text/currency#Unit)
 - Support authorization plugin [Casbin](https://github.com/casbin/casbin)
 - Support tracing plugin [OpenTracing](https://github.com/opentracing/opentracing-go)
-- Developer friendly, (query is highly similar to native sql query)
+- Developer friendly, (query is highly similar to native SQL query)
 - Support `sqldump` for backup purpose **(experiment)**
 
 <!-- You can refer to [examples](https://github.com/si3nloong/sqlike/tree/main/examples) folder to see what apis we offer and learn how to use those apis -->
@@ -58,12 +58,11 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 
 Our main objective is anti toxic query, that why some functionality we doesn't offer out of box
 
-- offset based pagination (but you may achieve this by using `Limit` and `Offset`)
-- eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
-- join (eg. left join, outer join, inner join), join clause is consider as toxic query, you should alway find your record using primary key
-- left wildcard search using Like is not allow (but you may use `expr.Raw` to bypass it)
-- bidirectional sorting is not allow (except mysql 8.0 and above)
-- currently only support `mysql` driver (postgres and sqlite yet to implement)
+- Offset based pagination (but you may achieve this by using `Limit` and `Offset`)
+- Eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
+- Join (eg. left join, outer join, inner join), join clause is consider as toxic query, you should alway find your record using primary key
+- Left wildcard search using Like is not allow (but you may use `expr.Raw` to bypass it)
+- Bidirectional sorting is not allow (except mysql 8.0 and above)
 
 ## General APIs
 
@@ -268,7 +267,7 @@ Thanks to these awesome companies for their support of Open Source developers �
 [![GitHub](https://jstools.dev/img/badges/github.svg)](https://github.com/open-source)
 [![NPM](https://jstools.dev/img/badges/npm.svg)](https://www.npmjs.com/)
 
-## 🧲 Adopters 
+## 🧲 Adopters
 
 <img src="https://camo.githubusercontent.com/2c975785e2902b4ca4d1a9e9fd4bd21b3e576395631f1dc7c49f170cdeb7f1f8/68747470733a2f2f61737365742e77657469782e6d792f696d616765732f6c6f676f2f77657469782e706e67"
 width="120px" style="margin-right: 10px" />
