@@ -77,7 +77,7 @@ func (s mySQLSchema) ByteDataType(sf reflext.FieldInfo) *sql.Column {
 
 func (s mySQLSchema) UUIDDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
-	charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
+	charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 	col.Name = sf.Name()
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(36)"
@@ -248,12 +248,12 @@ func (s mySQLSchema) CharDataType(sf reflext.FieldInfo) *sql.Column {
 	dflt := ""
 	switch sf.Type() {
 	case reflect.TypeOf(currency.Unit{}):
-		charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
+		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 		col.Type = "CHAR(3)"
 		col.Charset = &charset
 		col.Collation = &collation
 	default:
-		charset, collation := string(charset.Utf8mb4), "utf8mb4_unicode_ci"
+		charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 		col.Type = "CHAR(191)"
 		col.Charset = &charset
 		col.Collation = &collation

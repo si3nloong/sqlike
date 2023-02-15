@@ -11,7 +11,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
-// Dialect :
+// SQL dialect which implement interfaces
 type Dialect interface {
 	Codecer
 	TableName(db, table string) string
@@ -22,14 +22,14 @@ type Dialect interface {
 	UseDatabase(stmt Stmt, db string)
 	GetVersion(stmt Stmt)
 	GetDatabases(stmt Stmt)
-	CreateDatabase(stmt Stmt, db string, checkExists bool)
-	DropDatabase(stmt Stmt, db string, checkExists bool)
+	CreateDatabase(stmt Stmt, db string, exists bool)
+	DropDatabase(stmt Stmt, db string, exists bool)
 	HasTable(stmt Stmt, db, table string)
 	HasPrimaryKey(stmt Stmt, db, table string)
 	RenameTable(stmt Stmt, db, oldName, newName string)
 	RenameColumn(stmt Stmt, db, table, oldColName, newColName string)
 	DropColumn(stmt Stmt, db, table, column string)
-	DropTable(stmt Stmt, db, table string, checkExists bool, unsafe bool)
+	DropTable(stmt Stmt, db, table string, exists bool, unsafe bool)
 	TruncateTable(stmt Stmt, db, table string)
 	GetColumns(stmt Stmt, db, table string)
 	HasIndexByName(stmt Stmt, db, table, indexName string)

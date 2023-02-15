@@ -19,6 +19,10 @@ type Stmt interface {
 	StopTimer()
 }
 
-type Clause interface {
-	isSqlClause()
+type SqlClause interface {
+	isClause()
+}
+
+type SqlStmt interface {
+	isStmt()
 }

@@ -48,6 +48,7 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 		panic("missing required parser")
 	}
 	blr.SetBuilder(reflect.TypeOf(primitive.CastAs{}), b.BuildCastAs)
+	blr.SetBuilder(reflect.TypeOf(primitive.Pair{}), b.BuildPair)
 	blr.SetBuilder(reflect.TypeOf(primitive.Func{}), b.BuildFunction)
 	blr.SetBuilder(reflect.TypeOf(primitive.JSONFunc{}), b.BuildJSONFunction)
 	blr.SetBuilder(reflect.TypeOf(primitive.Field{}), b.BuildField)
@@ -78,6 +79,12 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 	blr.SetBuilder(reflect.String, b.BuildString)
 	b.registry = rg
 	b.builder = blr
+}
+
+func (b *mySQLBuilder) BuildPair(stmt db.Stmt, it any) error {
+	v := it.(primitive.Pair)
+	stmt.WriteString(b.Quote(v[0]) + `.` + b.Quote(v[1]))
+	return nil
 }
 
 // BuildCastAs :
@@ -152,13 +159,11 @@ func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it any) error {
 		return err
 	}
 
-	stmt.WriteByte(' ')
 	if x.IsNot {
-		stmt.WriteString("NOT LIKE")
+		stmt.WriteString(` NOT LIKE `)
 	} else {
-		stmt.WriteString("LIKE")
+		stmt.WriteString(` LIKE `)
 	}
-	stmt.WriteByte(' ')
 	v := reflext.ValueOf(x.Value)
 	if !v.IsValid() {
 		stmt.WriteByte('?')
@@ -196,9 +201,7 @@ func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it any) error {
 // BuildField :
 func (b *mySQLBuilder) BuildField(stmt db.Stmt, it any) error {
 	x := it.(primitive.Field)
-	stmt.WriteString("FIELD")
-	stmt.WriteByte('(')
-	stmt.WriteString(b.Quote(x.Name))
+	stmt.WriteString(`FIELD(` + b.Quote(x.Name))
 	for _, v := range x.Values {
 		stmt.WriteByte(',')
 		if err := b.getValue(stmt, v); err != nil {
@@ -303,14 +306,18 @@ func (b *mySQLBuilder) BuildRaw(stmt db.Stmt, it any) error {
 
 // BuildAs :
 func (b *mySQLBuilder) BuildAs(stmt db.Stmt, it any) error {
-	stmt.WriteByte('(')
-	x := it.(primitive.As)
-	if err := b.getValue(stmt, x.Field); err != nil {
+	_, isStmt := it.(db.SqlStmt)
+	if isStmt {
+		stmt.WriteByte('(')
+	}
+	v := it.(primitive.As)
+	if err := b.getValue(stmt, v.Field); err != nil {
 		return err
 	}
-	stmt.WriteByte(')')
-	stmt.WriteString(" AS ")
-	stmt.WriteString(b.Quote(x.Name))
+	if isStmt {
+		stmt.WriteByte(')')
+	}
+	stmt.WriteString(` AS ` + b.Quote(v.Name))
 	return nil
 }
 
@@ -544,16 +551,31 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it any) (err error) {
 // BuildSelectStmt :
 func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {
 	x := it.(*sql.SelectStmt)
-	stmt.WriteString("SELECT ")
+	stmt.WriteString(`SELECT `)
 	if x.DistinctOn {
-		stmt.WriteString("DISTINCT ")
+		stmt.WriteString(`DISTINCT `)
 	}
 	if err := b.appendSelect(stmt, x.Exprs); err != nil {
 		return err
 	}
-	stmt.WriteString(" FROM ")
+	stmt.WriteString(` FROM `)
 	if err := b.appendTable(stmt, x.Tables); err != nil {
 		return err
+	}
+	if len(x.Joins) > 0 {
+		for _, j := range x.Joins {
+			switch j.Type {
+			case primitive.InnerJoin:
+				stmt.WriteString(` INNER JOIN `)
+			case primitive.LeftJoin:
+				stmt.WriteString(` LEFT JOIN `)
+			}
+			b.builder.BuildStatement(stmt, j.SubQuery)
+			stmt.WriteString(` ON `)
+			b.builder.BuildStatement(stmt, j.On[0])
+			stmt.WriteString(` = `)
+			b.builder.BuildStatement(stmt, j.On[1])
+		}
 	}
 	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
 		return err

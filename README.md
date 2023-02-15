@@ -33,11 +33,11 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 
 ## ✨ What do we provide apart from native package (database/sql)?
 
-- Support `UUID` (^8.0)
+- Support `UUID` **(^8.0)**
 - Support `ENUM` and `SET`
 - Support `JSON`
-- Support `descending index` (^8.0)
-- Support `multi-valued` index (^8.0.17)
+- Support `descending index` **(^8.0)**
+- Support `multi-valued` index **(^8.0.17)**
 - Support `Spatial` with package [orb](https://github.com/paulmach/orb), such as `Point`, `LineString`
 - Support `generated column` of `stored column` and `virtual column`
 - Extra custom type such as `Date`, `Key`, `Boolean`
@@ -61,8 +61,8 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 - Offset based pagination (but you may achieve this by using `Limit` and `Offset`)
 - Eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
 - Join (eg. left join, outer join, inner join), join clause is consider as toxic query, you should alway find your record using primary key
-- Left wildcard search using Like is not allow (but you may use `expr.Raw` to bypass it)
-- Bidirectional sorting is not allow (except mysql 8.0 and above)
+- Left wildcard search using Like is not allow but you may use `expr.Raw` to bypass it
+- Bidirectional sorting is not allow except **MySQL 8.0** and above
 
 ## General APIs
 

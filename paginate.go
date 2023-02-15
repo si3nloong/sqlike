@@ -69,11 +69,11 @@ type Paginator struct {
 	err    error
 }
 
-// Paginate the records with after cursor.
+// After: Paginate the records using after cursor.
 //
-// 	if err := pg.After(context.Background(), 1); err != nil {
-// 		panic(err)
-// 	}
+//	if err := pg.After(context.Background(), 1); err != nil {
+//		panic(err)
+//	}
 func (pg *Paginator) After(ctx context.Context, cursor any) (err error) {
 	if pg.err != nil {
 		return pg.err

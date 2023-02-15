@@ -13,7 +13,7 @@ type SelectStmt struct {
 	DistinctOn bool
 	Tables     []any
 	Exprs      []any
-	Joins      []any
+	Joins      []primitive.Join
 	IndexHints string
 	Conditions primitive.Group
 	Havings    primitive.Group
@@ -23,6 +23,8 @@ type SelectStmt struct {
 	Skip       uint
 	Opts       []any
 }
+
+func (stmt *SelectStmt) isStmt() {}
 
 // Select :
 func Select(fields ...any) *SelectStmt {
@@ -91,14 +93,15 @@ func (stmt *SelectStmt) Where(fields ...any) *SelectStmt {
 	return stmt
 }
 
-// LeftJoin :
-func (stmt *SelectStmt) LeftJoin(fields ...any) *SelectStmt {
-	stmt.Conditions = expr.And(fields...)
+// InnerJoin :
+func (stmt *SelectStmt) InnerJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.InnerJoin, SubQuery: subQuery, On: [2]any{first, second}})
 	return stmt
 }
 
-func (stmt *SelectStmt) InnerJoin(fields ...any) *SelectStmt {
-	stmt.Conditions = expr.And(fields...)
+// LeftJoin :
+func (stmt *SelectStmt) LeftJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.LeftJoin, SubQuery: subQuery, On: [2]any{first, second}})
 	return stmt
 }
 

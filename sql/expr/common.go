@@ -7,6 +7,11 @@ import (
 	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
+func Pair(first, second string) (p primitive.Pair) {
+	p = [2]string{first, second}
+	return
+}
+
 // Raw :
 func Raw(value string) (r primitive.Raw) {
 	r.Value = value
@@ -14,8 +19,8 @@ func Raw(value string) (r primitive.Raw) {
 }
 
 // As :
-func As(field any, alias string) (as primitive.As) {
-	as.Field = wrapColumn(field)
+func As(src any, alias string) (as primitive.As) {
+	as.Field = wrapColumn(src)
 	as.Name = alias
 	return
 }

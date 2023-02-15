@@ -91,6 +91,8 @@ func TestExamples(t *testing.T) {
 func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	v := client.Version()
 	require.Equal(t, "mysql", client.DriverName())
+	// require.Equal(t, charset.UTF8MB4, client.Charset())
+	// require.Equal(t, "utf8mb4_0900_ai_ci", client.Collate())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 	client.SetLogger(Logger{})
 	DatabaseExamples(t, client)

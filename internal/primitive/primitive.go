@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+type JoinType int
+
+const (
+	InnerJoin JoinType = iota
+	LeftJoin
+)
+
+type Pair [2]string
+
 // Raw :
 type Raw struct {
 	Value string
@@ -71,6 +80,12 @@ type JSONFunc struct {
 	Prefix any
 	Type   jsonFunction
 	Args   []any
+}
+
+type Join struct {
+	Type     JoinType
+	SubQuery any
+	On       [2]any
 }
 
 // Group :
