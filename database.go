@@ -19,7 +19,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type txCallback func(ctx SessionContext) error
+type txCallback func(ctx context.Context) error
 
 // Database :
 type Database struct {
@@ -152,11 +152,11 @@ func (db *Database) RunInTransaction(ctx context.Context, cb txCallback, opts ..
 	if err != nil {
 		return err
 	}
-	defer tx.RollbackTransaction()
+	defer tx.Rollback()
 	if err := cb(tx); err != nil {
 		return err
 	}
-	return tx.CommitTransaction()
+	return tx.Commit()
 }
 
 type indexDefinition struct {

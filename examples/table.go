@@ -2,8 +2,11 @@ package examples
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/stretchr/testify/require"
 )
@@ -198,6 +201,36 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			Comment:      "String Nested",
 		})
 	}
+
+	t.Run("Ensure data type are matching", func(t *testing.T) {
+		table := db.Table("test")
+		defer table.DropIfExists(ctx)
+		table.MustUnsafeMigrate(ctx, struct {
+			ID        uuid.UUID `sqlike:",uuid"`
+			Name      string    `sql:"n"`
+			Timestamp time.Time `db:"ts"`
+		}{})
+		cols, err := table.Columns().List(ctx)
+		require.NoError(t, err)
+
+		expectedCols := []struct {
+			name     string
+			pos      int
+			dataType string
+			nullable bool
+		}{
+			{name: "ID", pos: 1, dataType: "varchar"},
+			{name: "n", pos: 2, dataType: "varchar"},
+			{name: "ts", pos: 3, dataType: "datetime"},
+		}
+
+		for i, col := range cols {
+			require.Equal(t, expectedCols[i].name, col.Name)
+			require.Equal(t, expectedCols[i].pos, col.Position)
+			require.Equal(t, expectedCols[i].nullable, bool(col.IsNullable))
+			require.True(t, strings.EqualFold(expectedCols[i].dataType, col.DataType))
+		}
+	})
 }
 
 // MigrateErrorExamples :

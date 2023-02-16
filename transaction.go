@@ -9,11 +9,6 @@ import (
 
 var txnCtxKey struct{}
 
-// SessionContext :
-type SessionContext interface {
-	context.Context
-}
-
 // Transaction :
 type Transaction struct {
 	// transaction context
@@ -36,13 +31,13 @@ type Transaction struct {
 	logger db.Logger
 }
 
-// RollbackTransaction : Rollback aborts the transaction.
-func (tx *Transaction) RollbackTransaction() error {
+// Rollback : Rollback aborts the transaction.
+func (tx *Transaction) Rollback() error {
 	return tx.driver.Rollback()
 }
 
-// CommitTransaction : Commit commits the transaction.
-func (tx *Transaction) CommitTransaction() error {
+// Commit : Commit commits the transaction.
+func (tx *Transaction) Commit() error {
 	return tx.driver.Commit()
 }
 

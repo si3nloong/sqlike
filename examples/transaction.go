@@ -54,7 +54,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
 
-		err = tx.CommitTransaction()
+		err = tx.Commit()
 		require.NoError(t, err)
 	}
 
@@ -78,7 +78,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
 
-		err = tx.RollbackTransaction()
+		err = tx.Rollback()
 		require.NoError(t, err)
 
 		ns = normalStruct{}
@@ -95,7 +95,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	// RunInTransaction
 	{
 		err = db.RunInTransaction(ctx,
-			func(sess sqlike.SessionContext) error {
+			func(sess context.Context) error {
 				uid, _ = uuid.Parse(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
 				now := time.Now()
 
@@ -143,7 +143,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		uid, _ = uuid.Parse(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
 		now := time.Now()
 		err = db.RunInTransaction(
-			ctx, func(sess sqlike.SessionContext) error {
+			ctx, func(sess context.Context) error {
 				ns = normalStruct{}
 				ns.ID = uid
 				ns.Date = civil.DateOf(now)
@@ -180,7 +180,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	// Lock record using transaction
 	{
 		err = db.RunInTransaction(
-			ctx, func(sess sqlike.SessionContext) error {
+			ctx, func(sess context.Context) error {
 				nss := []normalStruct{}
 				result, err := db.Table("NormalStruct").
 					Find(
@@ -236,7 +236,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		).Decode(&user{})
 		require.Error(t, err)
 
-		err = tx.CommitTransaction()
+		err = tx.Commit()
 		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(
@@ -278,7 +278,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		).Decode(&user{})
 		require.Error(t, err)
 
-		err = tx.RollbackTransaction()
+		err = tx.Rollback()
 		require.NoError(t, err)
 
 		err = db.Table("user").FindOne(

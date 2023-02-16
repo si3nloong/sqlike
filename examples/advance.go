@@ -65,7 +65,7 @@ func AdvanceQueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 	{
 		if err := db.RunInTransaction(
 			ctx,
-			func(sess sqlike.SessionContext) error {
+			func(sess context.Context) error {
 				if _, err := db.Exec(sess, "USE `sqlike`;"); err != nil {
 					return err
 				}
