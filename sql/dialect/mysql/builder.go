@@ -567,8 +567,14 @@ func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {
 			switch j.Type {
 			case primitive.InnerJoin:
 				stmt.WriteString(` INNER JOIN `)
+			case primitive.OuterJoin:
+				stmt.WriteString(` OUTER JOIN `)
 			case primitive.LeftJoin:
 				stmt.WriteString(` LEFT JOIN `)
+			case primitive.RightJoin:
+				stmt.WriteString(` RIGHT JOIN `)
+			case primitive.CrossJoin:
+				stmt.WriteString(` CROSS JOIN `)
 			}
 			b.builder.BuildStatement(stmt, j.SubQuery)
 			stmt.WriteString(` ON `)

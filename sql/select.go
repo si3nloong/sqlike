@@ -99,9 +99,27 @@ func (stmt *SelectStmt) InnerJoin(subQuery, first, second any) *SelectStmt {
 	return stmt
 }
 
+// OuterJoin :
+func (stmt *SelectStmt) OuterJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.OuterJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
 // LeftJoin :
 func (stmt *SelectStmt) LeftJoin(subQuery, first, second any) *SelectStmt {
 	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.LeftJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
+// RightJoin :
+func (stmt *SelectStmt) RightJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.RightJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
+// CrossJoin :
+func (stmt *SelectStmt) CrossJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.CrossJoin, SubQuery: subQuery, On: [2]any{first, second}})
 	return stmt
 }
 

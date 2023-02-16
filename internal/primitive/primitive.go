@@ -9,7 +9,10 @@ type JoinType int
 
 const (
 	InnerJoin JoinType = iota
+	OuterJoin
+	CrossJoin
 	LeftJoin
+	RightJoin
 )
 
 type Pair [2]string
