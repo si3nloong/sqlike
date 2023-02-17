@@ -23,8 +23,7 @@ import (
 // FindExamples :
 func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
-		// result sql.Result
-		result *sqlike.Result
+		result *sqlike.Rows
 		ns     normalStruct
 		err    error
 	)

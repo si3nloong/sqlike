@@ -121,8 +121,8 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	// Paginate with complex query
 	{
 		users = []User{} // reset
-		var result *sqlike.Result
-		result, err := table.Find(
+		var rows *sqlike.Rows
+		rows, err := table.Find(
 			ctx,
 			actions.Find().
 				Where(
@@ -136,7 +136,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			options.Find().
 				SetDebug(true))
 		require.NoError(t, err)
-		err = result.All(&users)
+		err = rows.All(&users)
 		require.NoError(t, err)
 
 		results := []User{}

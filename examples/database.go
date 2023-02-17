@@ -27,16 +27,19 @@ func DatabaseExamples(t *testing.T, client *sqlike.Client) {
 		tb := testDB.Table("t1")
 		require.NotNil(t, tb)
 
-		tb.MustUnsafeMigrate(ctx, struct {
+		tb.UnsafeMigrate(ctx, struct {
 			ID int64 `sqlike:",auto_increment"`
 		}{})
 
+		// FIXME:
 		// var o struct {
 		// 	Rows uint `sqlike:"rows"`
 		// }
 
 		// err = testDB.QueryRow(ctx, "EXPLAIN SELECT * FROM `t1`;").Decode(&o)
 		// require.NoError(t, err)
+
+		// // panic("")
 		// // empty table will treat as one record when using EXPLAIN
 		// require.Equal(t, uint(1), o.Rows)
 	}

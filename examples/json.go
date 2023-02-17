@@ -20,7 +20,7 @@ import (
 func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err    error
-		result *sqlike.Result
+		result *sqlike.Rows
 	)
 
 	table := db.Table("JSON")

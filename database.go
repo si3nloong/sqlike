@@ -61,12 +61,12 @@ func (db *Database) Query(ctx context.Context, query string, args ...any) (*sql.
 }
 
 // QueryRow :
-func (db *Database) QueryRow(ctx context.Context, query string, args ...any) *sql.Row {
-	return getDriverFromContext(ctx, db.driver).QueryRowContext(ctx, query, args...)
+func (db *Database) QueryRow(ctx context.Context, query string, args ...any) *Row {
+	return &Row{getDriverFromContext(ctx, db.driver).QueryRowContext(ctx, query, args...)}
 }
 
 // QueryStmt :
-func (db *Database) QueryStmt(ctx context.Context, query any) (*Result, error) {
+func (db *Database) QueryStmt(ctx context.Context, query any) (*Rows, error) {
 	if query == nil {
 		return nil, errors.New("sqlike: empty query statement")
 	}
@@ -87,7 +87,7 @@ func (db *Database) QueryStmt(ctx context.Context, query any) (*Result, error) {
 		return nil, err
 	}
 
-	rslt := new(Result)
+	rslt := new(Rows)
 	rslt.cache = db.client.cache
 	rslt.dialect = db.dialect
 	rslt.rows = rows

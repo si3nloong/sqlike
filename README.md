@@ -24,7 +24,7 @@ SQLike did support **mysql 5.7** as well. For better compatibility, we suggest y
 ## 🪣 Minimum Requirements
 
 - **mysql 8.0** and above
-- **golang 1.17** and above
+- **golang 1.18** and above
 
 ## ❓ Why another ORM?
 
@@ -60,7 +60,6 @@ Our main objective is anti toxic query, that why some functionality we doesn't o
 
 - Offset based pagination (but you may achieve this by using `Limit` and `Offset`)
 - Eager loading (we want to avoid magic function, you should handle this by your own using goroutines)
-- Join (eg. left join, outer join, inner join), join clause is consider as toxic query, you should alway find your record using primary key
 - Left wildcard search using Like is not allow but you may use `expr.Raw` to bypass it
 - Bidirectional sorting is not allow except **MySQL 8.0** and above
 

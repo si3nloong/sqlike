@@ -7,12 +7,13 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/charset"
 	"github.com/si3nloong/sqlike/v2/sql/util"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // HasPrimaryKey :
-func (ms mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
+func (ms *mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
 	stmt.WriteByte(';')
@@ -20,7 +21,7 @@ func (ms mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 }
 
 // RenameTable :
-func (ms mySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
+func (ms *mySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(" TO ")
@@ -29,7 +30,7 @@ func (ms mySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 }
 
 // DropTable :
-func (ms mySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
+func (ms *mySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
 	if unsafe {
 		stmt.WriteString("SET FOREIGN_KEY_CHECKS=0;")
 		defer stmt.WriteString("SET FOREIGN_KEY_CHECKS=1;")
@@ -38,13 +39,12 @@ func (ms mySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bo
 	if exists {
 		stmt.WriteString(" IF EXISTS")
 	}
-	stmt.WriteByte(' ')
-	stmt.WriteString(ms.TableName(db, table) + ";")
+	stmt.WriteString(` ` + ms.TableName(db, table) + `;`)
 }
 
 // TruncateTable :
 func (ms mySQL) TruncateTable(stmt db.Stmt, db, table string) {
-	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
+	stmt.WriteString(`TRUNCATE TABLE ` + ms.TableName(db, table) + `;`)
 }
 
 // HasTable :
@@ -67,15 +67,17 @@ func (ms mySQL) CreateTable(
 		virtual bool
 		stored  bool
 		ctx     = sql.Context(dbName, table)
+		first   = true
 	)
 
-	stmt.WriteString("CREATE TABLE " + ms.TableName(dbName, table) + " (")
+	stmt.WriteString(`CREATE TABLE ` + ms.TableName(dbName, table) + ` (`)
 
-	// Main columns :
-	for i, f := range fields {
-		if i > 0 {
+	for len(fields) > 0 {
+		f := fields[0]
+		if !first {
 			stmt.WriteByte(',')
 		}
+		first = false
 
 		ctx.SetField(f)
 		col, err = ms.schema.GetColumn(ctx)
@@ -96,17 +98,15 @@ func (ms mySQL) CreateTable(
 			if len(paths) < 2 {
 				panic(fmt.Sprintf("invalid foreign key value %q", v))
 			}
-			stmt.WriteString("FOREIGN KEY (`" + f.Name() + "`) REFERENCES ")
-			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
-		}
-
-		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
-		if _, ok := tag.Option("unique_index"); ok {
-			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
-			stmt.WriteByte(',')
+			stmt.WriteString("FOREIGN KEY (`" + f.Name() + "`) REFERENCES `" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
+
+		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
+		if _, ok := tag.Option("unique_index"); ok {
+			stmt.WriteString(`,UNIQUE INDEX ` + idx.GetName() + ` (` + ms.Quote(f.Name()) + `)`)
+		}
 
 		if v, ok := tag.Option("comment"); ok {
 			if len(v) > 60 {
@@ -118,6 +118,7 @@ func (ms mySQL) CreateTable(
 		// check generated columns
 		t := reflext.Deref(f.Type())
 		if t.Kind() != reflect.Struct {
+			fields = fields[1:]
 			continue
 		}
 
@@ -144,38 +145,33 @@ func (ms mySQL) CreateTable(
 					name = k2
 				}
 
-				stmt.WriteString(ms.Quote(name))
-				stmt.WriteString(" " + col.Type)
+				stmt.WriteString(ms.Quote(name) + ` ` + col.Type)
 				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), f.Name()), ".")
-				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(f.Name()) + "->>'$." + path + "')")
+				stmt.WriteString(" AS (" + ms.Quote(f.Name()) + "->>'$." + path + "')")
 				if stored {
-					stmt.WriteString(" STORED")
+					stmt.WriteString(` STORED`)
 				}
 				if !col.Nullable {
-					stmt.WriteString(" NOT NULL")
+					stmt.WriteString(` NOT NULL`)
 				}
 			}
 			children = children[1:]
 			children = append(children, child.Children()...)
 		}
-
+		fields = fields[1:]
 	}
 	if pk != nil {
-		stmt.WriteString(",PRIMARY KEY (" + ms.Quote(pk.Name()) + ")")
+		stmt.WriteString(`,PRIMARY KEY (` + ms.Quote(pk.Name()) + `)`)
 	}
-	stmt.WriteString(") ENGINE=INNODB")
-	code := string(info.Charset())
+	stmt.WriteString(`) ENGINE=INNODB`)
+	code, collate := info.Charset(), info.Collate()
 	if code == "" {
-		stmt.WriteString(" CHARACTER SET utf8mb4")
-		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
-	} else {
-		stmt.WriteString(" CHARACTER SET " + code)
-		if info.Collate() != "" {
-			stmt.WriteString(" COLLATE " + info.Collate())
-		}
+		code = charset.DefaultCharset
 	}
-	stmt.WriteByte(';')
+	if collate == "" {
+		collate = charset.DefaultCollation
+	}
+	stmt.WriteString(` CHARACTER SET ` + string(charset.DefaultCharset) + ` COLLATE ` + string(collate) + `;`)
 	return
 }
 
@@ -201,7 +197,7 @@ func (ms *mySQL) AlterTable(
 		suffix  = "FIRST"
 	)
 
-	stmt.WriteString("ALTER TABLE " + ms.TableName(dbName, table) + " ")
+	stmt.WriteString(`ALTER TABLE ` + ms.TableName(dbName, table) + ` `)
 
 	for i, f := range fields {
 		if i > 0 {
@@ -238,8 +234,7 @@ func (ms *mySQL) AlterTable(
 		if ok1 || ok2 {
 			idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
-				stmt.WriteString("ADD")
-				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
+				stmt.WriteString("ADD UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 				stmt.WriteByte(',')
 			}
 		}

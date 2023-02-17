@@ -18,8 +18,8 @@ var ErrNoRows = sql.ErrNoRows
 // EOF : is an alias for end of file
 var EOF = io.EOF
 
-// Resulter :
-type Resulter interface {
+// Result :
+type Result interface {
 	Scan(dests ...any) error
 	Columns() []string
 	Next() bool
@@ -27,8 +27,8 @@ type Resulter interface {
 	Close() error
 }
 
-// Result :
-type Result struct {
+// Rows :
+type Rows struct {
 	ctx         context.Context
 	close       bool
 	rows        *sql.Rows
@@ -39,26 +39,26 @@ type Result struct {
 	err         error
 }
 
-var _ Resulter = (*Result)(nil)
+var _ Result = (*Rows)(nil)
 
 // Columns :
-func (r *Result) Columns() []string {
+func (r *Rows) Columns() []string {
 	return r.columns
 }
 
 // ColumnTypes :
-func (r *Result) ColumnTypes() ([]*sql.ColumnType, error) {
+func (r *Rows) ColumnTypes() ([]*sql.ColumnType, error) {
 	return r.columnTypes, nil
 }
 
-func (r *Result) nextValues() ([]any, error) {
+func (r *Rows) nextValues() ([]any, error) {
 	if !r.Next() {
 		return nil, EOF
 	}
 	return r.values()
 }
 
-func (r *Result) values() ([]any, error) {
+func (r *Rows) values() ([]any, error) {
 	length := len(r.columns)
 	values := make([]any, length)
 	for j := 0; j < length; j++ {
@@ -71,7 +71,7 @@ func (r *Result) values() ([]any, error) {
 }
 
 // Scan : will behave as similar as sql.Scan.
-func (r *Result) Scan(dests ...any) error {
+func (r *Rows) Scan(dests ...any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err
@@ -105,7 +105,7 @@ func (r *Result) Scan(dests ...any) error {
 }
 
 // Decode will decode the current document into val, this will only accepting pointer of struct as an input.
-func (r *Result) Decode(dst any) error {
+func (r *Rows) Decode(dst any) error {
 	if r.close {
 		defer r.Close()
 	}
@@ -155,7 +155,7 @@ func (r *Result) Decode(dst any) error {
 }
 
 // ScanSlice :
-func (r *Result) ScanSlice(results any) error {
+func (r *Rows) ScanSlice(results any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err
@@ -199,7 +199,7 @@ func (r *Result) ScanSlice(results any) error {
 }
 
 // All : this will map all the records from sql to a slice of struct.
-func (r *Result) All(results any) error {
+func (r *Rows) All(results any) error {
 	defer r.Close()
 	if r.err != nil {
 		return r.err
@@ -254,7 +254,7 @@ func (r *Result) All(results any) error {
 }
 
 // Error :
-func (r *Result) Error() error {
+func (r *Rows) Error() error {
 	if r.rows != nil {
 		defer r.rows.Close()
 	}
@@ -262,17 +262,17 @@ func (r *Result) Error() error {
 }
 
 // Next :
-func (r *Result) Next() bool {
+func (r *Rows) Next() bool {
 	return r.rows.Next()
 }
 
 // NextResultSet :
-func (r *Result) NextResultSet() bool {
+func (r *Rows) NextResultSet() bool {
 	return r.rows.NextResultSet()
 }
 
 // Close :
-func (r *Result) Close() error {
+func (r *Rows) Close() error {
 	if r.rows != nil {
 		return r.rows.Close()
 	}

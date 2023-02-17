@@ -62,7 +62,7 @@ func (tb *Table) Find(
 	ctx context.Context,
 	act actions.SelectStatement,
 	opts ...*options.FindOptions,
-) (*Result, error) {
+) (*Rows, error) {
 	x := new(actions.FindActions)
 	if act != nil {
 		*x = *(act.(*actions.FindActions))
@@ -101,14 +101,14 @@ func find(
 	logger db.Logger,
 	act *actions.FindActions,
 	opt *options.FindOptions,
-) *Result {
+) *Rows {
 	if act.Database == "" {
 		act.Database = dbName
 	}
 	if act.Table == "" {
 		act.Table = tbName
 	}
-	rslt := new(Result)
+	rslt := new(Rows)
 	rslt.ctx = sqlx.Context(act.Database, act.Table)
 	rslt.cache = cache
 	rslt.dialect = dialect
