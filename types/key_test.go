@@ -183,6 +183,11 @@ func TestKey(t *testing.T) {
 		require.NoError(it, err)
 		require.Equal(it, bsontype.String, a)
 
+		k := new(Key)
+		pt, _, err := k.MarshalBSONValue()
+		require.NoError(it, err)
+		require.Equal(it, bsontype.Null, pt)
+
 		err = pk.UnmarshalBSONValue(a, b)
 		require.NoError(it, err)
 	})
@@ -280,6 +285,14 @@ func TestKey(t *testing.T) {
 		err = json.Unmarshal([]byte(`null`), k3)
 		require.NoError(it, err)
 		require.Equal(it, &Key{}, k3)
+
+		k = new(Key)
+		err = json.Unmarshal([]byte(`unknown`), k)
+		require.Error(it, err)
+
+		k = new(Key)
+		err = json.Unmarshal([]byte(""), k)
+		require.Error(it, err)
 	})
 
 	t.Run("sql.Scanner", func(t *testing.T) {
@@ -395,6 +408,18 @@ func TestKey(t *testing.T) {
 		require.Panics(it, func() {
 			nilKey.Encode()
 		})
+	})
+
+	t.Run("keyToGobKey", func(t *testing.T) {
+		var k *Key
+		gk := keyToGobKey(k)
+		require.Nil(t, gk)
+	})
+
+	t.Run("gobKeyToKey", func(t *testing.T) {
+		var gk *gobKey
+		k := gobKeyToKey(gk)
+		require.Nil(t, k)
 	})
 
 	nk := NewNameKey("Name", nil)

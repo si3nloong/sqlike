@@ -601,7 +601,6 @@ const (
 
 // NewIDKey :
 func NewIDKey(kind string, parent *Key) *Key {
-	rand.Seed(time.Now().UnixNano())
 	strID := strconv.FormatInt(time.Now().Unix(), 10) + strconv.FormatInt(rand.Int63n(maxSeed-minSeed)+minSeed, 10)
 	id, err := strconv.ParseInt(strID, 10, 64)
 	if err != nil {
