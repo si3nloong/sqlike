@@ -62,7 +62,7 @@ func TestHasTable(t *testing.T) {
 	defer sqlstmt.ReleaseStmt(stmt)
 
 	ms.HasTable(stmt, "db", "table")
-	require.Equal(t, "SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;", stmt.String())
+	require.Equal(t, "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;", stmt.String())
 	require.ElementsMatch(t, []any{"db", "table"}, stmt.Args())
 
 }

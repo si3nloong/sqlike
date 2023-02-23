@@ -10,8 +10,7 @@ import (
 
 // HasIndexByName :
 func (s *mySQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
-	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`)
-	stmt.AppendArgs(dbName, table, indexName)
+	stmt.AppendArgs(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`, dbName, table, indexName)
 }
 
 // HasIndex :
@@ -44,15 +43,13 @@ func (s *mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) {
 	}
 	stmt.WriteString(`) GROUP BY INDEX_NAME`)
 	stmt.WriteString(") AS temp WHERE temp.c = ?")
-	stmt.WriteByte(';')
 	args = append(args, int64(len(idx.Columns)))
-	stmt.AppendArgs(args...)
+	stmt.AppendArgs(";", args...)
 }
 
 // GetIndexes :
 func (s *mySQL) GetIndexes(stmt db.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs(dbName, table)
+	stmt.AppendArgs(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`, dbName, table)
 }
 
 // CreateIndexes :

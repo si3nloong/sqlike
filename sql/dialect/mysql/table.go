@@ -16,8 +16,7 @@ import (
 func (ms *mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
-	stmt.WriteByte(';')
-	stmt.AppendArgs(db, table)
+	stmt.AppendArgs(`;`, db, table)
 }
 
 // RenameTable :
@@ -49,8 +48,7 @@ func (ms mySQL) TruncateTable(stmt db.Stmt, db, table string) {
 
 // HasTable :
 func (ms mySQL) HasTable(stmt db.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs(dbName, table)
+	stmt.AppendArgs("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;", dbName, table)
 }
 
 // CreateTable :
@@ -104,7 +102,7 @@ func (ms mySQL) CreateTable(
 		ms.buildSchemaByColumn(stmt, col)
 
 		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
-		if _, ok := tag.Option("unique_index"); ok {
+		if _, ok := tag.Option("unique"); ok {
 			stmt.WriteString(`,UNIQUE INDEX ` + idx.GetName() + ` (` + ms.Quote(f.Name()) + `)`)
 		}
 
@@ -225,11 +223,10 @@ func (ms *mySQL) AlterTable(
 			if len(paths) < 2 {
 				panic(fmt.Sprintf("invalid foreign key value %q", v))
 			}
-			stmt.WriteString("ADD FOREIGN KEY (`" + f.Name() + "`) REFERENCES ")
-			stmt.WriteString("`" + paths[0] + "`(`" + paths[1] + "`),")
+			stmt.WriteString("ADD FOREIGN KEY (`" + f.Name() + "`) REFERENCES `" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
-		_, ok1 := tag.Option("unique_index")
+		_, ok1 := tag.Option("unique")
 		_, ok2 := tag.Option("auto_increment")
 		if ok1 || ok2 {
 			idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}

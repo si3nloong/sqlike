@@ -11,11 +11,15 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
+type SqlDriver interface {
+	Var(i int) string
+}
+
 // SQL dialect which implement interfaces
 type Dialect interface {
 	Codecer
+	SqlDriver
 	TableName(db, table string) string
-	Var(i int) string
 	Quote(n string) string
 	Format(v any) (val string)
 	Connect(opt *options.ConnectOptions) (connStr string)

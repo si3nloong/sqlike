@@ -1,13 +1,10 @@
 package mysql
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/internal/spatial"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -20,9 +17,8 @@ func (ms *mySQL) InsertInto(
 	v reflect.Value,
 	opt *options.InsertOptions,
 ) (err error) {
-	records := v.Len()
+	noOfRecords := v.Len()
 
-	ctx := sql.Context(dbName, table)
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
@@ -55,17 +51,18 @@ func (ms *mySQL) InsertInto(
 
 		i++
 	}
-	stmt.WriteString(") VALUES ")
+	stmt.WriteString(`) VALUES `)
 
 	length := len(fields)
 	encoders := make([]db.ValueEncoder, length)
-	for i := 0; i < records; i++ {
+	for i := 0; i < noOfRecords; i++ {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
-		stmt.WriteByte('(')
-		vi := reflext.Indirect(v.Index(i))
 
+		vi := reflext.Indirect(v.Index(i))
+		stmt.WriteByte('(')
+		// marshal records and construct `VALUES` statement
 		for j, f := range fields {
 			if j > 0 {
 				stmt.WriteByte(',')
@@ -76,32 +73,27 @@ func (ms *mySQL) InsertInto(
 
 			// first record only find encoders
 			if i == 0 {
-				// encoders[j], err = findEncoder(cdc, f, fv)
 				encoders[j], err = ms.LookupEncoder(fv)
 				if err != nil {
 					return err
 				}
 			}
 
-			ctx.SetField(f)
-			val, err := encoders[j](ctx, fv)
+			query, args, err := encoders[j](ms, fv, f.Tag().Opts())
 			if err != nil {
 				return err
 			}
-
-			stmt.WriteByte('?')
-			stmt.AppendArgs(val)
-			// convertSpatial(stmt, val)
+			stmt.AppendArgs(query, args...)
 		}
 		stmt.WriteByte(')')
 	}
 
-	var (
-		column string
-		name   string
-	)
 	if opt.Mode == options.InsertOnDuplicate {
-		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
+		var (
+			column string
+			name   string
+		)
+		stmt.WriteString(` ON DUPLICATE KEY UPDATE `)
 		next := false
 		for _, f := range fields {
 			name = f.Name()
@@ -129,42 +121,10 @@ func (ms *mySQL) InsertInto(
 			}
 
 			column = ms.Quote(name)
-			stmt.WriteString(column + "=VALUES(" + column + ")")
+			stmt.WriteString(column + `=VALUES(` + column + `)`)
 			next = true
 		}
 	}
 	stmt.WriteByte(';')
 	return
-}
-
-func convertSpatial(stmt db.Stmt, val any) {
-	switch vi := val.(type) {
-	case spatial.Geometry:
-		switch vi.Type {
-		case spatial.Point:
-			stmt.WriteString("ST_PointFromText")
-		case spatial.LineString:
-			stmt.WriteString("ST_LineStringFromText")
-		case spatial.Polygon:
-			stmt.WriteString("ST_PolygonFromText")
-		case spatial.MultiPoint:
-			stmt.WriteString("ST_MultiPointFromText")
-		case spatial.MultiLineString:
-			stmt.WriteString("ST_MultiLineStringFromText")
-		case spatial.MultiPolygon:
-			stmt.WriteString("ST_MultiPolygonFromText")
-		default:
-		}
-
-		stmt.WriteString("(?")
-		if vi.SRID > 0 {
-			stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
-		}
-		stmt.WriteByte(')')
-		stmt.AppendArgs(vi.WKT)
-
-	default:
-		stmt.WriteByte('?')
-		stmt.AppendArgs(val)
-	}
 }

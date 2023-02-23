@@ -45,7 +45,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		{
 			pk := columnMap["$Key"]
-			require.Equal(t, "VARCHAR(36)", pk.Type)
+			require.Equal(t, "BINARY(16)", pk.Type)
 			require.Equal(t, "$Key", pk.Name)
 			require.Equal(t, "Primary key", pk.Comment)
 		}
@@ -202,7 +202,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		})
 	}
 
-	t.Run("Ensure data type are matching", func(t *testing.T) {
+	t.Run(`MustUnsafeMigrate with multiple tag`, func(t *testing.T) {
 		table := db.Table("test")
 		defer table.DropIfExists(ctx)
 		table.MustUnsafeMigrate(ctx, struct {
@@ -216,12 +216,13 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		expectedCols := []struct {
 			name     string
 			pos      int
+			colType  string
 			dataType string
 			nullable bool
 		}{
-			{name: "ID", pos: 1, dataType: "varchar"},
-			{name: "n", pos: 2, dataType: "varchar"},
-			{name: "ts", pos: 3, dataType: "datetime"},
+			{name: "ID", pos: 1, colType: "binary(16)", dataType: "binary"},
+			{name: "n", pos: 2, colType: "varchar(191)", dataType: "varchar"},
+			{name: "ts", pos: 3, colType: "datetime", dataType: "datetime"},
 		}
 
 		for i, col := range cols {
@@ -229,6 +230,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			require.Equal(t, expectedCols[i].pos, col.Position)
 			require.Equal(t, expectedCols[i].nullable, bool(col.IsNullable))
 			require.True(t, strings.EqualFold(expectedCols[i].dataType, col.DataType))
+			// require.True(t, strings.EqualFold(expectedCols[i].colType, col.Type))
 		}
 	})
 }

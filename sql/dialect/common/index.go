@@ -10,8 +10,7 @@ import (
 
 // HasIndexByName :
 func (s *commonSQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
-	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2 AND INDEX_NAME = $3;`)
-	stmt.AppendArgs(dbName, table, indexName)
+	stmt.AppendArgs(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2 AND INDEX_NAME = $3;`, dbName, table, indexName)
 }
 
 // HasIndex :
@@ -30,13 +29,10 @@ func (s *commonSQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) 
 	args := []any{dbName, table, idxType, nonUnique}
 	stmt.WriteString("SELECT COUNT(1) FROM (")
 	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c FROM INFORMATION_SCHEMA.STATISTICS ")
-	stmt.WriteString("WHERE TABLE_SCHEMA = ")
-	s.Var(stmt.Pos())
-	stmt.WriteString("AND TABLE_NAME = ? ")
+	stmt.WriteString(`WHERE TABLE_SCHEMA = ` + s.Var(stmt.Pos()+1) + ` AND TABLE_NAME = ? `)
 	stmt.WriteString("AND INDEX_TYPE = ? ")
 	stmt.WriteString("AND NON_UNIQUE = ? ")
-	stmt.WriteString("AND COLUMN_NAME IN ")
-	stmt.WriteByte('(')
+	stmt.WriteString(`AND COLUMN_NAME IN (`)
 	for i, col := range idx.Columns {
 		if i > 0 {
 			stmt.WriteByte(',')
@@ -44,18 +40,13 @@ func (s *commonSQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) 
 		stmt.WriteByte('?')
 		args = append(args, col.Name)
 	}
-	stmt.WriteByte(')')
-	stmt.WriteString(" GROUP BY INDEX_NAME")
-	stmt.WriteString(") AS temp WHERE temp.c = ?")
-	stmt.WriteByte(';')
 	args = append(args, int64(len(idx.Columns)))
-	stmt.AppendArgs(args...)
+	stmt.AppendArgs(`) GROUP BY INDEX_NAME) AS tmp WHERE tmp.c = ?;`, args...)
 }
 
 // GetIndexes :
 func (s *commonSQL) GetIndexes(stmt db.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs(dbName, table)
+	stmt.AppendArgs(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`, dbName, table)
 }
 
 // CreateIndexes :

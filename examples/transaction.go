@@ -35,7 +35,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	)
 
 	// Commit Transaction
-	{
+	t.Run("Commit Transaction", func(t *testing.T) {
 		uid, _ = uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
@@ -48,7 +48,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		ns.UpdatedAt = now
 		tx, err = db.BeginTransaction(ctx)
 		require.NoError(t, err)
-		result, err = db.Table("NormalStruct").InsertOne(tx, &ns)
+		result, err = db.Table("NormalStruct").InsertOne(tx, &ns, options.InsertOne().SetDebug(true))
 		require.NoError(t, err)
 		affected, err = result.RowsAffected()
 		require.NoError(t, err)
@@ -56,10 +56,10 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 		err = tx.Commit()
 		require.NoError(t, err)
-	}
+	})
 
 	// Abort Transaction
-	{
+	t.Run("Abort Transaction", func(t *testing.T) {
 		uid, _ = uuid.Parse(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
@@ -90,78 +90,78 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				),
 		).Decode(&ns)
 		require.Equal(t, sql.ErrNoRows, err)
-	}
+	})
 
 	// RunInTransaction
-	{
-		err = db.RunInTransaction(ctx,
-			func(sess context.Context) error {
-				uid, _ = uuid.Parse(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
-				now := time.Now()
+	t.Run("RunInTransaction", func(t *testing.T) {
+		err = db.RunInTransaction(ctx, func(sess context.Context) error {
+			table := db.Table("NormalStruct")
+			uid, _ = uuid.Parse(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
+			now := time.Now()
 
-				ns = normalStruct{}
-				ns.ID = uid
-				ns.Date = civil.DateOf(now)
-				ns.DateTime = now
-				ns.Timestamp = now
-				ns.CreatedAt = now
-				ns.UpdatedAt = now
-				result, err := db.Table("NormalStruct").InsertOne(sess, &ns)
-				if err != nil {
-					return err
-				}
+			ns = normalStruct{}
+			ns.ID = uid
+			ns.Date = civil.DateOf(now)
+			ns.DateTime = now
+			ns.Timestamp = now
+			ns.CreatedAt = now
+			ns.UpdatedAt = now
 
-				ns.Int = 888
-				if _, err := db.Table("NormalStruct").
-					UpdateOne(
-						sess,
-						actions.UpdateOne().
-							Where(
-								expr.Equal("$Key", ns.ID),
-							).
-							Set(
-								expr.ColumnValue("Int", ns.Int),
-							),
-					); err != nil {
-					return err
-				}
+			result, err := table.InsertOne(sess, &ns)
+			if err != nil {
+				return err
+			}
 
-				affected, err := result.RowsAffected()
-				if err != nil {
-					return err
-				}
-				if affected < 1 {
-					return errors.New("no result affected")
-				}
-				return nil
-			})
+			ns.Int = 888
+			if _, err := table.UpdateOne(
+				sess,
+				actions.UpdateOne().
+					Where(
+						expr.Equal("$Key", ns.ID),
+					).
+					Set(
+						expr.ColumnValue("Int", ns.Int),
+					),
+			); err != nil {
+				return err
+			}
+
+			affected, err := result.RowsAffected()
+			if err != nil {
+				return err
+			}
+			if affected < 1 {
+				return errors.New("no result affected")
+			}
+			return nil
+		})
 		require.NoError(t, err)
-	}
+	})
 
 	// Timeout transaction
-	{
+	t.Run("RunInTransaction with timeout", func(t *testing.T) {
 		uid, _ = uuid.Parse(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
 		now := time.Now()
-		err = db.RunInTransaction(
-			ctx, func(sess context.Context) error {
-				ns = normalStruct{}
-				ns.ID = uid
-				ns.Date = civil.DateOf(now)
-				ns.DateTime = now
-				ns.Timestamp = now
-				ns.CreatedAt = now
-				ns.UpdatedAt = now
-				_, err := db.Table("NormalStruct").
-					InsertOne(
-						sess,
-						&ns, options.InsertOne().SetDebug(true),
-					)
-				if err != nil {
-					return err
-				}
-				time.Sleep(5 * time.Second)
-				return nil
-			}, options.Transaction().SetTimeOut(3*time.Second))
+		err = db.RunInTransaction(ctx, func(sess context.Context) error {
+			ns = normalStruct{}
+			ns.ID = uid
+			ns.Date = civil.DateOf(now)
+			ns.DateTime = now
+			ns.Timestamp = now
+			ns.CreatedAt = now
+			ns.UpdatedAt = now
+			_, err := db.Table("NormalStruct").
+				InsertOne(
+					sess,
+					&ns,
+					options.InsertOne().SetDebug(true),
+				)
+			if err != nil {
+				return err
+			}
+			time.Sleep(3 * time.Second)
+			return nil
+		}, options.Transaction().SetTimeOut(2*time.Second))
 		require.Equal(t, sql.ErrTxDone, err)
 
 		rslt := normalStruct{}
@@ -173,12 +173,12 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				),
 			options.FindOne().SetDebug(true),
 		).Decode(&rslt)
-		require.Error(t, err)
+		require.True(t, errors.Is(err, sql.ErrNoRows))
 		require.Equal(t, normalStruct{}, rslt)
-	}
+	})
 
 	// Lock record using transaction
-	{
+	t.Run("RunInTransaction with lock", func(t *testing.T) {
 		err = db.RunInTransaction(
 			ctx, func(sess context.Context) error {
 				nss := []normalStruct{}
@@ -199,7 +199,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				return nil
 			})
 		require.NoError(t, err)
-	}
+	})
 
 	err = db.Table("UserAddress").DropIfExists(ctx)
 	require.NoError(t, err)
@@ -212,9 +212,12 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	table.MustMigrate(ctx, new(user))
 
 	// Commit Transaction
-	{
+	t.Run("BeginTransaction with different context", func(t *testing.T) {
 		data := &user{ID: rand.Intn(10000), Name: "Oska"}
-		tx, _ := db.BeginTransaction(ctx)
+		tx, err := db.BeginTransaction(ctx)
+		require.NoError(t, err)
+		defer tx.Rollback()
+
 		_, err = db.Table("user").InsertOne(tx, data)
 		require.NoError(t, err)
 
@@ -251,10 +254,10 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		// Remove tested data
 		err = db.Table("user").DestroyOne(ctx, data)
 		require.NoError(t, err)
-	}
+	})
 
 	// Rollback Transaction
-	{
+	t.Run("Rollback Transaction", func(t *testing.T) {
 		data := &user{ID: 1234, Name: "Oska"}
 		tx, _ := db.BeginTransaction(ctx)
 		_, err = db.Table("user").InsertOne(tx, data)
@@ -289,10 +292,10 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 				),
 		).Decode(&user{})
 		require.Error(t, err)
-	}
+	})
 
 	// Nested transaction
-	{
+	t.Run("BeginTransaction with nested transactions", func(t *testing.T) {
 		// valid transaction
 		tx1, err := db.BeginTransaction(context.TODO())
 		require.NoError(t, err)
@@ -304,8 +307,10 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 		require.Nil(t, tx2)
 
 		// no matter how many level the context wrap with other context, it will still consider as nested transaction
-		tx2, err = db.BeginTransaction(context.WithValue(context.WithValue(tx1, "key", "lv2"), "key", "lv1"))
+		ctx := context.WithValue(tx1, "key", "lv2")
+		ctx = context.WithValue(ctx, "key", "lv1")
+		tx2, err = db.BeginTransaction(ctx)
 		require.Error(t, err)
 		require.Nil(t, tx2)
-	}
+	})
 }

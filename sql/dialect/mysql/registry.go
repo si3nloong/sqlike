@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/internal/spatial"
@@ -19,18 +20,19 @@ func buildDefaultRegistry() db.Codecer {
 	rg := codec.NewRegistry()
 	dec := DefaultDecoders{rg}
 	enc := DefaultEncoders{rg}
+
+	rg.RegisterTypeCodec(reflect.TypeOf(uuid.UUID{}), enc.EncodeUUID, dec.DecodeUUID)
 	rg.RegisterTypeCodec(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
 	rg.RegisterTypeCodec(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
 	rg.RegisterTypeCodec(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
 	rg.RegisterTypeCodec(reflect.TypeOf(civil.Time{}), enc.EncodeStringer, dec.DecodeTime)
 	rg.RegisterTypeCodec(reflect.TypeOf(civil.Date{}), enc.EncodeStringer, dec.DecodeDate)
 	rg.RegisterTypeCodec(reflect.TypeOf(time.Time{}), enc.EncodeDateTime, dec.DecodeDateTime)
-	// rg.RegisterTypeCodec(reflect.TypeOf(time.Location{}), enc.EncodeTime, dec.DecodeTime)
 	rg.RegisterTypeCodec(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
-	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJsonRaw, dec.DecodeJsonRaw)
 	rg.RegisterTypeCodec(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
 	rg.RegisterTypeCodec(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString), dec.DecodeLineString)
-	// rg.RegisterTypeCodec(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon), dec.DecodePolygon)
+	// rg.RegisterTypeCodec(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial2(spatial.Polygon), dec.DecodePolygon)
 	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint), dec.DecodeMultiPoint)
 	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiLineString{}), enc.EncodeSpatial(spatial.MultiLineString), dec.DecodeMultiLineString)
 	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPolygon{}), enc.EncodeSpatial(spatial.MultiPolygon), dec.DecodeMultiPolygon)

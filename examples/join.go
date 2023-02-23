@@ -48,7 +48,15 @@ func JoinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	t.Run("InnerJoin", func(t *testing.T) {
 		result, err := db.QueryStmt(ctx, sql.
-			Select().
+			Select(
+				expr.Pair("u", "ID"),
+				expr.Pair("u", "Name"),
+				expr.Pair("u", "Age"),
+				expr.Pair("u", "Status"),
+				expr.Pair("u", "CreatedAt"),
+				expr.As(expr.Pair("ua", "ID"), "UserAddressID"),
+				expr.Pair("ua", "UserID"),
+			).
 			From(expr.As(expr.Pair("sqlike", "User"), "u")).
 			InnerJoin(
 				expr.As(expr.Pair("sqlike", "UserAddress"), "ua"),

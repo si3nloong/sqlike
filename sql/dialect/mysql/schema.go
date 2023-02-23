@@ -77,13 +77,10 @@ func (s mySQLSchema) ByteDataType(sf reflext.FieldInfo) *sql.Column {
 
 func (s mySQLSchema) UUIDDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
-	charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
 	col.Name = sf.Name()
-	col.DataType = "VARCHAR"
-	col.Type = "VARCHAR(36)"
-	col.Size = 36
-	col.Charset = &charset
-	col.Collation = &collation
+	col.DataType = "BINARY"
+	col.Type = "BINARY(16)"
+	col.Size = 16
 	col.Nullable = sf.IsNullable()
 	return col
 }
@@ -108,6 +105,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "TIME"
+	col.Size = 6
 	col.Type = "TIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
 	// col.DefaultValue = &dflt

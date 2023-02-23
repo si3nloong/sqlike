@@ -38,13 +38,7 @@ func (sm *Statement) Args() []any {
 }
 
 // AppendArgs :
-func (sm *Statement) AppendArgs(args ...any) {
-	sm.args = append(sm.args, args...)
-	sm.c = len(sm.args)
-}
-
-// WriteAppendArgs :
-func (sm *Statement) WriteAppendArgs(query string, args ...any) {
+func (sm *Statement) AppendArgs(query string, args ...any) {
 	sm.Builder.WriteString(query)
 	sm.args = append(sm.args, args...)
 	sm.c = len(sm.args)
@@ -73,8 +67,7 @@ func (sm *Statement) Format(state fmt.State, verb rune) {
 			state.Write([]byte(str))
 			break
 		}
-		state.Write([]byte(str[:idx]))
-		state.Write([]byte(sm.fmt.Format(args[0])))
+		state.Write([]byte(str[:idx] + sm.fmt.Format(args[0])))
 		str = str[idx+1:]
 		args = args[1:]
 		i++

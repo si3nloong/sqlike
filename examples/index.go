@@ -31,7 +31,7 @@ func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	}
 
 	// Create one index
-	{
+	t.Run("Create single index", func(t *testing.T) {
 		idx := table.Indexes()
 		err = idx.CreateOne(
 			ctx,
@@ -41,8 +41,8 @@ func IndexExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.NoError(t, err)
 		idxs, err = idx.List(ctx)
 		require.NoError(t, err)
-		require.True(t, len(idxs) > 1)
-	}
+		require.Equal(t, 1, len(idxs))
+	})
 
 	// Auto build indexes using yaml file
 	{

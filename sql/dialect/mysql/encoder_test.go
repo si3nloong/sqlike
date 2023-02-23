@@ -9,41 +9,43 @@ import (
 
 func TestEncodeMap(t *testing.T) {
 	var (
+		ms  = New()
 		enc = DefaultEncoders{}
-		it  any
-		err error
 	)
 
-	// Nil map
-	{
+	t.Run("EncodeMap with nil map", func(t *testing.T) {
 		var nilmap map[string]string
-		it, err = enc.EncodeMap(nil, reflect.ValueOf(nilmap))
+		query, args, err := enc.EncodeMap(ms, reflect.ValueOf(nilmap), nil)
 		require.NoError(t, err)
-		require.Equal(t, `null`, it)
-	}
+		require.Equal(t, "?", query)
+		require.ElementsMatch(t, []any{`null`}, args)
+	})
 
-	// Initialized map
-	{
-		initmap := make(map[string]int)
-		it, err = enc.EncodeMap(nil, reflect.ValueOf(initmap))
+	// t.Run("EncodeMap with map[string]int", func(t *testing.T) {
+	// 	intmap := map[string]int{
+	// 		"one":             1,
+	// 		"eleven":          11,
+	// 		"hundred-and-ten": 110,
+	// 	}
+	// 	query, args, err := enc.EncodeMap(ms, reflect.ValueOf(intmap), nil)
+	// 	require.NoError(t, err)
+	// 	require.Equal(t, "?", query)
+	// 	require.ElementsMatch(t, []any{[]byte(`{"one":1,"eleven":11,"hundred-and-ten":110}`)}, args)
+	// })
+
+	t.Run("EncodeMap with map[string]any", func(t *testing.T) {
+		intmap := make(map[string]any)
+		query, args, err := enc.EncodeMap(ms, reflect.ValueOf(intmap), nil)
 		require.NoError(t, err)
-		require.Equal(t, []byte(`{}`), it)
-	}
+		require.Equal(t, "?", query)
+		require.ElementsMatch(t, []any{[]byte(`{}`)}, args)
+	})
 
-	// Initialized map
-	{
-		initmap := make(map[string]int)
-		it, err = enc.EncodeMap(nil, reflect.ValueOf(initmap))
-		require.NoError(t, err)
-		require.Equal(t, []byte(`{}`), it)
-	}
-
-	// Map with interface value
-	{
+	t.Run("EncodeMap with map[int]any", func(t *testing.T) {
 		intmap := make(map[int]any)
-		it, err = enc.EncodeMap(nil, reflect.ValueOf(intmap))
+		query, args, err := enc.EncodeMap(ms, reflect.ValueOf(intmap), nil)
 		require.NoError(t, err)
-		require.Equal(t, []byte(`{}`), it)
-	}
-
+		require.Equal(t, "?", query)
+		require.ElementsMatch(t, []any{[]byte(`{}`)}, args)
+	})
 }

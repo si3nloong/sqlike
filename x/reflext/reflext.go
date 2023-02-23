@@ -56,6 +56,9 @@ type FieldTag interface {
 	// Look up option using key
 	Option(key string) (val string, exists bool)
 
+	// Returns all options
+	Opts() map[string]string
+
 	// Look up tag value using key
 	LookUp(key string) (val string, exists bool)
 
@@ -86,6 +89,10 @@ func (st StructTag) Option(key string) (val string, exist bool) {
 	}
 	val, exist = st.opts[key]
 	return
+}
+
+func (st StructTag) Opts() map[string]string {
+	return st.opts
 }
 
 func (st StructTag) Get(key string) string {

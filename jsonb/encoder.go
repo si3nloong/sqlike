@@ -38,8 +38,8 @@ func (enc DefaultEncoder) EncodeStringer(w *Writer, v reflect.Value) error {
 	return nil
 }
 
-// EncodeJSONRaw :
-func (enc DefaultEncoder) EncodeJSONRaw(w *Writer, v reflect.Value) error {
+// EncodeJsonRaw :
+func (enc DefaultEncoder) EncodeJsonRaw(w *Writer, v reflect.Value) error {
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil

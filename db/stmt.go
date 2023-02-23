@@ -12,8 +12,7 @@ type Stmt interface {
 	fmt.Stringer
 	Pos() int
 	Args() []any
-	AppendArgs(args ...any)
-	WriteAppendArgs(query string, args ...any)
+	AppendArgs(query string, args ...any)
 	Reset()
 	StartTimer()
 	StopTimer()

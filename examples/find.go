@@ -213,7 +213,8 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			ctx,
 			actions.FindOne().
 				Select(
-					"$Key", "Emoji", "CustomStrType", "Bool",
+					expr.Func("BIN_TO_UUID", expr.Column("$Key")),
+					"Emoji", "CustomStrType", "Bool",
 					"JSONRaw", "Map", "Language",
 				).
 				Where(

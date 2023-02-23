@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"context"
 	"errors"
 	"reflect"
 	"strconv"
@@ -166,8 +165,7 @@ func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it any) error {
 	}
 	v := reflext.ValueOf(x.Value)
 	if !v.IsValid() {
-		stmt.WriteByte('?')
-		stmt.AppendArgs(nil)
+		stmt.AppendArgs("?", nil)
 		return nil
 	}
 
@@ -179,22 +177,23 @@ func (b *mySQLBuilder) BuildLike(stmt db.Stmt, it any) error {
 		return nil
 	}
 
-	stmt.WriteByte('?')
 	encoder, err := b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
-	vv, err := encoder(nil, v)
+	query, args, err := encoder(b, v, nil)
 	if err != nil {
 		return err
 	}
-	switch vi := vv.(type) {
-	case string:
-		vv = escapeWildCard(vi)
-	case []byte:
-		vv = escapeWildCard(string(vi))
+	for i := range args {
+		switch vi := args[i].(type) {
+		case string:
+			args[i] = escapeWildCard(vi)
+		case []byte:
+			args[i] = escapeWildCard(string(vi))
+		}
 	}
-	stmt.AppendArgs(vv)
+	stmt.AppendArgs(query, args...)
 	return nil
 }
 
@@ -217,8 +216,7 @@ func (b *mySQLBuilder) BuildValue(stmt db.Stmt, it any) (err error) {
 	x := it.(primitive.Value)
 	v := reflext.ValueOf(x.Raw)
 	if !v.IsValid() {
-		stmt.WriteByte('?')
-		stmt.AppendArgs(nil)
+		stmt.AppendArgs(b.Var(stmt.Pos()+1), nil)
 		return
 	}
 
@@ -226,13 +224,11 @@ func (b *mySQLBuilder) BuildValue(stmt db.Stmt, it any) (err error) {
 	if err != nil {
 		return err
 	}
-	vv, err := encoder(nil, v)
+	query, args, err := encoder(b, v, nil)
 	if err != nil {
 		return err
 	}
-	convertSpatial(stmt, vv)
-	// stmt.WriteRune('?')
-	// stmt.AppendArgs(vv)
+	stmt.AppendArgs(query, args...)
 	return nil
 }
 
@@ -288,9 +284,9 @@ func (b *mySQLBuilder) BuildNil(stmt db.Stmt, it any) error {
 		return err
 	}
 	if x.IsNot {
-		stmt.WriteString(" IS NULL")
+		stmt.WriteString(` IS NULL`)
 	} else {
-		stmt.WriteString(" IS NOT NULL")
+		stmt.WriteString(` IS NOT NULL`)
 	}
 	return nil
 }
@@ -352,9 +348,7 @@ func (b *mySQLBuilder) BuildAggregate(stmt db.Stmt, it any) error {
 // BuildOperator :
 func (b *mySQLBuilder) BuildOperator(stmt db.Stmt, it any) error {
 	x := it.(primitive.Operator)
-	stmt.WriteByte(' ')
-	stmt.WriteString(operatorMap[x])
-	stmt.WriteByte(' ')
+	stmt.WriteString(" " + operatorMap[x] + " ")
 	return nil
 }
 
@@ -470,23 +464,22 @@ func (b *mySQLBuilder) BuildRange(stmt db.Stmt, it any) (err error) {
 	if err != nil {
 		return err
 	}
-	arg, err := encoder(nil, v)
+	query, args, err := encoder(b, v, nil)
 	if err != nil {
 		return err
 	}
-	stmt.AppendArgs(arg)
+	stmt.AppendArgs(query+` AND `, args...)
 
 	v = reflext.ValueOf(x.To)
 	encoder, err = b.registry.LookupEncoder(v)
 	if err != nil {
 		return err
 	}
-	arg, err = encoder(nil, v)
+	query, args, err = encoder(b, v, nil)
 	if err != nil {
 		return err
 	}
-	stmt.AppendArgs(arg)
-	stmt.WriteString("? AND ?")
+	stmt.AppendArgs(query, args...)
 	return
 }
 
@@ -506,47 +499,6 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it any) (err error) {
 	stmt.WriteString(" COLLATE " + x.Collate)
 	return
 }
-
-// // BuildTypeSafe :
-// func (b *mySQLBuilder) BuildTypeSafe(stmt db.Stmt, it any) (err error) {
-// 	ts := it.(primitive.TypeSafe)
-// 	switch ts.Type {
-// 	case reflect.String:
-// 		stmt.WriteString(strconv.Quote(ts.Value.(string)))
-// 	case reflect.Bool:
-// 		v := ts.Value.(bool)
-// 		if v {
-// 			stmt.WriteString("1")
-// 		} else {
-// 			stmt.WriteString("0")
-// 		}
-// 	case reflect.Int:
-// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int)), 10))
-// 	case reflect.Int8:
-// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int8)), 10))
-// 	case reflect.Int16:
-// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int16)), 10))
-// 	case reflect.Int32:
-// 		stmt.WriteString(strconv.FormatInt(int64(ts.Value.(int32)), 10))
-// 	case reflect.Int64:
-// 		stmt.WriteString(strconv.FormatInt(ts.Value.(int64), 10))
-// 	case reflect.Uint:
-// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint)), 10))
-// 	case reflect.Uint8:
-// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint8)), 10))
-// 	case reflect.Uint16:
-// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint16)), 10))
-// 	case reflect.Uint32:
-// 		stmt.WriteString(strconv.FormatUint(uint64(ts.Value.(uint32)), 10))
-// 	case reflect.Uint64:
-// 		stmt.WriteString(strconv.FormatUint(ts.Value.(uint64), 10))
-// 	case reflect.Float32:
-// 		stmt.WriteString(strconv.FormatFloat(float64(ts.Value.(float32)), 'e', -1, 64))
-// 	case reflect.Float64:
-// 		stmt.WriteString(strconv.FormatFloat(ts.Value.(float64), 'e', -1, 64))
-// 	}
-// 	return
-// }
 
 // BuildSelectStmt :
 func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {
@@ -678,8 +630,7 @@ func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it any) error {
 func (b *mySQLBuilder) getValue(stmt db.Stmt, it any) (err error) {
 	v := reflext.ValueOf(it)
 	if !v.IsValid() {
-		stmt.WriteByte('?')
-		stmt.AppendArgs(nil)
+		stmt.AppendArgs(b.Var(1), nil)
 		return
 	}
 
@@ -695,13 +646,11 @@ func (b *mySQLBuilder) getValue(stmt db.Stmt, it any) (err error) {
 	if err != nil {
 		return err
 	}
-	vv, err := encoder(context.TODO(), v)
+	query, args, err := encoder(b, v, nil)
 	if err != nil {
 		return err
 	}
-	stmt.WriteByte('?')
-	stmt.AppendArgs(vv)
-	// convertSpatial(stmt, vv)
+	stmt.AppendArgs(query, args...)
 	return
 }
 
@@ -828,8 +777,4 @@ func escapeWildCard(n string) string {
 	}
 	blr.WriteByte(n[length])
 	return blr.String()
-}
-
-func unmatchedDataType(callback string) error {
-	return errors.New("mysql: invalid data type")
 }

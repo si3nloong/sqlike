@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/v2/jsonb"
@@ -27,6 +28,27 @@ import (
 // DefaultDecoders :
 type DefaultDecoders struct {
 	codec *codec.Registry
+}
+
+func (dec DefaultDecoders) DecodeUUID(it any, v reflect.Value) (err error) {
+	data, ok := it.([]byte)
+	if !ok {
+		return errors.New("uuid must be []byte")
+	}
+	var (
+		val    uuid.UUID
+		length = len(data)
+	)
+	if length == 16 {
+		val, err = uuid.Parse(hex.EncodeToString(data))
+	} else {
+		val, err = uuid.ParseBytes(data)
+	}
+	if err != nil {
+		return
+	}
+	v.Set(reflect.ValueOf(val))
+	return nil
 }
 
 // DecodeByte :
@@ -136,7 +158,7 @@ func (dec DefaultDecoders) DecodeLanguage(it any, v reflect.Value) error {
 }
 
 // DecodeJSONRaw :
-func (dec DefaultDecoders) DecodeJSONRaw(it any, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeJsonRaw(it any, v reflect.Value) error {
 	b := new(bytes.Buffer)
 	switch vi := it.(type) {
 	case string:
@@ -304,7 +326,11 @@ func (dec DefaultDecoders) DecodePoint(it any, v reflect.Value) error {
 		return nil
 	}
 
-	return errors.New("incorrect point")
+	return errors.New(`sqlike: incorrect point`)
+}
+
+func DecodeGeometry[T orb.MultiPoint | orb.LineString | orb.MultiLineString](p T) {
+
 }
 
 // DecodeLineString :
@@ -540,22 +566,21 @@ func (dec DefaultDecoders) DecodeMap(it any, v reflect.Value) error {
 
 // date format :
 var (
-	DDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
-	DDMMYYYYHHMMSS   = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
-	DDMMYYYYHHMMSSTZ = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}\.\d+$`)
+	dateFormatDDMMYYYY         = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}$`)
+	dateFormatDDMMYYYYHHMMSS   = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}$`)
+	dateFormatDDMMYYYYHHMMSSTZ = regexp.MustCompile(`^\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}:\d{2}\.\d+$`)
 )
 
 // DecodeTime : this will decode time by using multiple format
-func decodeTime(str string) (t time.Time, err error) {
+func decodeTime(str string) (time.Time, error) {
 	switch {
-	case DDMMYYYY.MatchString(str):
-		t, err = time.Parse("2006-01-02", str)
-	case DDMMYYYYHHMMSS.MatchString(str):
-		t, err = time.Parse("2006-01-02 15:04:05", str)
-	case DDMMYYYYHHMMSSTZ.MatchString(str):
-		t, err = time.Parse("2006-01-02 15:04:05.999999", str)
+	case dateFormatDDMMYYYY.MatchString(str):
+		return time.Parse("2006-01-02", str)
+	case dateFormatDDMMYYYYHHMMSS.MatchString(str):
+		return time.Parse("2006-01-02 15:04:05", str)
+	case dateFormatDDMMYYYYHHMMSSTZ.MatchString(str):
+		return time.Parse("2006-01-02 15:04:05.999999", str)
 	default:
-		t, err = time.Parse(time.RFC3339Nano, str)
+		return time.Parse(time.RFC3339Nano, str)
 	}
-	return
 }

@@ -85,15 +85,3 @@ type Func struct {
 	Type function
 	Args []any
 }
-
-// Geometry :
-type Geometry struct {
-	Type Type
-	SRID uint
-	WKT  string
-}
-
-// Value :
-func (g Geometry) Value() (any, error) {
-	return g.WKT, nil
-}

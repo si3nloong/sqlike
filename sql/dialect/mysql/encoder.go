@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
+	"database/sql/driver"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -19,8 +19,6 @@ import (
 	"github.com/si3nloong/sqlike/v2/sql/codec"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 
-	sqlx "github.com/si3nloong/sqlike/v2/sql"
-
 	"github.com/si3nloong/sqlike/v2/jsonb"
 )
 
@@ -29,201 +27,239 @@ type DefaultEncoders struct {
 	codec *codec.Registry
 }
 
+func (enc DefaultEncoders) EncodeUUID(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	if v.IsZero() {
+		return `UUID_TO_BIN(UUID(),1)`, nil, nil
+	}
+	fName := `UUID_TO_BIN(` + d.Var(1) + `)`
+	switch vi := v.Interface().(type) {
+	case []byte:
+		return fName, []any{string(vi)}, nil
+	case string:
+		return fName, []any{vi}, nil
+	case fmt.Stringer:
+		return fName, []any{vi.String()}, nil
+	case driver.Valuer:
+		uuid, err := vi.Value()
+		if err != nil {
+			return "", nil, err
+		}
+		return fName, []any{uuid}, nil
+	default:
+		return "", nil, fmt.Errorf(`sqlike: invalid data type %v for UUID`, v.Type())
+	}
+}
+
+func (enc DefaultEncoders) EncodeTime(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	vi := v.Interface().(time.Time)
+	if vi.IsZero() {
+		fName := `CURRENT_TIMESTAMP`
+		size, ok := opts["size"]
+		if !ok {
+			return fName, nil, nil
+		}
+		n, _ := strconv.Atoi(size)
+		if n <= 0 {
+			return fName, nil, nil
+		}
+		return fName + "(" + size + ")", nil, nil
+	}
+	return d.Var(1), []any{vi.UTC()}, nil
+}
+
+// EncodeSpatial :
+func (enc DefaultEncoders) EncodeSpatial(t spatial.Type) db.ValueEncoder {
+	return func(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+		x := v.Interface().(orb.Geometry)
+		fName := "ST_PointFromText"
+		switch t {
+		case spatial.Point:
+			fName = "ST_PointFromText"
+		case spatial.LineString:
+			fName = "ST_LineStringFromText"
+		case spatial.Polygon:
+			fName = "ST_PolygonFromText"
+		case spatial.MultiPoint:
+			fName = "ST_MultiPointFromText"
+		case spatial.MultiLineString:
+			fName = "ST_MultiLineStringFromText"
+		case spatial.MultiPolygon:
+			fName = "ST_MultiPolygonFromText"
+		default:
+		}
+		fName = fName + "(" + d.Var(1)
+		if v, ok := opts["srid"]; ok {
+			if n, _ := strconv.Atoi(v); n > 0 {
+				fName = fName + "," + v
+			}
+		}
+		return fName + ")", []any{wkt.MarshalString(x)}, nil
+	}
+}
+
 // EncodeByte :
-func (enc DefaultEncoders) EncodeByte(_ context.Context, v reflect.Value) (any, error) {
-	b := v.Bytes()
+func (enc DefaultEncoders) EncodeByte(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	if v.IsNil() {
+		return d.Var(1), []any{nil}, nil
+	}
+	b := reflext.Indirect(v).Bytes()
 	if b == nil {
-		return make([]byte, 0), nil
+		return d.Var(1), []any{[]byte{}}, nil
 	}
 	x := base64.StdEncoding.EncodeToString(b)
-	return []byte(x), nil
+	return d.Var(1), []any{[]byte(x)}, nil
 }
 
 // EncodeRawBytes :
-func (enc DefaultEncoders) EncodeRawBytes(_ context.Context, v reflect.Value) (any, error) {
-	return sql.RawBytes(v.Bytes()), nil
+func (enc DefaultEncoders) EncodeRawBytes(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{sql.RawBytes(v.Bytes())}, nil
 }
 
-// EncodeJSONRaw :
-func (enc DefaultEncoders) EncodeJSONRaw(_ context.Context, v reflect.Value) (any, error) {
+// EncodeJsonRaw :
+func (enc DefaultEncoders) EncodeJsonRaw(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if v.IsNil() {
-		return []byte("null"), nil
+		return d.Var(1), []any{[]byte("null")}, nil
 	}
 	buf := new(bytes.Buffer)
 	if err := json.Compact(buf, v.Bytes()); err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	if buf.Len() == 0 {
-		return []byte(`{}`), nil
+		return d.Var(1), []any{[]byte(`{}`)}, nil
 	}
-	return json.RawMessage(buf.Bytes()), nil
+	return d.Var(1), []any{json.RawMessage(buf.Bytes())}, nil
 }
 
 // EncodeStringer :
-func (enc DefaultEncoders) EncodeStringer(_ context.Context, v reflect.Value) (any, error) {
-	x := v.Interface().(fmt.Stringer)
-	return x.String(), nil
+func (enc DefaultEncoders) EncodeStringer(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{v.Interface().(fmt.Stringer).String()}, nil
 }
 
-// EncodeTime :
-func (enc DefaultEncoders) EncodeDateTime(ctx context.Context, v reflect.Value) (any, error) {
-	x := v.Interface().(time.Time)
+func (enc DefaultEncoders) EncodeDateTime(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	vi := v.Interface().(time.Time)
 	// TODO:
 	// If `CURRENT_TIMESTAMP` is define, we will pass `nil` value
 	// elseif the datetime is zero, we will pass the current datetime of the machine
 	// else we will pass the value of it instead
 	//
 	// And we should handle the TIMESTAMP type as well
-	f := sqlx.GetField(ctx)
-	def, ok := f.Tag().LookUp("default")
-	if ok && strings.EqualFold(def, "CURRENT_TIMESTAMP") {
-		return nil, nil
-	} else if x.IsZero() {
-		x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
-		return x, nil
+	// f := sqlx.GetField(ctx)
+	// // def, _ := f.Tag().LookUp("default")
+	// v2, _ := f.Tag().Option("default")
+	// if strings.Contains(v2, "CURRENT_TIMESTAMP") {
+	// 	return nil, nil
+	// } else if x.IsZero() {
+	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
+	// 	return x, nil
+	// }
+	if _, ok := opts["default"]; ok {
+		return "CURRENT_TIMESTAMP", []any{}, nil
 	}
 	// convert to UTC before storing into DB
-	return x.UTC(), nil
+	return d.Var(1), []any{vi.UTC()}, nil
 }
 
-// EncodeSpatial :
-func (enc DefaultEncoders) EncodeSpatial(st spatial.Type) db.ValueEncoder {
-	return func(ctx context.Context, v reflect.Value) (any, error) {
-		if reflext.IsZero(v) {
-			return nil, nil
-		}
-
-		f := sqlx.GetField(ctx)
-		x := v.Interface().(orb.Geometry)
-		// var srid uint
-		tag, ok := f.Tag().Option("srid")
-		if ok {
-			integer, _ := strconv.Atoi(tag)
-			if integer > 0 {
-				// srid = uint(integer)
-			}
-		}
-
-		// switch vi.Type {
-		// case spatial.Point:
-		// 	stmt.WriteString("ST_PointFromText")
-		// case spatial.LineString:
-		// 	stmt.WriteString("ST_LineStringFromText")
-		// case spatial.Polygon:
-		// 	stmt.WriteString("ST_PolygonFromText")
-		// case spatial.MultiPoint:
-		// 	stmt.WriteString("ST_MultiPointFromText")
-		// case spatial.MultiLineString:
-		// 	stmt.WriteString("ST_MultiLineStringFromText")
-		// case spatial.MultiPolygon:
-		// 	stmt.WriteString("ST_MultiPolygonFromText")
-		// default:
-		// }
-
-		// stmt.WriteString("(?")
-		// if vi.SRID > 0 {
-		// 	stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
-		// }
-		// stmt.WriteByte(')')
-		// stmt.AppendArgs(vi.WKT)
-		// log.Println(x)
-		return sql.RawBytes(`ST_PointFromText(` + wkt.MarshalString(x) + `)`), nil
-	}
-}
+// // EncodeTime :
+// func (enc DefaultEncoders) EncodeDateTime(ctx context.Context, v reflect.Value) (any, error) {
+// 	x := v.Interface().(time.Time)
+// 	// TODO:
+// 	// If `CURRENT_TIMESTAMP` is define, we will pass `nil` value
+// 	// elseif the datetime is zero, we will pass the current datetime of the machine
+// 	// else we will pass the value of it instead
+// 	//
+// 	// And we should handle the TIMESTAMP type as well
+// 	f := sqlx.GetField(ctx)
+// 	// def, _ := f.Tag().LookUp("default")
+// 	v2, _ := f.Tag().Option("default")
+// 	if strings.Contains(v2, "CURRENT_TIMESTAMP") {
+// 		return nil, nil
+// 	} else if x.IsZero() {
+// 		x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
+// 		return x, nil
+// 	}
+// 	// convert to UTC before storing into DB
+// 	return x.UTC(), nil
+// }
 
 // EncodeString :
-func (enc DefaultEncoders) EncodeString(ctx context.Context, v reflect.Value) (any, error) {
+func (enc DefaultEncoders) EncodeString(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	str := v.String()
-	f := sqlx.GetField(ctx)
 	if str == "" {
-		tag := f.Tag()
-		if val, ok := tag.Option("enum"); ok {
+		if val, ok := opts["enum"]; ok {
 			enums := strings.Split(val, "|")
 			if len(enums) > 0 {
-				return enums[0], nil
+				return d.Var(1), []any{enums[0]}, nil
 			}
 		}
 	}
-	return str, nil
+	return d.Var(1), []any{v.String()}, nil
 }
 
 // EncodeBool :
-func (enc DefaultEncoders) EncodeBool(_ context.Context, v reflect.Value) (any, error) {
-	return v.Bool(), nil
+func (enc DefaultEncoders) EncodeBool(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{v.Bool()}, nil
 }
 
 // EncodeInt :
-func (enc DefaultEncoders) EncodeInt(ctx context.Context, v reflect.Value) (any, error) {
-	f := sqlx.GetField(ctx)
-	if _, ok := f.Tag().Option("auto_increment"); ok {
-		return nil, nil
+func (enc DefaultEncoders) EncodeInt(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	if _, ok := opts["auto_increment"]; ok {
+		return d.Var(1), []any{nil}, nil
 	}
-	return v.Int(), nil
+	return d.Var(1), []any{v.Int()}, nil
 }
 
 // EncodeUint :
-func (enc DefaultEncoders) EncodeUint(ctx context.Context, v reflect.Value) (any, error) {
-	f := sqlx.GetField(ctx)
-	if _, ok := f.Tag().Option("auto_increment"); ok {
-		return nil, nil
+func (enc DefaultEncoders) EncodeUint(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	if _, ok := opts["auto_increment"]; ok {
+		return d.Var(1), []any{nil}, nil
 	}
-	return v.Uint(), nil
+	return d.Var(1), []any{v.Uint()}, nil
 }
 
 // EncodeFloat :
-func (enc DefaultEncoders) EncodeFloat(_ context.Context, v reflect.Value) (any, error) {
-	return v.Float(), nil
+func (enc DefaultEncoders) EncodeFloat(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{v.Float()}, nil
 }
 
 // EncodePtr :
-func (enc *DefaultEncoders) EncodePtr(ctx context.Context, v reflect.Value) (any, error) {
+func (enc *DefaultEncoders) EncodePtr(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if !v.IsValid() || v.IsNil() {
-		return nil, nil
+		return d.Var(1), []any{nil}, nil
 	}
 	v = v.Elem()
 	encoder, err := enc.codec.LookupEncoder(v)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
-	return encoder(ctx, v)
+	return encoder(d, v, opts)
 }
 
 // EncodeStruct :
-func (enc DefaultEncoders) EncodeStruct(_ context.Context, v reflect.Value) (any, error) {
-	return jsonb.Marshal(v)
+func (enc DefaultEncoders) EncodeStruct(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	b, err := jsonb.Marshal(v)
+	if err != nil {
+		return "", nil, err
+	}
+	return d.Var(1), []any{b}, nil
 }
 
 // EncodeArray :
-func (enc DefaultEncoders) EncodeArray(_ context.Context, v reflect.Value) (any, error) {
-	return jsonb.Marshal(v)
+func (enc DefaultEncoders) EncodeArray(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	b, err := jsonb.Marshal(v)
+	if err != nil {
+		return "", nil, err
+	}
+	return d.Var(1), []any{b}, nil
 }
 
 // EncodeMap :
-func (enc DefaultEncoders) EncodeMap(_ context.Context, v reflect.Value) (any, error) {
+func (enc DefaultEncoders) EncodeMap(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if v.IsNil() {
-		return string("null"), nil
+		return d.Var(1), []any{"null"}, nil
 	}
-	return jsonb.Marshal(v)
-}
-
-func isBaseType(t reflect.Type) bool {
-	for {
-		k := t.Kind()
-		switch k {
-		case reflect.String:
-			return true
-		case reflect.Bool:
-			return true
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			return true
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			return true
-		case reflect.Float32, reflect.Float64:
-			return true
-		case reflect.Ptr:
-			t = t.Elem()
-		default:
-			return false
-		}
+	b, err := jsonb.Marshal(v)
+	if err != nil {
+		return "", nil, err
 	}
+	return d.Var(1), []any{b}, nil
 }

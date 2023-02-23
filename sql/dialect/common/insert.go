@@ -5,7 +5,6 @@ import (
 
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/options"
-	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
@@ -20,7 +19,7 @@ func (s *commonSQL) InsertInto(
 ) (err error) {
 	records := v.Len()
 
-	ctx := sql.Context(dbName, table)
+	// ctx := sql.Context(dbName, table)
 	stmt.WriteString(`INSERT`)
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
@@ -81,14 +80,13 @@ func (s *commonSQL) InsertInto(
 				}
 			}
 
-			ctx.SetField(f)
-			val, err := encoders[j](ctx, fv)
-			if err != nil {
-				return err
-			}
+			// ctx.SetField(f)
+			// val, err := encoders[j](ctx, fv)
+			// if err != nil {
+			// 	return err
+			// }
 
-			stmt.WriteString(s.Var(stmt.Pos()))
-			stmt.AppendArgs(val)
+			// stmt.AppendArgs(s.Var(stmt.Pos()+1), val)
 		}
 		stmt.WriteByte(')')
 	}

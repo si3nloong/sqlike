@@ -1,7 +1,6 @@
 package codec
 
 import (
-	"context"
 	"database/sql"
 	"database/sql/driver"
 	"errors"
@@ -89,17 +88,22 @@ func (r *Registry) LookupEncoder(v reflect.Value) (db.ValueEncoder, error) {
 	)
 
 	if !v.IsValid() {
-		return NilEncoder, nil
+		return nilEncoder, nil
+	}
+
+	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		enc := r.kindEncoders[t.Kind()]
+		return enc, nil
+	}
+
+	enc, ok = r.typeEncoders[t]
+	if ok {
+		return enc, nil
 	}
 
 	if _, ok := v.Interface().(driver.Valuer); ok {
 		return encodeDriverValue, nil
-	}
-
-	t := v.Type()
-	enc, ok = r.typeEncoders[t]
-	if ok {
-		return enc, nil
 	}
 
 	enc, ok = r.kindEncoders[t.Kind()]
@@ -121,13 +125,13 @@ func (r *Registry) LookupDecoder(t reflect.Type) (db.ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
-	if ptrType.Implements(sqlScanner) {
-		return sqlScannerDecoder, nil
-	}
-
 	dec, ok = r.typeDecoders[t]
 	if ok {
 		return dec, nil
+	}
+
+	if ptrType.Implements(sqlScanner) {
+		return sqlScannerDecoder, nil
 	}
 
 	dec, ok = r.kindDecoders[t.Kind()]
@@ -137,20 +141,23 @@ func (r *Registry) LookupDecoder(t reflect.Type) (db.ValueDecoder, error) {
 	return nil, ErrNoDecoder{Type: t}
 }
 
-// NilEncoder :
-func NilEncoder(_ context.Context, _ reflect.Value) (any, error) {
-	return nil, nil
+func nilEncoder(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{nil}, nil
 }
 
-func encodeDriverValue(_ context.Context, v reflect.Value) (any, error) {
+func encodeDriverValue(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
-		return nil, nil
+		return d.Var(1), []any{nil}, nil
 	}
 	x, ok := v.Interface().(driver.Valuer)
 	if !ok {
-		return nil, errors.New("codec: invalid type for assertion")
+		return "", nil, errors.New("codec: invalid type for assertion")
 	}
-	return x.Value()
+	val, err := x.Value()
+	if err != nil {
+		return "", nil, err
+	}
+	return d.Var(1), []any{val}, nil
 }
 
 func sqlScannerDecoder(it any, v reflect.Value) error {

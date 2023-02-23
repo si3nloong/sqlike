@@ -13,19 +13,12 @@ import (
 
 // HasPrimaryKey :
 func (s *commonSQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
-	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
-	stmt.WriteString("WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2 AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
-	stmt.WriteByte(';')
-	stmt.AppendArgs(db, table)
+	stmt.AppendArgs(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2 AND CONSTRAINT_TYPE = 'PRIMARY KEY';`, db, table)
 }
 
 // RenameTable :
 func (s *commonSQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
-	stmt.WriteString("RENAME TABLE ")
-	stmt.WriteString(s.TableName(db, oldName))
-	stmt.WriteString(" TO ")
-	stmt.WriteString(s.TableName(db, newName))
-	stmt.WriteByte(';')
+	stmt.WriteString("RENAME TABLE " + s.TableName(db, oldName) + " TO " + s.TableName(db, newName) + ";")
 }
 
 // DropTable :
@@ -34,11 +27,10 @@ func (s *commonSQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsaf
 		stmt.WriteString("SET FOREIGN_KEY_CHECKS=0;")
 		defer stmt.WriteString("SET FOREIGN_KEY_CHECKS=1;")
 	}
-	stmt.WriteString("DROP TABLE")
+	stmt.WriteString("DROP TABLE ")
 	if exists {
-		stmt.WriteString(" IF EXISTS")
+		stmt.WriteString("IF EXISTS ")
 	}
-	stmt.WriteByte(' ')
 	stmt.WriteString(s.TableName(db, table) + ";")
 }
 
@@ -49,8 +41,7 @@ func (s *commonSQL) TruncateTable(stmt db.Stmt, db, table string) {
 
 // HasTable :
 func (s *commonSQL) HasTable(stmt db.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2;`)
-	stmt.AppendArgs(dbName, table)
+	stmt.AppendArgs(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = $1 AND TABLE_NAME = $2;`, dbName, table)
 }
 
 // CreateTable :

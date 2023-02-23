@@ -1,9 +1,12 @@
 package db
 
 import (
-	"context"
 	"reflect"
 )
+
+type SqlValuer interface {
+	SqlValue(SqlDriver, map[string]string) (string, []any, error)
+}
 
 // Codecer :
 type Codecer interface {
@@ -16,14 +19,14 @@ type Codecer interface {
 	LookupDecoder(t reflect.Type) (ValueDecoder, error)
 }
 
+// ValueEncoder :
+type ValueEncoder func(SqlDriver, reflect.Value, map[string]string) (string, []any, error)
+
 // ValueDecoder :
 type ValueDecoder func(any, reflect.Value) error
 
-// ValueEncoder :
-type ValueEncoder func(context.Context, reflect.Value) (any, error)
-
 // ValueCodec :
 type ValueCodec interface {
-	DecodeValue(any, reflect.Value) error
+	DecodeValue(SqlDriver, reflect.Value, map[string]string) (string, []any, error)
 	EncodeValue(reflect.Value) (any, error)
 }

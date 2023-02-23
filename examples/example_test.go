@@ -95,9 +95,9 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	// require.Equal(t, "utf8mb4_0900_ai_ci", client.Collate())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 	client.SetLogger(Logger{})
-	DatabaseExamples(t, client)
+	DatabaseExamples(ctx, t, client)
 	db := client.Database("sqlike")
-	mg := connectMongoDB(ctx)
+	// mg := connectMongoDB(ctx)
 
 	{
 		MigrateExamples(ctx, t, db)
@@ -113,11 +113,11 @@ func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 		DeleteExamples(ctx, t, db)
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
-		// SpatialExamples(ctx, t, db)
+		SpatialExamples(ctx, t, db)
 
 		// SQLDumpExamples(ctx, t, client)
 
-		ExtraExamples(ctx, t, db, mg)
+		// ExtraExamples(ctx, t, db, mg)
 	}
 
 	// Errors

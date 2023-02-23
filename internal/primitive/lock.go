@@ -18,7 +18,6 @@ const (
 
 // FIXME:
 type Lock struct {
-	Ofs    []ColumnPath
 	Type   LockType
 	Option LockOption
 }

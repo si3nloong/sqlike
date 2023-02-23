@@ -12,6 +12,6 @@ func TestGetVersion(t *testing.T) {
 	stmt := sqlstmt.AcquireStmt(ms)
 	defer sqlstmt.ReleaseStmt(stmt)
 	ms.GetVersion(stmt)
-	require.Equal(t, "SELECT VERSION();", stmt.String())
+	require.Equal(t, `SELECT VERSION();`, stmt.String())
 	require.ElementsMatch(t, []any{}, stmt.Args())
 }

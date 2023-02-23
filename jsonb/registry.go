@@ -44,7 +44,7 @@ func buildDefaultRegistry() *Registry {
 	rg.SetTypeCoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
 	rg.SetTypeCoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
 	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
-	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJsonRaw, dec.DecodeJSONRaw)
 	rg.SetTypeCoder(reflect.TypeOf(json.Number("")), enc.EncodeStringer, dec.DecodeJSONNumber)
 	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
 	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
