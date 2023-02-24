@@ -463,6 +463,30 @@ func TestDecodeArray(t *testing.T) {
 		err error
 	)
 
+	t.Run("Decode invalid array", func(t *testing.T) {
+		r := NewReader([]byte(`["sdasdasd"`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("Decode null", func(t *testing.T) {
+		r := NewReader([]byte(`null`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("Decode empty array", func(t *testing.T) {
+		r := NewReader([]byte(`[]`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.NoError(t, err)
+	})
+
 	t.Run("Decode to [2]string", func(ti *testing.T) {
 		arr := [2]string{}
 		err = Unmarshal([]byte(`["test", "abc", "ddd"]`), &arr)
