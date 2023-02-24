@@ -162,29 +162,10 @@ func (k *Key) Incomplete() bool {
 	return k.NameID == "" && k.IntID == 0
 }
 
-// // valid returns whether the key is valid.
-// func (k *Key) IsZero() bool {
-// 	if k == nil {
-// 		return false
-// 	}
-// 	for ; k != nil; k = k.Parent {
-// 		if k.Kind == "" {
-// 			return false
-// 		}
-// 		if k.NameID != "" && k.IntID != 0 {
-// 			return false
-// 		}
-// 		if k.Parent != nil {
-// 			if k.Parent.Incomplete() {
-// 				return false
-// 			}
-// 			if k.Parent.Namespace != k.Namespace {
-// 				return false
-// 			}
-// 		}
-// 	}
-// 	return true
-// }
+// valid returns whether the key is valid.
+func (k *Key) IsZero() bool {
+	return k.Incomplete()
+}
 
 // Equal reports whether two keys are equal. Two keys are equal if they are
 // both nil, or if their kinds, IDs, names, namespaces and parents are equal.
@@ -211,14 +192,6 @@ func (k Key) MarshalText() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// MarshalBinary :
-func (k Key) MarshalBinary() ([]byte, error) {
-	if k.Incomplete() {
-		return []byte(`null`), nil
-	}
-	return []byte(`"` + k.Encode() + `"`), nil
-}
-
 // MarshalJSON :
 func (k Key) MarshalJSON() ([]byte, error) {
 	if k.Incomplete() {
@@ -239,24 +212,10 @@ func (k Key) MarshalJSONB() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// UnmarshalBinary :
-func (k *Key) UnmarshalBinary(b []byte) error {
-	str := string(b)
-	if str == "null" {
-		return nil
-	}
-	key, err := DecodeKey(str)
-	if err != nil {
-		return err
-	}
-	*k = *key
-	return nil
-}
-
 // UnmarshalText :
 func (k *Key) UnmarshalText(b []byte) error {
 	if len(b) == 0 {
-		return nil
+		return errors.New("types: empty key values")
 	}
 	str := string(b)
 	if str == "null" {
@@ -273,7 +232,7 @@ func (k *Key) UnmarshalText(b []byte) error {
 // UnmarshalJSON :
 func (k *Key) UnmarshalJSON(b []byte) error {
 	length := len(b)
-	if length < 2 {
+	if length <= 2 {
 		return errors.New("types: invalid key json value")
 	}
 	if util.UnsafeString(b) == "null" {
@@ -291,11 +250,8 @@ func (k *Key) UnmarshalJSON(b []byte) error {
 // UnmarshalJSONB :
 func (k *Key) UnmarshalJSONB(b []byte) error {
 	length := len(b)
-	if length < 2 {
+	if length <= 2 {
 		return errors.New("types: invalid key json value")
-	}
-	if len(b) == 0 {
-		return nil
 	}
 	if util.UnsafeString(b) == "null" {
 		return nil
