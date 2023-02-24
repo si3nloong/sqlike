@@ -16,9 +16,7 @@ func TestReader(t *testing.T) {
 
 	// All data type with null should use default value
 	{
-		str, _ := r.reset().ReadString()
-		require.Equal(t, "", str)
-		str2, _ := r.reset().ReadEscapeString()
+		str2, _ := r.reset().ReadString()
 		require.Equal(t, "", str2)
 		flag, _ := r.reset().ReadBoolean()
 		require.Equal(t, false, flag)

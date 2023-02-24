@@ -131,7 +131,7 @@ func (dec DefaultDecoder) DecodeJSONNumber(r *Reader, v reflect.Value) error {
 
 // DecodeString :
 func (dec DefaultDecoder) DecodeString(r *Reader, v reflect.Value) error {
-	x, err := r.ReadEscapeString()
+	x, err := r.ReadString()
 	if err != nil {
 		return err
 	}
