@@ -1,23 +1,56 @@
 package jsonb
 
 import (
-	"errors"
-
 	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
-// ReadEscapeString :
-func (r *Reader) ReadEscapeString() (string, error) {
+// ReadRawString :
+func (r *Reader) ReadRawString() (string, error) {
 	c := r.nextToken()
 	if c == 'n' {
 		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", ErrInvalidJSON{}
+			return "", err
+		}
+		return "null", nil
+	}
+
+	if c != '"' {
+		return "", ErrInvalidJSON{
+			callback: "ReadString",
+			message:  "expect start with \"",
+		}
+	}
+
+	for i := r.pos; i < r.len; i++ {
+		c = r.b[i]
+		if c == '"' {
+			str := string(r.b[r.pos:i])
+			r.pos = i + 1
+			return str, nil
+		}
+	}
+
+	return "", ErrInvalidJSON{
+		callback: "ReadString",
+		message:  "expect end with \"",
+	}
+}
+
+// ReadString :
+func (r *Reader) ReadString() (string, error) {
+	c := r.nextToken()
+	if c == 'n' {
+		if err := r.unreadByte().ReadNull(); err != nil {
+			return "", err
 		}
 		return "", nil
 	}
 
 	if c != '"' {
-		return "", ErrInvalidJSON{}
+		return "", ErrInvalidJSON{
+			callback: "ReadString",
+			message:  "expect start with \"",
+		}
 	}
 
 	blr := util.AcquireString()
@@ -71,78 +104,13 @@ func (r *Reader) ReadEscapeString() (string, error) {
 	}
 
 	if c != '"' {
-		return "", ErrInvalidJSON{}
+		return "", ErrInvalidJSON{
+			callback: "ReadEscapeString",
+			message:  "expect end with \"",
+		}
 	}
 
 	return blr.String(), nil
-}
-
-// ReadRawString :
-func (r *Reader) ReadRawString() (string, error) {
-	c := r.nextToken()
-	if c == 'n' {
-		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", err
-		}
-		return "null", nil
-	}
-
-	if c != '"' {
-		return "", ErrInvalidJSON{
-			callback: "ReadString",
-			message:  "expect start with \"",
-		}
-	}
-
-	for i := r.pos; i < r.len; i++ {
-		c = r.b[i]
-		if c == '"' {
-			str := string(r.b[r.pos:i])
-			r.pos = i + 1
-			return str, nil
-		}
-	}
-
-	return "", ErrInvalidJSON{
-		callback: "ReadString",
-		message:  "expect end with \"",
-	}
-}
-
-// ReadString :
-func (r *Reader) ReadString() (string, error) {
-	c := r.nextToken()
-	if c == 'n' {
-		if err := r.unreadByte().ReadNull(); err != nil {
-			return "", err
-		}
-		return "", nil
-	}
-
-	if c != '"' {
-		return "", ErrInvalidJSON{
-			callback: "ReadString",
-			message:  "expect start with \"",
-		}
-	}
-
-	for i := r.pos; i < r.len; i++ {
-		c = r.b[i]
-		if c == '"' {
-			str := string(r.b[r.pos:i])
-			r.pos = i + 1
-			return str, nil
-		} else if c == '\\' {
-			break
-		} else if c < ' ' {
-			return "", errors.New("invalid character")
-		}
-	}
-
-	return "", ErrInvalidJSON{
-		callback: "ReadString",
-		message:  "expect end with \"",
-	}
 }
 
 // skipString :
