@@ -240,7 +240,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 							When(
 								expr.And(
 									expr.Equal("$Key", uid),
-									expr.NotNull("$Key"),
+									expr.IsNotNull("$Key"),
 								),
 								i8,
 							).

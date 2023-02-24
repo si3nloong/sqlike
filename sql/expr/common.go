@@ -7,6 +7,7 @@ import (
 	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
+// Pair :
 func Pair(first, second string) (p primitive.Pair) {
 	p = [2]string{first, second}
 	return

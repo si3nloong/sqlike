@@ -17,6 +17,9 @@ const (
 
 type Pair [2]string
 
+//lint:ignore U1000 to comply it's a sql clause
+func (p Pair) isClause() {}
+
 // Raw :
 type Raw struct {
 	Value string

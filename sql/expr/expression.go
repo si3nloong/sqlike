@@ -8,7 +8,7 @@ import (
 )
 
 type ColumnConstraints interface {
-	~string | primitive.Column | primitive.JSONColumn
+	~string | primitive.Column | primitive.Pair | primitive.JSONColumn
 }
 
 // Equal :
@@ -26,24 +26,24 @@ func NotEqual[C ColumnConstraints](field C, value any) (c primitive.C) {
 // IsNull :
 func IsNull[C ColumnConstraints](field C) (c primitive.Nil) {
 	c.Field = wrapColumn(field)
+	return
+}
+
+// IsNotNull :
+func IsNotNull[C ColumnConstraints](field C) (c primitive.Nil) {
+	c.Field = wrapColumn(field)
 	c.IsNot = true
 	return
 }
 
-// NotNull :
-func NotNull[C ColumnConstraints](field C) (c primitive.Nil) {
-	c.Field = wrapColumn(field)
-	return
-}
-
 // In :
-func In(field, values any) (c primitive.C) {
+func In[C ColumnConstraints](field C, values any) (c primitive.C) {
 	c = inGroup(field, primitive.In, values)
 	return
 }
 
 // NotIn :
-func NotIn(field, values any) (c primitive.C) {
+func NotIn[C ColumnConstraints](field C, values any) (c primitive.C) {
 	c = inGroup(field, primitive.NotIn, values)
 	return
 }
@@ -61,7 +61,7 @@ func Like[F ColumnConstraints, V string | primitive.Raw](field F, value V) (p pr
 }
 
 // NotLike :
-func NotLike(field, value any) (p primitive.L) {
+func NotLike[C ColumnConstraints](field C, value any) (p primitive.L) {
 	p.Field = wrapColumn(field)
 	p.IsNot = true
 	p.Value = value
@@ -154,7 +154,7 @@ func buildGroup(op primitive.Operator, conds []any) (g primitive.Group) {
 }
 
 // ColumnValue :
-func ColumnValue(field string, value any) (kv primitive.KV) {
+func ColumnValue[C ColumnConstraints](field string, value any) (kv primitive.KV) {
 	kv.Field = field
 	kv.Value = value
 	return
@@ -193,6 +193,8 @@ func wrapColumn(it any) any {
 	switch vi := it.(type) {
 	case string:
 		return Column(vi)
+	case primitive.Pair:
+		return Column(vi[0], vi[1])
 	case primitive.Column:
 		return vi
 	default:

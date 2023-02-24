@@ -18,14 +18,14 @@ func Field[T any](name string, val []T) (f primitive.Field) {
 }
 
 // Asc :
-func Asc(field any) (s primitive.Sort) {
+func Asc[C ColumnConstraints](field C) (s primitive.Sort) {
 	s.Field = wrapColumn(field)
 	s.Order = primitive.Ascending
 	return
 }
 
 // Desc :
-func Desc(field any) (s primitive.Sort) {
+func Desc[C ColumnConstraints](field C) (s primitive.Sort) {
 	s.Field = wrapColumn(field)
 	s.Order = primitive.Descending
 	return

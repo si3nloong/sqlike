@@ -8,6 +8,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestEqual(t *testing.T) {
+	// require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal(Pair("a", "num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal(Column("num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal("num", 123))
+}
+
+func TestNotEqual(t *testing.T) {
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.NotEqual, Value: 123}, NotEqual(Column("num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.NotEqual, Value: 123}, NotEqual("num", 123))
+}
+
+func TestIsNull(t *testing.T) {
+	require.Equal(t, primitive.Nil{Field: wrapColumn("column")}, IsNull("column"))
+	require.Equal(t, primitive.Nil{Field: wrapColumn("xx")}, IsNull(Column("xx")))
+}
+
+func TestIsNotNull(t *testing.T) {
+	require.Equal(t, primitive.Nil{Field: wrapColumn("column"), IsNot: true}, IsNotNull("column"))
+	require.Equal(t, primitive.Nil{Field: wrapColumn("xx"), IsNot: true}, IsNotNull(Column("xx")))
+}
+
+func TestIn(t *testing.T) {
+
+}
+
+func TestNotIn(t *testing.T) {
+
+}
+
 func TestExpression(t *testing.T) {
 	var (
 		grp primitive.Group

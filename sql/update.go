@@ -1,6 +1,8 @@
 package sql
 
 import (
+	"fmt"
+
 	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
@@ -15,13 +17,17 @@ type UpdateStmt struct {
 }
 
 // Update :
-func Update(tables ...any) *UpdateStmt {
+func Update[T ~string | primitive.Pair](src T) *UpdateStmt {
 	stmt := new(UpdateStmt)
-	return stmt.Update(tables...)
-}
-
-// Update :
-func (stmt *UpdateStmt) Update(fields ...any) *UpdateStmt {
+	switch vi := any(src).(type) {
+	case primitive.Pair:
+		stmt.Database = vi[0]
+		stmt.Table = vi[1]
+	case string:
+		stmt.Table = vi
+	default:
+		stmt.Table = fmt.Sprintf("%s", vi)
+	}
 	return stmt
 }
 

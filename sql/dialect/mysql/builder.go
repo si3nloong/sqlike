@@ -283,7 +283,7 @@ func (b *mySQLBuilder) BuildNil(stmt db.Stmt, it any) error {
 	if err := b.builder.BuildStatement(stmt, x.Field); err != nil {
 		return err
 	}
-	if x.IsNot {
+	if !x.IsNot {
 		stmt.WriteString(` IS NULL`)
 	} else {
 		stmt.WriteString(` IS NOT NULL`)

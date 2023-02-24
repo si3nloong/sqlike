@@ -86,7 +86,7 @@ func TestSelect(t *testing.T) {
 					Limit(10).
 					Offset(1),
 				),
-				expr.NotNull("B"),
+				expr.IsNotNull("B"),
 				expr.Or(
 					expr.In("C", []string{"1", "2", "3"}),
 					expr.Equal("A", 100),
