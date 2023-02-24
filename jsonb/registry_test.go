@@ -48,7 +48,7 @@ func TestRegistry(t *testing.T) {
 		})
 
 		t.Run("on missing type", func(t *testing.T) {
-			ch := make(chan any)
+			ch := make(chan interface{})
 			v := reflect.ValueOf(ch)
 			_, err = rg.LookupDecoder(v.Type())
 			require.Error(t, err)
