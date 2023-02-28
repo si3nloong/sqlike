@@ -4,14 +4,20 @@ import (
 	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
-// LockForUpdate :
-func LockForUpdate() (l primitive.Lock) {
-	l.Type = primitive.LockForUpdate
+// LockForShare :
+func LockForShare(opts ...func(l *primitive.Lock)) (l primitive.Lock) {
+	for _, opt := range opts {
+		opt(&l)
+	}
+	l.Type = primitive.LockForShare
 	return
 }
 
-// LockForShare :
-func LockForShare() (l primitive.Lock) {
-	l.Type = primitive.LockForShare
+// LockForUpdate :
+func LockForUpdate(opts ...func(l *primitive.Lock)) (l primitive.Lock) {
+	for _, opt := range opts {
+		opt(&l)
+	}
+	l.Type = primitive.LockForUpdate
 	return
 }

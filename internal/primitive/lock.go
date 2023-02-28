@@ -3,31 +3,20 @@ package primitive
 type LockType int
 
 const (
-	NoLock LockType = iota
-	LockForUpdate
+	LockForUpdate LockType = iota + 1
 	LockForShare
 )
 
 type LockOption int
 
 const (
-	NoLockOption LockOption = iota
-	NoWait
+	NoWait LockOption = iota + 1
 	SkipLocked
 )
 
-// FIXME:
+// Lock :
 type Lock struct {
 	Type   LockType
 	Option LockOption
-}
-
-func (l *Lock) NoWait() *Lock {
-	l.Option = NoWait
-	return l
-}
-
-func (l *Lock) SkipLocked() *Lock {
-	l.Option = SkipLocked
-	return l
+	Of     *Pair
 }

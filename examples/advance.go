@@ -32,7 +32,7 @@ func AdvanceQueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 				expr.Asc("Amount"),
 			).
 			Option(
-				expr.ForUpdate().NoWait(),
+				expr.ForUpdate(expr.NoWait()),
 			).
 			Limit(1).
 			Offset(1),
@@ -63,44 +63,43 @@ func AdvanceQueryExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 	}
 
 	{
-		if err := db.RunInTransaction(
-			ctx,
-			func(sess context.Context) error {
-				if _, err := db.Exec(sess, "USE `sqlike`;"); err != nil {
+		if err := db.RunInTransaction(ctx, func(sess context.Context) error {
+			if _, err := db.Exec(sess, "USE `sqlike`;"); err != nil {
+				return err
+			}
+
+			var version string
+			if err := db.QueryRow(sess, `SELECT VERSION();`).Scan(&version); err != nil {
+				return err
+			}
+			require.Regexp(t, regexp.MustCompile(`\d+\.\d+\d+`), version)
+
+			rows, err := db.Query(sess, "SELECT COUNT(*) FROM `GeneratedStruct`;")
+			if err != nil {
+				return err
+			}
+			defer rows.Close()
+
+			var count uint
+			for rows.Next() {
+				if err := rows.Scan(&count); err != nil {
 					return err
 				}
+			}
+			require.NotEmpty(t, count)
 
-				var version string
-				if err := db.QueryRow(sess, `SELECT VERSION();`).Scan(&version); err != nil {
-					return err
-				}
-				require.Regexp(t, regexp.MustCompile(`\d+\.\d+\d+`), version)
+			if err := rows.Close(); err != nil {
+				return err
+			}
 
-				rows, err := db.Query(sess, "SELECT COUNT(*) FROM `GeneratedStruct`;")
-				if err != nil {
-					return err
-				}
+			result, err := db.QueryStmt(sess, stmt)
+			if err != nil {
+				return err
+			}
+			defer result.Close()
 
-				var count uint
-				for rows.Next() {
-					if err := rows.Scan(&count); err != nil {
-						return err
-					}
-				}
-				require.NotEmpty(t, count)
-
-				if err := rows.Close(); err != nil {
-					return err
-				}
-
-				result, err := db.QueryStmt(sess, stmt)
-				if err != nil {
-					return err
-				}
-				defer result.Close()
-
-				return nil
-			}); err != nil {
+			return nil
+		}); err != nil {
 			panic(err)
 		}
 	}

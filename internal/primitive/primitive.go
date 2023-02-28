@@ -9,7 +9,6 @@ type JoinType int
 
 const (
 	InnerJoin JoinType = iota
-	OuterJoin
 	CrossJoin
 	LeftJoin
 	RightJoin
@@ -118,12 +117,18 @@ type L struct {
 	Value any
 }
 
+//lint:ignore U1000 to comply it's a sql clause
+func (l L) isClause() {}
+
 // C :
 type C struct {
 	Field    any
 	Operator Operator
 	Value    any
 }
+
+//lint:ignore U1000 to comply it's a sql clause
+func (c C) isClause() {}
 
 // KV :
 type KV struct {

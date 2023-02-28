@@ -68,27 +68,27 @@ func NotLike[C ColumnConstraints](field C, value any) (p primitive.L) {
 	return
 }
 
-// GreaterOrEqual :
-func GreaterOrEqual(field, value any) (c primitive.C) {
-	c = clause(field, primitive.GreaterOrEqual, value)
-	return
-}
-
 // GreaterThan :
 func GreaterThan(field, value any) (c primitive.C) {
 	c = clause(field, primitive.GreaterThan, value)
 	return
 }
 
-// LesserOrEqual :
-func LesserOrEqual(field, value any) (c primitive.C) {
-	c = clause(field, primitive.LesserOrEqual, value)
+// GreaterOrEqual :
+func GreaterOrEqual(field, value any) (c primitive.C) {
+	c = clause(field, primitive.GreaterOrEqual, value)
 	return
 }
 
 // LesserThan :
 func LesserThan(field, value any) (c primitive.C) {
 	c = clause(field, primitive.LesserThan, value)
+	return
+}
+
+// LesserOrEqual :
+func LesserOrEqual(field, value any) (c primitive.C) {
+	c = clause(field, primitive.LesserOrEqual, value)
 	return
 }
 
@@ -154,8 +154,15 @@ func buildGroup(op primitive.Operator, conds []any) (g primitive.Group) {
 }
 
 // ColumnValue :
-func ColumnValue[C ColumnConstraints](field string, value any) (kv primitive.KV) {
-	kv.Field = field
+func ColumnValue[C ColumnConstraints](field C, value any) (kv primitive.KV) {
+	switch vi := any(field).(type) {
+	case string:
+		kv.Field = vi
+	case primitive.Column:
+		kv.Field = vi.Name
+	case primitive.Pair:
+		kv.Field = vi[1]
+	}
 	kv.Value = value
 	return
 }

@@ -99,12 +99,6 @@ func (stmt *SelectStmt) InnerJoin(subQuery, first, second any) *SelectStmt {
 	return stmt
 }
 
-// OuterJoin :
-func (stmt *SelectStmt) OuterJoin(subQuery, first, second any) *SelectStmt {
-	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.OuterJoin, SubQuery: subQuery, On: [2]any{first, second}})
-	return stmt
-}
-
 // LeftJoin :
 func (stmt *SelectStmt) LeftJoin(subQuery, first, second any) *SelectStmt {
 	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.LeftJoin, SubQuery: subQuery, On: [2]any{first, second}})
@@ -131,13 +125,13 @@ func (stmt *SelectStmt) Having(fields ...any) *SelectStmt {
 
 // OrderBy :
 func (stmt *SelectStmt) OrderBy(fields ...any) *SelectStmt {
-	stmt.Sorts = fields
+	stmt.Sorts = append(stmt.Sorts, fields...)
 	return stmt
 }
 
 // GroupBy :
 func (stmt *SelectStmt) GroupBy(fields ...any) *SelectStmt {
-	stmt.Groups = fields
+	stmt.Groups = append(stmt.Groups, fields...)
 	return stmt
 }
 
@@ -159,7 +153,7 @@ func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 
 // Option :
 func (stmt *SelectStmt) Option(opts ...any) *SelectStmt {
-	stmt.Opts = opts
+	stmt.Opts = append(stmt.Opts, opts...)
 	return stmt
 }
 
