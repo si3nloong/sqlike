@@ -44,9 +44,9 @@ type Dialect interface {
 	CreateTable(stmt Stmt, db, table, pk string, info Info, fields []reflext.FieldInfo) (err error)
 	AlterTable(stmt Stmt, db, table, pk string, hasPk bool, info Info, fields []reflext.FieldInfo, columns util.StringSlice, indexes util.StringSlice, unsafe bool) (err error)
 	InsertInto(stmt Stmt, db, table, pk string, mapper reflext.StructMapper, fields []reflext.FieldInfo, values reflect.Value, opts *options.InsertOptions) (err error)
-	Select(stmt Stmt, act *actions.FindActions, lock primitive.Lock) (err error)
-	Update(stmt Stmt, act *actions.UpdateActions) (err error)
-	Delete(stmt Stmt, act *actions.DeleteActions) (err error)
+	Select(stmt Stmt, act actions.FindActions, lock primitive.Lock) (err error)
+	Update(stmt Stmt, act actions.UpdateActions) (err error)
+	Delete(stmt Stmt, act actions.DeleteActions) (err error)
 	SelectStmt(stmt Stmt, query any) (err error)
 	Replace(stmt Stmt, db, table string, columns []string, query *sql.SelectStmt) (err error)
 }
