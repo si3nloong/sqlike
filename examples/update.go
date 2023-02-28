@@ -68,25 +68,13 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.DateTime = now
 		ns.CreatedAt = now
 		ns.UpdatedAt = now
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().SetDebug(true))
+		affected, err = table.ModifyOne(ctx, &ns, options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
 
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().SetDebug(true))
-		require.Error(t, err)
-
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().
-				SetStrict(false).
-				SetDebug(true))
+		affected, err = table.ModifyOne(ctx, &ns, options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
+		require.Empty(t, affected)
 
 		ns2 := normalStruct{}
 		err = table.FindOne(
@@ -139,12 +127,13 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Message = "hello world"
 		ns.Flag = true
 		ns.No = 1800
-		err = tbl.ModifyOne(
+		affected, err = tbl.ModifyOne(
 			ctx,
 			&ns,
 			options.ModifyOne().SetDebug(true),
 		)
 		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
 
 		ns2 := newStruct{}
 		err = tbl.FindOne(
@@ -287,20 +276,22 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 // UpdateErrorExamples :
 func UpdateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
-		ns  normalStruct
-		err error
+		ns       normalStruct
+		err      error
+		affected int64
 	)
 
 	table := db.Table("NormalStruct")
 
-	{
-		err = table.ModifyOne(ctx, nil)
-		require.Error(t, err)
+	affected, err = table.ModifyOne(ctx, nil)
+	require.Error(t, err)
+	require.Empty(t, affected)
 
-		err = table.ModifyOne(ctx, &struct{}{})
-		require.Error(t, err)
+	affected, err = table.ModifyOne(ctx, &struct{}{})
+	require.Error(t, err)
+	require.Empty(t, affected)
 
-		err = table.ModifyOne(ctx, &ns)
-		require.Equal(t, sqlike.ErrNoRecordAffected, err)
-	}
+	affected, err = table.ModifyOne(ctx, &ns)
+	require.NoError(t, err)
+	require.Empty(t, affected)
 }

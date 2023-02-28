@@ -2,9 +2,8 @@ package options
 
 // ModifyOneOptions :
 type ModifyOneOptions struct {
-	Omits    []string
-	Debug    bool
-	NoStrict bool
+	Omits []string
+	Debug bool
 }
 
 // ModifyOne :
@@ -21,11 +20,5 @@ func (opt *ModifyOneOptions) SetDebug(debug bool) *ModifyOneOptions {
 // SetOmitFields :
 func (opt *ModifyOneOptions) SetOmitFields(fields ...string) *ModifyOneOptions {
 	opt.Omits = fields
-	return opt
-}
-
-// SetStrict :
-func (opt *ModifyOneOptions) SetStrict(strict bool) *ModifyOneOptions {
-	opt.NoStrict = !strict
 	return opt
 }

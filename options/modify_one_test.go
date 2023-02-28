@@ -26,11 +26,4 @@ func TestModifyOneOptions(t *testing.T) {
 		require.ElementsMatch(it, []string{"A", "cc"}, opt.Omits)
 	})
 
-	t.Run("SetStrict", func(it *testing.T) {
-		opt.SetStrict(true)
-		require.False(it, opt.NoStrict)
-
-		opt.SetStrict(false)
-		require.True(it, opt.NoStrict)
-	})
 }

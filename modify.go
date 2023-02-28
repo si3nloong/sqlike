@@ -18,7 +18,7 @@ func (tb *Table) ModifyOne(
 	ctx context.Context,
 	update any,
 	opts ...*options.ModifyOneOptions,
-) error {
+) (int64, error) {
 	return modifyOne(
 		ctx,
 		tb.dbName,
@@ -42,19 +42,19 @@ func modifyOne(
 	logger db.Logger,
 	update any,
 	opts []*options.ModifyOneOptions,
-) error {
+) (int64, error) {
 	v := reflext.ValueOf(update)
 	if !v.IsValid() {
-		return ErrInvalidInput
+		return 0, ErrInvalidInput
 	}
 
 	t := v.Type()
 	if !reflext.IsKind(t, reflect.Ptr) {
-		return ErrUnaddressableEntity
+		return 0, ErrUnaddressableEntity
 	}
 
 	if v.IsNil() {
-		return ErrNilEntity
+		return 0, ErrNilEntity
 	}
 
 	cdc := cache.CodecByType(t)
@@ -64,8 +64,8 @@ func modifyOne(
 	}
 
 	fields := skipColumns(cdc.Properties(), opt.Omits)
-	x := new(actions.UpdateActions)
-	x.Table = tbName
+	act := new(actions.UpdateActions)
+	act.Table = tbName
 
 	// FIXME: shouldn't use any tuple, strong type recommended
 	var pkv = [2]any{}
@@ -73,7 +73,7 @@ func modifyOne(
 		fv := cache.FieldByIndexesReadOnly(v, sf.Index())
 		if _, ok := sf.Tag().Option("primary_key"); ok {
 			if pkv[0] != nil {
-				x.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))
+				act.Set(expr.ColumnValue(pkv[0].(string), pkv[1]))
 			}
 			pkv[0] = sf.Name()
 			pkv[1] = fv.Interface()
@@ -84,22 +84,22 @@ func modifyOne(
 			pkv[1] = fv.Interface()
 			continue
 		}
-		x.Set(expr.ColumnValue(sf.Name(), fv.Interface()))
+		act.Set(expr.ColumnValue(sf.Name(), fv.Interface()))
 	}
 
 	if pkv[0] == nil {
-		return errors.New("sqlike: missing primary key field")
+		return 0, errors.New("sqlike: missing primary key field")
 	}
 
-	x.Where(expr.Equal(pkv[0].(string), pkv[1]))
-	x.Limit(1)
-	x.Table = tbName
-	x.Database = dbName
+	act.Where(expr.Equal(pkv[0].(string), pkv[1]))
+	act.Limit(1)
+	act.Table = tbName
+	act.Database = dbName
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Update(stmt, x); err != nil {
-		return err
+	if err := dialect.Update(stmt, *act); err != nil {
+		return 0, err
 	}
 
 	result, err := db.Execute(
@@ -109,16 +109,7 @@ func modifyOne(
 		getLogger(logger, opt.Debug),
 	)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if !opt.NoStrict {
-		affected, err := result.RowsAffected()
-		if err != nil {
-			return err
-		}
-		if affected < 1 {
-			return ErrNoRecordAffected
-		}
-	}
-	return nil
+	return result.RowsAffected()
 }
