@@ -55,11 +55,7 @@ func TestSelect(t *testing.T) {
 
 		stmt := sqlstmt.AcquireStmt(ms)
 		defer sqlstmt.ReleaseStmt(stmt)
-		err = New().Select(
-			stmt,
-			v,
-			primitive.Lock{},
-		)
+		err = New().Select(stmt, *v, primitive.Lock{})
 		require.NoError(t, err)
 		require.Equal(t, "SELECT * FROM `A`.`Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())
 	}

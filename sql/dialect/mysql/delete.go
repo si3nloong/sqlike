@@ -6,7 +6,7 @@ import (
 )
 
 // Delete :
-func (ms *mySQL) Delete(stmt db.Stmt, f *actions.DeleteActions) (err error) {
+func (ms *mySQL) Delete(stmt db.Stmt, f actions.DeleteActions) (err error) {
 	err = buildStatement(stmt, ms.parser, f)
 	return
 }

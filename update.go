@@ -83,7 +83,7 @@ func update(
 	}
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Update(stmt, act); err != nil {
+	if err := dialect.Update(stmt, *act); err != nil {
 		return 0, err
 	}
 	result, err := db.Execute(

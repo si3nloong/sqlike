@@ -115,7 +115,7 @@ func find(
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Select(stmt, act, opt.Lock); err != nil {
+	if err := dialect.Select(stmt, *act, opt.Lock); err != nil {
 		rslt.err = err
 		return rslt
 	}

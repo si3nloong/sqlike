@@ -8,17 +8,28 @@ import (
 )
 
 // Select :
-func (ms *mySQL) Select(stmt db.Stmt, f *actions.FindActions, lck primitive.Lock) (err error) {
+func (ms *mySQL) Select(stmt db.Stmt, f actions.FindActions, lck primitive.Lock) (err error) {
 	err = ms.parser.BuildStatement(stmt, f)
 	if err != nil {
 		return
 	}
+	// if lck != nil {
 	switch lck.Type {
 	case primitive.LockForUpdate:
-		stmt.WriteString(" FOR UPDATE")
+		stmt.WriteString(` FOR UPDATE`)
 	case primitive.LockForShare:
-		stmt.WriteString(" LOCK IN SHARE MODE")
+		stmt.WriteString(` FOR SHARE`)
 	}
+	if lck.Of != nil {
+		ms.parser.BuildStatement(stmt, *lck.Of)
+	}
+	switch lck.Option {
+	case primitive.NoWait:
+		stmt.WriteString(` NOWAIT`)
+	case primitive.SkipLocked:
+		stmt.WriteString(` SKIP LOCKED`)
+	}
+	// }
 	stmt.WriteByte(';')
 	return
 }

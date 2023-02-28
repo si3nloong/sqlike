@@ -5,13 +5,14 @@ import (
 	"sync"
 
 	"github.com/si3nloong/sqlike/v2/db"
-	"github.com/si3nloong/sqlike/v2/sql/dialect/common"
+	"github.com/si3nloong/sqlike/v2/sql/dialect/mysql"
 )
 
 var (
 	mutex    = new(sync.RWMutex)
 	dialects = map[string]db.Dialect{
-		"__common__": common.New(),
+		// "__common__": common.New(),
+		"mysql": mysql.New(),
 	}
 )
 

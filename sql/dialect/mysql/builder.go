@@ -72,9 +72,10 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 	blr.SetBuilder(reflect.TypeOf(&sql.SelectStmt{}), b.BuildSelectStmt)
 	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
 	// blr.SetBuilder(reflect.TypeOf(&sql.DeleteStmt{}), b.BuildDeleteStmt)
-	blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
-	blr.SetBuilder(reflect.TypeOf(&actions.UpdateActions{}), b.BuildUpdateActions)
-	blr.SetBuilder(reflect.TypeOf(&actions.DeleteActions{}), b.BuildDeleteActions)
+	blr.SetBuilder(reflect.TypeOf(actions.FindActions{}), b.BuildFindActions)
+	// blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
+	blr.SetBuilder(reflect.TypeOf(actions.UpdateActions{}), b.BuildUpdateActions)
+	blr.SetBuilder(reflect.TypeOf(actions.DeleteActions{}), b.BuildDeleteActions)
 	blr.SetBuilder(reflect.String, b.BuildString)
 	b.registry = rg
 	b.builder = blr
@@ -502,49 +503,45 @@ func (b *mySQLBuilder) BuildEncoding(stmt db.Stmt, it any) (err error) {
 
 // BuildSelectStmt :
 func (b *mySQLBuilder) BuildSelectStmt(stmt db.Stmt, it any) error {
-	x := it.(*sql.SelectStmt)
+	v := it.(*sql.SelectStmt)
 	stmt.WriteString(`SELECT `)
-	if x.DistinctOn {
+	if v.DistinctOn {
 		stmt.WriteString(`DISTINCT `)
 	}
-	if err := b.appendSelect(stmt, x.Exprs); err != nil {
+	if err := b.appendSelect(stmt, v.Exprs); err != nil {
 		return err
 	}
 	stmt.WriteString(` FROM `)
-	if err := b.appendTable(stmt, x.Tables); err != nil {
+	if err := b.appendTable(stmt, v.Tables); err != nil {
 		return err
 	}
-	if len(x.Joins) > 0 {
-		for _, j := range x.Joins {
-			switch j.Type {
-			case primitive.InnerJoin:
-				stmt.WriteString(` INNER JOIN `)
-			case primitive.OuterJoin:
-				stmt.WriteString(` OUTER JOIN `)
-			case primitive.LeftJoin:
-				stmt.WriteString(` LEFT JOIN `)
-			case primitive.RightJoin:
-				stmt.WriteString(` RIGHT JOIN `)
-			case primitive.CrossJoin:
-				stmt.WriteString(` CROSS JOIN `)
-			}
-			b.builder.BuildStatement(stmt, j.SubQuery)
-			stmt.WriteString(` ON `)
-			b.builder.BuildStatement(stmt, j.On[0])
-			stmt.WriteString(` = `)
-			b.builder.BuildStatement(stmt, j.On[1])
+	for _, j := range v.Joins {
+		switch j.Type {
+		case primitive.InnerJoin:
+			stmt.WriteString(` INNER JOIN `)
+		case primitive.LeftJoin:
+			stmt.WriteString(` LEFT JOIN `)
+		case primitive.RightJoin:
+			stmt.WriteString(` RIGHT JOIN `)
+		case primitive.CrossJoin:
+			stmt.WriteString(` CROSS JOIN `)
 		}
+		b.builder.BuildStatement(stmt, j.SubQuery)
+		stmt.WriteString(` ON `)
+		b.builder.BuildStatement(stmt, j.On[0])
+		stmt.WriteString(` = `)
+		b.builder.BuildStatement(stmt, j.On[1])
 	}
-	if err := b.appendWhere(stmt, x.Conditions.Values); err != nil {
+	if err := b.appendWhere(stmt, v.Conditions.Values); err != nil {
 		return err
 	}
-	if err := b.appendGroupBy(stmt, x.Groups); err != nil {
+	if err := b.appendGroupBy(stmt, v.Groups); err != nil {
 		return err
 	}
-	if err := b.appendOrderBy(stmt, x.Sorts); err != nil {
+	if err := b.appendOrderBy(stmt, v.Sorts); err != nil {
 		return err
 	}
-	b.appendLimitNOffset(stmt, x.RowCount, x.Skip)
+	b.appendLimitNOffset(stmt, v.RowCount, v.Skip)
 	return nil
 }
 
@@ -567,7 +564,7 @@ func (b *mySQLBuilder) BuildUpdateStmt(stmt db.Stmt, it any) error {
 
 // BuildFindActions :
 func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it any) error {
-	x := it.(*actions.FindActions)
+	x := it.(actions.FindActions)
 	x.Table = strings.TrimSpace(x.Table)
 	if x.Table == "" {
 		return errors.New("mysql: empty table name")
@@ -595,7 +592,7 @@ func (b *mySQLBuilder) BuildFindActions(stmt db.Stmt, it any) error {
 
 // BuildUpdateActions :
 func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it any) error {
-	x, ok := it.(*actions.UpdateActions)
+	x, ok := it.(actions.UpdateActions)
 	if !ok {
 		return errors.New("data type not match")
 	}
@@ -615,7 +612,7 @@ func (b *mySQLBuilder) BuildUpdateActions(stmt db.Stmt, it any) error {
 
 // BuildDeleteActions :
 func (b *mySQLBuilder) BuildDeleteActions(stmt db.Stmt, it any) error {
-	x := it.(*actions.DeleteActions)
+	x := it.(actions.DeleteActions)
 	stmt.WriteString("DELETE FROM " + b.TableName(x.Database, x.Table))
 	if err := b.appendWhere(stmt, x.Conditions); err != nil {
 		return err

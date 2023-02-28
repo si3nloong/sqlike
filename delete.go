@@ -106,7 +106,7 @@ func deleteMany(
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Delete(stmt, act); err != nil {
+	if err := dialect.Delete(stmt, *act); err != nil {
 		return 0, err
 	}
 	result, err := db.Execute(
@@ -138,9 +138,9 @@ func destroyOne(
 
 	t := v.Type()
 	cdc := cache.CodecByType(t)
-	x := new(actions.DeleteActions)
-	x.Database = dbName
-	x.Table = tbName
+	act := new(actions.DeleteActions)
+	act.Database = dbName
+	act.Table = tbName
 
 	var (
 		fieldName string
@@ -164,12 +164,12 @@ func destroyOne(
 		return errors.New("sqlike: missing primary key field")
 	}
 
-	x.Where(expr.Equal(fieldName, value))
-	x.Limit(1)
+	act.Where(expr.Equal(fieldName, value))
+	act.Limit(1)
 
 	stmt := sqlstmt.AcquireStmt(dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
-	if err := dialect.Delete(stmt, x); err != nil {
+	if err := dialect.Delete(stmt, *act); err != nil {
 		return err
 	}
 	result, err := db.Execute(
