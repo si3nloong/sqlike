@@ -9,14 +9,14 @@ import (
 )
 
 func TestLRUCache(t *testing.T) {
-	cache := New[int](3)
+	cache := New[reflect.Type, int](3)
 
 	t.Run("Cache should panic if pass in wrong arguments", func(t *testing.T) {
 		require.Panics(t, func() {
-			New[string](-1)
+			New[reflect.Type, string](-1)
 		})
 		require.Panics(t, func() {
-			New[string](1)
+			New[reflect.Type, string](1)
 		})
 	})
 
@@ -43,7 +43,7 @@ func TestLRUCache(t *testing.T) {
 
 	t.Run("Check maximum Capacity", func(t *testing.T) {
 		var (
-			cache       = New[int](3)
+			cache       = New[reflect.Type, int](3)
 			returnValue int
 			ok          bool
 		)
@@ -91,8 +91,7 @@ func TestLRUCache(t *testing.T) {
 
 		cache.Purge()
 
-		// after reset, it should be empty
-
+		// After reset, it should be empty
 		returnValue, ok = cache.Get(reflect.TypeOf(B{}))
 		require.Zero(t, returnValue)
 		require.False(t, ok)

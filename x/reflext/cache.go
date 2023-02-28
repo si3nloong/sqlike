@@ -30,7 +30,7 @@ type FormatFunc func(string) string
 
 type mapper struct {
 	tags    []string
-	cache   lrucache.Cache[*Struct]
+	cache   lrucache.Cache[reflect.Type, *Struct]
 	fmtFunc FormatFunc
 }
 
@@ -45,7 +45,7 @@ func NewMapperFunc(size int, tags []string, formatter ...FormatFunc) StructMappe
 		fmtFunc = formatter[0]
 	}
 	return &mapper{
-		cache:   lrucache.New[*Struct](size),
+		cache:   lrucache.New[reflect.Type, *Struct](size),
 		tags:    tags,
 		fmtFunc: fmtFunc,
 	}

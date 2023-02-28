@@ -92,22 +92,26 @@ func (ms *mySQL) InsertInto(
 		var (
 			column string
 			name   string
+			next   = false
+			tag    reflext.FieldTag
 		)
+
 		stmt.WriteString(` ON DUPLICATE KEY UPDATE `)
-		next := false
+
 		for _, f := range fields {
 			name = f.Name()
+			tag = f.Tag()
 			// skip primary key on duplicate update
 			if name == pk {
 				continue
 			}
 
 			// skip primary key on duplicate update
-			if _, ok := f.Tag().Option("primary_key"); ok {
+			if _, ok := tag.Option("primary_key"); ok {
 				continue
 			}
 
-			if _, ok := f.Tag().Option("auto_increment"); ok {
+			if _, ok := tag.Option("auto_increment"); ok {
 				continue
 			}
 

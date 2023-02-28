@@ -1,63 +1,62 @@
 package lrucache
 
 import (
-	"reflect"
 	"sync"
 )
 
 // Cache interface
-type Cache[V any] interface {
-	Get(reflect.Type) (V, bool)
-	Set(reflect.Type, V)
+type Cache[K comparable, V any] interface {
+	Get(K) (V, bool)
+	Set(K, V)
 	Size() int
 	Len() int
 	Purge()
 }
 
-type listItem[V any] struct {
-	key   reflect.Type
+type listItem[K comparable, V any] struct {
+	key   K
 	value V
-	prev  *listItem[V]
-	next  *listItem[V]
+	prev  *listItem[K, V]
+	next  *listItem[K, V]
 }
 
-// FIXME: Supposingly we should make key as generic type,
-// but current golang version (up to v1.18) doesn't support generic for comparable.
-// See this : https://github.com/golang/go/issues/51179
-type lru[V any] struct {
+type lru[K comparable, V any] struct {
 	// maximum entry of the lru cache
 	size int
 
 	// mutex lock is to prevent concurrency race
-	mu sync.Mutex
+	mu *sync.RWMutex
 
 	// store the current entry of the list
-	current *listItem[V]
+	current *listItem[K, V]
 
 	// indexes for the lru cache entries, for fast searching purpose
-	appendix map[reflect.Type]*listItem[V]
+	appendix map[K]*listItem[K, V]
 
 	// linked list for the lru cache entries
-	list *listItem[V]
+	list *listItem[K, V]
 }
 
 // Returns a lru cache with a size which comply to the `Cache` interface.
 //
-//   lrucache.New[string](100)
-func New[V any](capacity int) Cache[V] {
+//	lrucache.New[string](100)
+func New[K comparable, V any](capacity int) Cache[K, V] {
 	if capacity <= 1 {
 		panic("lrucache size should be at least 2")
 	}
-	return &lru[V]{
-		appendix: make(map[reflect.Type]*listItem[V]),
+	return &lru[K, V]{
+		mu:       new(sync.RWMutex),
+		appendix: make(map[K]*listItem[K, V]),
 		size:     capacity,
 	}
 }
 
 // Returns the value using key.
 //
-//   lrucache.Get(reflect.TypeOf(time.Time{}))
-func (l *lru[V]) Get(t reflect.Type) (V, bool) {
+//	lrucache.Get(reflect.TypeOf(time.Time{}))
+func (l *lru[K, V]) Get(t K) (V, bool) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	v, ok := l.appendix[t]
 	if ok {
 		return v.value, true
@@ -67,12 +66,13 @@ func (l *lru[V]) Get(t reflect.Type) (V, bool) {
 
 // Set the key and value into cache.
 //
-//   lrucache.Set(reflect.TypeOf(time.Time{}), time.Now())
-func (l *lru[V]) Set(t reflect.Type, value V) {
-	li := new(listItem[V])
+//	lrucache.Set(reflect.TypeOf(time.Time{}), time.Now())
+func (l *lru[K, V]) Set(t K, value V) {
+	li := new(listItem[K, V])
 	li.key = t
 	li.value = value
 	l.mu.Lock()
+	defer l.mu.Unlock()
 	if l.list != nil {
 		li.prev = l.list
 		l.current.next = li
@@ -88,26 +88,25 @@ func (l *lru[V]) Set(t reflect.Type, value V) {
 		delete(l.appendix, l.list.key)
 		l.list = next
 	}
-	l.mu.Unlock()
 }
 
 // Len returns the number of items in the cache.
-func (l *lru[V]) Len() int {
+func (l *lru[K, V]) Len() int {
 	return len(l.appendix)
 }
 
 // Size returns the size of the cache.
-func (l *lru[V]) Size() int {
+func (l *lru[K, V]) Size() int {
 	return l.size
 }
 
 // Purge clear all the entries inside the cache.
-func (l *lru[V]) Purge() {
+func (l *lru[K, V]) Purge() {
 	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.current = nil
 	l.list = nil
 	for k := range l.appendix {
 		delete(l.appendix, k)
 	}
-	l.mu.Unlock()
 }
