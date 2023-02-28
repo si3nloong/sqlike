@@ -46,3 +46,20 @@ func StringToBytes(s string) []byte {
 		}{s, len(s)},
 	))
 }
+
+func EscapeString(s string, escChar byte) string {
+	buf := make([]byte, 0, 3*len(s)/2)
+	f := func() {
+		buf = append(buf, []byte{escChar, escChar}...)
+	}
+	for w := 0; len(s) > 0; s = s[w:] {
+		r := rune(s[0])
+		w = 1
+		if r == rune(escChar) {
+			f()
+			continue
+		}
+		buf = append(buf, s[0])
+	}
+	return string(buf)
+}

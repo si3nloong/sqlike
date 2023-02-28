@@ -32,3 +32,8 @@ func TestUnsafeString(t *testing.T) {
 	b := []byte(msg)
 	require.Equal(t, msg, UnsafeString(b))
 }
+
+func TestEscapeString(t *testing.T) {
+	require.Equal(t, "sqlike", EscapeString("sqlike", '`'))
+	require.Equal(t, "``sqlike``", EscapeString("`sqlike`", '`'))
+}
