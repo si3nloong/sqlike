@@ -8,8 +8,5 @@ import (
 )
 
 func TestSum(t *testing.T) {
-	require.Equal(t, primitive.Aggregate{
-		Field: wrapColumn("a"),
-		By:    primitive.Sum,
-	}, Sum("a"))
+	require.Equal(t, primitive.Aggregate{Field: wrapColumn("a"), By: primitive.Sum}, Sum("a"))
 }
