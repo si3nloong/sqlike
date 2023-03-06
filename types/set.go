@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"database/sql/driver"
+	"fmt"
 	"strings"
 
 	"github.com/si3nloong/sqlike/v2/db"
@@ -11,15 +12,19 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
+type setDataType interface {
+	~string
+}
+
 // Set : sql data type of `SET`
-type Set []string
+type Set[T setDataType] []T
 
 var (
-	_ db.ColumnDataTyper = (*Set)(nil)
+	_ db.ColumnDataTyper = (*Set[string])(nil)
 )
 
 // DataType :
-func (s *Set) ColumnDataType(ctx context.Context) *sql.Column {
+func (s *Set[T]) ColumnDataType(ctx context.Context) *sql.Column {
 	charset, collate := "utf8mb4", "utf8mb4_0900_ai_ci"
 	f := sql.GetField(ctx)
 	blr := util.AcquireString()
@@ -52,15 +57,23 @@ func (s *Set) ColumnDataType(ctx context.Context) *sql.Column {
 }
 
 // Value :
-func (s Set) Value() (driver.Value, error) {
+func (s Set[T]) Value() (driver.Value, error) {
 	if s == nil {
 		return nil, nil
 	}
-	return strings.Join(s, ","), nil
+	blr := util.AcquireString()
+	defer util.ReleaseString(blr)
+	for idx, v := range s {
+		if idx > 0 {
+			blr.WriteByte(',')
+		}
+		blr.WriteString(fmt.Sprintf("%s", v))
+	}
+	return blr.String(), nil
 }
 
 // Scan :
-func (s *Set) Scan(it any) error {
+func (s *Set[T]) Scan(it any) error {
 	switch vi := it.(type) {
 	case []byte:
 		s.unmarshal(string(vi))
@@ -69,10 +82,15 @@ func (s *Set) Scan(it any) error {
 		s.unmarshal(vi)
 
 	case nil:
+		*s = nil
 	}
 	return nil
 }
 
-func (s *Set) unmarshal(val string) {
-	*s = strings.Split(val, ",")
+func (s *Set[T]) unmarshal(val string) {
+	sets := make(Set[T], 0)
+	for _, v := range strings.Split(val, ",") {
+		sets = append(sets, T(v))
+	}
+	*s = sets
 }

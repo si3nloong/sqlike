@@ -139,7 +139,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)
-		require.ElementsMatch(t, types.Set{"A", "B"}, ns.Set)
+		require.ElementsMatch(t, types.Set[string]{"A", "B"}, ns.Set)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 
 		columns := []string{

@@ -10,7 +10,7 @@ import (
 
 func TestSet(t *testing.T) {
 
-	set := Set{"a", "b", "c", "d"}
+	set := Set[string]{"a", "b", "c", "d"}
 
 	t.Run("DataType", func(it *testing.T) {
 		col := set.ColumnDataType(sql.Context("", "").
@@ -29,7 +29,7 @@ func TestSet(t *testing.T) {
 	})
 
 	t.Run("driver.Valuer with nil value", func(it *testing.T) {
-		var set Set
+		var set Set[string]
 		v, err := set.Value()
 		require.NoError(it, err)
 		require.Nil(it, v)
@@ -42,12 +42,12 @@ func TestSet(t *testing.T) {
 	})
 
 	t.Run("Scan Set with sql.Scanner", func(it *testing.T) {
-		var set2 Set
+		var set2 Set[string]
 		err := set2.Scan("a,b,c,d")
 		require.NoError(it, err)
 		require.Equal(it, set, set2)
 
-		set2 = Set{}
+		set2 = Set[string]{}
 		err = set2.Scan([]byte("a,b,c,d"))
 		require.NoError(t, err)
 		require.Equal(t, set, set2)

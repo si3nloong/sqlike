@@ -74,8 +74,8 @@ type normalStruct struct {
 	Languages  []language.Tag
 	Currency   currency.Unit
 	Currencies []currency.Unit
-	Enum       Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Set        types.Set `sqlike:",set=A|B|C"`
+	Enum       Enum              `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Set        types.Set[string] `sqlike:",set=A|B|C"`
 	Model
 }
 

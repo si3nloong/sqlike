@@ -34,8 +34,8 @@ type dumpStruct struct {
 	Array   []string
 	// Point        orb.Point
 	// LineString   orb.LineString
-	Enum        Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Set         types.Set `sqlike:",set=A|B|C"`
+	Enum        Enum              `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Set         types.Set[string] `sqlike:",set=A|B|C"`
 	Date        civil.Date
 	DateTime    time.Time
 	PtrString   *string
@@ -46,7 +46,7 @@ type dumpStruct struct {
 	PtrDate     *civil.Date
 	PtrTime     *civil.Time
 	PtrDateTime *time.Time
-	PtrSet      *types.Set `sqlike:",set=A|B|C"`
+	PtrSet      *types.Set[string] `sqlike:",set=A|B|C"`
 }
 
 // SQLDumpExamples :
