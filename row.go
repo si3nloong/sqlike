@@ -4,10 +4,12 @@ import (
 	"database/sql"
 )
 
+// Row is the result of calling QueryRow to select a single row.
 type Row struct {
 	*sql.Row
 }
 
+// Decode will unmarshal the values to struct.
 func (r *Row) Decode(dst any) error {
 	// v := reflext.ValueOf(dst)
 	// if !v.IsValid() {

@@ -29,16 +29,19 @@ func ReleaseString(x *strings.Builder) {
 
 // UnsafeString :
 func UnsafeString(b []byte) string {
+	// #nosec
 	return *(*string)(unsafe.Pointer(&b))
 }
 
 // BytesToString converts byte slice to string.
 func BytesToString(b []byte) string {
+	// #nosec
 	return *(*string)(unsafe.Pointer(&b))
 }
 
 // StringToBytes converts string to byte slice.
 func StringToBytes(s string) []byte {
+	// #nosec
 	return *(*[]byte)(unsafe.Pointer(
 		&struct {
 			string
