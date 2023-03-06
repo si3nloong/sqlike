@@ -25,7 +25,7 @@ var (
 type ValueDecoder func(*Reader, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(*Writer, reflect.Value) error
+type ValueEncoder func(JsonWriter, reflect.Value) error
 
 // Registry :
 type Registry struct {
@@ -116,10 +116,7 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	)
 
 	if !v.IsValid() || reflext.IsNull(v) {
-		return func(w *Writer, v reflect.Value) error {
-			w.WriteString(null)
-			return nil
-		}, nil
+		return nilEncoder(), nil
 	}
 
 	it := v.Interface()

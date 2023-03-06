@@ -11,8 +11,6 @@ var whiteSpaceMap = map[byte]bool{
 	'\r': true,
 }
 
-var emptyJSON = []byte(`null`)
-
 // Reader :
 type Reader struct {
 	typ   jsonType

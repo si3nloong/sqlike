@@ -91,8 +91,7 @@ func modifyOne(
 		return 0, errors.New("sqlike: missing primary key field")
 	}
 
-	act.Where(expr.Equal(pkv[0].(string), pkv[1]))
-	act.Limit(1)
+	act.Where(expr.Equal(pkv[0].(string), pkv[1])).Limit(1)
 	act.Table = tbName
 	act.Database = dbName
 

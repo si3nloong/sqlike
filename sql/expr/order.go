@@ -7,12 +7,11 @@ import (
 // Field :
 func Field[T any](name string, val []T) (f primitive.Field) {
 	f.Name = name
-	length := len(val)
-	if length < 1 {
-		panic("zero length of array or slice")
+	if len(val) < 1 {
+		panic(`sqlike: zero length of array or slice`)
 	}
-	for i := 0; i < length; i++ {
-		f.Values = append(f.Values, val[i])
+	for _, v := range val {
+		f.Values = append(f.Values, v)
 	}
 	return
 }

@@ -90,7 +90,7 @@ func (s *Set[T]) Scan(it any) error {
 func (s *Set[T]) unmarshal(val string) {
 	sets := make(Set[T], 0)
 	for _, v := range strings.Split(val, ",") {
-		sets = append(sets, T(v))
+		sets = append(sets, T(strings.TrimSpace(v)))
 	}
 	*s = sets
 }

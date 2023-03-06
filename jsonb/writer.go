@@ -1,6 +1,18 @@
 package jsonb
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+	"io"
+)
+
+type JsonWriter interface {
+	io.StringWriter
+	io.ByteWriter
+	io.Writer
+	fmt.Stringer
+	Bytes() []byte
+}
 
 // Writer :
 type Writer struct {
@@ -8,6 +20,6 @@ type Writer struct {
 }
 
 // NewWriter :
-func NewWriter() *Writer {
+func NewWriter() JsonWriter {
 	return &Writer{}
 }

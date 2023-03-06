@@ -363,12 +363,11 @@ func (dec *DefaultDecoder) DecodeMap(r *Reader, v reflect.Value) error {
 	}
 	x := reflect.MakeMap(t)
 	if err := r.ReadObject(func(it *Reader, k string) error {
-		ki := reflext.Zero(t.Key())
+		ki, vi := reflext.Zero(t.Key()), reflext.Zero(t.Elem())
 		err = decodeKey(NewReader([]byte(strconv.Quote(k))), ki)
 		if err != nil {
 			return err
 		}
-		vi := reflext.Zero(t.Elem())
 		err = decodeValue(it, vi)
 		if err != nil {
 			return err
