@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/internal/util"
@@ -148,7 +149,7 @@ func (d *Dumper) BackupTo(ctx context.Context, query any, wr io.Writer) (affecte
 #
 `)
 	w.WriteString("# Driver: " + d.driver + "\n")
-	w.WriteString("# Version: " + version + "\n")
+	w.WriteString("# Version: " + version.String() + "\n")
 	// w.WriteString("# Host: rm-zf86x4n0wvyy6830yyo.mysql.kualalumpur.rds.aliyuncs.com\n")
 	w.WriteString("# Database: " + dbName + "\n")
 	w.WriteString("# Generation Time: " + time.Now().UTC().Format(time.RFC3339) + "\n")
@@ -251,14 +252,14 @@ UNLOCK TABLES;
 	return
 }
 
-func (d *Dumper) getVersion(ctx context.Context) (string, error) {
+func (d *Dumper) getVersion(ctx context.Context) (*semver.Version, error) {
 	stmt := sqlstmt.AcquireStmt(d.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 
 	d.dialect.GetVersion(stmt)
 	rows, err := d.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -266,10 +267,9 @@ func (d *Dumper) getVersion(ctx context.Context) (string, error) {
 
 	var version string
 	if err := rows.Scan(&version); err != nil {
-		return "", err
+		return nil, err
 	}
-
-	return version, nil
+	return semver.MustParse(version), nil
 }
 
 func (d *Dumper) getColumns(ctx context.Context, dbName, table string) ([]Column, error) {

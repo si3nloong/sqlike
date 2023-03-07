@@ -69,11 +69,38 @@ type Paginator struct {
 	err    error
 }
 
-// After: Paginate the records using after cursor.
-//
-//	if err := pg.After(context.Background(), 1); err != nil {
-//		panic(err)
-//	}
+// Before is to set before cursor.
+func (pg *Paginator) Before(ctx context.Context, cursor any) (err error) {
+	if pg.err != nil {
+		return pg.err
+	}
+	if cursor == nil || reflext.IsZero(reflext.ValueOf(cursor)) {
+		return ErrInvalidCursor
+	}
+	fa := actions.FindOne().
+		Select(pg.fields...).
+		Where(
+			expr.Equal(pg.table.pk, cursor),
+		).(*actions.FindOneActions)
+	fa.Limit(1)
+	result := find(
+		ctx,
+		pg.table.dbName,
+		pg.table.name,
+		pg.table.client.cache,
+		getDriverFromContext(ctx, pg.table.driver),
+		pg.table.dialect,
+		pg.table.logger,
+		&fa.FindActions,
+		&options.FindOptions{Debug: pg.option.Debug},
+	)
+	// prevent memory leak
+	defer result.Close()
+	pg.values, err = result.nextValues()
+	return
+}
+
+// After is to set after cursor.
 func (pg *Paginator) After(ctx context.Context, cursor any) (err error) {
 	if pg.err != nil {
 		return pg.err
@@ -105,7 +132,7 @@ func (pg *Paginator) After(ctx context.Context, cursor any) (err error) {
 }
 
 // All :
-func (pg *Paginator) All(results any) error {
+func (pg *Paginator) All(dest any) error {
 	if pg.err != nil {
 		return pg.err
 	}
@@ -120,7 +147,7 @@ func (pg *Paginator) All(results any) error {
 		pg.buildAction(),
 		pg.option,
 	)
-	return result.All(results)
+	return result.All(dest)
 }
 
 func (pg *Paginator) buildAction() *actions.FindActions {

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"strconv"
 	"strings"
-	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
@@ -15,6 +15,9 @@ var null = []byte(`null`)
 type Parser func([]byte) string
 
 func byteToString(data []byte) string {
+	if data == nil {
+		return `NULL`
+	}
 	if len(data) == 0 {
 		return `""`
 	}
@@ -26,17 +29,18 @@ func numToString(data []byte) string {
 }
 
 func tsToString(data []byte) string {
-	t, _ := time.Parse(time.RFC3339, string(data))
-	return t.UTC().Format(`"2006-01-02 15:04:05.999999999"`)
+	// t, _ := time.Parse(time.RFC3339, string(data))
+	// return t.UTC().Format(`"2006-01-02 15:04:05.999999999"`)
+	return strconv.Quote(string(data))
 }
 
 func dateToString(data []byte) string {
-	t, _ := time.Parse(time.RFC3339, string(data))
-	return t.UTC().Format(`"2006-01-02"`)
+	t, _ := civil.ParseDate(string(data))
+	return strconv.Quote(t.String())
 }
 
 func jsonToString(data []byte) string {
-	if bytes.Equal(data, null) {
+	if data == nil || bytes.Equal(data, null) {
 		return `"null"`
 	}
 	return strconv.Quote(string(data))

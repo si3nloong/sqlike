@@ -197,16 +197,16 @@ func (enc *DefaultEncoder) EncodeMap(w JsonWriter, v reflect.Value) error {
 	keys := v.MapKeys()
 	var encode ValueEncoder
 	if k.Implements(textMarshaler) {
-		encode = func(wr JsonWriter, vi reflect.Value) error {
+		encode = func(w JsonWriter, vi reflect.Value) error {
 			it := vi.Interface().(encoding.TextMarshaler)
 			b, err := it.MarshalText()
 			if err != nil {
 				return err
 			}
 
-			wr.WriteByte('"')
-			wr.Write(b)
-			wr.WriteByte('"')
+			w.WriteByte('"')
+			w.Write(b)
+			w.WriteByte('"')
 			return nil
 		}
 	} else {
@@ -220,16 +220,16 @@ func (enc *DefaultEncoder) EncodeMap(w JsonWriter, v reflect.Value) error {
 			sort.SliceStable(keys, func(i, j int) bool {
 				return keys[i].Int() < keys[j].Int()
 			})
-			encode = func(wr JsonWriter, vi reflect.Value) error {
-				wr.WriteString(`"` + strconv.FormatInt(vi.Int(), 10) + `"`)
+			encode = func(w JsonWriter, vi reflect.Value) error {
+				w.WriteString(`"` + strconv.FormatInt(vi.Int(), 10) + `"`)
 				return nil
 			}
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			sort.SliceStable(keys, func(i, j int) bool {
 				return keys[i].Uint() < keys[j].Uint()
 			})
-			encode = func(wr JsonWriter, vi reflect.Value) error {
-				wr.WriteString(`"` + strconv.FormatUint(vi.Uint(), 10) + `"`)
+			encode = func(w JsonWriter, vi reflect.Value) error {
+				w.WriteString(`"` + strconv.FormatUint(vi.Uint(), 10) + `"`)
 				return nil
 			}
 		default:

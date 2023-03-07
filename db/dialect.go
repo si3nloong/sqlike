@@ -13,6 +13,7 @@ import (
 
 type SqlDriver interface {
 	Var(i int) string
+	Quote(n string) string
 }
 
 // SQL dialect which implement interfaces
@@ -20,7 +21,6 @@ type Dialect interface {
 	Codecer
 	SqlDriver
 	TableName(db, table string) string
-	Quote(n string) string
 	Format(v any) (val string)
 	Connect(opt *options.ConnectOptions) (connStr string)
 	UseDatabase(stmt Stmt, db string)
