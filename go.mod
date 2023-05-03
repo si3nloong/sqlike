@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/tidwall/sjson v1.2.5
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
-	go.mongodb.org/mongo-driver v1.11.4
+	go.mongodb.org/mongo-driver v1.11.5
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 	golang.org/x/text v0.9.0
 	google.golang.org/protobuf v1.30.0
