@@ -15,7 +15,15 @@ func JoinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	// setup databases
 	db.Table("User").MustMigrate(ctx, User{})
-	db.Table("UserAddress").MustMigrate(ctx, UserAddress{})
+	addressTable := db.Table("UserAddress")
+	addressTable.MustMigrate(ctx, UserAddress{})
+
+	t.Run("Check the foreign key index", func(t *testing.T) {
+		idxs, err := addressTable.Indexes().List(ctx)
+		require.NoError(t, err)
+
+		require.Contains(t, idxs, sqlike.Index{Name: "UserID", Type: "BTREE"})
+	})
 
 	// SELECT * FROM `User` LEFT JOIN `UserAddress` ON `User`.`ID` = `UserAddress`.`UserID`;
 	t.Run("LeftJoin", func(t *testing.T) {
@@ -46,6 +54,7 @@ func JoinExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		}
 	})
 
+	// SELECT * FROM `User` INNER JOIN `UserAddress` ON `User`.`ID` = `UserAddress`.`UserID`;
 	t.Run("InnerJoin", func(t *testing.T) {
 		result, err := db.QueryStmt(ctx, sql.
 			Select(
