@@ -21,17 +21,18 @@ func TestEncodeMap(t *testing.T) {
 		require.ElementsMatch(t, []any{`null`}, args)
 	})
 
-	// t.Run("EncodeMap with map[string]int", func(t *testing.T) {
-	// 	intmap := map[string]int{
-	// 		"one":             1,
-	// 		"eleven":          11,
-	// 		"hundred-and-ten": 110,
-	// 	}
-	// 	query, args, err := enc.EncodeMap(ms, reflect.ValueOf(intmap), nil)
-	// 	require.NoError(t, err)
-	// 	require.Equal(t, "?", query)
-	// 	require.ElementsMatch(t, []any{[]byte(`{"one":1,"eleven":11,"hundred-and-ten":110}`)}, args)
-	// })
+	t.Run("EncodeMap with map[string]int", func(t *testing.T) {
+		intmap := map[string]int{
+			"one":             1,
+			"eleven":          11,
+			"hundred-and-ten": 110,
+		}
+		query, args, err := enc.EncodeMap(ms, reflect.ValueOf(intmap), nil)
+		require.NoError(t, err)
+		require.Equal(t, "?", query)
+		require.Equal(t, len(args), 1)
+		require.JSONEq(t, `{"one":1,"eleven":11,"hundred-and-ten":110}`, string(args[0].([]byte)))
+	})
 
 	t.Run("EncodeMap with map[string]any", func(t *testing.T) {
 		intmap := make(map[string]any)

@@ -73,7 +73,6 @@ func (b mySQLBuilder) SetRegistryAndBuilders(rg db.Codecer, blr *sqlstmt.Stateme
 	blr.SetBuilder(reflect.TypeOf(&sql.UpdateStmt{}), b.BuildUpdateStmt)
 	// blr.SetBuilder(reflect.TypeOf(&sql.DeleteStmt{}), b.BuildDeleteStmt)
 	blr.SetBuilder(reflect.TypeOf(actions.FindActions{}), b.BuildFindActions)
-	// blr.SetBuilder(reflect.TypeOf(&actions.FindActions{}), b.BuildFindActions)
 	blr.SetBuilder(reflect.TypeOf(actions.UpdateActions{}), b.BuildUpdateActions)
 	blr.SetBuilder(reflect.TypeOf(actions.DeleteActions{}), b.BuildDeleteActions)
 	blr.SetBuilder(reflect.String, b.BuildString)
