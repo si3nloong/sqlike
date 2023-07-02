@@ -32,7 +32,11 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const keyEnv = "SQLIKE_NAMESPACE"
+var keyNS string
+
+func init() {
+	keyNS = os.Getenv("SQL_NAMESPACE")
+}
 
 // Writer :
 type writer interface {
@@ -263,9 +267,9 @@ func (k *Key) UnmarshalJSONB(b []byte) error {
 // MarshalBSONValue :
 func (k Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	if k.Incomplete() {
-		return bsontype.Null, nil, nil
+		return bson.TypeNull, nil, nil
 	}
-	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
+	return bson.TypeString, bsoncore.AppendString(nil, k.String()), nil
 }
 
 // UnmarshalBSONValue :
@@ -273,7 +277,7 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	if k == nil {
 		return errors.New("types: invalid key value <nil>")
 	}
-	if t == bsontype.Null {
+	if t == bson.TypeNull {
 		return nil
 	}
 	v, _, ok := bsoncore.ReadString(b)
@@ -301,7 +305,7 @@ func (k *Key) UnmarshalGQL(it any) error {
 		return k.UnmarshalJSON([]byte(vi))
 	case nil:
 	default:
-		return fmt.Errorf("sqlike: %T is not a Key", it)
+		return fmt.Errorf("types: %T is not a Key", it)
 	}
 	return nil
 }
@@ -530,7 +534,7 @@ func protoToKey(pk *pb.Key) *Key {
 // The namespace of the new key is empty.
 func NameKey(kind, name string, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		NameID:    name,
 		Parent:    parent,
@@ -543,7 +547,7 @@ func NameKey(kind, name string, parent *Key) *Key {
 // The namespace of the new key is empty.
 func IDKey(kind string, id int64, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		IntID:     id,
 		Parent:    parent,
@@ -564,7 +568,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 	}
 
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		IntID:     id,
 		Parent:    parent,
@@ -574,7 +578,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 // NewNameKey :
 func NewNameKey(kind string, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		NameID:    ksuid.New().String(),
 		Parent:    parent,
