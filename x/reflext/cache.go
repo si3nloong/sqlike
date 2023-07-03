@@ -1,10 +1,13 @@
 package reflext
 
 import (
+	"os"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/si3nloong/sqlike/v2/internal/lrucache"
+	"github.com/si3nloong/sqlike/v2/internal/strfmt"
 )
 
 var defaultMapper = NewMapperFunc(500, []string{"sqlike", "db", "sql"})
@@ -43,6 +46,15 @@ func NewMapperFunc(size int, tags []string, formatter ...FormatFunc) StructMappe
 	}
 	if len(formatter) > 0 {
 		fmtFunc = formatter[0]
+	} else {
+		switch strings.ToLower(os.Getenv("SQL_NAMING_CONVENTION")) {
+		case "camelcase":
+			fmtFunc = strfmt.ToCamelCase
+		case "snakecase":
+			fmtFunc = strfmt.ToSnakeCase
+		case "pascalcase":
+			fmtFunc = strfmt.ToPascalCase
+		}
 	}
 	return &mapper{
 		cache:   lrucache.New[reflect.Type, *Struct](size),
@@ -55,13 +67,6 @@ func NewMapperFunc(size int, tags []string, formatter ...FormatFunc) StructMappe
 func (m *mapper) CodecByType(t reflect.Type) StructInfo {
 	mapping, ok := m.cache.Get(t)
 	if !ok {
-		// m.mutex.Lock()
-		// mapping = getCodec(t, m.tags, m.fmtFunc)
-		// _, ok = m.cache[t]
-		// if !ok {
-		// 	m.cache[t] = mapping
-		// }
-		// m.mutex.Unlock()
 		mapping = getCodec(t, m.tags, m.fmtFunc)
 		m.cache.Set(t, mapping)
 	}
