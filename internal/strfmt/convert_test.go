@@ -9,7 +9,8 @@ import (
 func TestSnakeCase(t *testing.T) {
 	require.Equal(t, `abcef_ghij_kk`, ToSnakeCase("abcef ghij kk"))
 	require.Equal(t, `abcd_j`, ToSnakeCase("ABCD j"))
-	require.Equal(t, `id`, ToSnakeCase(`id`))
+	require.Equal(t, `id`, ToSnakeCase(`ID`))
+	require.Equal(t, `upper_case`, ToSnakeCase(`UpperCase`))
 	require.Equal(t, `const_k`, ToSnakeCase(`CONST_K`))
 	require.Equal(t, `marshal_json`, ToSnakeCase(`MarshalJSON`))
 }

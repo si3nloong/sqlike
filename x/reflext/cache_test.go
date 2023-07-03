@@ -26,6 +26,8 @@ func TestMapper(t *testing.T) {
 	tmp := dbStruct{Name: "John"}
 	v := reflect.ValueOf(&tmp)
 	typeof := v.Type()
+
+	// mapper.CodecByType(reflect.TypeOf(tmp))
 	fv := mapper.FieldByName(v, "name")
 	require.NotNil(t, fv)
 

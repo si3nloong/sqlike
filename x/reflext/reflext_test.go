@@ -121,7 +121,9 @@ func TestCodec(t *testing.T) {
 	)
 
 	typeof = reflect.TypeOf(i)
-	codec = getCodec(typeof, []string{"sqlike", "db", "sql"}, nil)
+	codec = getCodec(typeof, []string{"sqlike", "db", "sql"}, func(s string) string {
+		return s
+	})
 
 	require.Equal(t, len(codec.Fields()), 16)
 
@@ -223,7 +225,9 @@ func TestCodec(t *testing.T) {
 	})
 
 	typeof = reflect.TypeOf(recursiveStruct{})
-	codec = getCodec(typeof, []string{"sqlike"}, nil)
+	codec = getCodec(typeof, []string{"sqlike"}, func(s string) string {
+		return s
+	})
 
 	require.Equal(t, len(codec.fields), 2)
 	require.Equal(t, len(codec.properties), 2)
@@ -255,7 +259,7 @@ func TestParseTag(t *testing.T) {
 
 	t.Run("parseTag with MultipleTag", func(t *testing.T) {
 		f, _ := v.FieldByName("ID")
-		tag := parseTag(f, []string{"db", "sqlike"}, nil)
+		tag := parseTag(f, []string{"db", "sqlike"})
 		// require.Empty(t, tag.Name())
 		require.Equal(t, "ID", tag.FieldName())
 		v, ok := tag.LookUp("db")
@@ -273,7 +277,7 @@ func TestParseTag(t *testing.T) {
 
 	t.Run("parseTag with skip tag", func(t *testing.T) {
 		f, _ := v.FieldByName("Skip")
-		tag := parseTag(f, []string{"db", "sqlike"}, nil)
+		tag := parseTag(f, []string{"db", "sqlike"})
 		require.Equal(t, "-", tag.Name())
 		require.Equal(t, "Skip", tag.FieldName())
 		require.Equal(t, `-`, tag.Get("sqlike"))

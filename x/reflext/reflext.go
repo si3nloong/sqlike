@@ -276,7 +276,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 				continue
 			}
 
-			tag := parseTag(f, tagNames, fmtFunc)
+			tag := parseTag(f, tagNames)
 			// skip when it's hyphen
 			if tag.Name() == "-" {
 				continue
@@ -301,7 +301,7 @@ func getCodec(t reflect.Type, tagNames []string, fmtFunc FormatFunc) *Struct {
 
 			// if tag name is empty, set to field name
 			if sf.path == "" && !sf.IsEmbedded() {
-				sf.path = f.Name
+				sf.path = fmtFunc(f.Name)
 			}
 
 			if q.pp != "" {
@@ -385,7 +385,7 @@ func appendSlice[T any](s []T, i T) []T {
 	return x
 }
 
-func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st StructTag) {
+func parseTag(f reflect.StructField, tagNames []string) (st StructTag) {
 	st.fieldName = f.Name
 	st.tag = f.Tag
 	st.opts = make(map[string]string)
@@ -420,9 +420,6 @@ func parseTag(f reflect.StructField, tagNames []string, fmtFunc FormatFunc) (st 
 			opt = strings.ToLower(opt)
 			st.opts[opt] = ""
 		}
-	}
-	if fmtFunc != nil {
-		name = fmtFunc(name)
 	}
 	st.name = name
 	return
