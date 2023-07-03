@@ -18,6 +18,8 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
+
+	uuidv5 "github.com/gofrs/uuid/v5"
 )
 
 // DataTypeFunc :
@@ -86,6 +88,7 @@ func (sb *Builder) SetDefaultTypes() {
 	sb.SetType(reflect.TypeOf([]byte{}), sqltype.Byte)
 	sb.SetType(reflect.TypeOf(uuid.UUID{}), sqltype.UUID)
 	sb.SetType(reflect.TypeOf(gouuid.UUID{}), sqltype.UUID)
+	sb.SetType(reflect.TypeOf(uuidv5.UUID{}), sqltype.UUID)
 	sb.SetType(reflect.TypeOf(language.Tag{}), sqltype.String)
 	sb.SetType(reflect.TypeOf(currency.Unit{}), sqltype.Char)
 	sb.SetType(reflect.TypeOf(time.Time{}), sqltype.DateTime)

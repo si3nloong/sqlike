@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"testing"
 
-	uuid "github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
@@ -48,8 +48,8 @@ func DeleteExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		table.MustUnsafeMigrate(ctx, dummy{})
 		records := []dummy{
-			{UUID: uuid.New()},
-			{UUID: uuid.New()},
+			{UUID: uuid.Must(uuid.NewV4())},
+			{UUID: uuid.Must(uuid.NewV4())},
 		}
 
 		_, err = table.Insert(ctx, &records)

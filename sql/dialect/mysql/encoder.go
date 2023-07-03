@@ -3,7 +3,7 @@ package mysql
 import (
 	"bytes"
 	"database/sql"
-	"database/sql/driver"
+	"encoding"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -20,6 +20,8 @@ import (
 	"github.com/si3nloong/sqlike/v2/x/reflext"
 
 	"github.com/si3nloong/sqlike/v2/jsonb"
+
+	"github.com/gofrs/uuid/v5"
 )
 
 // DefaultEncoders :
@@ -29,22 +31,48 @@ type DefaultEncoders struct {
 
 func (enc DefaultEncoders) EncodeUUID(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if v.IsZero() {
-		return `UUID_TO_BIN(UUID(),1)`, nil, nil
+		id, err := uuid.NewV7()
+		if err != nil {
+			return "", nil, err
+		}
+		switch vi := v.Interface().(type) {
+		case []byte:
+			v.Set(reflect.ValueOf(id.Bytes()))
+		case string:
+			v.Set(reflect.ValueOf(id.String()))
+		case sql.Scanner:
+			if err := vi.Scan(id.String()); err != nil {
+				return "", nil, err
+			}
+		case encoding.TextUnmarshaler:
+			if err := vi.UnmarshalText(id.Bytes()); err != nil {
+				return "", nil, err
+			}
+		}
+		return d.Var(1), []any{id.Bytes()}, nil
 	}
 	fName := `UUID_TO_BIN(` + d.Var(1) + `)`
 	switch vi := v.Interface().(type) {
 	case []byte:
+		// v.Set()
 		return fName, []any{string(vi)}, nil
 	case string:
 		return fName, []any{vi}, nil
-	case fmt.Stringer:
-		return fName, []any{vi.String()}, nil
-	case driver.Valuer:
-		uuid, err := vi.Value()
+	case encoding.BinaryMarshaler:
+		id, err := vi.MarshalBinary()
 		if err != nil {
 			return "", nil, err
 		}
-		return fName, []any{uuid}, nil
+		return d.Var(1), []any{id}, nil
+
+	// case fmt.Stringer:
+	// 	return fName, []any{vi.String()}, nil
+	// case driver.Valuer:
+	// 	uuid, err := vi.Value()
+	// 	if err != nil {
+	// 		return "", nil, err
+	// 	}
+	// 	return fName, []any{uuid}, nil
 	default:
 		return "", nil, fmt.Errorf(`sqlike: invalid data type %v for UUID`, v.Type())
 	}
@@ -115,8 +143,8 @@ func (enc DefaultEncoders) EncodeRawBytes(d db.SqlDriver, v reflect.Value, opts 
 	return d.Var(1), []any{sql.RawBytes(v.Bytes())}, nil
 }
 
-// EncodeJsonRaw :
-func (enc DefaultEncoders) EncodeJsonRaw(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+// EncodeJSONRaw :
+func (enc DefaultEncoders) EncodeJSONRaw(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if v.IsNil() {
 		return d.Var(1), []any{[]byte("null")}, nil
 	}
@@ -132,28 +160,17 @@ func (enc DefaultEncoders) EncodeJsonRaw(d db.SqlDriver, v reflect.Value, opts m
 
 // EncodeStringer :
 func (enc DefaultEncoders) EncodeStringer(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
-	return d.Var(1), []any{v.Interface().(fmt.Stringer).String()}, nil
+	vi := v.Interface().(fmt.Stringer)
+	return d.Var(1), []any{vi.String()}, nil
 }
 
 func (enc DefaultEncoders) EncodeDateTime(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	vi := v.Interface().(time.Time)
-	// TODO:
-	// If `CURRENT_TIMESTAMP` is define, we will pass `nil` value
-	// elseif the datetime is zero, we will pass the current datetime of the machine
-	// else we will pass the value of it instead
-	//
-	// And we should handle the TIMESTAMP type as well
-	// f := sqlx.GetField(ctx)
-	// // def, _ := f.Tag().LookUp("default")
-	// v2, _ := f.Tag().Option("default")
-	// if strings.Contains(v2, "CURRENT_TIMESTAMP") {
-	// 	return nil, nil
-	// } else if x.IsZero() {
-	// 	x, _ = time.Parse(time.RFC3339, "1970-01-01T08:00:00Z")
-	// 	return x, nil
-	// }
-	if _, ok := opts["default"]; ok {
-		return "CURRENT_TIMESTAMP", []any{}, nil
+	if vi.IsZero() {
+		vi = time.Now()
+		if v.CanSet() {
+			v.Set(reflect.ValueOf(vi))
+		}
 	}
 	// convert to UTC before storing into DB
 	return d.Var(1), []any{vi.UTC()}, nil

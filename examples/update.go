@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
@@ -25,8 +25,8 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	)
 
 	table := db.Table("NormalStruct")
-	uid, _ := uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
-	uid2, _ := uuid.Parse("ae608554-491c-4472-beac-97feef49e810")
+	uid, _ := uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87b17`)
+	uid2, _ := uuid.FromString("ae608554-491c-4472-beac-97feef49e810")
 
 	{
 		ns = normalStruct{}

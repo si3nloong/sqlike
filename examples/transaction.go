@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
@@ -36,7 +36,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 	// Commit Transaction
 	t.Run("Commit Transaction", func(t *testing.T) {
-		uid, _ = uuid.Parse(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
+		uid, _ = uuid.FromString(`be72fc34-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
 		ns = normalStruct{}
@@ -60,7 +60,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 	// Abort Transaction
 	t.Run("Abort Transaction", func(t *testing.T) {
-		uid, _ = uuid.Parse(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
+		uid, _ = uuid.FromString(`be7191c8-917b-11e9-af91-6c96cfd87a51`)
 		now := time.Now()
 
 		ns = normalStruct{}
@@ -96,7 +96,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 	t.Run("RunInTransaction", func(t *testing.T) {
 		err = db.RunInTransaction(ctx, func(sess context.Context) error {
 			table := db.Table("NormalStruct")
-			uid, _ = uuid.Parse(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
+			uid, _ = uuid.FromString(`4ab3898c-9192-11e9-b500-6c96cfd87a51`)
 			now := time.Now()
 
 			ns = normalStruct{}
@@ -140,7 +140,7 @@ func TransactionExamples(ctx context.Context, t *testing.T, db *sqlike.Database)
 
 	// Timeout transaction
 	t.Run("RunInTransaction with timeout", func(t *testing.T) {
-		uid, _ = uuid.Parse(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
+		uid, _ = uuid.FromString(`5eb3f5c6-bfdb-11e9-88c7-6c96cfd87a51`)
 		now := time.Now()
 		err = db.RunInTransaction(ctx, func(sess context.Context) error {
 			ns = normalStruct{}

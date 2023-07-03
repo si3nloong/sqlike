@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
+	gouuid "github.com/google/uuid"
 	"github.com/paulmach/orb"
 	"github.com/si3nloong/sqlike/v2/db"
 	"github.com/si3nloong/sqlike/v2/internal/spatial"
@@ -21,6 +22,7 @@ func buildDefaultRegistry() db.Codecer {
 	dec := DefaultDecoders{rg}
 	enc := DefaultEncoders{rg}
 
+	rg.RegisterTypeCodec(reflect.TypeOf(gouuid.UUID{}), enc.EncodeUUID, dec.DecodeUUID)
 	rg.RegisterTypeCodec(reflect.TypeOf(uuid.UUID{}), enc.EncodeUUID, dec.DecodeUUID)
 	rg.RegisterTypeCodec(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
 	rg.RegisterTypeCodec(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
@@ -29,7 +31,7 @@ func buildDefaultRegistry() db.Codecer {
 	rg.RegisterTypeCodec(reflect.TypeOf(civil.Date{}), enc.EncodeStringer, dec.DecodeDate)
 	rg.RegisterTypeCodec(reflect.TypeOf(time.Time{}), enc.EncodeDateTime, dec.DecodeDateTime)
 	rg.RegisterTypeCodec(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
-	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJsonRaw, dec.DecodeJsonRaw)
+	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
 	rg.RegisterTypeCodec(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
 	rg.RegisterTypeCodec(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString), dec.DecodeLineString)
 	// rg.RegisterTypeCodec(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial2(spatial.Polygon), dec.DecodePolygon)

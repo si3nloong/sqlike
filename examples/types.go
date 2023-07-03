@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 type indexStruct struct {
@@ -248,7 +248,7 @@ func newNormalStruct() normalStruct {
 	now := time.Now()
 	ns := normalStruct{}
 	// ns.Key = types.IDKey("NormalStruct", id, nil)
-	ns.ID = uuid.New()
+	ns.ID = uuid.Must(uuid.NewV4())
 	ns.priv = 100
 	ns.Emoji = `😀 😁 😂 🤣 😃 😄 😅 😆 😉 😊`
 	ns.Byte = []byte(`-----BEGIN PUBLIC KEY-----
@@ -313,7 +313,7 @@ eCnpmNrTzG6ZJlJcvQIDAQAB
 func newPtrStruct() ptrStruct {
 	now := time.Now()
 	str := `hello world`
-	uid := uuid.New()
+	uid := uuid.Must(uuid.NewV4())
 	flag := true
 	b := []byte(`hello world`)
 	date, _ := civil.ParseDate("2019-01-02")
@@ -349,7 +349,7 @@ func newPtrStruct() ptrStruct {
 func newGeneratedStruct() *generatedStruct {
 	utcNow := time.Now().UTC()
 	gs := &generatedStruct{}
-	gs.Nested.ID = uuid.New().String()
+	gs.Nested.ID = uuid.Must(uuid.NewV4()).String()
 	gs.Nested.Amount = gofakeit.Float64Range(1, 10000)
 	gs.CivilDate = civil.DateOf(utcNow)
 	gs.CreatedAt = utcNow

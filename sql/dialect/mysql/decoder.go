@@ -3,6 +3,7 @@ package mysql
 import (
 	"bytes"
 	"database/sql"
+	"encoding"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -12,7 +13,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
 	"github.com/si3nloong/sqlike/v2/jsonb"
@@ -35,19 +36,20 @@ func (dec DefaultDecoders) DecodeUUID(it any, v reflect.Value) (err error) {
 	if !ok {
 		return errors.New("uuid must be []byte")
 	}
-	var (
-		val    uuid.UUID
-		length = len(data)
-	)
-	if length == 16 {
-		val, err = uuid.Parse(hex.EncodeToString(data))
-	} else {
-		val, err = uuid.ParseBytes(data)
+	switch vi := v.Addr().Interface().(type) {
+	case encoding.BinaryUnmarshaler:
+		return vi.UnmarshalBinary(data)
+	case sql.Scanner:
+		return vi.Scan(data)
+	case *[16]uint8:
+		id, err := uuid.FromBytes(data)
+		if err != nil {
+			return err
+		}
+		v.Set(reflect.ValueOf(id.Bytes()))
+		return nil
+	default:
 	}
-	if err != nil {
-		return
-	}
-	v.Set(reflect.ValueOf(val))
 	return nil
 }
 
@@ -158,7 +160,7 @@ func (dec DefaultDecoders) DecodeLanguage(it any, v reflect.Value) error {
 }
 
 // DecodeJSONRaw :
-func (dec DefaultDecoders) DecodeJsonRaw(it any, v reflect.Value) error {
+func (dec DefaultDecoders) DecodeJSONRaw(it any, v reflect.Value) error {
 	b := new(bytes.Buffer)
 	switch vi := it.(type) {
 	case string:

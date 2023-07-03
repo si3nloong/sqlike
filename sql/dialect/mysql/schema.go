@@ -108,11 +108,6 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Size = 6
 	col.Type = "TIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
-	// FIXME: set auto datetime
-	// col.DefaultValue = &dflt
-	// if _, ok := sf.Tag().Option("on_update"); ok {
-	// 	col.Extra = "ON UPDATE " + dflt
-	// }
 	return col
 }
 
@@ -351,13 +346,9 @@ func (s mySQLSchema) ArrayDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Nullable = sf.IsNullable()
 	// length := sf.Zero.Len()
 	t := sf.Type().Elem()
-	if t.Kind() == reflect.Uint8 {
-		charset, collation := "ascii", "ascii_general_ci"
-		col.DataType = "VARCHAR"
-		col.Type = "VARCHAR(36)"
-		col.Charset = &charset
-		col.Collation = &collation
-		return col
+	// UUID
+	if t.Kind() == reflect.Uint8 && sf.Type().Len() == 16 {
+		return s.UUIDDataType(sf)
 	}
 
 	col.DataType = "JSON"

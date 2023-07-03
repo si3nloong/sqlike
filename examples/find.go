@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid/v5"
 	"github.com/si3nloong/sqlike/v2"
 	"github.com/si3nloong/sqlike/v2/actions"
 	"github.com/si3nloong/sqlike/v2/options"
@@ -35,7 +35,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	無料で始められる、初心者向け学習サイト。
 	`
 
-	uid, _ := uuid.Parse("e7977246-910a-11e9-844d-6c96cfd87a51")
+	uid, _ := uuid.FromString("e7977246-910a-11e9-844d-6c96cfd87a51")
 	ts, _ := time.Parse("2006-01-02 15:04:05", "2008-01-28 10:25:33")
 	b := []byte(`abcd1234`)
 	jsonRaw := json.RawMessage(`{"test":"hello world"}`)
