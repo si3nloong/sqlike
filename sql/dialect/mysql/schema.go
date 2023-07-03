@@ -108,6 +108,7 @@ func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	col.Size = 6
 	col.Type = "TIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
+	// FIXME: set auto datetime
 	// col.DefaultValue = &dflt
 	// if _, ok := sf.Tag().Option("on_update"); ok {
 	// 	col.Extra = "ON UPDATE " + dflt
@@ -156,7 +157,7 @@ func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
 		}
 		if v, ok := sf.Tag().Option("srid"); ok {
 			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
-				panic("sqlike: SRID mosu be a number")
+				panic("sqlike: SRID must be a number")
 			}
 			col.Extra = "SRID " + v
 		}
@@ -189,7 +190,7 @@ func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
 	if enum, ok := tag.Option("enum"); ok {
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
-			panic("invalid enum formats")
+			panic("sqlike: invalid enum formats")
 		}
 
 		if !ok1 {
@@ -291,7 +292,7 @@ func (s mySQLSchema) IntDataType(sf reflext.FieldInfo) *sql.Column {
 		col.DefaultValue = nil
 	} else if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
-			panic("int default value should be integer")
+			panic("sqlike: int default value should be integer")
 		}
 		col.DefaultValue = &v
 	}
