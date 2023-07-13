@@ -30,12 +30,12 @@ type DefaultEncoders struct {
 }
 
 func (enc DefaultEncoders) EncodeUUID(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
-	if v.IsZero() {
+	if v.IsZero() && v.CanSet() {
 		id, err := uuid.NewV7()
 		if err != nil {
 			return "", nil, err
 		}
-		switch vi := v.Interface().(type) {
+		switch vi := v.Addr().Interface().(type) {
 		case []byte:
 			v.Set(reflect.ValueOf(id.Bytes()))
 		case string:
