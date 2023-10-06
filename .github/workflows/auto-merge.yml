@@ -20,11 +20,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Authenticate cli with a PAT
-        run: echo "${{ secrets.DEPENDABOT_TOKEN }}" | gh auth login --with-token
-
       - name: Enable auto-merge for Dependabot PRs
-        if: steps.dependabot_metadata.outputs.dependency-type == 'direct:development' && (steps.dependabot_metadata.outputs.update-type == 'version-update:semver-minor' || steps.dependabot_metadata.outputs.update-type == 'version-update:semver-patch')
-        run: gh pr merge --auto --merge "$PR_URL"
+        if: (steps.dependabot_metadata.outputs.update-type == 'version-update:semver-minor' || steps.dependabot_metadata.outputs.update-type == 'version-update:semver-patch')
+        run: |
+          gh pr merge --auto --merge "$PR_URL"
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
