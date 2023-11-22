@@ -1,13 +1,13 @@
 cloud.google.com/go v0.110.10 h1:LXy9GEO+timppncPIAZoOj3l58LIU9k+kn48AN7IO3Y=
 cloud.google.com/go v0.110.10/go.mod h1:v1OoFqYxiBkUrruItNM3eT4lLByNjxmJSV/xDKJNnic=
-github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible h1:1G1pk05UrOh0NlF1oeaaix1x8XzrfjIDK47TY0Zehcw=
-github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKOW72Y5+4WNxUIkjM8=
 github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
-github.com/casbin/casbin/v2 v2.77.2 h1:yQinn/w9x8AswiwqwtrXz93VU48R1aYTXdHEx4RI3jM=
-github.com/casbin/casbin/v2 v2.77.2/go.mod h1:mzGx0hYW9/ksOSpw3wNjk3NRAroq5VMFYUQ6G43iGPk=
+github.com/casbin/casbin/v2 v2.78.0 h1:RocLi3oFCO8o8iMymNfj99vpQ78mYdq9/jHSJgyzqYM=
+github.com/casbin/casbin/v2 v2.78.0/go.mod h1:0kO/C6yRxWqWzbLvzqnxU/V01DZqbDCy/0aXQqbIWmE=
+github.com/casbin/govaluate v1.1.0 h1:6xdCWIpE9CwHdZhlVQW+froUrCsjb6/ZYNcXODfLT+E=
+github.com/casbin/govaluate v1.1.0/go.mod h1:G/UnbIjZk/0uMNaLwZZmFQrR72tYRZWQkO70si/iR7A=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
