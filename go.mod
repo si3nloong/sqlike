@@ -10,7 +10,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/google/uuid v1.6.0
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/paulmach/orb v0.11.0
+	github.com/paulmach/orb v0.11.1
 	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
 	github.com/segmentio/ksuid v1.0.4
 	github.com/stretchr/testify v1.8.4
