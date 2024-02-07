@@ -5,7 +5,7 @@
 - [x] Support `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` or else.
 - [x] Support `sqldump`.
 - [x] `StructMapper` as an interface and enable to set in `Client` object.
-- [x] Change `StructField` to `interface{}`.
+- [x] Change `StructField` to `any`.
 - [x] Support index with files instead of single file (index.yaml).
 - [x] `Codec` as an interface and enable to set in `Client` object.
 - [x] Support unmarshal map key using `TextUnmarshaler` interface.
@@ -75,13 +75,16 @@
 - [x] Support comment.
 - [ ] Support spatial `Polygon`.
 - [ ] Support `charset` and `collate` on `AlterTable`.
-- [ ] BeforeSave and AfterLoad hook.
+- [ ] `BeforeSave` and `AfterLoad` hook.
 - [ ] Support migration like `django`.
 - [ ] Comprehensive `testcase`.
+- [ ] Refactor `Paginate`, add `PrevCursor` and `NextCursor`.
+- [x] Refactor `reflext`, set public struct to private struct.
 - [ ] Support insert with map.
-- [ ] Support foreign key.
-- [ ] Support multiple tag (reflext).
+- [x] Support foreign key.
+- [x] Support multiple tag (reflext).
 - [ ] Support proxy mode for master-slave topology.
 - [ ] Support any of [index](https://dev.mysql.com/doc/refman/8.0/en/create-index.html).
 - [ ] Support [skip locked](https://mysqlserverteam.com/mysql-8-0-1-using-skip-locked-and-nowait-to-handle-hot-rows/).
 - [ ] [BREAKING CHANGE] collate should reside in charset package.
+- [ ] Support **JOIN**.

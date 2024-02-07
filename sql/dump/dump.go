@@ -11,13 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/si3nloong/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/types"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/Masterminds/semver/v3"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/util"
+	"github.com/si3nloong/sqlike/v2/sql/dialect"
+	"github.com/si3nloong/sqlike/v2/types"
 
-	"github.com/si3nloong/sqlike/sql/dialect"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 )
 
 // Column :
@@ -57,13 +58,13 @@ type Column struct {
 type Dumper struct {
 	mu      *sync.Mutex
 	driver  string
-	conn    driver.Queryer
-	dialect dialect.Dialect
+	conn    db.Queryer
+	dialect db.Dialect
 	mapper  map[string]Parser
 }
 
 // NewDumper :
-func NewDumper(driver string, conn driver.Queryer) *Dumper {
+func NewDumper(driver string, conn db.Queryer) *Dumper {
 	dumper := new(Dumper)
 	dumper.mu = new(sync.Mutex)
 	dumper.driver = strings.TrimSpace(strings.ToLower(driver))
@@ -98,7 +99,7 @@ func (d *Dumper) RegisterParser(dataType string, parser Parser) {
 }
 
 // BackupTo :
-func (d *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) (affected int64, err error) {
+func (d *Dumper) BackupTo(ctx context.Context, query any, wr io.Writer) (affected int64, err error) {
 	w := bufio.NewWriter(wr)
 
 	var (
@@ -144,11 +145,11 @@ func (d *Dumper) BackupTo(ctx context.Context, query interface{}, wr io.Writer) 
 # ************************************************************
 # Sqlike Dumper
 #
-# https://github.com/si3nloong/sqlike
+# https://github.com/si3nloong/sqlike/v2
 #
 `)
 	w.WriteString("# Driver: " + d.driver + "\n")
-	w.WriteString("# Version: " + version + "\n")
+	w.WriteString("# Version: " + version.String() + "\n")
 	// w.WriteString("# Host: rm-zf86x4n0wvyy6830yyo.mysql.kualalumpur.rds.aliyuncs.com\n")
 	w.WriteString("# Database: " + dbName + "\n")
 	w.WriteString("# Generation Time: " + time.Now().UTC().Format(time.RFC3339) + "\n")
@@ -210,7 +211,7 @@ UNLOCK TABLES;
 			w.WriteByte('\n')
 		}
 		length := len(cols)
-		data := make([]interface{}, length)
+		data := make([]any, length)
 		for i := 0; i < length; i++ {
 			data[i] = new(sql.RawBytes)
 		}
@@ -251,14 +252,14 @@ UNLOCK TABLES;
 	return
 }
 
-func (d *Dumper) getVersion(ctx context.Context) (string, error) {
+func (d *Dumper) getVersion(ctx context.Context) (*semver.Version, error) {
 	stmt := sqlstmt.AcquireStmt(d.dialect)
 	defer sqlstmt.ReleaseStmt(stmt)
 
 	d.dialect.GetVersion(stmt)
 	rows, err := d.conn.QueryContext(ctx, stmt.String(), stmt.Args()...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -266,10 +267,9 @@ func (d *Dumper) getVersion(ctx context.Context) (string, error) {
 
 	var version string
 	if err := rows.Scan(&version); err != nil {
-		return "", err
+		return nil, err
 	}
-
-	return version, nil
+	return semver.MustParse(version), nil
 }
 
 func (d *Dumper) getColumns(ctx context.Context, dbName, table string) ([]Column, error) {

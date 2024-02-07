@@ -7,7 +7,6 @@ import (
 )
 
 func TestJsonType(t *testing.T) {
-
 	require.Equal(t, "invalid", jsonInvalid.String())
 	require.Equal(t, "null", jsonNull.String())
 	require.Equal(t, "object", jsonObject.String())
@@ -16,5 +15,4 @@ func TestJsonType(t *testing.T) {
 	require.Equal(t, "string", jsonString.String())
 	require.Equal(t, "boolean", jsonBoolean.String())
 	require.Equal(t, "number", jsonNumber.String())
-
 }

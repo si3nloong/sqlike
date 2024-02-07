@@ -5,7 +5,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/si3nloong/sqlike/sql/instrumented"
+	"github.com/si3nloong/sqlike/v2/sql/instrumented"
 )
 
 // TraceOptions :

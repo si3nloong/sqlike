@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"

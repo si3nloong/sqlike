@@ -1,40 +1,30 @@
 package expr
 
 import (
-	"fmt"
-	"reflect"
-
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
 // Field :
-func Field(name string, val interface{}) (f primitive.Field) {
+func Field[T any](name string, val []T) (f primitive.Field) {
 	f.Name = name
-	v := reflext.Indirect(reflect.ValueOf(val))
-	k := v.Kind()
-	if k != reflect.Array && k != reflect.Slice {
-		panic(fmt.Errorf("unsupported data type: %v", k))
+	if len(val) < 1 {
+		panic(`sqlike: zero length of array or slice`)
 	}
-	length := v.Len()
-	if length < 1 {
-		panic("zero length of array or slice")
-	}
-	for i := 0; i < length; i++ {
-		f.Values = append(f.Values, v.Index(i).Interface())
+	for _, v := range val {
+		f.Values = append(f.Values, v)
 	}
 	return
 }
 
 // Asc :
-func Asc(field interface{}) (s primitive.Sort) {
+func Asc[C ColumnConstraints](field C) (s primitive.Sort) {
 	s.Field = wrapColumn(field)
 	s.Order = primitive.Ascending
 	return
 }
 
 // Desc :
-func Desc(field interface{}) (s primitive.Sort) {
+func Desc[C ColumnConstraints](field C) (s primitive.Sort) {
 	s.Field = wrapColumn(field)
 	s.Order = primitive.Descending
 	return

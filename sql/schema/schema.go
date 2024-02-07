@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -11,34 +12,28 @@ import (
 	"github.com/google/uuid"
 	"github.com/paulmach/orb"
 	gouuid "github.com/satori/go.uuid"
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/driver"
-	sqltype "github.com/si3nloong/sqlike/sql/type"
-	"github.com/si3nloong/sqlike/sqlike/columns"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	sqltype "github.com/si3nloong/sqlike/v2/sql/type"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
 
-// DataTyper :
-type DataTyper interface {
-	DataType(info driver.Info, sf reflext.StructFielder) columns.Column
-}
-
 // DataTypeFunc :
-type DataTypeFunc func(sf reflext.StructFielder) columns.Column
+type DataTypeFunc func(f reflext.FieldInfo) *sql.Column
 
 // Builder :
 type Builder struct {
-	mutex    *sync.Mutex
-	typeMap  map[interface{}]sqltype.Type
+	mutex    sync.Mutex
+	typeMap  map[any]sqltype.Type
 	builders map[sqltype.Type]DataTypeFunc
 }
 
 // NewBuilder :
 func NewBuilder() *Builder {
 	sb := &Builder{
-		mutex:    new(sync.Mutex),
-		typeMap:  make(map[interface{}]sqltype.Type),
+		typeMap:  make(map[any]sqltype.Type),
 		builders: make(map[sqltype.Type]DataTypeFunc),
 	}
 	sb.SetDefaultTypes()
@@ -46,7 +41,7 @@ func NewBuilder() *Builder {
 }
 
 // SetType :
-func (sb *Builder) SetType(it interface{}, t sqltype.Type) {
+func (sb *Builder) SetType(it any, t sqltype.Type) {
 	sb.mutex.Lock()
 	defer sb.mutex.Unlock()
 	sb.typeMap[it] = t
@@ -67,22 +62,23 @@ func (sb *Builder) LookUpType(t reflect.Type) (typ sqltype.Type, exists bool) {
 }
 
 // GetColumn :
-func (sb *Builder) GetColumn(info driver.Info, sf reflext.StructFielder) (columns.Column, error) {
-	t := reflext.Deref(sf.Type())
+func (sb *Builder) GetColumn(ctx context.Context) (*sql.Column, error) {
+	f := sql.GetField(ctx)
+	t := reflext.Deref(f.Type())
 	v := reflect.New(t)
-	if x, ok := v.Interface().(DataTyper); ok {
-		return x.DataType(info, sf), nil
+	if x, ok := v.Interface().(db.ColumnDataTyper); ok {
+		return x.ColumnDataType(ctx), nil
 	}
 
 	if x, ok := sb.typeMap[t]; ok {
-		return sb.builders[x](sf), nil
+		return sb.builders[x](f), nil
 	}
 
 	if x, ok := sb.typeMap[t.Kind()]; ok {
-		return sb.builders[x](sf), nil
+		return sb.builders[x](f), nil
 	}
 
-	return columns.Column{}, fmt.Errorf("schema: invalid data type support %v", t)
+	return nil, fmt.Errorf("schema: invalid data type support %v", t)
 }
 
 // SetDefaultTypes :

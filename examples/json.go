@@ -7,19 +7,20 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
+
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
 )
 
 // JSONExamples :
 func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
 		err    error
-		result *sqlike.Result
+		result *sqlike.Rows
 	)
 
 	table := db.Table("JSON")
@@ -33,9 +34,9 @@ func JSONExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 	// create index
 	{
-		err = table.Indexes().CreateOne(ctx, indexes.Index{
+		err = table.Indexes().CreateOne(ctx, sqlx.Index{
 			Name:    "words",
-			Type:    indexes.MultiValued,
+			Type:    sqlx.MultiValued,
 			Cast:    "StrArr",
 			As:      "CHAR(50) ARRAY",
 			Comment: "wording index",

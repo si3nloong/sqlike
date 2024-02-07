@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
@@ -214,7 +214,7 @@ func TestDecodeMap(t *testing.T) {
 	var (
 		dec = DefaultDecoder{registry: buildDefaultRegistry()}
 		r   *Reader
-		x   map[string]interface{}
+		x   map[string]any
 		err error
 	)
 
@@ -224,17 +224,17 @@ func TestDecodeMap(t *testing.T) {
 		r = NewReader([]byte(`null`))
 		err = dec.DecodeMap(r, v)
 		require.NoError(t, err)
-		require.Equal(t, map[string]interface{}(nil), x)
+		require.Equal(t, map[string]any(nil), x)
 	})
 
 	t.Run("Decode with empty object", func(ti *testing.T) {
 		r = NewReader([]byte(`{}`))
 		err = dec.DecodeMap(r, v)
 		require.NoError(t, err)
-		require.Equal(t, make(map[string]interface{}), x)
+		require.Equal(t, make(map[string]any), x)
 	})
 
-	t.Run("Decode to map<string,interface{}>", func(ti *testing.T) {
+	t.Run("Decode to map<string,any>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"a":"123", 
@@ -245,7 +245,7 @@ func TestDecodeMap(t *testing.T) {
 		}`))
 		err = dec.DecodeMap(r, v)
 		require.NoError(t, err)
-		require.Equal(t, map[string]interface{}{
+		require.Equal(t, map[string]any{
 			"a": "123",
 			"b": float64(108213312),
 			"c": true,
@@ -387,7 +387,7 @@ func TestDecodeMap(t *testing.T) {
 		}, m)
 	})
 
-	t.Run("Decode to map<string,interface{}>", func(ti *testing.T) {
+	t.Run("Decode to map<string,any>", func(ti *testing.T) {
 		r = NewReader([]byte(`
 		{
 			"negative": -183,
@@ -401,16 +401,16 @@ func TestDecodeMap(t *testing.T) {
 				}
 			}
 		}`))
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		v := reflect.ValueOf(&m)
 		err = dec.DecodeMap(r, v.Elem())
 		require.NoError(ti, err)
-		require.Equal(ti, map[string]interface{}{
+		require.Equal(ti, map[string]any{
 			"negative": float64(-183),
 			"string":   "textasjdhasljdlasjkdjlsa:'dasdas",
 			"number":   float64(3123123799213),
-			"nested": map[string]interface{}{
-				"k": map[string]interface{}{
+			"nested": map[string]any{
+				"k": map[string]any{
 					"bool":   true,
 					"no":     float64(10),
 					"string": "😀😁😂",
@@ -462,6 +462,30 @@ func TestDecodeArray(t *testing.T) {
 	var (
 		err error
 	)
+
+	t.Run("Decode invalid array", func(t *testing.T) {
+		r := NewReader([]byte(`["sdasdasd"`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("Decode null", func(t *testing.T) {
+		r := NewReader([]byte(`null`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("Decode empty array", func(t *testing.T) {
+		r := NewReader([]byte(`[]`))
+		err := r.ReadArray(func(r *Reader) error {
+			return nil
+		})
+		require.NoError(t, err)
+	})
 
 	t.Run("Decode to [2]string", func(ti *testing.T) {
 		arr := [2]string{}

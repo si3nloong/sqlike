@@ -1,0 +1,280 @@
+package sqlike
+
+import (
+	"context"
+	"database/sql"
+	"io"
+	"reflect"
+
+	"errors"
+
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
+)
+
+// ErrNoRows : is an alias for no record found
+var ErrNoRows = sql.ErrNoRows
+
+// EOF : is an alias for end of file
+var EOF = io.EOF
+
+// Result :
+type Result interface {
+	Scan(dests ...any) error
+	Columns() []string
+	Next() bool
+	NextResultSet() bool
+	Close() error
+}
+
+// Rows :
+type Rows struct {
+	ctx         context.Context
+	close       bool
+	rows        *sql.Rows
+	cache       reflext.StructMapper
+	dialect     db.Dialect
+	columns     []string
+	columnTypes []*sql.ColumnType
+	err         error
+}
+
+var _ Result = (*Rows)(nil)
+
+// Columns :
+func (r *Rows) Columns() []string {
+	return r.columns
+}
+
+// ColumnTypes :
+func (r *Rows) ColumnTypes() ([]*sql.ColumnType, error) {
+	return r.columnTypes, nil
+}
+
+func (r *Rows) nextValues() ([]any, error) {
+	if !r.Next() {
+		return nil, EOF
+	}
+	return r.values()
+}
+
+func (r *Rows) values() ([]any, error) {
+	length := len(r.columns)
+	values := make([]any, length)
+	for j := 0; j < length; j++ {
+		values[j] = &values[j]
+	}
+	if err := r.rows.Scan(values...); err != nil {
+		return nil, err
+	}
+	return values, nil
+}
+
+// Scan : will behave as similar as sql.Scan.
+func (r *Rows) Scan(dests ...any) error {
+	defer r.Close()
+	if r.err != nil {
+		return r.err
+	}
+	if len(dests) == 0 {
+		return errors.New("sqlike: empty destination to scan")
+	}
+	values, err := r.values()
+	if err != nil {
+		return err
+	}
+	max := len(dests)
+	for i, v := range values {
+		if i >= max {
+			break
+		}
+		fv := reflext.ValueOf(dests[i])
+		if fv.Kind() != reflect.Ptr {
+			return ErrUnaddressableEntity
+		}
+		fv = reflext.IndirectInit(fv)
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
+		if err != nil {
+			return err
+		}
+		if err := decoder(v, fv); err != nil {
+			return err
+		}
+	}
+	return r.Close()
+}
+
+// Decode will decode the current document into val, this will only accepting pointer of struct as an input.
+func (r *Rows) Decode(dst any) error {
+	if r.close {
+		defer r.Close()
+	}
+	if r.err != nil {
+		return r.err
+	}
+
+	v := reflext.ValueOf(dst)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
+	t := v.Type()
+	if !reflext.IsKind(t, reflect.Ptr) {
+		return ErrUnaddressableEntity
+	}
+
+	t = reflext.Deref(t)
+	if !reflext.IsKind(t, reflect.Struct) {
+		return errors.New("sqlike: it must be a struct to decode")
+	}
+
+	idxs := r.cache.TraversalsByName(t, r.columns)
+	values, err := r.values()
+	if err != nil {
+		return err
+	}
+	vv := reflext.Zero(t)
+	for j, idx := range idxs {
+		if idx == nil {
+			continue
+		}
+		fv := r.cache.FieldByIndexes(vv, idx)
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
+		if err != nil {
+			return err
+		}
+		if err := decoder(values[j], fv); err != nil {
+			return err
+		}
+	}
+	reflext.IndirectInit(v).Set(reflext.Indirect(vv))
+	if r.close {
+		return r.Close()
+	}
+	return nil
+}
+
+// ScanSlice :
+func (r *Rows) ScanSlice(results any) error {
+	defer r.Close()
+	if r.err != nil {
+		return r.err
+	}
+
+	v := reflext.ValueOf(results)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
+	if !reflext.IsKind(v.Type(), reflect.Ptr) {
+		return ErrUnaddressableEntity
+	}
+
+	v = reflext.Indirect(v)
+	t := v.Type()
+	if !reflext.IsKind(t, reflect.Slice) {
+		return errors.New("sqlike: it must be a slice of entity")
+	}
+
+	slice := reflect.MakeSlice(t, 0, 0)
+	t = t.Elem()
+
+	for i := 0; r.rows.Next(); i++ {
+		values, err := r.values()
+		if err != nil {
+			return err
+		}
+		slice = reflect.Append(slice, reflext.Zero(t))
+		fv := slice.Index(i)
+		decoder, err := r.dialect.LookupDecoder(fv.Type())
+		if err != nil {
+			return err
+		}
+		if err := decoder(values[0], fv); err != nil {
+			return err
+		}
+	}
+	v.Set(slice)
+	return r.rows.Close()
+}
+
+// All : this will map all the records from sql to a slice of struct.
+func (r *Rows) All(results any) error {
+	defer r.Close()
+	if r.err != nil {
+		return r.err
+	}
+
+	v := reflext.ValueOf(results)
+	if !v.IsValid() {
+		return ErrInvalidInput
+	}
+
+	if !reflext.IsKind(v.Type(), reflect.Ptr) {
+		return ErrUnaddressableEntity
+	}
+
+	v = reflext.Indirect(v)
+	t := v.Type()
+	if !reflext.IsKind(t, reflect.Slice) {
+		return errors.New("sqlike: it must be a slice of entity")
+	}
+
+	length := len(r.columns)
+	slice := reflect.MakeSlice(t, 0, 0)
+	t = t.Elem()
+	idxs := r.cache.TraversalsByName(t, r.columns)
+	decoders := make([]db.ValueDecoder, length)
+	for i := 0; r.rows.Next(); i++ {
+		values, err := r.values()
+		if err != nil {
+			return err
+		}
+		vv := reflext.Zero(t)
+		for j, idx := range idxs {
+			if idx == nil {
+				continue
+			}
+			fv := r.cache.FieldByIndexes(vv, idx)
+			if i < 1 {
+				decoder, err := r.dialect.LookupDecoder(fv.Type())
+				if err != nil {
+					return err
+				}
+				decoders[j] = decoder
+			}
+			if err := decoders[j](values[j], fv); err != nil {
+				return err
+			}
+		}
+		slice = reflect.Append(slice, vv)
+	}
+	v.Set(slice)
+	return r.rows.Close()
+}
+
+// Error :
+func (r *Rows) Error() error {
+	if r.rows != nil {
+		defer r.rows.Close()
+	}
+	return r.err
+}
+
+// Next :
+func (r *Rows) Next() bool {
+	return r.rows.Next()
+}
+
+// NextResultSet :
+func (r *Rows) NextResultSet() bool {
+	return r.rows.NextResultSet()
+}
+
+// Close :
+func (r *Rows) Close() error {
+	if r.rows != nil {
+		return r.rows.Close()
+	}
+	return nil
+}

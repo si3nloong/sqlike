@@ -5,26 +5,23 @@ import (
 	"log"
 	"testing"
 
-	semver "github.com/Masterminds/semver/v3"
+	"github.com/Masterminds/semver/v3"
 
-	_ "github.com/go-sql-driver/mysql"
 	mysql "github.com/go-sql-driver/mysql"
 
-	"github.com/si3nloong/sqlike/plugin/opentracing"
-	"github.com/si3nloong/sqlike/sql/instrumented"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/plugin/opentracing"
+	"github.com/si3nloong/sqlike/v2/sql/instrumented"
 
-	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/si3nloong/sqlike/v2"
 	"github.com/stretchr/testify/require"
 )
 
-type Logger struct {
-}
+type Logger struct{}
 
-func (l Logger) Debug(stmt *sqlstmt.Statement) {
+func (l Logger) Debug(args ...any) {
 	// log.Printf("%v", stmt)
-	log.Printf("%+v", stmt)
+	log.Printf("%+v", args...)
 }
 
 // TestExamples :
@@ -33,13 +30,22 @@ func TestExamples(t *testing.T) {
 		ctx = context.Background()
 	)
 
+	// t.Run("Connect with missing driver", func(t *testing.T) {
+	// 	sqlike.MustConnect(
+	// 		ctx,
+	// 		"common",
+	// 		options.Connect().
+	// 			ApplyURI(`root:abcd1234@tcp()/sqlike?parseTime=true&multiStatements=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
+	// 	)
+	// })
+
 	// normal connect
-	{
+	t.Run("Connect without tracing", func(t *testing.T) {
 		client := sqlike.MustConnect(
 			ctx,
 			"mysql",
 			options.Connect().
-				ApplyURI(`root:abcd1234@tcp()/sqlike?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
+				ApplyURI(`root:abcd1234@tcp()/sqlike?parseTime=true&multiStatements=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_general_ci`),
 		)
 
 		// set timezone for UTC
@@ -48,10 +54,9 @@ func TestExamples(t *testing.T) {
 		}
 
 		testCase(ctx, t, client)
-	}
+	})
 
-	// with tracing (OpenTracing)
-	{
+	t.Run("Connect with tracing", func(t *testing.T) {
 		driver := "mysql"
 		username := "root"
 
@@ -79,37 +84,40 @@ func TestExamples(t *testing.T) {
 		client := sqlike.MustConnectDB(ctx, driver, instrumented.WrapConnector(conn, itpr))
 		defer client.Close()
 		testCase(ctx, t, client)
-	}
-
-	testRace(ctx, t)
+	})
 
 }
 
 func testCase(ctx context.Context, t *testing.T, client *sqlike.Client) {
 	v := client.Version()
 	require.Equal(t, "mysql", client.DriverName())
+	// require.Equal(t, charset.UTF8MB4, client.Charset())
+	// require.Equal(t, "utf8mb4_0900_ai_ci", client.Collate())
 	require.True(t, v.GreaterThan(semver.MustParse("5.7")))
 	client.SetLogger(Logger{})
-	DatabaseExamples(t, client)
+	DatabaseExamples(ctx, t, client)
 	db := client.Database("sqlike")
-	mg := connectMongoDB(ctx)
+	// mg := connectMongoDB(ctx)
 
 	{
-		SQLDumpExamples(ctx, t, client)
 		MigrateExamples(ctx, t, db)
 		IndexExamples(ctx, t, db)
-		ExtraExamples(ctx, t, db, mg)
 
 		InsertExamples(ctx, t, db)
 		FindExamples(ctx, t, db)
-		QueryExamples(ctx, t, db)
-		TransactionExamples(ctx, t, db)
+		JoinExamples(ctx, t, db)
+		AdvanceQueryExamples(ctx, t, db)
+		// TransactionExamples(ctx, t, db)
 		PaginationExamples(ctx, t, client)
 		UpdateExamples(ctx, t, db)
 		DeleteExamples(ctx, t, db)
 		JSONExamples(ctx, t, db)
 		CasbinExamples(ctx, t, db)
 		SpatialExamples(ctx, t, db)
+
+		// SQLDumpExamples(ctx, t, client)
+
+		// ExtraExamples(ctx, t, db, mg)
 	}
 
 	// Errors

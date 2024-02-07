@@ -2,7 +2,6 @@ package examples
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -12,12 +11,12 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/uuid"
-	sqldump "github.com/si3nloong/sqlike/sql/dump"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	sqldump "github.com/si3nloong/sqlike/v2/sql/dump"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	"github.com/si3nloong/sqlike/v2/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,8 +34,8 @@ type dumpStruct struct {
 	Array   []string
 	// Point        orb.Point
 	// LineString   orb.LineString
-	Enum        Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Set         types.Set `sqlike:",set=A|B|C"`
+	Enum        Enum              `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Set         types.Set[string] `sqlike:",set=A|B|C"`
 	Date        civil.Date
 	DateTime    time.Time
 	PtrString   *string
@@ -47,6 +46,7 @@ type dumpStruct struct {
 	PtrDate     *civil.Date
 	PtrTime     *civil.Time
 	PtrDateTime *time.Time
+	PtrSet      *types.Set[string] `sqlike:",set=A|B|C"`
 }
 
 // SQLDumpExamples :
@@ -68,7 +68,8 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 
 	{
 		if _, err := table.Insert(
-			ctx, &data,
+			ctx,
+			&data,
 			options.Insert().SetDebug(true),
 		); err != nil {
 			require.NoError(t, err)
@@ -99,15 +100,14 @@ func SQLDumpExamples(ctx context.Context, t *testing.T, client *sqlike.Client) {
 			// check how many records return or backup
 			affected, err := dumper.BackupTo(
 				ctx,
-				actions.Find().
-					From("sqlike", "sqldump").
+				sql.Select().From("sqlike", "sqldump").
 					Where(filter).
 					Offset(offset).
 					Limit(limit),
 				file,
 			)
 			if err != nil {
-				if err != sql.ErrNoRows {
+				if err != sqlike.ErrNoRows {
 					require.NoError(t, err)
 				}
 				break

@@ -9,8 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type stringer struct {
-}
+type stringer struct{}
 
 func (s stringer) String() string {
 	return "i'm stringer"

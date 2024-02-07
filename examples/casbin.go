@@ -6,9 +6,9 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/persist"
-	plugin "github.com/si3nloong/sqlike/plugin/casbin"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/si3nloong/sqlike/v2"
+	plugin "github.com/si3nloong/sqlike/v2/plugin/casbin"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 

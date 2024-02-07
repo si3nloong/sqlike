@@ -9,7 +9,7 @@ import (
 type Boolean bool
 
 // Scan :
-func (x *Boolean) Scan(src interface{}) error {
+func (x *Boolean) Scan(src any) error {
 	*x = false
 	switch vi := src.(type) {
 	case []byte:

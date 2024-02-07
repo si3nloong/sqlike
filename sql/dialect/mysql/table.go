@@ -1,27 +1,26 @@
 package mysql
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/driver"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/charset"
+	"github.com/si3nloong/sqlike/v2/sql/util"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // HasPrimaryKey :
-func (ms MySQL) HasPrimaryKey(stmt sqlstmt.Stmt, db, table string) {
+func (ms *mySQL) HasPrimaryKey(stmt db.Stmt, db, table string) {
 	stmt.WriteString("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND CONSTRAINT_TYPE = 'PRIMARY KEY'")
-	stmt.WriteByte(';')
-	stmt.AppendArgs(db, table)
+	stmt.AppendArgs(`;`, db, table)
 }
 
 // RenameTable :
-func (ms MySQL) RenameTable(stmt sqlstmt.Stmt, db, oldName, newName string) {
+func (ms *mySQL) RenameTable(stmt db.Stmt, db, oldName, newName string) {
 	stmt.WriteString("RENAME TABLE ")
 	stmt.WriteString(ms.TableName(db, oldName))
 	stmt.WriteString(" TO ")
@@ -30,90 +29,108 @@ func (ms MySQL) RenameTable(stmt sqlstmt.Stmt, db, oldName, newName string) {
 }
 
 // DropTable :
-func (ms MySQL) DropTable(stmt sqlstmt.Stmt, db, table string, exists bool) {
+func (ms *mySQL) DropTable(stmt db.Stmt, db, table string, exists bool, unsafe bool) {
+	if unsafe {
+		stmt.WriteString("SET FOREIGN_KEY_CHECKS=0;")
+		defer stmt.WriteString("SET FOREIGN_KEY_CHECKS=1;")
+	}
 	stmt.WriteString("DROP TABLE")
 	if exists {
 		stmt.WriteString(" IF EXISTS")
 	}
-	stmt.WriteByte(' ')
-	stmt.WriteString(ms.TableName(db, table) + ";")
+	stmt.WriteString(` ` + ms.TableName(db, table) + `;`)
 }
 
 // TruncateTable :
-func (ms MySQL) TruncateTable(stmt sqlstmt.Stmt, db, table string) {
-	stmt.WriteString("TRUNCATE TABLE " + ms.TableName(db, table) + ";")
+func (ms mySQL) TruncateTable(stmt db.Stmt, db, table string) {
+	stmt.WriteString(`TRUNCATE TABLE ` + ms.TableName(db, table) + `;`)
 }
 
 // HasTable :
-func (ms MySQL) HasTable(stmt sqlstmt.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs(dbName, table)
+func (ms mySQL) HasTable(stmt db.Stmt, dbName, table string) {
+	stmt.AppendArgs("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;", dbName, table)
 }
 
 // CreateTable :
-func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver.Info, fields []reflext.StructFielder) (err error) {
+func (ms mySQL) CreateTable(
+	stmt db.Stmt,
+	dbName, table, pkName string,
+	info db.Info,
+	fields []reflext.FieldInfo,
+) (err error) {
 	var (
-		col     columns.Column
-		pkk     reflext.StructFielder
+		col     *sql.Column
+		pk      reflext.FieldInfo
 		k1, k2  string
 		virtual bool
 		stored  bool
+		ctx     = sql.Context(dbName, table)
+		first   = true
 	)
 
-	stmt.WriteString("CREATE TABLE " + ms.TableName(db, table) + " ")
-	stmt.WriteByte('(')
+	stmt.WriteString(`CREATE TABLE ` + ms.TableName(dbName, table) + ` (`)
 
-	// Main columns :
-	for i, sf := range fields {
-		if i > 0 {
+	for len(fields) > 0 {
+		f := fields[0]
+		if !first {
 			stmt.WriteByte(',')
 		}
+		first = false
 
-		col, err = ms.schema.GetColumn(info, sf)
+		ctx.SetField(f)
+		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
 
-		tag := sf.Tag()
+		tag := f.Tag()
 		// allow primary_key tag to override
-		if _, ok := tag.LookUp("primary_key"); ok {
-			pkk = sf
-		} else if _, ok := tag.LookUp("auto_increment"); ok {
-			pkk = sf
-		} else if sf.Name() == pk && pkk == nil {
-			pkk = sf
-		}
-
-		idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
-		if _, ok := tag.LookUp("unique_index"); ok {
-			stmt.WriteString("UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
-			stmt.WriteByte(',')
+		if _, ok := tag.Option("primary_key"); ok {
+			pk = f
+		} else if _, ok := tag.Option("auto_increment"); ok {
+			pk = f
+		} else if f.Name() == pkName && pk == nil {
+			pk = f
+		} else if v, ok := tag.Option("foreign_key"); ok {
+			paths := strings.SplitN(v, ":", 2)
+			if len(paths) < 2 {
+				panic(fmt.Sprintf("invalid foreign key value %q", v))
+			}
+			stmt.WriteString("FOREIGN KEY (`" + f.Name() + "`) REFERENCES `" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := tag.LookUp("comment"); ok {
+		idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
+		if _, ok := tag.Option("unique"); ok {
+			stmt.WriteString(`,UNIQUE INDEX ` + idx.GetName() + ` (` + ms.Quote(f.Name()) + `)`)
+		}
+
+		if v, ok := tag.Option("comment"); ok {
 			if len(v) > 60 {
-				panic("maximum length of comment is 60 characters")
+				panic("sqlike: maximum length of comment is 60 characters")
 			}
 			stmt.WriteString(" COMMENT '" + v + "'")
 		}
 
 		// check generated columns
-		t := reflext.Deref(sf.Type())
+		t := reflext.Deref(f.Type())
 		if t.Kind() != reflect.Struct {
+			fields = fields[1:]
 			continue
 		}
 
-		children := sf.Children()
+		children := f.Children()
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
-			k1, virtual = tg.LookUp("virtual_column")
-			k2, stored = tg.LookUp("stored_column")
+			k1, virtual = tg.Option("virtual_column")
+			k2, stored = tg.Option("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
-				col, err = ms.schema.GetColumn(info, child)
+
+				ctx.SetField(child)
+				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
 				}
@@ -126,97 +143,109 @@ func (ms MySQL) CreateTable(stmt sqlstmt.Stmt, db, table, pk string, info driver
 					name = k2
 				}
 
-				stmt.WriteString(ms.Quote(name))
-				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
-				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
+				stmt.WriteString(ms.Quote(name) + ` ` + col.Type)
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), f.Name()), ".")
+				stmt.WriteString(" AS (" + ms.Quote(f.Name()) + "->>'$." + path + "')")
 				if stored {
-					stmt.WriteString(" STORED")
+					stmt.WriteString(` STORED`)
 				}
 				if !col.Nullable {
-					stmt.WriteString(" NOT NULL")
+					stmt.WriteString(` NOT NULL`)
 				}
 			}
 			children = children[1:]
 			children = append(children, child.Children()...)
 		}
-
+		fields = fields[1:]
 	}
-	if pkk != nil {
-		stmt.WriteByte(',')
-		stmt.WriteString("PRIMARY KEY (" + ms.Quote(pkk.Name()) + ")")
+	if pk != nil {
+		stmt.WriteString(`,PRIMARY KEY (` + ms.Quote(pk.Name()) + `)`)
 	}
-	stmt.WriteByte(')')
-	stmt.WriteString(" ENGINE=INNODB")
-	code := string(info.Charset())
+	stmt.WriteString(`) ENGINE=INNODB`)
+	code, collate := info.Charset(), info.Collate()
 	if code == "" {
-		stmt.WriteString(" CHARACTER SET utf8mb4")
-		stmt.WriteString(" COLLATE utf8mb4_unicode_ci")
-	} else {
-		stmt.WriteString(" CHARACTER SET " + code)
-		if info.Collate() != "" {
-			stmt.WriteString(" COLLATE " + info.Collate())
-		}
+		code = charset.DefaultCharset
 	}
-	stmt.WriteByte(';')
+	if collate == "" {
+		collate = charset.DefaultCollation
+	}
+	stmt.WriteString(` CHARACTER SET ` + string(charset.DefaultCharset) + ` COLLATE ` + string(collate) + `;`)
 	return
 }
 
 // AlterTable :
-func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool, info driver.Info, fields []reflext.StructFielder, cols util.StringSlice, idxs util.StringSlice, unsafe bool) (err error) {
+func (ms *mySQL) AlterTable(
+	stmt db.Stmt,
+	dbName, table, pk string,
+	hasPk bool,
+	info db.Info,
+	fields []reflext.FieldInfo,
+	cols util.StringSlice,
+	idxs util.StringSlice,
+	unsafe bool,
+) (err error) {
 	var (
-		col     columns.Column
-		pkk     reflext.StructFielder
+		col     *sql.Column
+		pkk     reflext.FieldInfo
 		idx     int
 		k1, k2  string
 		virtual bool
 		stored  bool
+		ctx     = sql.Context(dbName, table)
+		suffix  = "FIRST"
 	)
 
-	suffix := "FIRST"
-	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
+	stmt.WriteString(`ALTER TABLE ` + ms.TableName(dbName, table) + ` `)
 
-	for i, sf := range fields {
+	for i, f := range fields {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
 
 		action := "ADD"
-		idx = cols.IndexOf(sf.Name())
+		idx = cols.IndexOf(f.Name())
 		if idx > -1 {
 			action = "MODIFY"
 			cols.Splice(idx)
 		}
+
+		tag := f.Tag()
 		if !hasPk {
-			// allow primary_key tag to override
-			if _, ok := sf.Tag().LookUp("primary_key"); ok {
-				pkk = sf
+			// allow `primary_key` tag to override
+			if _, ok := tag.Option("primary_key"); ok {
+				pkk = f
 			}
-			if sf.Name() == pk && pkk == nil {
-				pkk = sf
+			if f.Name() == pk && pkk == nil {
+				pkk = f
 			}
+		} else if v, ok := tag.Option("foreign_key"); ok && idxs.IndexOf(f.Name()) < 0 {
+			paths := strings.SplitN(v, ":", 2)
+			if len(paths) < 2 {
+				panic(fmt.Sprintf("invalid foreign key value %q", v))
+			}
+			stmt.WriteString("ADD FOREIGN KEY (`" + f.Name() + "`) REFERENCES `" + paths[0] + "`(`" + paths[1] + "`),")
 		}
 
-		tag := sf.Tag()
-		_, ok1 := tag.LookUp("unique_index")
-		_, ok2 := tag.LookUp("auto_increment")
+		_, ok1 := tag.Option("unique")
+		_, ok2 := tag.Option("auto_increment")
 		if ok1 || ok2 {
-			idx := indexes.Index{Columns: indexes.Columns(sf.Name())}
+			idx := sql.Index{Columns: sql.IndexedColumns(f.Name())}
 			if idxs.IndexOf(idx.GetName()) < 0 {
-				stmt.WriteString("ADD")
-				stmt.WriteString(" UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(sf.Name()) + ")")
+				stmt.WriteString("ADD UNIQUE INDEX " + idx.GetName() + " (" + ms.Quote(f.Name()) + ")")
 				stmt.WriteByte(',')
 			}
 		}
 		stmt.WriteString(action + " ")
-		col, err = ms.schema.GetColumn(info, sf)
+
+		ctx.SetField(f)
+		col, err = ms.schema.GetColumn(ctx)
 		if err != nil {
 			return
 		}
+
 		ms.buildSchemaByColumn(stmt, col)
 
-		if v, ok := sf.Tag().LookUp("comment"); ok {
+		if v, ok := f.Tag().Option("comment"); ok {
 			if len(v) > 60 {
 				panic("maximum length of comment is 60 characters")
 			}
@@ -224,23 +253,24 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 
 		stmt.WriteString(" " + suffix)
-		suffix = "AFTER " + ms.Quote(sf.Name())
+		suffix = "AFTER " + ms.Quote(f.Name())
 
 		// check generated columns
-		t := reflext.Deref(sf.Type())
+		t := reflext.Deref(f.Type())
 		if t.Kind() != reflect.Struct {
 			continue
 		}
 
-		children := sf.Children()
+		children := f.Children()
 		for len(children) > 0 {
 			child := children[0]
 			tg := child.Tag()
-			k1, virtual = tg.LookUp("virtual_column")
-			k2, stored = tg.LookUp("stored_column")
+			k1, virtual = tg.Option("virtual_column")
+			k2, stored = tg.Option("stored_column")
 			if virtual || stored {
 				stmt.WriteByte(',')
-				col, err = ms.schema.GetColumn(info, child)
+				ctx.SetField(child)
+				col, err = ms.schema.GetColumn(ctx)
 				if err != nil {
 					return
 				}
@@ -263,9 +293,9 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 				stmt.WriteString(action + " ")
 				stmt.WriteString(ms.Quote(name))
 				stmt.WriteString(" " + col.Type)
-				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), sf.Name()), ".")
+				path := strings.TrimLeft(strings.TrimPrefix(child.Name(), f.Name()), ".")
 				stmt.WriteString(" AS ")
-				stmt.WriteString("(" + ms.Quote(sf.Name()) + "->>'$." + path + "')")
+				stmt.WriteString("(" + ms.Quote(f.Name()) + "->>'$." + path + "')")
 				if stored {
 					stmt.WriteString(" STORED")
 				}
@@ -294,7 +324,7 @@ func (ms *MySQL) AlterTable(stmt sqlstmt.Stmt, db, table, pk string, hasPk bool,
 		}
 	}
 
-	// TODO: character set
+	// TODO: allow user to character set
 	stmt.WriteByte(',')
 	stmt.WriteString(`CHARACTER SET utf8mb4`)
 	stmt.WriteString(` COLLATE utf8mb4_unicode_ci`)

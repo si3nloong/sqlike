@@ -3,111 +3,120 @@ package expr
 import (
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
+type ColumnConstraints interface {
+	~string | primitive.Column | primitive.Pair | primitive.JSONColumn
+}
+
 // Equal :
-func Equal(field, value interface{}) (c primitive.C) {
+func Equal[C ColumnConstraints](field C, value any) (c primitive.C) {
 	c = clause(field, primitive.Equal, value)
 	return
 }
 
 // NotEqual :
-func NotEqual(field, value interface{}) (c primitive.C) {
+func NotEqual[C ColumnConstraints](field C, value any) (c primitive.C) {
 	c = clause(field, primitive.NotEqual, value)
 	return
 }
 
 // IsNull :
-func IsNull(field string) (c primitive.Nil) {
+func IsNull[C ColumnConstraints](field C) (c primitive.Nil) {
+	c.Field = wrapColumn(field)
+	return
+}
+
+// IsNotNull :
+func IsNotNull[C ColumnConstraints](field C) (c primitive.Nil) {
 	c.Field = wrapColumn(field)
 	c.IsNot = true
 	return
 }
 
-// NotNull :
-func NotNull(field string) (c primitive.Nil) {
-	c.Field = wrapColumn(field)
-	return
-}
-
 // In :
-func In(field, values interface{}) (c primitive.C) {
+func In[C ColumnConstraints](field C, values any) (c primitive.C) {
 	c = inGroup(field, primitive.In, values)
 	return
 }
 
 // NotIn :
-func NotIn(field, values interface{}) (c primitive.C) {
+func NotIn[C ColumnConstraints](field C, values any) (c primitive.C) {
 	c = inGroup(field, primitive.NotIn, values)
 	return
 }
 
+// Any :
+func Any[T any](values []T) (c primitive.C) {
+	return
+}
+
 // Like :
-func Like(field, value interface{}) (p primitive.L) {
+func Like[F ColumnConstraints, V string | primitive.Raw](field F, value V) (p primitive.L) {
 	p.Field = wrapColumn(field)
 	p.Value = value
 	return
 }
 
 // NotLike :
-func NotLike(field, value interface{}) (p primitive.L) {
+func NotLike[C ColumnConstraints](field C, value any) (p primitive.L) {
 	p.Field = wrapColumn(field)
 	p.IsNot = true
 	p.Value = value
 	return
 }
 
-// GreaterOrEqual :
-func GreaterOrEqual(field, value interface{}) (c primitive.C) {
-	c = clause(field, primitive.GreaterOrEqual, value)
-	return
-}
-
 // GreaterThan :
-func GreaterThan(field, value interface{}) (c primitive.C) {
+func GreaterThan(field, value any) (c primitive.C) {
 	c = clause(field, primitive.GreaterThan, value)
 	return
 }
 
-// LesserOrEqual :
-func LesserOrEqual(field, value interface{}) (c primitive.C) {
-	c = clause(field, primitive.LesserOrEqual, value)
+// GreaterOrEqual :
+func GreaterOrEqual(field, value any) (c primitive.C) {
+	c = clause(field, primitive.GreaterOrEqual, value)
 	return
 }
 
 // LesserThan :
-func LesserThan(field, value interface{}) (c primitive.C) {
+func LesserThan(field, value any) (c primitive.C) {
 	c = clause(field, primitive.LesserThan, value)
 	return
 }
 
+// LesserOrEqual :
+func LesserOrEqual(field, value any) (c primitive.C) {
+	c = clause(field, primitive.LesserOrEqual, value)
+	return
+}
+
 // Between :
-func Between(field, from, to interface{}) (c primitive.C) {
+func Between(field, from, to any) (c primitive.C) {
 	c = clause(field, primitive.Between, primitive.R{From: from, To: to})
 	return
 }
 
 // NotBetween :
-func NotBetween(field, from, to interface{}) (c primitive.C) {
+func NotBetween(field, from, to any) (c primitive.C) {
 	c = clause(field, primitive.NotBetween, primitive.R{From: from, To: to})
 	return
 }
 
 // And :
-func And(conds ...interface{}) (g primitive.Group) {
+func And(conds ...any) (g primitive.Group) {
 	g = buildGroup(primitive.And, conds)
 	return
 }
 
 // Or :
-func Or(conds ...interface{}) (g primitive.Group) {
+func Or(conds ...any) (g primitive.Group) {
 	g = buildGroup(primitive.Or, conds)
 	return
 }
 
-func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.Group) {
+func buildGroup(op primitive.Operator, conds []any) (g primitive.Group) {
 	length := len(conds)
 	if length < 1 {
 		return
@@ -120,7 +129,7 @@ func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.Group) 
 		}
 	}
 
-	sg := make([]interface{}, 0, length)
+	sg := make([]any, 0, length)
 	for len(conds) > 0 {
 		cond := conds[0]
 		conds = conds[1:]
@@ -145,20 +154,27 @@ func buildGroup(op primitive.Operator, conds []interface{}) (g primitive.Group) 
 }
 
 // ColumnValue :
-func ColumnValue(field string, value interface{}) (kv primitive.KV) {
-	kv.Field = field
+func ColumnValue[C ColumnConstraints](field C, value any) (kv primitive.KV) {
+	switch vi := any(field).(type) {
+	case string:
+		kv.Field = vi
+	case primitive.Column:
+		kv.Field = vi.Name
+	case primitive.Pair:
+		kv.Field = vi[1]
+	}
 	kv.Value = value
 	return
 }
 
 // CastAs :
-func CastAs(value interface{}, datatype primitive.DataType) (cast primitive.CastAs) {
+func CastAs(value any, datatype primitive.DataType) (cast primitive.CastAs) {
 	cast.Value = value
 	cast.DataType = datatype
 	return
 }
 
-func inGroup(field interface{}, op primitive.Operator, values interface{}) (c primitive.C) {
+func inGroup(field any, op primitive.Operator, values any) (c primitive.C) {
 	v := reflect.ValueOf(values)
 	k := v.Kind()
 	c.Field = wrapColumn(field)
@@ -180,10 +196,12 @@ func inGroup(field interface{}, op primitive.Operator, values interface{}) (c pr
 	return c
 }
 
-func wrapColumn(it interface{}) interface{} {
+func wrapColumn(it any) any {
 	switch vi := it.(type) {
 	case string:
 		return Column(vi)
+	case primitive.Pair:
+		return Column(vi[0], vi[1])
 	case primitive.Column:
 		return vi
 	default:
@@ -191,7 +209,7 @@ func wrapColumn(it interface{}) interface{} {
 	}
 }
 
-func clause(field interface{}, op primitive.Operator, value interface{}) (c primitive.C) {
+func clause(field any, op primitive.Operator, value any) (c primitive.C) {
 	c.Field = wrapColumn(field)
 	c.Operator = op
 	c.Value = value

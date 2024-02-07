@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -188,7 +188,7 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		_, err = table.InsertOne(
 			ctx,
 			&struct {
-				Interface interface{}
+				Interface any
 			}{},
 		)
 		require.Error(t, err)
@@ -198,7 +198,7 @@ func InsertExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		_, err = table.InsertOne(ctx, empty)
 		require.Error(t, err)
 
-		_, err = table.Insert(ctx, []interface{}{})
+		_, err = table.Insert(ctx, []any{})
 		require.Error(t, err)
 	}
 

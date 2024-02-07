@@ -7,11 +7,11 @@ import (
 
 	"github.com/paulmach/orb"
 	"github.com/paulmach/orb/encoding/wkb"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,9 +49,9 @@ func SpatialExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		table.MustMigrate(ctx, Spatial{})
 		table.MustUnsafeMigrate(ctx, Spatial{})
 		iv := table.Indexes()
-		idx := indexes.Index{
-			Type:    indexes.Spatial,
-			Columns: indexes.Columns("Point"),
+		idx := sqlx.Index{
+			Type:    sqlx.Spatial,
+			Columns: sqlx.IndexedColumns("Point"),
 		}
 		err = iv.CreateOne(ctx, idx)
 		require.NoError(t, err)
@@ -208,8 +208,8 @@ func SpatialExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				Select(
 					expr.As(expr.ST_Distance(expr.Column("Point"), origin), "dist"),
 					expr.ST_Distance(
-						expr.ST_GeomFromText(p1, 4326),
-						expr.ST_GeomFromText(p2, 4326),
+						expr.ST_GeomFromText(p1, uint(4326)),
+						expr.ST_GeomFromText(p2, uint(4326)),
 					),
 					expr.ST_AsText(expr.Column("Point")),
 				).

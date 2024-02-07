@@ -3,163 +3,107 @@ package codec
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"reflect"
 	"sync"
-	"time"
 
-	"cloud.google.com/go/civil"
-	"github.com/paulmach/orb"
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/spatial"
-	"golang.org/x/text/currency"
-	"golang.org/x/text/language"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
-// Codecer :
-type Codecer interface {
-	RegisterTypeCodec(t reflect.Type, enc ValueEncoder, dec ValueDecoder)
-	RegisterTypeEncoder(t reflect.Type, enc ValueEncoder)
-	RegisterTypeDecoder(t reflect.Type, dec ValueDecoder)
-	RegisterKindEncoder(k reflect.Kind, enc ValueEncoder)
-	RegisterKindDecoder(k reflect.Kind, dec ValueDecoder)
-	LookupEncoder(v reflect.Value) (ValueEncoder, error)
-	LookupDecoder(t reflect.Type) (ValueDecoder, error)
-}
-
-// DefaultMapper :
 var (
-	DefaultRegistry = buildDefaultRegistry()
-	sqlScanner      = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
+	sqlScanner = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
 )
-
-func buildDefaultRegistry() Codecer {
-	rg := NewRegistry()
-	dec := DefaultDecoders{rg}
-	enc := DefaultEncoders{rg}
-	rg.RegisterTypeCodec(reflect.TypeOf([]byte{}), enc.EncodeByte, dec.DecodeByte)
-	rg.RegisterTypeCodec(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
-	rg.RegisterTypeCodec(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
-	rg.RegisterTypeCodec(reflect.TypeOf(time.Time{}), enc.EncodeDateTime, dec.DecodeDateTime)
-	rg.RegisterTypeCodec(reflect.TypeOf(time.Location{}), enc.EncodePointerStringer, dec.DecodeTimeLocation)
-	rg.RegisterTypeCodec(reflect.TypeOf(civil.Date{}), enc.EncodeStringer, dec.DecodeDate)
-	rg.RegisterTypeCodec(reflect.TypeOf(civil.Time{}), enc.EncodeStringer, dec.DecodeTime)
-	rg.RegisterTypeCodec(reflect.TypeOf(sql.RawBytes{}), enc.EncodeRawBytes, dec.DecodeRawBytes)
-	rg.RegisterTypeCodec(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
-	rg.RegisterTypeCodec(reflect.TypeOf(orb.Point{}), enc.EncodeSpatial(spatial.Point), dec.DecodePoint)
-	rg.RegisterTypeCodec(reflect.TypeOf(orb.LineString{}), enc.EncodeSpatial(spatial.LineString), dec.DecodeLineString)
-	// rg.RegisterTypeCodec(reflect.TypeOf(orb.Polygon{}), enc.EncodeSpatial(spatial.Polygon), dec.DecodePolygon)
-	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPoint{}), enc.EncodeSpatial(spatial.MultiPoint), dec.DecodeMultiPoint)
-	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiLineString{}), enc.EncodeSpatial(spatial.MultiLineString), dec.DecodeMultiLineString)
-	// rg.RegisterTypeCodec(reflect.TypeOf(orb.MultiPolygon{}), enc.EncodeSpatial(spatial.MultiPolygon), dec.DecodeMultiPolygon)
-	rg.RegisterKindCodec(reflect.String, enc.EncodeString, dec.DecodeString)
-	rg.RegisterKindCodec(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
-	rg.RegisterKindCodec(reflect.Int, enc.EncodeInt, dec.DecodeInt)
-	rg.RegisterKindCodec(reflect.Int8, enc.EncodeInt, dec.DecodeInt)
-	rg.RegisterKindCodec(reflect.Int16, enc.EncodeInt, dec.DecodeInt)
-	rg.RegisterKindCodec(reflect.Int32, enc.EncodeInt, dec.DecodeInt)
-	rg.RegisterKindCodec(reflect.Int64, enc.EncodeInt, dec.DecodeInt)
-	rg.RegisterKindCodec(reflect.Uint, enc.EncodeUint, dec.DecodeUint)
-	rg.RegisterKindCodec(reflect.Uint8, enc.EncodeUint, dec.DecodeUint)
-	rg.RegisterKindCodec(reflect.Uint16, enc.EncodeUint, dec.DecodeUint)
-	rg.RegisterKindCodec(reflect.Uint32, enc.EncodeUint, dec.DecodeUint)
-	rg.RegisterKindCodec(reflect.Uint64, enc.EncodeUint, dec.DecodeUint)
-	rg.RegisterKindCodec(reflect.Float32, enc.EncodeFloat, dec.DecodeFloat)
-	rg.RegisterKindCodec(reflect.Float64, enc.EncodeFloat, dec.DecodeFloat)
-	rg.RegisterKindCodec(reflect.Ptr, enc.EncodePtr, dec.DecodePtr)
-	rg.RegisterKindCodec(reflect.Struct, enc.EncodeStruct, dec.DecodeStruct)
-	rg.RegisterKindCodec(reflect.Array, enc.EncodeArray, dec.DecodeArray)
-	rg.RegisterKindCodec(reflect.Slice, enc.EncodeArray, dec.DecodeArray)
-	rg.RegisterKindCodec(reflect.Map, enc.EncodeMap, dec.DecodeMap)
-	return rg
-}
 
 // Registry :
 type Registry struct {
-	mutex        *sync.Mutex
-	typeEncoders map[reflect.Type]ValueEncoder
-	typeDecoders map[reflect.Type]ValueDecoder
-	kindEncoders map[reflect.Kind]ValueEncoder
-	kindDecoders map[reflect.Kind]ValueDecoder
+	mutex        sync.Mutex
+	typeEncoders map[reflect.Type]db.ValueEncoder
+	typeDecoders map[reflect.Type]db.ValueDecoder
+	kindEncoders map[reflect.Kind]db.ValueEncoder
+	kindDecoders map[reflect.Kind]db.ValueDecoder
 }
 
-var _ Codecer = (*Registry)(nil)
+var _ db.Codecer = (*Registry)(nil)
 
-// NewRegistry creates a new empty Registry.
+// NewRegistry : creates a new empty Registry.
 func NewRegistry() *Registry {
 	return &Registry{
-		mutex:        new(sync.Mutex),
-		typeEncoders: make(map[reflect.Type]ValueEncoder),
-		typeDecoders: make(map[reflect.Type]ValueDecoder),
-		kindEncoders: make(map[reflect.Kind]ValueEncoder),
-		kindDecoders: make(map[reflect.Kind]ValueDecoder),
+		typeEncoders: make(map[reflect.Type]db.ValueEncoder),
+		typeDecoders: make(map[reflect.Type]db.ValueDecoder),
+		kindEncoders: make(map[reflect.Kind]db.ValueEncoder),
+		kindDecoders: make(map[reflect.Kind]db.ValueDecoder),
 	}
 }
 
 // RegisterTypeCodec :
-func (r *Registry) RegisterTypeCodec(t reflect.Type, enc ValueEncoder, dec ValueDecoder) {
+func (r *Registry) RegisterTypeCodec(t reflect.Type, enc db.ValueEncoder, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
 	r.typeDecoders[t] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterTypeEncoder :
-func (r *Registry) RegisterTypeEncoder(t reflect.Type, enc ValueEncoder) {
+func (r *Registry) RegisterTypeEncoder(t reflect.Type, enc db.ValueEncoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeEncoders[t] = enc
+	r.mutex.Unlock()
 }
 
 // RegisterTypeDecoder :
-func (r *Registry) RegisterTypeDecoder(t reflect.Type, dec ValueDecoder) {
+func (r *Registry) RegisterTypeDecoder(t reflect.Type, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.typeDecoders[t] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterKindCodec :
-func (r *Registry) RegisterKindCodec(k reflect.Kind, enc ValueEncoder, dec ValueDecoder) {
+func (r *Registry) RegisterKindCodec(k reflect.Kind, enc db.ValueEncoder, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
 	r.kindDecoders[k] = dec
+	r.mutex.Unlock()
 }
 
 // RegisterKindEncoder :
-func (r *Registry) RegisterKindEncoder(k reflect.Kind, enc ValueEncoder) {
+func (r *Registry) RegisterKindEncoder(k reflect.Kind, enc db.ValueEncoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindEncoders[k] = enc
+	r.mutex.Unlock()
 }
 
 // RegisterKindDecoder :
-func (r *Registry) RegisterKindDecoder(k reflect.Kind, dec ValueDecoder) {
+func (r *Registry) RegisterKindDecoder(k reflect.Kind, dec db.ValueDecoder) {
 	r.mutex.Lock()
-	defer r.mutex.Unlock()
 	r.kindDecoders[k] = dec
+	r.mutex.Unlock()
 }
 
 // LookupEncoder :
-func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
+func (r *Registry) LookupEncoder(v reflect.Value) (db.ValueEncoder, error) {
 	var (
-		enc ValueEncoder
+		enc db.ValueEncoder
 		ok  bool
 	)
 
 	if !v.IsValid() {
-		return NilEncoder, nil
-	}
-
-	if _, ok := v.Interface().(driver.Valuer); ok {
-		return encodeValue, nil
+		return nilEncoder, nil
 	}
 
 	t := v.Type()
+	if t.Kind() == reflect.Ptr {
+		enc := r.kindEncoders[t.Kind()]
+		return enc, nil
+	}
+
 	enc, ok = r.typeEncoders[t]
 	if ok {
 		return enc, nil
+	}
+
+	if _, ok := v.Interface().(driver.Valuer); ok {
+		return encodeDriverValue, nil
 	}
 
 	enc, ok = r.kindEncoders[t.Kind()]
@@ -170,9 +114,9 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 }
 
 // LookupDecoder :
-func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
+func (r *Registry) LookupDecoder(t reflect.Type) (db.ValueDecoder, error) {
 	var (
-		dec ValueDecoder
+		dec db.ValueDecoder
 		ok  bool
 	)
 
@@ -181,13 +125,13 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 		ptrType = reflect.PtrTo(t)
 	}
 
-	if ptrType.Implements(sqlScanner) {
-		return sqlScannerDecoder, nil
-	}
-
 	dec, ok = r.typeDecoders[t]
 	if ok {
 		return dec, nil
+	}
+
+	if ptrType.Implements(sqlScanner) {
+		return sqlScannerDecoder, nil
 	}
 
 	dec, ok = r.kindDecoders[t.Kind()]
@@ -197,23 +141,26 @@ func (r *Registry) LookupDecoder(t reflect.Type) (ValueDecoder, error) {
 	return nil, ErrNoDecoder{Type: t}
 }
 
-func encodeValue(_ reflext.StructFielder, v reflect.Value) (interface{}, error) {
+func nilEncoder(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
+	return d.Var(1), []any{nil}, nil
+}
+
+func encodeDriverValue(d db.SqlDriver, v reflect.Value, opts map[string]string) (string, []any, error) {
 	if !v.IsValid() || reflext.IsNull(v) {
-		return nil, nil
+		return d.Var(1), []any{nil}, nil
 	}
 	x, ok := v.Interface().(driver.Valuer)
 	if !ok {
-		return nil, errors.New("codec: invalid type for assertion")
+		return "", nil, errors.New("codec: invalid type for assertion")
 	}
-	return x.Value()
+	val, err := x.Value()
+	if err != nil {
+		return "", nil, err
+	}
+	return d.Var(1), []any{val}, nil
 }
 
-// NilEncoder :
-func NilEncoder(_ reflext.StructFielder, _ reflect.Value) (interface{}, error) {
-	return nil, nil
-}
-
-func sqlScannerDecoder(it interface{}, v reflect.Value) error {
+func sqlScannerDecoder(it any, v reflect.Value) error {
 	if it == nil {
 		// Avoid from sql.scanner when the value is nil
 		v.Set(reflect.Zero(v.Type()))

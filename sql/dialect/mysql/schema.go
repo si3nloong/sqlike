@@ -5,14 +5,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/charset"
-	"github.com/si3nloong/sqlike/sql/schema"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	sqltype "github.com/si3nloong/sqlike/sql/type"
-	sqlutil "github.com/si3nloong/sqlike/sql/util"
-	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/util"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/charset"
+	"github.com/si3nloong/sqlike/v2/sql/schema"
+	sqltype "github.com/si3nloong/sqlike/v2/sql/type"
+	sqlutil "github.com/si3nloong/sqlike/v2/sql/util"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 )
 
@@ -62,104 +62,111 @@ func (s mySQLSchema) SetBuilders(sb *schema.Builder) {
 	sb.SetTypeBuilder(sqltype.Map, s.JSONDataType)
 }
 
-func (s mySQLSchema) ByteDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) ByteDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "MEDIUMBLOB"
 	col.Type = "MEDIUMBLOB"
 	col.Nullable = sf.IsNullable()
 	tag := sf.Tag()
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		col.DefaultValue = &v
 	}
-	return
+	return col
 }
 
-func (s mySQLSchema) UUIDDataType(sf reflext.StructFielder) (col columns.Column) {
-	charset, collation := string(charset.UTF8MB4), "utf8mb4_unicode_ci"
+func (s mySQLSchema) UUIDDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
-	col.DataType = "VARCHAR"
-	col.Type = "VARCHAR(36)"
-	col.Size = 36
-	col.Charset = &charset
-	col.Collation = &collation
+	col.DataType = "BINARY"
+	col.Type = "BINARY(16)"
+	col.Size = 16
 	col.Nullable = sf.IsNullable()
-	return
+	return col
 }
 
-func (s mySQLSchema) DateDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) DateDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "DATE"
 	col.Type = "DATE"
 	col.Nullable = sf.IsNullable()
-	return
+	return col
 }
 
-func (s mySQLSchema) TimeDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) TimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
-	if v, exists := sf.Tag().LookUp("size"); exists {
+	if v, exists := sf.Tag().Option("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
 			size = v
 		}
 	}
 
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "TIME"
+	col.Size = 6
 	col.Type = "TIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
+	// FIXME: set auto datetime
 	// col.DefaultValue = &dflt
-	// if _, ok := sf.Tag().LookUp("on_update"); ok {
+	// if _, ok := sf.Tag().Option("on_update"); ok {
 	// 	col.Extra = "ON UPDATE " + dflt
 	// }
-	return
+	return col
 }
 
-func (s mySQLSchema) DateTimeDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) DateTimeDataType(sf reflext.FieldInfo) *sql.Column {
 	size := "6"
-	if v, exists := sf.Tag().LookUp("size"); exists {
+	if v, exists := sf.Tag().Option("size"); exists {
 		if _, err := strconv.Atoi(v); err == nil {
 			size = v
 		}
 	}
 
 	dflt := "CURRENT_TIMESTAMP(" + size + ")"
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "DATETIME"
 	col.Type = "DATETIME(" + size + ")"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := sf.Tag().LookUp("on_update"); ok {
+	if _, ok := sf.Tag().Option("on_update"); ok {
 		col.Extra = "ON UPDATE " + dflt
 	}
-	return
+	return col
 }
 
-func (s mySQLSchema) JSONDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) JSONDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "JSON"
 	col.Type = "JSON"
 	col.Nullable = sf.IsNullable()
-	return
+	return col
 }
 
 func (s mySQLSchema) SpatialDataType(dataType string) schema.DataTypeFunc {
-	return func(sf reflext.StructFielder) (col columns.Column) {
+	return func(sf reflext.FieldInfo) *sql.Column {
+		col := new(sql.Column)
 		col.Name = sf.Name()
 		col.DataType = dataType
 		col.Type = dataType
 		if sf.Type().Kind() == reflect.Ptr {
 			col.Nullable = true
 		}
-		if v, ok := sf.Tag().LookUp("srid"); ok {
+		if v, ok := sf.Tag().Option("srid"); ok {
 			if _, err := strconv.ParseUint(v, 10, 64); err != nil {
-				return
+				panic("sqlike: SRID must be a number")
 			}
 			col.Extra = "SRID " + v
 		}
-		return
+		return col
 	}
 }
 
-func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) StringDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.Nullable = sf.IsNullable()
 
@@ -167,7 +174,7 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 	collation := charsetMap[charset]
 	dflt := ""
 	tag := sf.Tag()
-	cs, ok1 := tag.LookUp("charset")
+	cs, ok1 := tag.Option("charset")
 	if ok1 {
 		charset = strings.ToLower(cs)
 		collation = charsetMap[charset]
@@ -176,14 +183,14 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 	col.DefaultValue = &dflt
 	col.Charset = &charset
 	col.Collation = &collation
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		col.DefaultValue = &v
 	}
 
-	if enum, ok := tag.LookUp("enum"); ok {
+	if enum, ok := tag.Option("enum"); ok {
 		paths := strings.Split(enum, "|")
 		if len(paths) < 1 {
-			panic("invalid enum formats")
+			panic("sqlike: invalid enum formats")
 		}
 
 		if !ok1 {
@@ -207,24 +214,24 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 		col.DataType = "ENUM"
 		col.Type = blr.String()
 		col.DefaultValue = &dflt
-		return
-	} else if char, ok := tag.LookUp("char"); ok {
+		return col
+	} else if char, ok := tag.Option("char"); ok {
 		if _, err := strconv.Atoi(char); err != nil {
 			panic("invalid value for char data type")
 		}
 		col.DataType = "CHAR"
 		col.Type = "CHAR(" + char + ")"
-		return
-	} else if _, ok := tag.LookUp("longtext"); ok {
+		return col
+	} else if _, ok := tag.Option("longtext"); ok {
 		col.DataType = "TEXT"
 		col.Type = "TEXT"
 		col.DefaultValue = nil
 		col.Charset = nil
 		col.Collation = nil
-		return
+		return col
 	}
 
-	size, _ := tag.LookUp("size")
+	size, _ := tag.Option("size")
 	charLen, _ := strconv.Atoi(size)
 	if charLen < 1 {
 		charLen = 191
@@ -232,10 +239,11 @@ func (s mySQLSchema) StringDataType(sf reflext.StructFielder) (col columns.Colum
 
 	col.DataType = "VARCHAR"
 	col.Type = "VARCHAR(" + strconv.Itoa(charLen) + ")"
-	return
+	return col
 }
 
-func (s mySQLSchema) CharDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) CharDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	dflt := ""
 	switch sf.Type() {
 	case reflect.TypeOf(currency.Unit{}):
@@ -253,86 +261,92 @@ func (s mySQLSchema) CharDataType(sf reflext.StructFielder) (col columns.Column)
 	col.DataType = "CHAR"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	return
+	return col
 }
 
-func (s mySQLSchema) BoolDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) BoolDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	dflt := "0"
 	col.Name = sf.Name()
 	col.DataType = "TINYINT"
 	col.Type = "TINYINT(1)"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	return
+	return col
 }
 
-func (s mySQLSchema) IntDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) IntDataType(sf reflext.FieldInfo) *sql.Column {
 	t := sf.Type()
 	tag := sf.Tag()
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = dataType
 	col.Type = dataType
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := tag.LookUp("auto_increment"); ok {
+	if _, ok := tag.Option("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
-	} else if v, ok := tag.LookUp("default"); ok {
+	} else if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
-			panic("int default value should be integer")
+			panic("sqlike: int default value should be integer")
 		}
 		col.DefaultValue = &v
 	}
-	return
+	return col
 }
 
-func (s mySQLSchema) UintDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) UintDataType(sf reflext.FieldInfo) *sql.Column {
 	t := sf.Type()
 	tag := sf.Tag()
 	dflt := "0"
 	dataType := s.getIntDataType(reflext.Deref(t))
 
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = dataType
 	col.Type = dataType + " UNSIGNED"
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if _, ok := tag.LookUp("auto_increment"); ok {
+	if _, ok := tag.Option("auto_increment"); ok {
 		col.Extra = "AUTO_INCREMENT"
 		col.DefaultValue = nil
-	} else if v, ok := tag.LookUp("default"); ok {
+	} else if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseUint(v, 10, 64); err != nil {
 			panic("uint default value should be unsigned integer")
 		}
 		col.DefaultValue = &v
 	}
-	return
+	return col
 }
 
-func (s mySQLSchema) FloatDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) FloatDataType(sf reflext.FieldInfo) *sql.Column {
 	dflt := "0"
 	tag := sf.Tag()
+
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.DataType = "REAL"
 	col.Type = "REAL"
-	if _, ok := tag.LookUp("unsigned"); ok {
+	if _, ok := tag.Option("unsigned"); ok {
 		col.Type += " UNSIGNED"
 	}
 	col.Nullable = sf.IsNullable()
 	col.DefaultValue = &dflt
-	if v, ok := tag.LookUp("default"); ok {
+	if v, ok := tag.Option("default"); ok {
 		if _, err := strconv.ParseFloat(v, 64); err != nil {
 			panic("float default value should be decimal number")
 		}
 		col.DefaultValue = &v
 	}
-	return
+	return col
 }
 
-func (s mySQLSchema) ArrayDataType(sf reflext.StructFielder) (col columns.Column) {
+func (s mySQLSchema) ArrayDataType(sf reflext.FieldInfo) *sql.Column {
+	col := new(sql.Column)
 	col.Name = sf.Name()
 	col.Nullable = sf.IsNullable()
 	// length := sf.Zero.Len()
@@ -343,14 +357,15 @@ func (s mySQLSchema) ArrayDataType(sf reflext.StructFielder) (col columns.Column
 		col.Type = "VARCHAR(36)"
 		col.Charset = &charset
 		col.Collation = &collation
-		return
+		return col
 	}
+
 	col.DataType = "JSON"
 	col.Type = "JSON"
-	return
+	return col
 }
 
-func (ms MySQL) buildSchemaByColumn(stmt sqlstmt.Stmt, col columns.Column) {
+func (ms mySQL) buildSchemaByColumn(stmt db.Stmt, col *sql.Column) {
 	stmt.WriteString(ms.Quote(col.Name))
 	stmt.WriteString(" " + col.Type)
 	if col.Charset != nil {

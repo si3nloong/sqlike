@@ -2,9 +2,12 @@ package examples
 
 import (
 	"context"
+	"strings"
 	"testing"
+	"time"
 
-	"github.com/si3nloong/sqlike/sqlike"
+	"github.com/google/uuid"
+	"github.com/si3nloong/sqlike/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +45,7 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		{
 			pk := columnMap["$Key"]
-			require.Equal(t, "VARCHAR(36)", pk.Type)
+			require.Equal(t, "BINARY(16)", pk.Type)
 			require.Equal(t, "$Key", pk.Name)
 			require.Equal(t, "Primary key", pk.Comment)
 		}
@@ -198,6 +201,38 @@ func MigrateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			Comment:      "String Nested",
 		})
 	}
+
+	t.Run(`MustUnsafeMigrate with multiple tag`, func(t *testing.T) {
+		table := db.Table("test")
+		defer table.DropIfExists(ctx)
+		table.MustUnsafeMigrate(ctx, struct {
+			ID        uuid.UUID `sqlike:",uuid"`
+			Name      string    `sql:"n"`
+			Timestamp time.Time `db:"ts"`
+		}{})
+		cols, err := table.Columns().List(ctx)
+		require.NoError(t, err)
+
+		expectedCols := []struct {
+			name     string
+			pos      int
+			colType  string
+			dataType string
+			nullable bool
+		}{
+			{name: "ID", pos: 1, colType: "binary(16)", dataType: "binary"},
+			{name: "n", pos: 2, colType: "varchar(191)", dataType: "varchar"},
+			{name: "ts", pos: 3, colType: "datetime", dataType: "datetime"},
+		}
+
+		for i, col := range cols {
+			require.Equal(t, expectedCols[i].name, col.Name)
+			require.Equal(t, expectedCols[i].pos, col.Position)
+			require.Equal(t, expectedCols[i].nullable, bool(col.IsNullable))
+			require.True(t, strings.EqualFold(expectedCols[i].dataType, col.DataType))
+			// require.True(t, strings.EqualFold(expectedCols[i].colType, col.Type))
+		}
+	})
 }
 
 // MigrateErrorExamples :
@@ -223,10 +258,10 @@ func MigrateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database
 		err = db.Table("NormalStruct").Migrate(ctx, bool(false))
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(ctx, map[string]interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, map[string]any{})
 		require.Error(t, err)
 
-		err = db.Table("NormalStruct").Migrate(ctx, []interface{}{})
+		err = db.Table("NormalStruct").Migrate(ctx, []any{})
 		require.Error(t, err)
 	}
 }

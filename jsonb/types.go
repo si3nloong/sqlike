@@ -12,8 +12,6 @@ const (
 	jsonString
 	jsonBoolean
 	jsonNumber
-	// jsonLiteral
-	// jsonComma
 )
 
 func (jt jsonType) String() (name string) {

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
@@ -251,7 +251,7 @@ func (dec *DefaultDecoder) DecodePtr(r *Reader, v reflect.Value) error {
 
 // DecodeStruct :
 func (dec *DefaultDecoder) DecodeStruct(r *Reader, v reflect.Value) error {
-	mapper := reflext.DefaultMapper
+	mapper := reflext.DefaultMapper()
 	if r.IsNull() {
 		v.Set(reflect.Zero(v.Type()))
 		return r.skipNull()
@@ -363,12 +363,11 @@ func (dec *DefaultDecoder) DecodeMap(r *Reader, v reflect.Value) error {
 	}
 	x := reflect.MakeMap(t)
 	if err := r.ReadObject(func(it *Reader, k string) error {
-		ki := reflext.Zero(t.Key())
+		ki, vi := reflext.Zero(t.Key()), reflext.Zero(t.Elem())
 		err = decodeKey(NewReader([]byte(strconv.Quote(k))), ki)
 		if err != nil {
 			return err
 		}
-		vi := reflext.Zero(t.Elem())
 		err = decodeValue(it, vi)
 		if err != nil {
 			return err

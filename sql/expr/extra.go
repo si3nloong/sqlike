@@ -1,9 +1,9 @@
 package expr
 
-import "github.com/si3nloong/sqlike/sqlike/primitive"
+import "github.com/si3nloong/sqlike/v2/internal/primitive"
 
 type selectStmt interface {
-	// Where(fields ...interface{}) selectStmt
+	// Where(fields ...any) selectStmt
 }
 
 // Union :
@@ -12,14 +12,8 @@ func Union(stmt1 selectStmt, stmt2 selectStmt, others ...selectStmt) (grp primit
 	return
 }
 
-// // UnionAll :
-// func UnionAll(stmt1 *sql.SelectStmt, stmt2 *sql.SelectStmt, others ...*sql.SelectStmt) (grp primitive.Group) {
-// 	grp = union(Raw("UNION ALL"), append([]*sql.SelectStmt{stmt1, stmt2}, others...))
-// 	return
-// }
-
 // Exists :
-func Exists(subquery interface{}) (grp primitive.Group) {
+func Exists(subquery any) (grp primitive.Group) {
 	grp.Values = append(grp.Values, Raw("EXISTS ("))
 	grp.Values = append(grp.Values, subquery)
 	grp.Values = append(grp.Values, Raw(")"))
@@ -27,7 +21,7 @@ func Exists(subquery interface{}) (grp primitive.Group) {
 }
 
 // NotExists :
-func NotExists(subquery interface{}) (grp primitive.Group) {
+func NotExists(subquery any) (grp primitive.Group) {
 	grp.Values = append(grp.Values, Raw("NOT EXISTS ("))
 	grp.Values = append(grp.Values, subquery)
 	grp.Values = append(grp.Values, Raw(")"))

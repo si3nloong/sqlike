@@ -1,35 +1,41 @@
 package util
 
-import "strings"
+import (
+	"regexp"
+
+	"github.com/si3nloong/sqlike/v2/internal/util"
+)
+
+var sqlFuncRegexp = regexp.MustCompile(`\([\w\_]+\)$`)
 
 // MySQLUtil :
 type MySQLUtil struct{}
 
 // TableName :
-func (util MySQLUtil) TableName(db, table string) string {
-	return "`" + db + "`.`" + table + "`"
+func (u MySQLUtil) TableName(db, table string) string {
+	return "`" + util.EscapeString(db, '`') + "`.`" + util.EscapeString(table, '`') + "`"
 }
 
 // Var :
-func (util MySQLUtil) Var(i int) string {
+func (u MySQLUtil) Var(i int) string {
 	return "?"
 }
 
 // Quote :
-func (util MySQLUtil) Quote(n string) string {
-	return "`" + n + "`"
+func (u MySQLUtil) Quote(s string) string {
+	return "`" + util.EscapeString(s, '`') + "`"
 }
 
 // Wrap :
-func (util MySQLUtil) Wrap(n string) string {
-	return "'" + n + "'"
+func (u MySQLUtil) Wrap(s string) string {
+	return "'" + util.EscapeString(s, '\'') + "'"
 }
 
 // WrapOnlyValue :
-func (util MySQLUtil) WrapOnlyValue(n string) string {
-	// TODO: regex to check the string with () symbols
-	if strings.Contains(n, "(") {
+func (u MySQLUtil) WrapOnlyValue(n string) string {
+	// eg. CURRENT_TIMESTAMP(6)
+	if sqlFuncRegexp.MatchString(n) {
 		return n
 	}
-	return util.Wrap(n)
+	return u.Wrap(n)
 }

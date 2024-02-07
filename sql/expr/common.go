@@ -4,8 +4,14 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
+
+// Pair :
+func Pair(first, second string) (p primitive.Pair) {
+	p = [2]string{first, second}
+	return
+}
 
 // Raw :
 func Raw(value string) (r primitive.Raw) {
@@ -14,8 +20,8 @@ func Raw(value string) (r primitive.Raw) {
 }
 
 // As :
-func As(field interface{}, alias string) (as primitive.As) {
-	as.Field = wrapColumn(field)
+func As(src any, alias string) (as primitive.As) {
+	as.Field = wrapColumn(src)
 	as.Name = alias
 	return
 }
@@ -32,7 +38,7 @@ func Column(name string, alias ...string) (c primitive.Column) {
 }
 
 // Func :
-func Func(name string, value interface{}, others ...interface{}) (f primitive.Func) {
+func Func(name string, value any, others ...any) (f primitive.Func) {
 	f.Name = strings.ToUpper(strings.TrimSpace(name))
 	f.Args = append(f.Args, wrapRaw(value))
 	if len(others) > 0 {
@@ -43,7 +49,7 @@ func Func(name string, value interface{}, others ...interface{}) (f primitive.Fu
 	return
 }
 
-func wrapRaw(v interface{}) (it interface{}) {
+func wrapRaw(v any) (it any) {
 	vv := primitive.Value{}
 	switch vi := v.(type) {
 	case sql.RawBytes:

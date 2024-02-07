@@ -1,7 +1,9 @@
 package sql
 
 import (
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"fmt"
+
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 )
 
 // UpdateStmt :
@@ -10,23 +12,27 @@ type UpdateStmt struct {
 	Table      string
 	Conditions primitive.Group
 	Values     []primitive.KV
-	Sorts      []interface{}
-	Max        uint
+	Sorts      []any
+	RowCount   uint
 }
 
 // Update :
-func Update(tables ...interface{}) *UpdateStmt {
+func Update[T ~string | primitive.Pair](src T) *UpdateStmt {
 	stmt := new(UpdateStmt)
-	return stmt.Update(tables...)
-}
-
-// Update :
-func (stmt *UpdateStmt) Update(fields ...interface{}) *UpdateStmt {
+	switch vi := any(src).(type) {
+	case primitive.Pair:
+		stmt.Database = vi[0]
+		stmt.Table = vi[1]
+	case string:
+		stmt.Table = vi
+	default:
+		stmt.Table = fmt.Sprintf("%s", vi)
+	}
 	return stmt
 }
 
 // Where :
-func (stmt *UpdateStmt) Where(fields ...interface{}) *UpdateStmt {
+func (stmt *UpdateStmt) Where(fields ...any) *UpdateStmt {
 	// stmt.Conditions = expr.And(fields...)
 	return stmt
 }
@@ -38,7 +44,7 @@ func (stmt *UpdateStmt) Set(values ...primitive.KV) *UpdateStmt {
 }
 
 // OrderBy :
-func (stmt *UpdateStmt) OrderBy(fields ...interface{}) *UpdateStmt {
+func (stmt *UpdateStmt) OrderBy(fields ...any) *UpdateStmt {
 	stmt.Sorts = fields
 	return stmt
 }
@@ -46,7 +52,7 @@ func (stmt *UpdateStmt) OrderBy(fields ...interface{}) *UpdateStmt {
 // Limit :
 func (stmt *UpdateStmt) Limit(num uint) *UpdateStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
 	}
 	return stmt
 }

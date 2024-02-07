@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // DefaultEncoder :
@@ -20,26 +20,24 @@ type DefaultEncoder struct {
 }
 
 // EncodeByte :
-func (enc DefaultEncoder) EncodeByte(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeByte(w JsonWriter, v reflect.Value) error {
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
 	}
-	w.WriteRune('"')
-	w.WriteString(base64.StdEncoding.EncodeToString(v.Bytes()))
-	w.WriteRune('"')
+	w.WriteString(`"` + base64.StdEncoding.EncodeToString(v.Bytes()) + `"`)
 	return nil
 }
 
 // EncodeStringer :
-func (enc DefaultEncoder) EncodeStringer(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeStringer(w JsonWriter, v reflect.Value) error {
 	x := v.Interface().(fmt.Stringer)
 	w.WriteString(strconv.Quote(x.String()))
 	return nil
 }
 
-// EncodeJSONRaw :
-func (enc DefaultEncoder) EncodeJSONRaw(w *Writer, v reflect.Value) error {
+// EncodeJsonRaw :
+func (enc DefaultEncoder) EncodeJsonRaw(w JsonWriter, v reflect.Value) error {
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
@@ -57,7 +55,7 @@ func (enc DefaultEncoder) EncodeJSONRaw(w *Writer, v reflect.Value) error {
 }
 
 // EncodeTime :
-func (enc DefaultEncoder) EncodeTime(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeTime(w JsonWriter, v reflect.Value) error {
 	var temp [20]byte
 	x := v.Interface().(time.Time)
 	w.Write(x.UTC().AppendFormat(temp[:0], `"`+time.RFC3339Nano+`"`))
@@ -65,39 +63,39 @@ func (enc DefaultEncoder) EncodeTime(w *Writer, v reflect.Value) error {
 }
 
 // EncodeString :
-func (enc DefaultEncoder) EncodeString(w *Writer, v reflect.Value) error {
-	w.WriteRune('"')
+func (enc DefaultEncoder) EncodeString(w JsonWriter, v reflect.Value) error {
+	w.WriteByte('"')
 	escapeString(w, v.String())
-	w.WriteRune('"')
+	w.WriteByte('"')
 	return nil
 }
 
 // EncodeBool :
-func (enc DefaultEncoder) EncodeBool(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeBool(w JsonWriter, v reflect.Value) error {
 	var temp [4]byte
 	w.Write(strconv.AppendBool(temp[:0], v.Bool()))
 	return nil
 }
 
 // EncodeInt :
-func (enc DefaultEncoder) EncodeInt(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeInt(w JsonWriter, v reflect.Value) error {
 	var temp [8]byte
 	w.Write(strconv.AppendInt(temp[:0], v.Int(), 10))
 	return nil
 }
 
 // EncodeUint :
-func (enc DefaultEncoder) EncodeUint(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeUint(w JsonWriter, v reflect.Value) error {
 	var temp [10]byte
 	w.Write(strconv.AppendUint(temp[:0], v.Uint(), 10))
 	return nil
 }
 
 // EncodeFloat :
-func (enc DefaultEncoder) EncodeFloat(w *Writer, v reflect.Value) error {
+func (enc DefaultEncoder) EncodeFloat(w JsonWriter, v reflect.Value) error {
 	f64 := v.Float()
 	if f64 <= 0 {
-		w.WriteRune('0')
+		w.WriteByte('0')
 		return nil
 	}
 	w.WriteString(strconv.FormatFloat(f64, 'E', -1, 64))
@@ -105,7 +103,7 @@ func (enc DefaultEncoder) EncodeFloat(w *Writer, v reflect.Value) error {
 }
 
 // EncodePtr :
-func (enc *DefaultEncoder) EncodePtr(w *Writer, v reflect.Value) error {
+func (enc *DefaultEncoder) EncodePtr(w JsonWriter, v reflect.Value) error {
 	if v.IsNil() {
 		w.WriteString(null)
 		return nil
@@ -120,16 +118,15 @@ func (enc *DefaultEncoder) EncodePtr(w *Writer, v reflect.Value) error {
 }
 
 // EncodeStruct :
-func (enc *DefaultEncoder) EncodeStruct(w *Writer, v reflect.Value) error {
-	w.WriteRune('{')
-	mapper := reflext.DefaultMapper
+func (enc *DefaultEncoder) EncodeStruct(w JsonWriter, v reflect.Value) error {
+	w.WriteByte('{')
+	mapper := reflext.DefaultMapper()
 	cdc := mapper.CodecByType(v.Type())
 	for i, sf := range cdc.Properties() {
 		if i > 0 {
-			w.WriteRune(',')
+			w.WriteByte(',')
 		}
-		w.WriteString(strconv.Quote(sf.Name()))
-		w.WriteRune(':')
+		w.WriteString(strconv.Quote(sf.Name()) + `:`)
 		fv := mapper.FieldByIndexesReadOnly(v, sf.Index())
 		encoder, err := enc.registry.LookupEncoder(fv)
 		if err != nil {
@@ -139,23 +136,22 @@ func (enc *DefaultEncoder) EncodeStruct(w *Writer, v reflect.Value) error {
 			return err
 		}
 	}
-	w.WriteRune('}')
+	w.WriteByte('}')
 	return nil
 }
 
 // EncodeArray :
-func (enc *DefaultEncoder) EncodeArray(w *Writer, v reflect.Value) error {
+func (enc *DefaultEncoder) EncodeArray(w JsonWriter, v reflect.Value) error {
 	if v.Kind() == reflect.Slice && v.IsNil() {
 		w.WriteString(null)
 		return nil
 	}
-	w.WriteRune('[')
+	w.WriteByte('[')
 	length := v.Len()
 	for i := 0; i < length; i++ {
 		if i > 0 {
-			w.WriteRune(',')
+			w.WriteByte(',')
 		}
-
 		fv := v.Index(i)
 		encoder, err := enc.registry.LookupEncoder(fv)
 		if err != nil {
@@ -165,12 +161,12 @@ func (enc *DefaultEncoder) EncodeArray(w *Writer, v reflect.Value) error {
 			return err
 		}
 	}
-	w.WriteRune(']')
+	w.WriteByte(']')
 	return nil
 }
 
 // EncodeInterface :
-func (enc *DefaultEncoder) EncodeInterface(w *Writer, v reflect.Value) error {
+func (enc *DefaultEncoder) EncodeInterface(w JsonWriter, v reflect.Value) error {
 	it := v.Interface()
 	if it == nil {
 		w.WriteString(null)
@@ -184,7 +180,7 @@ func (enc *DefaultEncoder) EncodeInterface(w *Writer, v reflect.Value) error {
 }
 
 // EncodeMap :
-func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
+func (enc *DefaultEncoder) EncodeMap(w JsonWriter, v reflect.Value) error {
 	t := v.Type()
 	k := t.Key()
 	if v.IsNil() {
@@ -201,16 +197,16 @@ func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 	keys := v.MapKeys()
 	var encode ValueEncoder
 	if k.Implements(textMarshaler) {
-		encode = func(wr *Writer, vi reflect.Value) error {
+		encode = func(w JsonWriter, vi reflect.Value) error {
 			it := vi.Interface().(encoding.TextMarshaler)
 			b, err := it.MarshalText()
 			if err != nil {
 				return err
 			}
 
-			wr.WriteByte('"')
-			wr.Write(b)
-			wr.WriteByte('"')
+			w.WriteByte('"')
+			w.Write(b)
+			w.WriteByte('"')
 			return nil
 		}
 	} else {
@@ -224,20 +220,16 @@ func (enc *DefaultEncoder) EncodeMap(w *Writer, v reflect.Value) error {
 			sort.SliceStable(keys, func(i, j int) bool {
 				return keys[i].Int() < keys[j].Int()
 			})
-			encode = func(wr *Writer, vi reflect.Value) error {
-				wr.WriteByte('"')
-				wr.WriteString(strconv.FormatInt(vi.Int(), 10))
-				wr.WriteByte('"')
+			encode = func(w JsonWriter, vi reflect.Value) error {
+				w.WriteString(`"` + strconv.FormatInt(vi.Int(), 10) + `"`)
 				return nil
 			}
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 			sort.SliceStable(keys, func(i, j int) bool {
 				return keys[i].Uint() < keys[j].Uint()
 			})
-			encode = func(wr *Writer, vi reflect.Value) error {
-				wr.WriteByte('"')
-				wr.WriteString(strconv.FormatUint(vi.Uint(), 10))
-				wr.WriteByte('"')
+			encode = func(w JsonWriter, vi reflect.Value) error {
+				w.WriteString(`"` + strconv.FormatUint(vi.Uint(), 10) + `"`)
 				return nil
 			}
 		default:

@@ -1,27 +1,31 @@
 package expr
 
-import "github.com/si3nloong/sqlike/sqlike/primitive"
+import (
+	"golang.org/x/exp/constraints"
+
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+)
 
 // Increment :
-func Increment(field string, inc uint) primitive.Math {
+func Increment[V constraints.Unsigned](field string, value V) primitive.Math {
 	return primitive.Math{
 		Field: field,
 		Mode:  primitive.Add,
-		Value: int(inc),
+		Value: uint(value),
 	}
 }
 
 // Decrement :
-func Decrement(field string, inc uint) primitive.Math {
+func Decrement[V constraints.Unsigned](field string, value V) primitive.Math {
 	return primitive.Math{
 		Field: field,
 		Mode:  primitive.Deduct,
-		Value: int(inc),
+		Value: uint(value),
 	}
 }
 
 // Multiply :
-func Multiply(fields ...interface{}) (grp primitive.Group) {
+func Multiply(fields ...any) (grp primitive.Group) {
 	for i, f := range fields {
 		if i > 0 {
 			grp.Values = append(grp.Values, Raw("*"))

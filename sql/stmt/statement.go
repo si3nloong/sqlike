@@ -2,50 +2,44 @@ package sqlstmt
 
 import (
 	"fmt"
-	"io"
 	"strings"
 	"time"
 )
 
-// Stmt :
-type Stmt interface {
-	io.StringWriter
-	io.ByteWriter
-	fmt.Stringer
-	Args() []interface{}
-	AppendArgs(args ...interface{})
-}
-
 // Formatter :
 type Formatter interface {
-	Format(it interface{}) string
+	Format(it any) string
 	Var(i int) string
 }
 
 // Statement :
 type Statement struct {
-	strings.Builder
+	*strings.Builder
 	start   time.Time
 	elapsed time.Duration
-	fmt     Formatter
-	c       int
-	args    []interface{}
+
+	// SQL formatter (different driver different formatter)
+	fmt Formatter
+
+	// arguments count
+	c int
+
+	// SQL query arguments
+	args []any
 }
 
-// NewStatement :
-func NewStatement(fmt Formatter) (sm *Statement) {
-	sm = new(Statement)
-	sm.fmt = fmt
-	return
+func (sm *Statement) Pos() int {
+	return sm.c
 }
 
 // Args :
-func (sm *Statement) Args() []interface{} {
+func (sm *Statement) Args() []any {
 	return sm.args
 }
 
 // AppendArgs :
-func (sm *Statement) AppendArgs(args ...interface{}) {
+func (sm *Statement) AppendArgs(query string, args ...any) {
+	sm.Builder.WriteString(query)
 	sm.args = append(sm.args, args...)
 	sm.c = len(sm.args)
 }
@@ -53,8 +47,7 @@ func (sm *Statement) AppendArgs(args ...interface{}) {
 // Format :
 func (sm *Statement) Format(state fmt.State, verb rune) {
 	if sm.fmt == nil {
-		state.Write([]byte(`missing formatter, unable to debug`))
-		return
+		panic("missing formatter, unable to debug")
 	}
 
 	str := sm.String()
@@ -74,8 +67,7 @@ func (sm *Statement) Format(state fmt.State, verb rune) {
 			state.Write([]byte(str))
 			break
 		}
-		state.Write([]byte(str[:idx]))
-		state.Write([]byte(sm.fmt.Format(args[0])))
+		state.Write([]byte(str[:idx] + sm.fmt.Format(args[0])))
 		str = str[idx+1:]
 		args = args[1:]
 		i++
@@ -103,5 +95,8 @@ func (sm *Statement) TimeElapsed() time.Duration {
 // Reset : implement resetter as strings.Builer
 func (sm *Statement) Reset() {
 	sm.args = nil
+	sm.c = 0
+	sm.start = time.Time{}
+	sm.elapsed = time.Duration(0)
 	sm.Builder.Reset()
 }

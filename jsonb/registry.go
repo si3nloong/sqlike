@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 )
@@ -25,7 +25,7 @@ var (
 type ValueDecoder func(*Reader, reflect.Value) error
 
 // ValueEncoder :
-type ValueEncoder func(*Writer, reflect.Value) error
+type ValueEncoder func(JsonWriter, reflect.Value) error
 
 // Registry :
 type Registry struct {
@@ -44,7 +44,7 @@ func buildDefaultRegistry() *Registry {
 	rg.SetTypeCoder(reflect.TypeOf(language.Tag{}), enc.EncodeStringer, dec.DecodeLanguage)
 	rg.SetTypeCoder(reflect.TypeOf(currency.Unit{}), enc.EncodeStringer, dec.DecodeCurrency)
 	rg.SetTypeCoder(reflect.TypeOf(time.Time{}), enc.EncodeTime, dec.DecodeTime)
-	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJSONRaw, dec.DecodeJSONRaw)
+	rg.SetTypeCoder(reflect.TypeOf(json.RawMessage{}), enc.EncodeJsonRaw, dec.DecodeJSONRaw)
 	rg.SetTypeCoder(reflect.TypeOf(json.Number("")), enc.EncodeStringer, dec.DecodeJSONNumber)
 	rg.SetKindCoder(reflect.String, enc.EncodeString, dec.DecodeString)
 	rg.SetKindCoder(reflect.Bool, enc.EncodeBool, dec.DecodeBool)
@@ -116,10 +116,7 @@ func (r *Registry) LookupEncoder(v reflect.Value) (ValueEncoder, error) {
 	)
 
 	if !v.IsValid() || reflext.IsNull(v) {
-		return func(w *Writer, v reflect.Value) error {
-			w.WriteString(null)
-			return nil
-		}, nil
+		return nilEncoder(), nil
 	}
 
 	it := v.Interface()

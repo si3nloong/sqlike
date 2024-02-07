@@ -1,25 +1,29 @@
 package mysql
 
 import (
-	"fmt"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/spatial"
-	"github.com/si3nloong/sqlike/sql/codec"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // InsertInto :
-func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflext.StructMapper, cdc codec.Codecer, fields []reflext.StructFielder, v reflect.Value, opt *options.InsertOptions) (err error) {
-	records := v.Len()
+func (ms *mySQL) InsertInto(
+	stmt db.Stmt,
+	dbName, table, pk string,
+	cache reflext.StructMapper,
+	fields []reflext.FieldInfo,
+	v reflect.Value,
+	opt *options.InsertOptions,
+) (err error) {
+	noOfRecords := v.Len()
 
 	stmt.WriteString("INSERT")
 	if opt.Mode == options.InsertIgnore {
 		stmt.WriteString(" IGNORE")
 	}
-	stmt.WriteString(" INTO " + ms.TableName(db, table) + " (")
+	stmt.WriteString(" INTO " + ms.TableName(dbName, table) + " (")
 
 	omitField := make(map[string]bool)
 	noOfOmit := len(opt.Omits)
@@ -35,7 +39,7 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 		}
 
 		// omit all the struct field with `generated_column` tag, it shouldn't include when inserting to the db
-		if _, ok := fields[i].Tag().LookUp("generated_column"); ok {
+		if _, ok := fields[i].Tag().Option("generated_column"); ok {
 			fields = append(fields[:i], fields[i+1:]...)
 			continue
 		}
@@ -47,61 +51,67 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 
 		i++
 	}
-	stmt.WriteString(") VALUES ")
+	stmt.WriteString(`) VALUES `)
 
 	length := len(fields)
-	encoders := make([]codec.ValueEncoder, length)
-	for i := 0; i < records; i++ {
+	encoders := make([]db.ValueEncoder, length)
+	for i := 0; i < noOfRecords; i++ {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
-		stmt.WriteByte('(')
-		vi := reflext.Indirect(v.Index(i))
 
-		for j := range fields {
+		vi := reflext.Indirect(v.Index(i))
+		stmt.WriteByte('(')
+		// marshal records and construct `VALUES` statement
+		for j, f := range fields {
 			if j > 0 {
 				stmt.WriteByte(',')
 			}
 
+			// get struct property value
+			fv := cache.FieldByIndexesReadOnly(vi, f.Index())
+
 			// first record only find encoders
-			fv := cache.FieldByIndexesReadOnly(vi, fields[j].Index())
 			if i == 0 {
-				encoders[j], err = findEncoder(cdc, fields[j], fv)
+				encoders[j], err = ms.LookupEncoder(fv)
 				if err != nil {
 					return err
 				}
 			}
 
-			val, err := encoders[j](fields[j], fv)
+			query, args, err := encoders[j](ms, fv, f.Tag().Opts())
 			if err != nil {
 				return err
 			}
-
-			convertSpatial(stmt, val)
+			stmt.AppendArgs(query, args...)
 		}
 		stmt.WriteByte(')')
 	}
 
-	var (
-		column string
-		name   string
-	)
 	if opt.Mode == options.InsertOnDuplicate {
-		stmt.WriteString(" ON DUPLICATE KEY UPDATE ")
-		next := false
+		var (
+			column string
+			name   string
+			next   = false
+			tag    reflext.FieldTag
+		)
+
+		stmt.WriteString(` ON DUPLICATE KEY UPDATE `)
+
 		for _, f := range fields {
 			name = f.Name()
+			tag = f.Tag()
 			// skip primary key on duplicate update
 			if name == pk {
 				continue
 			}
 
 			// skip primary key on duplicate update
-			if _, ok := f.Tag().LookUp("primary_key"); ok {
+			if _, ok := tag.Option("primary_key"); ok {
 				continue
 			}
 
-			if _, ok := f.Tag().LookUp("auto_increment"); ok {
+			if _, ok := tag.Option("auto_increment"); ok {
 				continue
 			}
 
@@ -115,54 +125,10 @@ func (ms MySQL) InsertInto(stmt sqlstmt.Stmt, db, table, pk string, cache reflex
 			}
 
 			column = ms.Quote(name)
-			stmt.WriteString(column + "=VALUES(" + column + ")")
+			stmt.WriteString(column + `=VALUES(` + column + `)`)
 			next = true
 		}
 	}
 	stmt.WriteByte(';')
 	return
-}
-
-func findEncoder(c codec.Codecer, sf reflext.StructFielder, v reflect.Value) (codec.ValueEncoder, error) {
-	// auto_increment field should pass nil if it's empty
-	if _, ok := sf.Tag().LookUp("auto_increment"); ok && reflext.IsZero(v) {
-		return codec.NilEncoder, nil
-	}
-	encoder, err := c.LookupEncoder(v)
-	if err != nil {
-		return nil, err
-	}
-	return encoder, nil
-}
-
-func convertSpatial(stmt sqlstmt.Stmt, val interface{}) {
-	switch vi := val.(type) {
-	case spatial.Geometry:
-		switch vi.Type {
-		case spatial.Point:
-			stmt.WriteString("ST_PointFromText")
-		case spatial.LineString:
-			stmt.WriteString("ST_LineStringFromText")
-		case spatial.Polygon:
-			stmt.WriteString("ST_PolygonFromText")
-		case spatial.MultiPoint:
-			stmt.WriteString("ST_MultiPointFromText")
-		case spatial.MultiLineString:
-			stmt.WriteString("ST_MultiLineStringFromText")
-		case spatial.MultiPolygon:
-			stmt.WriteString("ST_MultiPolygonFromText")
-		default:
-		}
-
-		stmt.WriteString("(?")
-		if vi.SRID > 0 {
-			stmt.WriteString(fmt.Sprintf(",%d", vi.SRID))
-		}
-		stmt.WriteByte(')')
-		stmt.AppendArgs(vi.WKT)
-
-	default:
-		stmt.WriteByte('?')
-		stmt.AppendArgs(val)
-	}
 }

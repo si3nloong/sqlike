@@ -4,38 +4,36 @@ import (
 	"regexp"
 	"strconv"
 
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
 )
 
 // HasIndexByName :
-func (ms MySQL) HasIndexByName(stmt sqlstmt.Stmt, dbName, table, indexName string) {
-	stmt.WriteString(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`)
-	stmt.AppendArgs(dbName, table, indexName)
+func (s *mySQL) HasIndexByName(stmt db.Stmt, dbName, table, indexName string) {
+	stmt.AppendArgs(`SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?;`, dbName, table, indexName)
 }
 
 // HasIndex :
-func (ms MySQL) HasIndex(stmt sqlstmt.Stmt, dbName, table string, idx indexes.Index) {
+func (s *mySQL) HasIndex(stmt db.Stmt, dbName, table string, idx sql.Index) {
 	nonUnique, idxType := true, "BTREE"
 	switch idx.Type {
-	case indexes.Unique:
+	case sql.Unique:
 		nonUnique = false
-	case indexes.FullText:
+	case sql.FullText:
 		idxType = "FULLTEXT"
-	case indexes.Spatial:
+	case sql.Spatial:
 		idxType = "SPATIAL"
-	case indexes.Primary:
+	case sql.Primary:
 		nonUnique = false
 	}
-	args := []interface{}{dbName, table, idxType, nonUnique}
+	args := []any{dbName, table, idxType, nonUnique}
 	stmt.WriteString("SELECT COUNT(1) FROM (")
 	stmt.WriteString("SELECT INDEX_NAME, COUNT(*) AS c FROM INFORMATION_SCHEMA.STATISTICS ")
 	stmt.WriteString("WHERE TABLE_SCHEMA = ? ")
 	stmt.WriteString("AND TABLE_NAME = ? ")
 	stmt.WriteString("AND INDEX_TYPE = ? ")
 	stmt.WriteString("AND NON_UNIQUE = ? ")
-	stmt.WriteString("AND COLUMN_NAME IN ")
-	stmt.WriteByte('(')
+	stmt.WriteString(`AND COLUMN_NAME IN (`)
 	for i, col := range idx.Columns {
 		if i > 0 {
 			stmt.WriteByte(',')
@@ -43,69 +41,65 @@ func (ms MySQL) HasIndex(stmt sqlstmt.Stmt, dbName, table string, idx indexes.In
 		stmt.WriteByte('?')
 		args = append(args, col.Name)
 	}
-	stmt.WriteByte(')')
-	stmt.WriteString(" GROUP BY INDEX_NAME")
+	stmt.WriteString(`) GROUP BY INDEX_NAME`)
 	stmt.WriteString(") AS temp WHERE temp.c = ?")
-	stmt.WriteByte(';')
 	args = append(args, int64(len(idx.Columns)))
-	stmt.AppendArgs(args...)
+	stmt.AppendArgs(";", args...)
 }
 
 // GetIndexes :
-func (ms MySQL) GetIndexes(stmt sqlstmt.Stmt, dbName, table string) {
-	stmt.WriteString(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`)
-	stmt.AppendArgs(dbName, table)
+func (s *mySQL) GetIndexes(stmt db.Stmt, dbName, table string) {
+	stmt.AppendArgs(`SELECT DISTINCT INDEX_NAME, INDEX_TYPE, NON_UNIQUE FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?;`, dbName, table)
 }
 
 // CreateIndexes :
-func (ms MySQL) CreateIndexes(stmt sqlstmt.Stmt, db, table string, idxs []indexes.Index, supportDesc bool) {
-	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table))
+func (s *mySQL) CreateIndexes(stmt db.Stmt, db, table string, idxs []sql.Index, supportDesc bool) {
+	stmt.WriteString(`ALTER TABLE ` + s.TableName(db, table))
 	for i, idx := range idxs {
 		if i > 0 {
 			stmt.WriteByte(',')
 		}
 
-		stmt.WriteString(" ADD " + ms.getIndexByType(idx.Type) + " ")
+		stmt.WriteString(` ADD ` + s.getIndexByType(idx.Type) + ` `)
 		name := idx.GetName()
-		if idx.Type == indexes.MultiValued {
+		if idx.Type == sql.MultiValued {
 			stmt.WriteString(name + "( (CAST(")
 			if regexp.MustCompile(`(?is).+\s*\-\>\s*.+`).MatchString(idx.Cast) {
 				stmt.WriteString(idx.Cast)
 			} else {
 				stmt.WriteString("`" + idx.Cast + "` -> '$'")
 			}
-			stmt.WriteString(" AS " + idx.As + ")) )")
+			stmt.WriteString(` AS ` + idx.As + `)) )`)
 		} else {
 			if name != "" {
-				stmt.WriteString(ms.Quote(name))
+				stmt.WriteString(s.Quote(name))
 			}
-			stmt.WriteString(" (")
+			stmt.WriteString(` (`)
 			for j, col := range idx.Columns {
 				if j > 0 {
 					stmt.WriteByte(',')
 				}
-				stmt.WriteString(ms.Quote(col.Name))
+				stmt.WriteString(s.Quote(col.Name))
 				if !supportDesc {
 					continue
 				}
-				if col.Direction == indexes.Descending {
-					stmt.WriteString(" DESC")
+				if col.Direction == sql.Descending {
+					stmt.WriteString(` DESC`)
 				}
 			}
 			stmt.WriteByte(')')
 		}
 
 		if idx.Comment != "" {
-			stmt.WriteString(" COMMENT " + strconv.Quote(idx.Comment))
+			stmt.WriteString(` COMMENT ` + strconv.Quote(idx.Comment))
 		}
-
 	}
 	stmt.WriteByte(';')
 }
 
 // DropIndexes :
-func (ms MySQL) DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string) {
-	stmt.WriteString("ALTER TABLE " + ms.TableName(db, table) + " ")
+func (s *mySQL) DropIndexes(stmt db.Stmt, db, table string, idxs []string) {
+	stmt.WriteString(`ALTER TABLE ` + s.TableName(db, table) + ` `)
 	for i, idx := range idxs {
 		if idx == "PRIMARY" {
 			// stmt.WriteString("DROP PRIMARY KEY")
@@ -115,20 +109,20 @@ func (ms MySQL) DropIndexes(stmt sqlstmt.Stmt, db, table string, idxs []string) 
 			stmt.WriteByte(',')
 		}
 
-		stmt.WriteString("DROP INDEX " + ms.Quote(idx))
+		stmt.WriteString(`DROP INDEX ` + s.Quote(idx))
 	}
 	stmt.WriteByte(';')
 }
 
-func (ms MySQL) getIndexByType(k indexes.Type) (idx string) {
+func (s *mySQL) getIndexByType(k sql.Type) (idx string) {
 	switch k {
-	case indexes.FullText:
+	case sql.FullText:
 		idx = "FULLTEXT INDEX"
-	case indexes.Spatial:
+	case sql.Spatial:
 		idx = "SPATIAL INDEX"
-	case indexes.Unique:
+	case sql.Unique:
 		idx = "UNIQUE INDEX"
-	case indexes.Primary:
+	case sql.Primary:
 		idx = "PRIMARY KEY"
 	default:
 		idx = "INDEX"

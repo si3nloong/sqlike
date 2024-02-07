@@ -4,9 +4,38 @@ import (
 	"testing"
 	"time"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/stretchr/testify/require"
 )
+
+func TestEqual(t *testing.T) {
+	// require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal(Pair("a", "num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal(Column("num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.Equal, Value: 123}, Equal("num", 123))
+}
+
+func TestNotEqual(t *testing.T) {
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.NotEqual, Value: 123}, NotEqual(Column("num"), 123))
+	require.Equal(t, primitive.C{Field: wrapColumn("num"), Operator: primitive.NotEqual, Value: 123}, NotEqual("num", 123))
+}
+
+func TestIsNull(t *testing.T) {
+	require.Equal(t, primitive.Nil{Field: wrapColumn("column")}, IsNull("column"))
+	require.Equal(t, primitive.Nil{Field: wrapColumn("xx")}, IsNull(Column("xx")))
+}
+
+func TestIsNotNull(t *testing.T) {
+	require.Equal(t, primitive.Nil{Field: wrapColumn("column"), IsNot: true}, IsNotNull("column"))
+	require.Equal(t, primitive.Nil{Field: wrapColumn("xx"), IsNot: true}, IsNotNull(Column("xx")))
+}
+
+func TestIn(t *testing.T) {
+
+}
+
+func TestNotIn(t *testing.T) {
+
+}
 
 func TestExpression(t *testing.T) {
 	var (
@@ -14,38 +43,38 @@ func TestExpression(t *testing.T) {
 		str *string
 	)
 
-	invalids := []interface{}{
+	invalids := []any{
 		And(),
 		nil,
 		struct{}{},
 		Or(),
-		make([]interface{}, 0),
-		[]interface{}{},
-		[]interface{}(nil),
+		make([]any, 0),
+		[]any{},
+		[]any(nil),
 		map[string]string(nil),
 		str,
 	}
 
 	now := time.Now()
-	filters := []interface{}{
+	filters := []any{
 		Equal("A", 1),
 		Like("B", "abc%"),
 		Between("DateTime", now, now.Add(5*time.Minute)),
 	}
 	filters = append(filters, invalids...)
 
-	t.Run("Empty And", func(ti *testing.T) {
+	t.Run("Empty And", func(t *testing.T) {
 		grp = And()
-		require.Equal(ti, primitive.Group{}, grp)
+		require.Equal(t, primitive.Group{}, grp)
 
 		grp = And(invalids...)
-		require.Equal(ti, primitive.Group{}, grp)
+		require.Equal(t, primitive.Group{}, grp)
 	})
 
-	t.Run("And", func(ti *testing.T) {
+	t.Run("And", func(t *testing.T) {
 		grp = And(filters...)
-		require.Equal(ti, primitive.Group{
-			Values: []interface{}{
+		require.Equal(t, primitive.Group{
+			Values: []any{
 				Raw("("),
 				Equal("A", 1),
 				primitive.And,
@@ -57,10 +86,10 @@ func TestExpression(t *testing.T) {
 		}, grp)
 	})
 
-	t.Run("Or", func(ti *testing.T) {
+	t.Run("Or", func(t *testing.T) {
 		grp = Or(filters...)
-		require.Equal(ti, primitive.Group{
-			Values: []interface{}{
+		require.Equal(t, primitive.Group{
+			Values: []any{
 				Raw("("),
 				Equal("A", 1),
 				primitive.Or,

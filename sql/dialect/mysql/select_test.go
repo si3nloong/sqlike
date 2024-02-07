@@ -4,10 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sql/expr"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	sqlstmt "github.com/si3nloong/sqlike/v2/sql/stmt"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,20 +16,21 @@ func TestSelect(t *testing.T) {
 	var (
 		now = time.Now()
 		err error
+		ms  = New()
 	)
 
-	invalids := []interface{}{
+	invalids := []any{
 		expr.And(),
 		nil,
 		struct{}{},
 		expr.Or(),
-		make([]interface{}, 0),
-		[]interface{}{},
-		[]interface{}(nil),
+		make([]any, 0),
+		[]any{},
+		[]any(nil),
 		map[string]string(nil),
 	}
 
-	filters := []interface{}{
+	filters := []any{
 		expr.Equal("A", 1),
 		expr.Like("B", "abc%"),
 		expr.Between("DateTime", now, now.Add(5*time.Minute)),
@@ -37,18 +39,23 @@ func TestSelect(t *testing.T) {
 
 	// Complex select statement
 	{
-		stmt := sqlstmt.AcquireStmt(MySQL{})
+
+		act := actions.Find().
+			Where(
+				expr.And(filters...),
+				expr.Or(filters...),
+				expr.Equal("E", uint(888)),
+				expr.NotBetween("Z", -10, 12933),
+			)
+
+		v, ok := act.(*actions.FindActions)
+		require.True(t, ok)
+		v.Database = "A"
+		v.Table = "Test"
+
+		stmt := sqlstmt.AcquireStmt(ms)
 		defer sqlstmt.ReleaseStmt(stmt)
-		err = New().Select(
-			stmt,
-			actions.Find().From("A", "Test").
-				Where(
-					expr.And(filters...),
-					expr.Or(filters...),
-					expr.Equal("E", uint(888)),
-					expr.NotBetween("Z", -10, 12933),
-				).(*actions.FindActions), 0,
-		)
+		err = New().Select(stmt, *v, primitive.Lock{})
 		require.NoError(t, err)
 		require.Equal(t, "SELECT * FROM `A`.`Test` WHERE ((`A` = ? AND `B` LIKE ? AND `DateTime` BETWEEN ? AND ?) AND (`A` = ? OR `B` LIKE ? OR `DateTime` BETWEEN ? AND ?) AND `E` = ? AND `Z` NOT BETWEEN ? AND ?);", stmt.String())
 	}
@@ -75,7 +82,7 @@ func TestSelect(t *testing.T) {
 					Limit(10).
 					Offset(1),
 				),
-				expr.NotNull("B"),
+				expr.IsNotNull("B"),
 				expr.Or(
 					expr.In("C", []string{"1", "2", "3"}),
 					expr.Equal("A", 100),
@@ -86,9 +93,9 @@ func TestSelect(t *testing.T) {
 			expr.Asc("C"),
 		).Limit(1)
 
-		x := New()
-		stmt2 := sqlstmt.NewStatement(x)
-		err := x.parser.BuildStatement(stmt2, stmt)
+		stmt2 := sqlstmt.AcquireStmt(ms)
+		defer sqlstmt.ReleaseStmt(stmt2)
+		err := ms.parser.BuildStatement(stmt2, stmt)
 		require.NoError(t, err)
 	}
 }

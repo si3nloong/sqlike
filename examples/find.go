@@ -10,11 +10,12 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	"github.com/si3nloong/sqlike/v2/types"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 )
@@ -22,8 +23,7 @@ import (
 // FindExamples :
 func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
-		// result sql.Result
-		result *sqlike.Result
+		result *sqlike.Rows
 		ns     normalStruct
 		err    error
 	)
@@ -84,6 +84,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Date = civil.DateOf(now)
 		ns.DateTime = ts
 		ns.Timestamp = ts
+		ns.Date = civil.DateOf(ts)
 		ns.Language = lang
 		ns.Languages = langs
 		ns.Set = append(ns.Set, "A", "A", "B")
@@ -138,7 +139,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, numMap, ns.Map)
 		require.Equal(t, lang, ns.Language)
 		require.Equal(t, langs, ns.Languages)
-		require.ElementsMatch(t, types.Set{"A", "B"}, ns.Set)
+		require.ElementsMatch(t, types.Set[string]{"A", "B"}, ns.Set)
 		require.Equal(t, json.RawMessage(`{"test":"hello world"}`), ns.JSONRaw)
 
 		columns := []string{
@@ -212,7 +213,8 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			ctx,
 			actions.FindOne().
 				Select(
-					"$Key", "Emoji", "CustomStrType", "Bool",
+					expr.Func("BIN_TO_UUID", expr.Column("$Key")),
+					"Emoji", "CustomStrType", "Bool",
 					"JSONRaw", "Map", "Language",
 				).
 				Where(
@@ -338,8 +340,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 			ctx,
 			actions.Find().
 				Where(
-					expr.In("$Key", actions.Find().
-						Select("$Key").
+					expr.In("$Key", sql.Select("$Key").
 						From("sqlike", "NormalStruct").
 						Where(
 							expr.Between("Tinyint", 1, 100),
@@ -349,8 +350,7 @@ func FindExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 						),
 					),
 					expr.Exists(
-						actions.Find().
-							Select(expr.Raw("1")).
+						sql.Select(expr.Raw("1")).
 							From("sqlike", "NormalStruct"),
 					),
 				).

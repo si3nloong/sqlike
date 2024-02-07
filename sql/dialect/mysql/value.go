@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
 // Format :
-func (ms MySQL) Format(it interface{}) (val string) {
+func (ms mySQL) Format(it any) (val string) {
 	switch vi := it.(type) {
 	case []byte:
 		val = strconv.Quote(util.UnsafeString(vi))

@@ -4,19 +4,22 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/si3nloong/sqlike/v2/sql"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSet(t *testing.T) {
-
-	set := Set{"a", "b", "c", "d"}
+	var (
+		set = Set[string]{"a", "b", "c", "d"}
+		err error
+	)
 
 	t.Run("DataType", func(it *testing.T) {
-		col := set.DataType(nil, field{
-			name: "Set",
-			t:    reflect.TypeOf(set),
-			null: true,
-		})
+		col := set.ColumnDataType(sql.Context("", "").
+			SetField(field{
+				name: "Set",
+				t:    reflect.TypeOf(set),
+			}))
 
 		require.Equal(it, "Set", col.Name)
 		require.Equal(it, "SET", col.DataType)
@@ -27,29 +30,40 @@ func TestSet(t *testing.T) {
 		require.Equal(it, "utf8mb4_0900_ai_ci", *col.Collation)
 	})
 
-	t.Run("driver.Valuer with nil value", func(it *testing.T) {
-		var set Set
+	t.Run("driver.Valuer with nil value", func(t *testing.T) {
+		var set Set[string]
 		v, err := set.Value()
-		require.NoError(it, err)
-		require.Nil(it, v)
+		require.NoError(t, err)
+		require.Nil(t, v)
 	})
 
-	t.Run("driver.Valuer with value", func(it *testing.T) {
+	t.Run("driver.Valuer with value", func(t *testing.T) {
 		v, err := set.Value()
-		require.NoError(it, err)
-		require.Equal(it, "a,b,c,d", v)
+		require.NoError(t, err)
+		require.Equal(t, "a,b,c,d", v)
 	})
 
-	t.Run("Scan Set with sql.Scanner", func(it *testing.T) {
-		var set2 Set
-		err := set2.Scan("a,b,c,d")
-		require.NoError(it, err)
-		require.Equal(it, set, set2)
+	t.Run("Scan Set with sql.Scanner", func(t *testing.T) {
+		type longStr string
+		var set1 Set[longStr]
+		err = set1.Scan("a, k, v")
+		require.NoError(t, err)
+		require.Equal(t, Set[longStr]{"a", "k", "v"}, set1)
 
-		set2 = Set{}
+		var set2 Set[string]
+		err = set2.Scan("a,b,c,d")
+		require.NoError(t, err)
+		require.Equal(t, set, set2)
+
+		set2 = Set[string]{}
 		err = set2.Scan([]byte("a,b,c,d"))
 		require.NoError(t, err)
 		require.Equal(t, set, set2)
+
+		set2 = Set[string](nil)
+		err = set2.Scan(nil)
+		require.NoError(t, err)
+		require.Nil(t, set2)
 	})
 
 }

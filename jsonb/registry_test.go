@@ -34,7 +34,7 @@ func TestRegistry(t *testing.T) {
 	})
 
 	t.Run("LookupDecoder", func(t *testing.T) {
-		t.Run("", func(t *testing.T) {
+		t.Run("on valid type", func(t *testing.T) {
 			var str string
 			v := reflect.ValueOf(str)
 
@@ -48,7 +48,7 @@ func TestRegistry(t *testing.T) {
 		})
 
 		t.Run("on missing type", func(t *testing.T) {
-			ch := make(chan interface{})
+			ch := make(chan any)
 			v := reflect.ValueOf(ch)
 			_, err = rg.LookupDecoder(v.Type())
 			require.Error(t, err)

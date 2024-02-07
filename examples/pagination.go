@@ -4,43 +4,13 @@ import (
 	"context"
 	"sort"
 	"testing"
-	"time"
 
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
-
-type status string
-
-const (
-	statusActive  status = "ACTIVE"
-	statusSuspend status = "SUSPEND"
-)
-
-// User :
-type User struct {
-	ID        int64
-	Name      string
-	Age       int
-	Status    status `sqlike:",enum=ACTIVE|SUSPEND"`
-	CreatedAt time.Time
-}
-
-// Users :
-type Users []User
-
-// Len is part of sort.Interface.
-func (usrs Users) Len() int {
-	return len(usrs)
-}
-
-// Swap is part of sort.Interface.
-func (usrs Users) Swap(i, j int) {
-	usrs[i], usrs[j] = usrs[j], usrs[i]
-}
 
 // PaginationExamples :
 func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
@@ -51,8 +21,12 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 
 	db := c.SetPrimaryKey("ID").Database("sqlike")
 	table := db.Table("User")
+	addressTable := db.Table("UserAddress")
 
 	{
+		err = addressTable.DropIfExists(ctx)
+		require.NoError(t, err)
+
 		err = table.DropIfExists(ctx)
 		require.NoError(t, err)
 	}
@@ -62,16 +36,21 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 		require.NoError(t, err)
 	}
 
+	{
+		err = addressTable.Migrate(ctx, UserAddress{})
+		require.NoError(t, err)
+	}
+
 	data := []User{
-		{10, "User A", 18, statusActive, time.Now().UTC()},
-		{88, "User B", 12, statusActive, time.Now().UTC()},
-		{8, "User F", 20, statusActive, time.Now().UTC()},
-		{27, "User C", 16, statusSuspend, time.Now().UTC()},
-		{20, "User C", 16, statusActive, time.Now().UTC()},
-		{100, "User G", 10, statusSuspend, time.Now().UTC()},
-		{21, "User C", 16, statusActive, time.Now().UTC()},
-		{50, "User D", 23, statusActive, time.Now().UTC()},
-		{5, "User E", 30, statusSuspend, time.Now().UTC()},
+		{ID: 1, Name: "User A", Age: 18, Status: userStatusActive},
+		{ID: 2, Name: "User B", Age: 12, Status: userStatusActive},
+		{ID: 3, Name: "User F", Age: 20, Status: userStatusActive},
+		{ID: 4, Name: "User C", Age: 16, Status: userStatusSuspend},
+		{ID: 5, Name: "User C", Age: 16, Status: userStatusActive},
+		{ID: 6, Name: "User G", Age: 10, Status: userStatusSuspend},
+		{ID: 7, Name: "User C", Age: 16, Status: userStatusActive},
+		{ID: 8, Name: "User D", Age: 23, Status: userStatusActive},
+		{ID: 9, Name: "User E", Age: 30, Status: userStatusSuspend},
 	}
 
 	{
@@ -80,11 +59,22 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			data, options.Insert().SetDebug(true),
 		)
 		require.NoError(t, err)
+
+		_, err = addressTable.Insert(
+			ctx,
+			&[]UserAddress{
+				{UserID: data[0].ID},
+				{UserID: data[3].ID},
+				{UserID: data[2].ID},
+				{UserID: data[6].ID},
+			}, options.Insert().SetDebug(true),
+		)
+		require.NoError(t, err)
 	}
 
 	var (
 		users  []User
-		cursor interface{}
+		cursor any
 	)
 
 	sort.SliceStable(data, func(i, j int) bool {
@@ -107,7 +97,8 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 				).
 				OrderBy(
 					expr.Desc("Age"),
-				).Limit(2),
+				).
+				Limit(2),
 			options.Paginate().
 				SetDebug(true))
 		require.NoError(t, err)
@@ -121,7 +112,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			}
 			require.Equal(t, data[i].ID, users[0].ID)
 			cursor = users[len(users)-1].ID
-			if pg.NextCursor(ctx, cursor) != nil {
+			if pg.After(ctx, cursor) != nil {
 				break
 			}
 		}
@@ -130,8 +121,8 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 	// Paginate with complex query
 	{
 		users = []User{} // reset
-		var result *sqlike.Result
-		result, err := table.Find(
+		var rows *sqlike.Rows
+		rows, err := table.Find(
 			ctx,
 			actions.Find().
 				Where(
@@ -140,11 +131,12 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 				OrderBy(
 					expr.Desc("Age"),
 					expr.Desc("ID"),
-				).Limit(100),
+				).
+				Limit(100),
 			options.Find().
 				SetDebug(true))
 		require.NoError(t, err)
-		err = result.All(&users)
+		err = rows.All(&users)
 		require.NoError(t, err)
 
 		results := []User{}
@@ -182,7 +174,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			require.True(t, len(users) > i)
 
 			require.Equal(t, results[0], users[i])
-			if err := pg.NextCursor(ctx, cursor); err != nil {
+			if err := pg.After(ctx, cursor); err != nil {
 				require.NoError(t, err)
 			}
 
@@ -210,25 +202,25 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 
 	// Expected paginate with error
 	{
-		err = pg.NextCursor(ctx, nil)
+		err = pg.After(ctx, nil)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, []string{})
+		err = pg.After(ctx, []string{})
 		require.Error(t, err)
 		var nilslice []string
-		err = pg.NextCursor(ctx, nilslice)
+		err = pg.After(ctx, nilslice)
 		require.Error(t, err)
-		var nilmap map[string]interface{}
-		err = pg.NextCursor(ctx, nilmap)
+		var nilmap map[string]any
+		err = pg.After(ctx, nilmap)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, "")
+		err = pg.After(ctx, "")
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, 0)
+		err = pg.After(ctx, 0)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, false)
+		err = pg.After(ctx, false)
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, float64(0))
+		err = pg.After(ctx, float64(0))
 		require.Error(t, err)
-		err = pg.NextCursor(ctx, []byte(nil))
+		err = pg.After(ctx, []byte(nil))
 		require.Error(t, err)
 	}
 
@@ -259,7 +251,7 @@ func PaginationExamples(ctx context.Context, t *testing.T, c *sqlike.Client) {
 			}
 			// require.ElementsMatch(t, actuals[i], users)
 			cursor = users[len(users)-1].ID
-			if pg.NextCursor(ctx, cursor) != nil {
+			if pg.After(ctx, cursor) != nil {
 				break
 			}
 		}

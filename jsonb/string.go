@@ -1,7 +1,7 @@
 package jsonb
 
 import (
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
 // ReadRawString :
@@ -180,7 +180,7 @@ var escapeCharMap = map[byte][]byte{
 	'\b': []byte(`\b`),
 }
 
-func escapeString(w *Writer, str string) {
+func escapeString(w JsonWriter, str string) {
 	length := len(str)
 	for i := 0; i < length; i++ {
 		b := str[0]

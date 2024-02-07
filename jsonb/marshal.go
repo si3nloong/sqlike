@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // Marshaler :
@@ -14,7 +14,7 @@ type Marshaler interface {
 }
 
 // Marshal :
-func Marshal(src interface{}) (b []byte, err error) {
+func Marshal(src any) (b []byte, err error) {
 	v := reflext.ValueOf(src)
 	if src == nil || !v.IsValid() || reflext.IsNull(v) {
 		b = []byte(null)
@@ -34,9 +34,16 @@ func Marshal(src interface{}) (b []byte, err error) {
 	return
 }
 
+func nilEncoder() ValueEncoder {
+	return func(w JsonWriter, v reflect.Value) error {
+		w.WriteString(null)
+		return nil
+	}
+}
+
 // marshalerEncoder
 func marshalerEncoder() ValueEncoder {
-	return func(w *Writer, v reflect.Value) error {
+	return func(w JsonWriter, v reflect.Value) error {
 		x := v.Interface().(Marshaler)
 		b, err := x.MarshalJSONB()
 		if err != nil {
@@ -48,7 +55,7 @@ func marshalerEncoder() ValueEncoder {
 }
 
 func jsonMarshalerEncoder() ValueEncoder {
-	return func(w *Writer, v reflect.Value) error {
+	return func(w JsonWriter, v reflect.Value) error {
 		x := v.Interface().(json.Marshaler)
 		b, err := x.MarshalJSON()
 		if err != nil {
@@ -60,7 +67,7 @@ func jsonMarshalerEncoder() ValueEncoder {
 }
 
 func textMarshalerEncoder() ValueEncoder {
-	return func(w *Writer, v reflect.Value) error {
+	return func(w JsonWriter, v reflect.Value) error {
 		x := v.Interface().(encoding.TextMarshaler)
 		b, err := x.MarshalText()
 		if err != nil {

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	uuid "github.com/google/uuid"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/google/uuid"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,12 +31,10 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	{
 		ns = normalStruct{}
 		ns.ID = uid
+		ns.Date = civil.DateOf(time.Now())
 		ns.Timestamp = time.Now()
-		result, err = table.InsertOne(
-			ctx,
-			&ns,
-			options.InsertOne().
-				SetMode(options.InsertIgnore))
+		result, err = table.InsertOne(ctx, &ns,
+			options.InsertOne().SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
@@ -44,9 +42,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns = normalStruct{}
 		ns.ID = uid2
 		ns.Timestamp = time.Now()
-		result, err = table.InsertOne(
-			ctx,
-			&ns,
+		result, err = table.InsertOne(ctx, &ns,
 			options.InsertOne().
 				SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
@@ -67,25 +63,13 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.DateTime = now
 		ns.CreatedAt = now
 		ns.UpdatedAt = now
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().SetDebug(true))
+		affected, err = table.ModifyOne(ctx, &ns, options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
 
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().SetDebug(true))
-		require.Error(t, err)
-
-		err = table.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().
-				SetStrict(false).
-				SetDebug(true))
+		affected, err = table.ModifyOne(ctx, &ns, options.ModifyOne().SetDebug(true))
 		require.NoError(t, err)
+		require.Empty(t, affected)
 
 		ns2 := normalStruct{}
 		err = table.FindOne(
@@ -125,9 +109,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Key = 8888
 		ns.No = 1500
 		ns.ID = 1
-		result, err = tbl.InsertOne(
-			ctx,
-			&ns,
+		result, err = tbl.InsertOne(ctx, &ns,
 			options.InsertOne().
 				SetMode(options.InsertIgnore))
 		affected, _ = result.RowsAffected()
@@ -138,12 +120,9 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		ns.Message = "hello world"
 		ns.Flag = true
 		ns.No = 1800
-		err = tbl.ModifyOne(
-			ctx,
-			&ns,
-			options.ModifyOne().SetDebug(true),
-		)
+		affected, err = tbl.ModifyOne(ctx, &ns)
 		require.NoError(t, err)
+		require.Equal(t, int64(1), affected)
 
 		ns2 := newStruct{}
 		err = tbl.FindOne(
@@ -160,8 +139,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 		require.Equal(t, true, ns2.Flag)
 	}
 
-	// Update single record
-	{
+	t.Run("UpdateOne", func(t *testing.T) {
 		affected, err = table.UpdateOne(
 			ctx,
 			actions.UpdateOne().
@@ -175,7 +153,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 
 		require.NoError(t, err)
 		require.Equal(t, int64(1), affected)
-	}
+	})
 
 	// Advance update query
 	{
@@ -198,7 +176,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				Set(
 					expr.ColumnValue("Emoji", "<😗>"),
 					expr.ColumnValue("SID", expr.Column("LongStr")),
-					expr.ColumnValue("Int", expr.Increment("Int", 100)),
+					expr.ColumnValue("Int", expr.Increment("Int", uint(100))),
 					expr.ColumnValue("Tinyint", expr.Raw("80")),
 				),
 			options.UpdateOne().SetDebug(true),
@@ -239,7 +217,7 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 							When(
 								expr.And(
 									expr.Equal("$Key", uid),
-									expr.NotNull("$Key"),
+									expr.IsNotNull("$Key"),
 								),
 								i8,
 							).
@@ -252,7 +230,6 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				),
 			options.Update().SetDebug(true),
 		)
-
 		require.NoError(t, err)
 		require.Equal(t, int64(2), affected)
 
@@ -265,7 +242,6 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				),
 		).Decode(&result1)
 		require.NoError(t, err)
-
 		require.Equal(t, "88", result1.SID)
 
 		var result2 normalStruct
@@ -277,7 +253,6 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 				),
 		).Decode(&result2)
 		require.NoError(t, err)
-
 		require.Equal(t, "56789", result2.SID)
 	}
 
@@ -286,20 +261,38 @@ func UpdateExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 // UpdateErrorExamples :
 func UpdateErrorExamples(ctx context.Context, t *testing.T, db *sqlike.Database) {
 	var (
-		ns  normalStruct
-		err error
+		ns       normalStruct
+		err      error
+		affected int64
 	)
 
 	table := db.Table("NormalStruct")
 
-	{
-		err = table.ModifyOne(ctx, nil)
+	t.Run("ModifyOne with nil", func(t *testing.T) {
+		affected, err = table.ModifyOne(ctx, nil)
 		require.Error(t, err)
+		require.Empty(t, affected)
+	})
 
-		err = table.ModifyOne(ctx, &struct{}{})
+	t.Run("ModifyOne with primitive data type", func(t *testing.T) {
+		affected, err = table.ModifyOne(ctx, "")
 		require.Error(t, err)
+		require.Empty(t, affected)
 
-		err = table.ModifyOne(ctx, &ns)
-		require.Equal(t, sqlike.ErrNoRecordAffected, err)
-	}
+		affected, err = table.ModifyOne(ctx, int64(0))
+		require.Error(t, err)
+		require.Empty(t, affected)
+	})
+
+	t.Run("ModifyOne with invalid struct", func(t *testing.T) {
+		affected, err = table.ModifyOne(ctx, &struct{}{})
+		require.Error(t, err)
+		require.Empty(t, affected)
+	})
+
+	t.Run("ModifyOne with empty struct", func(t *testing.T) {
+		affected, err = table.ModifyOne(ctx, &ns)
+		require.NoError(t, err)
+		require.Empty(t, affected)
+	})
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/v2/internal/util"
 )
 
 var r = regexp.MustCompile(`(\$\d|\?|\:\w+)`)

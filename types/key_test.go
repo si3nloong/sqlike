@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/si3nloong/sqlike/jsonb"
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/jsonb"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 )
@@ -18,55 +19,45 @@ type field struct {
 	name string
 	t    reflect.Type
 	null bool
-	opts map[string]string
 }
 
-// Name :
 func (f field) Name() string {
 	return f.name
 }
 
-// Type :
 func (f field) Type() reflect.Type {
 	return f.t
 }
 
-// Index :
 func (field) Index() []int {
 	return nil
 }
 
-// Tag :
-func (f field) Tag() reflext.StructTag {
+func (f field) Tag() reflext.FieldTag {
 	return reflext.StructTag{}
 }
 
-// Parent :
-func (field) Parent() reflext.StructFielder {
+func (field) Parent() reflext.FieldInfo {
 	return nil
 }
 
-// ParentByTraversal :
-func (field) ParentByTraversal(cb func(reflext.StructFielder) bool) reflext.StructFielder {
+func (field) ParentByTraversal(cb func(reflext.FieldInfo) bool) reflext.FieldInfo {
 	return nil
 }
 
-// Children :
-func (field) Children() []reflext.StructFielder {
+func (field) Children() []reflext.FieldInfo {
 	return nil
 }
 
-// IsNullable :
 func (f field) IsNullable() bool {
 	return f.null
 }
 
-// IsEmbedded :
 func (field) IsEmbedded() bool {
 	return false
 }
 
-var _ reflext.StructFielder = (*field)(nil)
+var _ reflext.FieldInfo = (*field)(nil)
 
 func TestKey(t *testing.T) {
 	var (
@@ -78,10 +69,12 @@ func TestKey(t *testing.T) {
 
 	t.Run("DataType", func(it *testing.T) {
 		k := new(Key)
-		col := k.DataType(nil, field{
-			name: "Key",
-			t:    reflect.TypeOf(k),
-		})
+
+		col := k.ColumnDataType(sql.Context("", "").
+			SetField(field{
+				name: "Key",
+				t:    reflect.TypeOf(k),
+			}))
 
 		require.Equal(it, "Key", col.Name)
 		require.Equal(it, "VARCHAR", col.DataType)
@@ -115,6 +108,7 @@ func TestKey(t *testing.T) {
 	t.Run("Empty Key", func(it *testing.T) {
 		k := new(Key)
 		require.True(it, k.Incomplete())
+		require.True(it, k.IsZero())
 		require.Equal(it, k, k.Root())
 		require.Nil(it, k.Parent)
 	})
@@ -166,38 +160,63 @@ func TestKey(t *testing.T) {
 		require.Equal(it, NameKey("Name", "🤔ヤマト", IDKey("Parent", 1288888, nil)), pk)
 	})
 
-	t.Run("MarshalerText & UnmarshalText", func(it *testing.T) {
+	t.Run("MarshalerText & UnmarshalText", func(t *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
-		require.Equal(it, "1288888", pk.ID())
+		require.Equal(t, "1288888", pk.ID())
 
 		b, err = pk.MarshalText()
-		require.NoError(it, err)
-		require.Equal(it, b, []byte(`Parent,1288888`))
+		require.NoError(t, err)
+		require.Equal(t, b, []byte(`Parent,1288888`))
+
+		pk = new(Key)
+		err = pk.UnmarshalText([]byte(``))
+		require.Error(t, err)
+
+		pk = new(Key)
+		err = pk.UnmarshalText([]byte(`null`))
+		require.NoError(t, err)
+		require.True(t, pk.Incomplete())
+
+		pk = new(Key)
+		err = pk.UnmarshalText([]byte(`nullunknown`))
+		require.Error(t, err)
 
 		str := `EgROYW1lIg1zaWFubG9vbmcvQDkwKhISBlBhcmVudBjQ1deb4Mjr0xU`
 		err = pk.UnmarshalText([]byte(str))
-		require.NoError(it, err)
-		require.Equal(it, "Parent,1560407411636169424/Name,'sianloong%2F@90'", pk.String())
-		require.Equal(it, str, pk.Encode())
+		require.NoError(t, err)
+		require.False(t, pk.Incomplete())
+		require.Equal(t, "Parent,1560407411636169424/Name,'sianloong%2F@90'", pk.String())
+		require.Equal(t, str, pk.Encode())
 	})
 
-	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(it *testing.T) {
-
+	t.Run("MarshalBSONValue & UnmarshalBSONValue", func(t *testing.T) {
 		pk := IDKey("Parent", 1288888, nil)
-		require.Equal(it, "1288888", pk.ID())
+		require.Equal(t, "1288888", pk.ID())
 
 		a, b, err = pk.MarshalBSONValue()
-		require.NoError(it, err)
-		require.Equal(it, bsontype.String, a)
+		require.NoError(t, err)
+		require.Equal(t, bsontype.String, a)
+
+		k := new(Key)
+		pt, _, err := k.MarshalBSONValue()
+		require.NoError(t, err)
+		require.Equal(t, bsontype.Null, pt)
 
 		err = pk.UnmarshalBSONValue(a, b)
-		require.NoError(it, err)
+		require.NoError(t, err)
+
+		err = pk.UnmarshalBSONValue(bsontype.Null, nil)
+		require.NoError(t, err)
+
+		var nilKey *Key
+		err = nilKey.UnmarshalBSONValue(a, b)
+		require.Error(t, err)
 	})
 
-	t.Run("JSONB Marshal & Unmarshal", func(it *testing.T) {
+	t.Run("JSONB Marshal & Unmarshal", func(t *testing.T) {
 		var nilKey *Key
 		b, err = jsonb.Marshal(nilKey)
-		require.NoError(it, err)
+		require.NoError(t, err)
 		require.Equal(t, []byte(`null`), b)
 
 		var o struct {
@@ -206,87 +225,120 @@ func TestKey(t *testing.T) {
 
 		ik := new(Key)
 		b, err = json.Marshal(ik)
-		require.NoError(it, err)
+		require.NoError(t, err)
 		require.Equal(t, []byte(`null`), b)
 
 		ik2 := new(Key)
 		b, err = jsonb.Marshal(ik2)
-		require.NoError(it, err)
+		require.NoError(t, err)
 		require.Equal(t, []byte(`null`), b)
 
 		b, err = jsonb.Marshal(o)
-		require.NoError(it, err)
+		require.NoError(t, err)
 		require.Equal(t, []byte(`{"Key":null}`), b)
 
 		pk := IDKey("Parent", 1288888, nil)
-		require.Equal(it, "1288888", pk.ID())
+		require.Equal(t, "1288888", pk.ID())
 
 		b, err = pk.MarshalJSONB()
-		require.NoError(it, err)
-		require.Equal(it, `"Parent,1288888"`, string(b))
+		require.NoError(t, err)
+		require.Equal(t, `"Parent,1288888"`, string(b))
 
 		rk := NameKey("Name", "sianloong", pk)
-		require.NoError(it, err)
+		require.NoError(t, err)
 		b, err = rk.MarshalJSONB()
-		require.Equal(it, `"Parent,1288888/Name,'sianloong'"`, string(b))
+		require.Equal(t, `"Parent,1288888/Name,'sianloong'"`, string(b))
 
 		kv := `Parent,1560407411636169424/Name,'sianloong'`
 		b = []byte(strconv.Quote(kv))
+
+		err = rk.UnmarshalJSONB([]byte(`""`))
+		require.Error(t, err)
+
 		err = rk.UnmarshalJSONB(b)
-		require.NoError(it, err)
-		require.Equal(it, kv, rk.String())
+		require.NoError(t, err)
+		require.Equal(t, kv, rk.String())
 
 		kv = `Parent,1560407411636169424`
 		b = []byte(strconv.Quote(kv))
 		k = new(Key)
 		err = k.UnmarshalJSONB(b)
-		require.NoError(it, err)
-		require.Equal(it, kv, k.String())
+		require.NoError(t, err)
+		require.Equal(t, kv, k.String())
 
 		kv = `Parent,'a'`
 		b = []byte(strconv.Quote(kv))
 		k = new(Key)
 		err = k.UnmarshalJSONB(b)
-		require.NoError(it, err)
-		require.Equal(it, kv, k.String())
+		require.NoError(t, err)
+		require.Equal(t, kv, k.String())
 
 		k = new(Key)
 		err = k.UnmarshalJSONB([]byte("null"))
-		require.NoError(it, err)
-		require.Equal(it, new(Key), k)
+		require.NoError(t, err)
+		require.Equal(t, new(Key), k)
 
 		nk := NameKey("Name", "sianloong", pk)
 		b, err = jsonb.Marshal(nk)
-		require.NoError(it, err)
-		require.Equal(it, `"Parent,1560407411636169424/Name,'sianloong'"`, string(b))
+		require.NoError(t, err)
+		require.Equal(t, `"Parent,1560407411636169424/Name,'sianloong'"`, string(b))
 
 		k2 := new(Key)
 		err = jsonb.Unmarshal(b, k2)
-		require.NoError(it, err)
-		require.Equal(it, nk, k2)
+		require.NoError(t, err)
+		require.Equal(t, nk, k2)
 
 		k3 := new(Key)
 		err = jsonb.Unmarshal([]byte(`null`), k3)
-		require.NoError(it, err)
-		require.Equal(it, &Key{}, k3)
+		require.NoError(t, err)
+		require.Equal(t, &Key{}, k3)
 	})
 
-	t.Run("JSON Marshal & Unmarshal", func(it *testing.T) {
+	t.Run("JSON Marshal & Unmarshal", func(t *testing.T) {
 		k := NameKey("Name", "sianloong", nil)
 		b := []byte(`"EgROYW1lIglzaWFubG9vbmc"`)
 		binary, err := json.Marshal(k)
-		require.NoError(it, err)
-		require.Equal(it, b, binary)
+		require.NoError(t, err)
+		require.Equal(t, b, binary)
 
 		var k2 *Key
+		err = json.Unmarshal([]byte(``), &k2)
+		require.Error(t, err)
+
 		err = json.Unmarshal(binary, &k2)
-		require.NoError(it, err)
-		require.Equal(it, k, k2)
+		require.NoError(t, err)
+		require.Equal(t, k, k2)
 
 		k3 := new(Key)
 		err = json.Unmarshal([]byte(`null`), k3)
-		require.NoError(it, err)
-		require.Equal(it, &Key{}, k3)
+		require.NoError(t, err)
+		require.Equal(t, &Key{}, k3)
+
+		k = new(Key)
+		err = json.Unmarshal([]byte(`unknown`), k)
+		require.Error(t, err)
+
+		k = new(Key)
+		err = json.Unmarshal([]byte(""), k)
+		require.Error(t, err)
+	})
+
+	t.Run("sql.Scanner", func(t *testing.T) {
+		var k = new(Key)
+		var keystr = `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`
+		err := k.Scan(keystr)
+		require.NoError(t, err)
+		require.Equal(t, keystr, k.String())
+
+		err = k.Scan([]byte(keystr))
+		require.NoError(t, err)
+		require.Equal(t, keystr, k.String())
+
+		err = k.Scan(`unknown`)
+		require.Error(t, err)
+
+		err = k.Scan([]byte(`wrong key`))
+		require.Error(t, err)
 	})
 
 	t.Run("driver.Valuer", func(it *testing.T) {
@@ -331,14 +383,23 @@ func TestKey(t *testing.T) {
 		require.Equal(it, encoded, w.String())
 
 		w.Reset()
-		emptyk := new(Key)
-		emptyk.MarshalGQL(w)
+		pk := new(Key)
+		pk.MarshalGQL(w)
 		require.NoError(it, err)
 		require.Equal(it, `null`, w.String())
 
-		err = emptyk.UnmarshalGQL(encoded)
+		pk = new(Key)
+		err = pk.UnmarshalGQL(k)
 		require.NoError(t, err)
-		require.Equal(t, `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`, emptyk.String())
+		require.Equal(t, `Parent,'hello-world%21'`, pk.String())
+
+		err = pk.UnmarshalGQL(encoded)
+		require.NoError(t, err)
+		require.Equal(t, `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`, pk.String())
+
+		err = pk.UnmarshalGQL([]byte(encoded))
+		require.NoError(t, err)
+		require.Equal(t, `Parent,'hello-world%21'/Child,'hRTYUI%2CO88191'`, pk.String())
 	})
 
 	t.Run("Check Panic", func(it *testing.T) {
@@ -367,9 +428,6 @@ func TestKey(t *testing.T) {
 			nilKey.MarshalText()
 		})
 		require.Panics(it, func() {
-			nilKey.MarshalBinary()
-		})
-		require.Panics(it, func() {
 			nilKey.MarshalJSON()
 		})
 		require.Panics(it, func() {
@@ -384,6 +442,18 @@ func TestKey(t *testing.T) {
 		require.Panics(it, func() {
 			nilKey.Encode()
 		})
+	})
+
+	t.Run("keyToGobKey", func(t *testing.T) {
+		var k *Key
+		gk := keyToGobKey(k)
+		require.Nil(t, gk)
+	})
+
+	t.Run("gobKeyToKey", func(t *testing.T) {
+		var gk *gobKey
+		k := gobKeyToKey(gk)
+		require.Nil(t, k)
 	})
 
 	nk := NewNameKey("Name", nil)

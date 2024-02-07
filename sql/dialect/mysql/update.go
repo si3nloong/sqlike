@@ -1,15 +1,12 @@
 package mysql
 
 import (
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
-	"github.com/si3nloong/sqlike/sqlike/actions"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/db"
 )
 
 // Update :
-func (ms *MySQL) Update(stmt sqlstmt.Stmt, f *actions.UpdateActions) (err error) {
+func (ms *mySQL) Update(stmt db.Stmt, f actions.UpdateActions) (err error) {
 	err = buildStatement(stmt, ms.parser, f)
-	if err != nil {
-		return
-	}
 	return
 }

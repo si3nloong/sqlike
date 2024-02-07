@@ -7,12 +7,12 @@ import (
 
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/indexes"
-	"github.com/si3nloong/sqlike/sqlike/options"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 )
 
 // Adapter :
@@ -48,9 +48,9 @@ func New(ctx context.Context, table *sqlike.Table) (persist.FilteredAdapter, err
 	if err := a.table.Indexes().
 		CreateOneIfNotExists(
 			a.ctx,
-			indexes.Index{
-				Type: indexes.Primary,
-				Columns: indexes.Columns(
+			sql.Index{
+				Type: sql.Primary,
+				Columns: sql.IndexedColumns(
 					"PType",
 					"V0", "V1", "V2",
 					"V3", "V4", "V5",
@@ -80,11 +80,11 @@ func (a *Adapter) LoadPolicy(model model.Model) error {
 }
 
 // LoadFilteredPolicy :
-func (a *Adapter) LoadFilteredPolicy(model model.Model, filter interface{}) error {
+func (a *Adapter) LoadFilteredPolicy(model model.Model, filter any) error {
 	var policies []*Policy
 	x, ok := filter.(primitive.Group)
 	if !ok {
-		return errors.New("invalid filter data type, expected []interface{}")
+		return errors.New("invalid filter data type, expected []any")
 	}
 
 	act := new(actions.FindActions)

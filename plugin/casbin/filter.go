@@ -1,11 +1,11 @@
 package casbin
 
 import (
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 )
 
 // Filter :
-func Filter(fields ...interface{}) primitive.Group {
+func Filter(fields ...any) primitive.Group {
 	return expr.And(fields...)
 }

@@ -1,13 +1,16 @@
 package examples
 
 import (
+	"context"
 	"encoding/json"
 	"sort"
 	"time"
 
 	"cloud.google.com/go/civil"
 	"github.com/brianvoe/gofakeit"
-	"github.com/si3nloong/sqlike/types"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/types"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/language"
 
@@ -40,8 +43,8 @@ type normalStruct struct {
 	Byte          []byte
 	Bool          bool
 	priv          int
-	Skip          interface{} `sqlike:"-"`
-	Int           int         `sqlike:",default=100"`
+	Skip          any `sqlike:"-"`
+	Int           int `sqlike:",default=100"`
 	TinyInt       int8
 	SmallInt      int16
 	MediumInt     int32
@@ -71,9 +74,14 @@ type normalStruct struct {
 	Languages  []language.Tag
 	Currency   currency.Unit
 	Currencies []currency.Unit
-	Enum       Enum      `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
-	Set        types.Set `sqlike:",set=A|B|C"`
+	Enum       Enum              `sqlike:",enum=SUCCESS|FAILED|UNKNOWN"`
+	Set        types.Set[string] `sqlike:",set=A|B|C"`
 	Model
+}
+
+type relativeNormalStruct struct {
+	ID             uuid.UUID `sqlike:",primary_key"`
+	NormalStructID string    `sqlike:",foreign_key=NormalStruct:ID"`
 }
 
 type simpleStruct struct {
@@ -95,6 +103,10 @@ type jsonStruct struct {
 		IntSlice    sort.IntSlice
 	}
 	NullableFloat *float64
+}
+
+type uuidStruct struct {
+	ID string `sql:"id,uuid"`
 }
 
 // LongStr :
@@ -132,8 +144,26 @@ type model struct {
 	Address
 }
 
+type CustomValue struct {
+}
+
+var (
+	_ db.ColumnDataTyper = (*CustomValue)(nil)
+)
+
+// ColumnDataType :
+func (c CustomValue) ColumnDataType(ctx context.Context) *sql.Column {
+	f := sql.GetField(ctx)
+	return &sql.Column{
+		Name:     f.Name(),
+		DataType: "INT",
+		Type:     "INT",
+	}
+}
+
 type ptrStruct struct {
-	ID            int64 `sqlike:"$Key,auto_increment"`
+	ID int64 `sqlike:"$Key,auto_increment"`
+	// CustomValue   CustomValue
 	NullUUID      *uuid.UUID
 	NullStr       *string `sqlike:"nullstr"`
 	NullBool      *bool
@@ -178,6 +208,40 @@ type overrideStruct struct {
 	ID     int64  `sqlike:",comment=Int64 ID"`      // override string ID of generatedStruct
 	Amount int    `sqlike:",comment=Int Amount"`    // override string Amount of generatedStruct
 	Nested string `sqlike:",comment=String Nested"` // override string Nested of generatedStruct
+}
+
+type userStatus string
+
+const (
+	userStatusActive  userStatus = "ACTIVE"
+	userStatusSuspend userStatus = "SUSPEND"
+)
+
+// User :
+type User struct {
+	ID        int64 `sqlike:",auto_increment"`
+	Name      string
+	Age       int
+	Status    userStatus `sqlike:",enum=ACTIVE|SUSPEND"`
+	CreatedAt time.Time  `sqlike:",default=CURRENT_TIMESTAMP"`
+}
+
+// Users :
+type Users []User
+
+// Len is part of sort.Interface.
+func (usrs Users) Len() int {
+	return len(usrs)
+}
+
+// Swap is part of sort.Interface.
+func (usrs Users) Swap(i, j int) {
+	usrs[i], usrs[j] = usrs[j], usrs[i]
+}
+
+type UserAddress struct {
+	ID     int64 `sqlike:",auto_increment"`
+	UserID int64 `sqlike:",foreign_key=User:ID"`
 }
 
 func newNormalStruct() normalStruct {

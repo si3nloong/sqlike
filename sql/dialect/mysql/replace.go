@@ -1,12 +1,12 @@
 package mysql
 
 import (
-	"github.com/si3nloong/sqlike/sql"
-	sqlstmt "github.com/si3nloong/sqlike/sql/stmt"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/sql"
 )
 
 // Replace :
-func (ms MySQL) Replace(stmt sqlstmt.Stmt, db, table string, columns []string, query *sql.SelectStmt) (err error) {
+func (ms mySQL) Replace(stmt db.Stmt, db, table string, columns []string, query *sql.SelectStmt) (err error) {
 	stmt.WriteString("REPLACE INTO ")
 	stmt.WriteString(ms.TableName(db, table) + " ")
 	if len(columns) > 0 {

@@ -3,34 +3,37 @@ package sql
 import (
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // SelectStmt :
 type SelectStmt struct {
-	DistinctOn  bool
-	Tables      []interface{}
-	Projections []interface{}
-	Joins       []interface{}
-	IndexHints  string
-	Conditions  primitive.Group
-	Havings     primitive.Group
-	Groups      []interface{}
-	Sorts       []interface{}
-	Max         uint
-	Skip        uint
+	DistinctOn bool
+	Tables     []any
+	Exprs      []any
+	Joins      []primitive.Join
+	IndexHints string
+	Conditions primitive.Group
+	Havings    primitive.Group
+	Groups     []any
+	Sorts      []any
+	RowCount   uint
+	Skip       uint
+	Opts       []any
 }
 
+func (stmt *SelectStmt) isStmt() {}
+
 // Select :
-func Select(fields ...interface{}) *SelectStmt {
+func Select(fields ...any) *SelectStmt {
 	stmt := new(SelectStmt)
 	return stmt.Select(fields...)
 }
 
 // Select :
-func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Select(fields ...any) *SelectStmt {
 	if len(fields) == 1 {
 		switch fields[0].(type) {
 		case primitive.As, *SelectStmt:
@@ -38,18 +41,18 @@ func (stmt *SelectStmt) Select(fields ...interface{}) *SelectStmt {
 			grp.Values = append(grp.Values, primitive.Raw{Value: "("})
 			grp.Values = append(grp.Values, fields...)
 			grp.Values = append(grp.Values, primitive.Raw{Value: ")"})
-			stmt.Projections = append(stmt.Projections, grp)
+			stmt.Exprs = append(stmt.Exprs, grp)
 		default:
-			stmt.Projections = append(stmt.Projections, fields...)
+			stmt.Exprs = append(stmt.Exprs, fields...)
 		}
 		return stmt
 	}
-	stmt.Projections = fields
+	stmt.Exprs = fields
 	return stmt
 }
 
 // From :
-func (stmt *SelectStmt) From(values ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) From(values ...any) *SelectStmt {
 	length := len(values)
 	if length == 0 {
 		panic("empty table name")
@@ -85,33 +88,57 @@ func (stmt *SelectStmt) Distinct() *SelectStmt {
 }
 
 // Where :
-func (stmt *SelectStmt) Where(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Where(fields ...any) *SelectStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 
+// InnerJoin :
+func (stmt *SelectStmt) InnerJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.InnerJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
+// LeftJoin :
+func (stmt *SelectStmt) LeftJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.LeftJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
+// RightJoin :
+func (stmt *SelectStmt) RightJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.RightJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
+// CrossJoin :
+func (stmt *SelectStmt) CrossJoin(subQuery, first, second any) *SelectStmt {
+	stmt.Joins = append(stmt.Joins, primitive.Join{Type: primitive.CrossJoin, SubQuery: subQuery, On: [2]any{first, second}})
+	return stmt
+}
+
 // Having :
-func (stmt *SelectStmt) Having(fields ...interface{}) *SelectStmt {
+func (stmt *SelectStmt) Having(fields ...any) *SelectStmt {
 	stmt.Havings = expr.And(fields...)
 	return stmt
 }
 
 // OrderBy :
-func (stmt *SelectStmt) OrderBy(fields ...interface{}) *SelectStmt {
-	stmt.Sorts = fields
+func (stmt *SelectStmt) OrderBy(fields ...any) *SelectStmt {
+	stmt.Sorts = append(stmt.Sorts, fields...)
 	return stmt
 }
 
 // GroupBy :
-func (stmt *SelectStmt) GroupBy(fields ...interface{}) *SelectStmt {
-	stmt.Groups = fields
+func (stmt *SelectStmt) GroupBy(fields ...any) *SelectStmt {
+	stmt.Groups = append(stmt.Groups, fields...)
 	return stmt
 }
 
 // Limit :
 func (stmt *SelectStmt) Limit(num uint) *SelectStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
 	}
 	return stmt
 }
@@ -124,7 +151,13 @@ func (stmt *SelectStmt) Offset(num uint) *SelectStmt {
 	return stmt
 }
 
-func mustString(it interface{}) string {
+// Option :
+func (stmt *SelectStmt) Option(opts ...any) *SelectStmt {
+	stmt.Opts = append(stmt.Opts, opts...)
+	return stmt
+}
+
+func mustString(it any) string {
 	v := reflext.Indirect(reflext.ValueOf(it))
 	if v.Kind() != reflect.String {
 		panic("unsupported data type")

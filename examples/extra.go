@@ -7,11 +7,11 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/google/uuid"
-	"github.com/si3nloong/sqlike/sql"
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike"
-	"github.com/si3nloong/sqlike/sqlike/actions"
-	"github.com/si3nloong/sqlike/sqlike/options"
+	"github.com/si3nloong/sqlike/v2"
+	"github.com/si3nloong/sqlike/v2/actions"
+	"github.com/si3nloong/sqlike/v2/options"
+	"github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -107,7 +107,7 @@ func ExtraExamples(ctx context.Context, t *testing.T, db *sqlike.Database, mg *m
 		dt := dateTime{}
 		dt.ID = uuid.New()
 		dt.Name = "yuki"
-		dt.Date = civil.DateOf(time.Now())
+		dt.Date = civil.DateOf(utcNow)
 		dt.Time = utcNow
 
 		table.MustUnsafeMigrate(ctx, dt)

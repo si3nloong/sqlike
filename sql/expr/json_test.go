@@ -4,39 +4,39 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
 	"github.com/stretchr/testify/require"
 )
 
 func TestJSON(t *testing.T) {
 	var (
-		it interface{}
+		it any
 	)
 
-	t.Run("JSON_QUOTE", func(tst *testing.T) {
+	t.Run("JSON_QUOTE", func(t *testing.T) {
 		it = JSON_QUOTE("a")
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_QUOTE,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: "a"},
 			},
 		}, it)
 	})
 
-	t.Run("JSON_CONTAINS", func(tst *testing.T) {
+	t.Run("JSON_CONTAINS", func(t *testing.T) {
 		it = JSON_CONTAINS(Column("a"), Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Column{Name: "a"},
 				primitive.Column{Name: "b"},
 			},
 		}, it)
 
 		it = JSON_CONTAINS(`["a", "b"]`, Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: `["a", "b"]`},
 				primitive.Column{Name: "b"},
 			},
@@ -44,9 +44,9 @@ func TestJSON(t *testing.T) {
 
 		raw := json.RawMessage(`["A","B","C"]`)
 		it = JSON_CONTAINS(raw, Column("b"))
-		require.Equal(tst, primitive.JSONFunc{
+		require.Equal(t, primitive.JSONFunc{
 			Type: primitive.JSON_CONTAINS,
-			Args: []interface{}{
+			Args: []any{
 				primitive.Value{Raw: raw},
 				primitive.Column{Name: "b"},
 			},

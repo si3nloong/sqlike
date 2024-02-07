@@ -79,5 +79,5 @@ func (t Type) String() string {
 	if v, ok := names[t]; ok {
 		return v
 	}
-	return "unknown"
+	return "unknown type"
 }

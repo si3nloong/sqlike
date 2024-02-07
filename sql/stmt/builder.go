@@ -6,31 +6,31 @@ import (
 
 	"reflect"
 
-	"github.com/si3nloong/sqlike/reflext"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 )
 
 // BuildStatementFunc :
-type BuildStatementFunc func(stmt Stmt, it interface{}) error
+type BuildStatementFunc func(stmt db.Stmt, it any) error
 
 // StatementBuilder :
 type StatementBuilder struct {
-	mutex    *sync.Mutex
-	builders map[interface{}]BuildStatementFunc
+	mu       sync.Mutex
+	builders map[any]BuildStatementFunc
 }
 
 // NewStatementBuilder :
 func NewStatementBuilder() *StatementBuilder {
 	return &StatementBuilder{
-		mutex:    new(sync.Mutex),
-		builders: make(map[interface{}]BuildStatementFunc),
+		builders: make(map[any]BuildStatementFunc),
 	}
 }
 
 // SetBuilder :
-func (sb *StatementBuilder) SetBuilder(it interface{}, p BuildStatementFunc) {
-	sb.mutex.Lock()
-	defer sb.mutex.Unlock()
+func (sb *StatementBuilder) SetBuilder(it any, p BuildStatementFunc) {
+	sb.mu.Lock()
 	sb.builders[it] = p
+	sb.mu.Unlock()
 }
 
 // LookupBuilder :
@@ -40,13 +40,13 @@ func (sb *StatementBuilder) LookupBuilder(t reflect.Type) (blr BuildStatementFun
 }
 
 // BuildStatement :
-func (sb *StatementBuilder) BuildStatement(stmt Stmt, it interface{}) error {
+func (sb *StatementBuilder) BuildStatement(stmt db.Stmt, it any) error {
 	v := reflext.ValueOf(it)
-	if x, ok := sb.builders[v.Type()]; ok {
-		return x(stmt, it)
+	if cb, ok := sb.builders[v.Type()]; ok {
+		return cb(stmt, it)
 	}
-	if x, ok := sb.builders[v.Kind()]; ok {
-		return x(stmt, it)
+	if cb, ok := sb.builders[v.Kind()]; ok {
+		return cb(stmt, it)
 	}
 
 	return fmt.Errorf("sqlstmt: invalid data type support %v", v.Type())

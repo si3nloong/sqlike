@@ -1,31 +1,48 @@
 package sql
 
 import (
-	"github.com/si3nloong/sqlike/sql/expr"
-	"github.com/si3nloong/sqlike/sqlike/primitive"
+	"github.com/si3nloong/sqlike/v2/internal/primitive"
+	"github.com/si3nloong/sqlike/v2/sql/expr"
 )
 
 // DeleteStmt :
 type DeleteStmt struct {
-	Tables     []interface{}
+	Tables     []any
 	Conditions primitive.Group
-	Sorts      []interface{}
-	Max        uint
+	Sorts      []any
+	RowCount   uint
 }
 
 // From :
-func (stmt *DeleteStmt) From() *DeleteStmt {
+func (stmt *DeleteStmt) From(values ...any) *DeleteStmt {
+	length := len(values)
+	if length == 0 {
+		panic("empty table name")
+	}
+	switch length {
+	case 1:
+		stmt.Tables = append(stmt.Tables, values[0])
+	case 2:
+		stmt.Tables = append(stmt.Tables,
+			primitive.Column{
+				Table: mustString(values[0]),
+				Name:  mustString(values[1]),
+			},
+		)
+	default:
+		panic("invalid length of arguments")
+	}
 	return stmt
 }
 
 // Where :
-func (stmt *DeleteStmt) Where(fields ...interface{}) *DeleteStmt {
+func (stmt *DeleteStmt) Where(fields ...any) *DeleteStmt {
 	stmt.Conditions = expr.And(fields...)
 	return stmt
 }
 
 // OrderBy :
-func (stmt *DeleteStmt) OrderBy(fields ...interface{}) *DeleteStmt {
+func (stmt *DeleteStmt) OrderBy(fields ...any) *DeleteStmt {
 	stmt.Sorts = fields
 	return stmt
 }
@@ -33,7 +50,7 @@ func (stmt *DeleteStmt) OrderBy(fields ...interface{}) *DeleteStmt {
 // Limit :
 func (stmt *DeleteStmt) Limit(num uint) *DeleteStmt {
 	if num > 0 {
-		stmt.Max = num
+		stmt.RowCount = num
 	}
 	return stmt
 }

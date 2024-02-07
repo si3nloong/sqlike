@@ -2,6 +2,7 @@ package types
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding"
@@ -20,18 +21,22 @@ import (
 	"errors"
 
 	"github.com/segmentio/ksuid"
-	pb "github.com/si3nloong/sqlike/protobuf"
-	"github.com/si3nloong/sqlike/reflext"
-	sqldriver "github.com/si3nloong/sqlike/sql/driver"
-	"github.com/si3nloong/sqlike/sqlike/columns"
-	"github.com/si3nloong/sqlike/util"
+	"github.com/si3nloong/sqlike/v2/db"
+	"github.com/si3nloong/sqlike/v2/internal/util"
+	pb "github.com/si3nloong/sqlike/v2/protobuf"
+	sqlx "github.com/si3nloong/sqlike/v2/sql"
+	"github.com/si3nloong/sqlike/v2/x/reflext"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsontype"
 	"go.mongodb.org/mongo-driver/x/bsonx/bsoncore"
 	"google.golang.org/protobuf/proto"
 )
 
-const keyEnv = "SQLIKE_NAMESPACE"
+var keyNS string
+
+func init() {
+	keyNS = os.Getenv("SQL_NAMESPACE")
+}
 
 // Writer :
 type writer interface {
@@ -50,6 +55,7 @@ type Key struct {
 }
 
 var (
+	_ db.ColumnDataTyper       = (*Key)(nil)
 	_ fmt.GoStringer           = (*Key)(nil)
 	_ driver.Valuer            = (*Key)(nil)
 	_ sql.Scanner              = (*Key)(nil)
@@ -63,24 +69,25 @@ var (
 )
 
 // DataType :
-func (k Key) DataType(t sqldriver.Info, sf reflext.StructFielder) columns.Column {
-	tag := sf.Tag()
+func (k Key) ColumnDataType(ctx context.Context) *sqlx.Column {
+	f := sqlx.GetField(ctx)
+	tag := f.Tag()
 	size, charset, collate := "512", "latin1", "latin1_bin"
-	if v, ok := tag.LookUp("charset"); ok {
+	if v, ok := tag.Option("charset"); ok {
 		charset = v
 	}
-	if v, ok := tag.LookUp("collate"); ok {
+	if v, ok := tag.Option("collate"); ok {
 		collate = v
 	}
-	if v, ok := tag.LookUp("size"); ok {
+	if v, ok := tag.Option("size"); ok {
 		size = v
 	}
 
-	return columns.Column{
-		Name:      sf.Name(),
+	return &sqlx.Column{
+		Name:      f.Name(),
 		DataType:  "VARCHAR",
 		Type:      "VARCHAR(" + size + ")",
-		Nullable:  reflext.IsNullable(sf.Type()),
+		Nullable:  reflext.IsNullable(f.Type()),
 		Charset:   &charset,
 		Collation: &collate,
 	}
@@ -137,7 +144,7 @@ func (k Key) Value() (driver.Value, error) {
 }
 
 // Scan :
-func (k *Key) Scan(it interface{}) error {
+func (k *Key) Scan(it any) error {
 	switch vi := it.(type) {
 	case []byte:
 		if err := k.unmarshal(string(vi)); err != nil {
@@ -159,29 +166,10 @@ func (k *Key) Incomplete() bool {
 	return k.NameID == "" && k.IntID == 0
 }
 
-// // valid returns whether the key is valid.
-// func (k *Key) IsZero() bool {
-// 	if k == nil {
-// 		return false
-// 	}
-// 	for ; k != nil; k = k.Parent {
-// 		if k.Kind == "" {
-// 			return false
-// 		}
-// 		if k.NameID != "" && k.IntID != 0 {
-// 			return false
-// 		}
-// 		if k.Parent != nil {
-// 			if k.Parent.Incomplete() {
-// 				return false
-// 			}
-// 			if k.Parent.Namespace != k.Namespace {
-// 				return false
-// 			}
-// 		}
-// 	}
-// 	return true
-// }
+// valid returns whether the key is valid.
+func (k *Key) IsZero() bool {
+	return k.Incomplete()
+}
 
 // Equal reports whether two keys are equal. Two keys are equal if they are
 // both nil, or if their kinds, IDs, names, namespaces and parents are equal.
@@ -208,14 +196,6 @@ func (k Key) MarshalText() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// MarshalBinary :
-func (k Key) MarshalBinary() ([]byte, error) {
-	if k.Incomplete() {
-		return []byte(`null`), nil
-	}
-	return []byte(`"` + k.Encode() + `"`), nil
-}
-
 // MarshalJSON :
 func (k Key) MarshalJSON() ([]byte, error) {
 	if k.Incomplete() {
@@ -236,22 +216,11 @@ func (k Key) MarshalJSONB() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// UnmarshalBinary :
-func (k *Key) UnmarshalBinary(b []byte) error {
-	str := string(b)
-	if str == "null" {
-		return nil
-	}
-	key, err := DecodeKey(str)
-	if err != nil {
-		return err
-	}
-	*k = *key
-	return nil
-}
-
 // UnmarshalText :
 func (k *Key) UnmarshalText(b []byte) error {
+	if len(b) == 0 {
+		return errors.New("types: empty key values")
+	}
 	str := string(b)
 	if str == "null" {
 		return nil
@@ -267,14 +236,13 @@ func (k *Key) UnmarshalText(b []byte) error {
 // UnmarshalJSON :
 func (k *Key) UnmarshalJSON(b []byte) error {
 	length := len(b)
-	if length < 2 {
+	if length <= 2 {
 		return errors.New("types: invalid key json value")
 	}
-	str := string(b)
-	if str == "null" {
+	if util.UnsafeString(b) == "null" {
 		return nil
 	}
-	str = string(b[1 : length-1])
+	str := string(b[1 : length-1])
 	key, err := DecodeKey(str)
 	if err != nil {
 		return err
@@ -286,23 +254,22 @@ func (k *Key) UnmarshalJSON(b []byte) error {
 // UnmarshalJSONB :
 func (k *Key) UnmarshalJSONB(b []byte) error {
 	length := len(b)
-	if length < 2 {
+	if length <= 2 {
 		return errors.New("types: invalid key json value")
 	}
-	str := string(b)
-	if str == "null" {
+	if util.UnsafeString(b) == "null" {
 		return nil
 	}
-	str = string(b[1 : length-1])
+	str := string(b[1 : length-1])
 	return k.unmarshal(str)
 }
 
 // MarshalBSONValue :
 func (k Key) MarshalBSONValue() (bsontype.Type, []byte, error) {
 	if k.Incomplete() {
-		return bsontype.Null, nil, nil
+		return bson.TypeNull, nil, nil
 	}
-	return bsontype.String, bsoncore.AppendString(nil, k.String()), nil
+	return bson.TypeString, bsoncore.AppendString(nil, k.String()), nil
 }
 
 // UnmarshalBSONValue :
@@ -310,7 +277,7 @@ func (k *Key) UnmarshalBSONValue(t bsontype.Type, b []byte) error {
 	if k == nil {
 		return errors.New("types: invalid key value <nil>")
 	}
-	if t == bsontype.Null {
+	if t == bson.TypeNull {
 		return nil
 	}
 	v, _, ok := bsoncore.ReadString(b)
@@ -328,7 +295,7 @@ func (k Key) MarshalGQL(w io.Writer) {
 	w.Write([]byte(`"` + k.Encode() + `"`))
 }
 
-func (k *Key) UnmarshalGQL(it interface{}) error {
+func (k *Key) UnmarshalGQL(it any) error {
 	switch vi := it.(type) {
 	case *Key:
 		*k = *vi
@@ -338,7 +305,7 @@ func (k *Key) UnmarshalGQL(it interface{}) error {
 		return k.UnmarshalJSON([]byte(vi))
 	case nil:
 	default:
-		return fmt.Errorf("sqlike: %T is not a Key", it)
+		return fmt.Errorf("types: %T is not a Key", it)
 	}
 	return nil
 }
@@ -567,7 +534,7 @@ func protoToKey(pk *pb.Key) *Key {
 // The namespace of the new key is empty.
 func NameKey(kind, name string, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		NameID:    name,
 		Parent:    parent,
@@ -580,7 +547,7 @@ func NameKey(kind, name string, parent *Key) *Key {
 // The namespace of the new key is empty.
 func IDKey(kind string, id int64, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		IntID:     id,
 		Parent:    parent,
@@ -594,7 +561,6 @@ const (
 
 // NewIDKey :
 func NewIDKey(kind string, parent *Key) *Key {
-	rand.Seed(time.Now().UnixNano())
 	strID := strconv.FormatInt(time.Now().Unix(), 10) + strconv.FormatInt(rand.Int63n(maxSeed-minSeed)+minSeed, 10)
 	id, err := strconv.ParseInt(strID, 10, 64)
 	if err != nil {
@@ -602,7 +568,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 	}
 
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		IntID:     id,
 		Parent:    parent,
@@ -612,7 +578,7 @@ func NewIDKey(kind string, parent *Key) *Key {
 // NewNameKey :
 func NewNameKey(kind string, parent *Key) *Key {
 	return &Key{
-		Namespace: os.Getenv(keyEnv),
+		Namespace: keyNS,
 		Kind:      kind,
 		NameID:    ksuid.New().String(),
 		Parent:    parent,
