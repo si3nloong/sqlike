@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.84.0
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.8.0
 	github.com/google/uuid v1.6.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/paulmach/orb v0.11.1
@@ -24,6 +24,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/casbin/govaluate v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
