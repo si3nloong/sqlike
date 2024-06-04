@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.114.0
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.89.0
+	github.com/casbin/casbin/v2 v2.90.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/opentracing/opentracing-go v1.2.0
