@@ -6,8 +6,8 @@ github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/brianvoe/gofakeit v3.18.0+incompatible h1:wDOmHc9DLG4nRjUVVaxA+CEglKOW72Y5+4WNxUIkjM8=
 github.com/brianvoe/gofakeit v3.18.0+incompatible/go.mod h1:kfwdRA90vvNhPutZWfH7WPaDzUjz+CZFqG+rPkOjGOc=
-github.com/casbin/casbin/v2 v2.95.0 h1:WnvALcOfusuNcU1a65C1ub88+VpD4gXqIHTPNFkvjYg=
-github.com/casbin/casbin/v2 v2.95.0/go.mod h1:jX8uoN4veP85O/n2674r2qtfSXI6myvxW85f6TH50fw=
+github.com/casbin/casbin/v2 v2.96.0 h1:uHEOYAk3vmh1xREUeCnuD/crJuokH5d/wd2PSCN3BSk=
+github.com/casbin/casbin/v2 v2.96.0/go.mod h1:jX8uoN4veP85O/n2674r2qtfSXI6myvxW85f6TH50fw=
 github.com/casbin/govaluate v1.1.0 h1:6xdCWIpE9CwHdZhlVQW+froUrCsjb6/ZYNcXODfLT+E=
 github.com/casbin/govaluate v1.1.0/go.mod h1:G/UnbIjZk/0uMNaLwZZmFQrR72tYRZWQkO70si/iR7A=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
