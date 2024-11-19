@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	cloud.google.com/go v0.116.0
-	github.com/Masterminds/semver/v3 v3.3.0
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/casbin/casbin/v2 v2.101.0
 	github.com/go-sql-driver/mysql v1.8.1
