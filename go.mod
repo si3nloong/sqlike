@@ -18,7 +18,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.1-0.20201104193830-18533face0df
 	go.mongodb.org/mongo-driver v1.17.1
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
-	golang.org/x/text v0.20.0
+	golang.org/x/text v0.21.0
 	google.golang.org/protobuf v1.35.2
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -40,5 +40,5 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
 )
