@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.117.0
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.102.0
+	github.com/casbin/casbin/v2 v2.103.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/opentracing/opentracing-go v1.2.0
@@ -26,7 +26,7 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
-	github.com/casbin/govaluate v1.2.0 // indirect
+	github.com/casbin/govaluate v1.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.15.8 // indirect
