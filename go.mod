@@ -19,7 +19,7 @@ require (
 	go.mongodb.org/mongo-driver v1.17.2
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 	golang.org/x/text v0.22.0
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.5
 	gopkg.in/yaml.v3 v3.0.1
 )
 
