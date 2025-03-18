@@ -1,12 +1,13 @@
 module github.com/si3nloong/sqlike/v2
 
 go 1.20
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go v0.119.0
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
-	github.com/casbin/casbin/v2 v2.103.0
+	github.com/casbin/casbin/v2 v2.104.0
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/google/uuid v1.6.0
 	github.com/opentracing/opentracing-go v1.2.0
